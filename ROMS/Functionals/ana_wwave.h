@@ -29,6 +29,15 @@
 #if defined BBL_MODEL || defined WEC
      &                     FORCES(ng) % Dwave,                          &
 #endif
+#if defined WAVES_OCEAN || (defined WEC_VF && defined BOTTOM_STREAMING)
+     &                     FORCES(ng) % Dissip_fric,                    &
+#endif
+#if defined TKE_WAVEDISS || defined WAVES_OCEAN || \
+    defined WDISS_THORGUZA || defined WDISS_CHURTHOR || \
+    defined WAVES_DISS
+     &                     FORCES(ng) % Dissip_break,                   &
+     &                     FORCES(ng) % Dissip_wcap,                    &
+#endif
 #ifdef WAVES_HEIGHT
      &                     FORCES(ng) % Hwave,                          &
 #endif
@@ -46,9 +55,6 @@
 #endif
 #ifdef WAVES_UB
      &                     FORCES(ng) % Uwave_rms,                      &
-#endif
-#ifdef TKE_WAVEDISS
-     &                     FORCES(ng) % wave_dissip,                    &
 #endif
      &                     GRID(ng) % angler,                           &
      &                     GRID(ng) % h)
@@ -73,6 +79,14 @@
 #if defined BBL_MODEL || defined WEC
      &                           Dwave,                                 &
 #endif
+#if defined WAVES_OCEAN || (defined WEC_VF && defined BOTTOM_STREAMING)
+     &                           Dissip_fric,                           &
+#endif
+#if defined TKE_WAVEDISS || defined WAVES_OCEAN || \
+    defined WDISS_THORGUZA || defined WDISS_CHURTHOR || \
+    defined WAVES_DISS
+     &                           Dissip_break, Dissip_wcap,             &
+#endif
 #ifdef WAVES_HEIGHT
      &                           Hwave,                                 &
 #endif
@@ -90,9 +104,6 @@
 #endif
 #ifdef WAVES_UB
      &                           Uwave_rms,                             &
-#endif
-#ifdef TKE_WAVEDISS
-     &                           wave_dissip,                           &
 #endif
      &                           angler, h)
 !***********************************************************************
@@ -119,6 +130,15 @@
 # if defined BBL_MODEL || defined WEC
       real(r8), intent(inout) :: Dwave(LBi:,LBj:)
 # endif
+# if defined WAVES_OCEAN || (defined WEC_VF && defined BOTTOM_STREAMING)
+      real(r8), intent(inout) :: Dissip_fric(LBi:,LBj:)
+# endif
+# if defined TKE_WAVEDISS || defined WAVES_OCEAN || \
+     defined WDISS_THORGUZA || defined WDISS_CHURTHOR || \
+     defined WAVES_DISS
+      real(r8), intent(inout) :: Dissip_break(LBi:,LBj:)
+      real(r8), intent(inout) :: Dissip_wcap(LBi:,LBj:)
+# endif
 # ifdef WAVES_HEIGHT
       real(r8), intent(inout) :: Hwave(LBi:,LBj:)
 # endif
@@ -137,9 +157,6 @@
 # ifdef WAVES_UB
       real(r8), intent(inout) :: Uwave_rms(LBi:,LBj:)
 # endif
-# ifdef TKE_WAVEDISS
-      real(r8), intent(inout) :: wave_dissip(LBi:,LBj:)
-# endif
 
 #else
 
@@ -147,6 +164,15 @@
       real(r8), intent(in) :: h(LBi:UBi,LBj:UBj)
 # if defined BBL_MODEL || defined WEC
       real(r8), intent(inout) :: Dwave(LBi:UBi,LBj:UBj)
+# endif
+# if defined WAVES_OCEAN || (defined WEC_VF && defined BOTTOM_STREAMING)
+      real(r8), intent(inout) :: Dissip_fric(LBi:UBi,LBj:UBj)
+# endif
+# if defined TKE_WAVEDISS || defined WAVES_OCEAN || \
+     defined WDISS_THORGUZA || defined WDISS_CHURTHOR || \
+     defined WAVES_DISS
+      real(r8), intent(inout) :: Dissip_break(LBi:UBi,LBj:UBj)
+      real(r8), intent(inout) :: Dissip_wcap(LBi:UBi,LBj:UBj)
 # endif
 # ifdef WAVES_HEIGHT
       real(r8), intent(inout) :: Hwave(LBi:UBi,LBj:UBj)
@@ -165,9 +191,6 @@
 # endif
 # ifdef WAVES_UB
       real(r8), intent(inout) :: Uwave_rms(LBi:UBi,LBj:UBj)
-# endif
-# ifdef TKE_WAVEDISS
-      real(r8), intent(inout) :: wave_dissip(LBi:UBi,LBj:UBj)
 # endif
 #endif
 !
@@ -263,6 +286,33 @@
      &                    LBi, UBi, LBj, UBj,                           &
      &                    NghostPoints, EWperiodic, NSperiodic,         &
      &                    Dwave)
+#  endif
+# endif
+# if defined WAVES_OCEAN || (defined WEC_VF && defined BOTTOM_STREAMING)
+      CALL exchange_r2d_tile (ng, tile,                                 &
+     &                        LBi, UBi, LBj, UBj,                       &
+     &                        Dissip_fric)
+#  ifdef DISTRIBUTE
+      CALL mp_exchange2d (ng, tile, model, 1,                           &
+     &                    LBi, UBi, LBj, UBj,                           &
+     &                    NghostPoints, EWperiodic, NSperiodic,         &
+     &                    Dissip_fric)
+#  endif
+# endif
+# if defined TKE_WAVEDISS || defined WAVES_OCEAN || \
+     defined WDISS_THORGUZA || defined WDISS_CHURTHOR || \
+     defined WAVES_DISS
+      CALL exchange_r2d_tile (ng, tile,                                 &
+     &                        LBi, UBi, LBj, UBj,                       &
+     &                        Dissip_break)
+      CALL exchange_r2d_tile (ng, tile,                                 &
+     &                        LBi, UBi, LBj, UBj,                       &
+     &                        Dissip_wcap)
+#  ifdef DISTRIBUTE
+      CALL mp_exchange2d (ng, tile, model, 2,                           &
+     &                    LBi, UBi, LBj, UBj,                           &
+     &                    NghostPoints, EWperiodic, NSperiodic,         &
+     &                    Dissip_break, Dissip_wcap)
 #  endif
 # endif
 # ifdef WAVES_HEIGHT
