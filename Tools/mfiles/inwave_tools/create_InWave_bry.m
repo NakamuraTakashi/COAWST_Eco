@@ -37,7 +37,8 @@ evdimID = netcdf.defDim(nc_bndry,'ev',M);
 
 etime_dimID = netcdf.defDim(nc_bndry,'energy_time',length(time));
 %eangle_dimID = netcdf.defDim(nc_bndry,'energy_angle',Nbins+1);
-eanglec_dimID = netcdf.defDim(nc_bndry,'energy_angle_c',length(nbin));
+%eanglec_dimID = netcdf.defDim(nc_bndry,'energy_angle_c',length(nbin));
+eanglec_dimID = netcdf.defDim(nc_bndry,'energy_angle',length(nbin));
 TA_dimID = netcdf.defDim(nc_bndry,'TA_dim',1);
 
 NT=length(time);
