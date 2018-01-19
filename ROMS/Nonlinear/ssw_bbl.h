@@ -81,6 +81,11 @@
      &                BBL(ng) % bvstrw,                                 &
      &                BBL(ng) % bustrcwmax,                             &
      &                BBL(ng) % bvstrcwmax,                             &
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#ifdef REEF_ECOSYS
+     &                BBL(ng) % bstrcwave,                              &
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
      &                FORCES(ng) % bustr,                               &
      &                FORCES(ng) % bvstr)
 #ifdef PROFILE
@@ -113,6 +118,11 @@
      &                      bustrc, bvstrc,                             &
      &                      bustrw, bvstrw,                             &
      &                      bustrcwmax, bvstrcwmax,                     &
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#ifdef REEF_ECOSYS
+     &                      bstrcwave,                                  &
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
      &                      bustr, bvstr)
 !***********************************************************************
 !
@@ -170,6 +180,11 @@
       real(r8), intent(out) :: bvstrw(LBi:,LBj:)
       real(r8), intent(out) :: bustrcwmax(LBi:,LBj:)
       real(r8), intent(out) :: bvstrcwmax(LBi:,LBj:)
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#ifdef REEF_ECOSYS
+      real(r8), intent(out) :: bstrcwave(LBi:,LBj:)
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
       real(r8), intent(out) :: bustr(LBi:,LBj:)
       real(r8), intent(out) :: bvstr(LBi:,LBj:)
 #else
@@ -208,6 +223,11 @@
       real(r8), intent(out) :: bvstrw(LBi:UBi,LBj:UBj)
       real(r8), intent(out) :: bustrcwmax(LBi:UBi,LBj:UBj)
       real(r8), intent(out) :: bvstrcwmax(LBi:UBi,LBj:UBj)
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#ifdef REEF_ECOSYS
+      real(r8), intent(out) :: bstrcwave(LBi:UBi,LBj:UBj)
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
       real(r8), intent(out) :: bustr(LBi:UBi,LBj:UBj)
       real(r8), intent(out) :: bvstr(LBi:UBi,LBj:UBj)
 #endif
@@ -688,6 +708,13 @@
           bvstrcwmax(i,j)=Taucwmax(i,j)*anglew
           Vbot(i,j)=Ub(i,j)*anglew
           Vr(i,j)=Vcur(i,j)
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#ifdef REEF_ECOSYS
+          bstrcwave(i,j)=1.0_r8/MAX(Pwave_bot(i,j),0.05_r8)*           &
+     &                  int_simpson(Tauc(i,j),Tauw(i,j),Pwave_bot(i,j) &
+     &                             ,Fwave_bot(i,j),phicw(i,j)  )
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
           bottom(i,j,ibwav)=Ab(i,j)
           bottom(i,j,irhgt)=rheight(i,j)
@@ -1417,3 +1444,72 @@
       RETURN
       END SUBROUTINE madsen94
 #endif
+
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#ifdef REEF_ECOSYS
+!-----------------------------------------------------------------------
+!   Integration by Simpson's rule
+!-----------------------------------------------------------------------
+      real(8) FUNCTION int_simpson(tauc, tauw, Tp, Fp, angle)
+
+      implicit none
+
+      real(8), intent(in) :: tauc       ! bottom share stress u
+      real(8), intent(in) :: tauw       ! bottom share stress v
+      real(8), intent(in) :: Tp       ! peak wave period
+      real(8), intent(in) :: Fp       ! wave direction
+      real(8), intent(in) :: angle       ! wave direction
+
+      integer, parameter :: N = 10      ! ������
+
+      real(8) :: dx, x1,x2,x3, y1,y2,y3
+      real(8) :: sum
+      integer :: i
+
+!      dx = (b-a)/dble(N)*0.5d0
+      dx = Tp/dble(N)*0.5d0
+
+      x1 = 0.0d0
+      y1 = func(x1, tauc, tauw, Fp, angle)
+
+      sum = 0.0d0
+      do i=1,N
+        x2 = x1+dx
+        x3 = x2+dx
+        y2 = func(x2, tauc, tauw, Fp, angle)
+        y3 = func(x3, tauc, tauw, Fp, angle)
+        sum = sum + ( y1 + 4.0d0*y2 + y3 )
+        x1 = x3
+        y1 = y3
+      end do
+
+      int_simpson = sum * dx/3.0d0
+
+      return
+      END FUNCTION int_simpson
+
+!-----------------------------------------------------------------------
+
+      real(8) FUNCTION func(x, tauc, tauw, Fp, angle)
+
+      implicit none
+
+      real(8), intent(in) :: x          ! x variable
+      real(8), intent(in) :: tauc       ! bottom share stress u
+      real(8), intent(in) :: tauw       ! bottom share stress v
+      real(8), intent(in) :: Fp       ! wave direction
+      real(8), intent(in) :: angle       ! wave direction
+
+      real(8) :: taui, tauj
+
+      taui=tauc*COS(angle)+tauw*ABS(SIN(Fp*x))*SIN(Fp*x)
+      tauj=tauc*SIN(angle)
+
+      func = SQRT( taui*taui + tauj*tauj )
+
+      return
+      END FUNCTION func
+
+!-----------------------------------------------------------------------
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add

@@ -43,7 +43,7 @@
       USE mod_sedbed
       USE mod_sediment
 #endif
-#if defined VEGETATION 
+#if defined VEGETATION
       USE mod_vegetation
       USE mod_vegarr
 #endif
@@ -2873,7 +2873,7 @@
 # endif
 #endif
 !
-#if defined ESTUARYBGC && defined SPECTRAL_LIGHT 
+#if defined ESTUARYBGC && defined SPECTRAL_LIGHT
 !  Write out Photosynthetically Available Radiation (PAR)
 !
       IF (Hout(idPARo,ng)) THEN
@@ -2957,9 +2957,9 @@
 !
 #if defined ESTUARYBGC && defined SAV_BIOMASS
 !
-!  Write out Dissolved Inorganic Nitrogen in water column 
+!  Write out Dissolved Inorganic Nitrogen in water column
 !
-      IF (Hout(iddinw,ng)) THEN 
+      IF (Hout(iddinw,ng)) THEN
         scale=1.0_r8
         gtype=gfactor*r3dvar
         status=nf_fwrite3d(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(iddinw), &
@@ -2975,7 +2975,7 @@
      &                     OCEAN(ng) % DINwcr)
         IF (FoundError(status, nf90_noerr, __LINE__,                    &
      &                 __FILE__)) THEN
-          IF (Master) THEN 
+          IF (Master) THEN
             WRITE (stdout,10) TRIM(Vname(1,iddinw)), HIS(ng)%Rindex
           END IF
           exit_flag=3
@@ -2984,9 +2984,9 @@
         END IF
       END IF
 !
-!  Write out Dissolved Inorganic Nitrogen in sediment column 
+!  Write out Dissolved Inorganic Nitrogen in sediment column
 !
-      IF (Hout(iddins,ng)) THEN 
+      IF (Hout(iddins,ng)) THEN
         scale=1.0_r8
         gtype=gfactor*r3dvar
         status=nf_fwrite3d(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(iddins), &
@@ -3011,9 +3011,9 @@
         END IF
       END IF
 !
-!  Write out Dissolved Oxygen in water column 
+!  Write out Dissolved Oxygen in water column
 !
-      IF (Hout(iddowc,ng)) THEN 
+      IF (Hout(iddowc,ng)) THEN
         scale=1.0_r8
         gtype=gfactor*r3dvar
         status=nf_fwrite3d(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(iddowc), &
@@ -3038,9 +3038,9 @@
         END IF
       END IF
 !
-!  Write out Dissolved Inorganic Nitrogen in water column due to SAV 
+!  Write out Dissolved Inorganic Nitrogen in water column due to SAV
 !
-      IF (Hout(idwsvl,ng)) THEN 
+      IF (Hout(idwsvl,ng)) THEN
         scale=1.0_r8
         gtype=gfactor*r3dvar
         status=nf_fwrite3d(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idwsvl), &
@@ -3127,7 +3127,7 @@
         status=nf_fwrite3d(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idsvpp), &
      &                     HIS(ng)%Rindex, gtype,                       &
      &                     LBi, UBi, LBj, UBj, 1, N(ng), scale,         &
-# ifdef MASKING 
+# ifdef MASKING
 #  ifdef WET_DRY
      &                     GRID(ng) % rmask_full,                       &
 #  else
@@ -4026,7 +4026,7 @@
 #endif
 #ifdef VEGETATION
 #include "vegetation_wrt_his.h"
-#endif 
+#endif
 
 #ifdef WEC_MELLOR
 !
@@ -4955,6 +4955,180 @@
       END IF
 # endif
 #endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#if defined SGD_ON
+!
+!  Write out time-dependent SGD point source
+!
+      IF (Hout(idSgds,ng)) THEN
+        scale=1.0_r8
+        gtype=gfactor*r2dvar
+        status=nf_fwrite2d(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idSgds), &
+     &                     HIS(ng)%Rindex, gtype,                       &
+     &                     LBi, UBi, LBj, UBj, scale,                   &
+# ifdef MASKING
+     &                     GRID(ng) % rmask,                            &
+# endif
+     &                     GRID(ng) % sgd_src,                          &
+     &                     SetFillVal = .FALSE.)
+        IF (status.ne.nf90_noerr) THEN
+          IF (Master) THEN
+            WRITE (stdout,10) TRIM(Vname(1,idSgds)), HIS(ng)%Rindex
+          END IF
+          exit_flag=3
+          ioerror=status
+          RETURN
+        END IF
+      END IF
+#endif
+
+#if defined REEF_ECOSYS
+
+!!
+!!  Write out time-dependent coral coverage
+!!
+!      IF (Hout(idCrl1,ng)) THEN
+!        scale=1.0_r8
+!        gtype=gfactor*r2dvar
+!        status=nf_fwrite2d(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idCrl1), &
+!     &                     HIS(ng)%Rindex, gtype,                       &
+!     &                     LBi, UBi, LBj, UBj, scale,                   &
+!# ifdef MASKING
+!     &                     GRID(ng) % rmask,                            &
+!# endif
+!     &                     GRID(ng) % p_coral(:,:,1)                    &
+!     &                     SetFillVal = .FALSE.)
+!        IF (status.ne.nf90_noerr) THEN
+!          IF (Master) THEN
+!            WRITE (stdout,10) TRIM(Vname(1,idCrl1)), HIS(ng)%Rindex
+!          END IF
+!          exit_flag=3
+!          ioerror=status
+!          RETURN
+!        END IF
+!      END IF
+!      IF (Hout(idCrl2,ng)) THEN
+!        scale=1.0_r8
+!        gtype=gfactor*r2dvar
+!        status=nf_fwrite2d(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idCrl2), &
+!     &                     HIS(ng)%Rindex, gtype,                       &
+!     &                     LBi, UBi, LBj, UBj, scale,                   &
+!# ifdef MASKING
+!     &                     GRID(ng) % rmask,                            &
+!# endif
+!     &                     GRID(ng) % p_coral(:,:,2)                    &
+!     &                     SetFillVal = .FALSE.)
+!        IF (status.ne.nf90_noerr) THEN
+!          IF (Master) THEN
+!            WRITE (stdout,10) TRIM(Vname(1,idCrl2)), HIS(ng)%Rindex
+!          END IF
+!          exit_flag=3
+!          ioerror=status
+!          RETURN
+!        END IF
+!      END IF
+!!
+!!  Write out time-dependent seagrass coverage
+!!
+!      IF (Hout(idSgrs,ng)) THEN
+!        scale=1.0_r8
+!        gtype=gfactor*r2dvar
+!        status=nf_fwrite2d(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idSgrs), &
+!     &                     HIS(ng)%Rindex, gtype,                       &
+!     &                     LBi, UBi, LBj, UBj, scale,                   &
+!# ifdef MASKING
+!     &                     GRID(ng) % rmask,                            &
+!# endif
+!     &                     GRID(ng) % p_seagrass,                       &
+!     &                     SetFillVal = .FALSE.)
+!        IF (status.ne.nf90_noerr) THEN
+!          IF (Master) THEN
+!            WRITE (stdout,10) TRIM(Vname(1,idSgrs)), HIS(ng)%Rindex
+!          END IF
+!          exit_flag=3
+!          ioerror=status
+!          RETURN
+!        END IF
+!      END IF
+!!
+!!  Write out time-dependent algal coverage
+!!
+!      IF (Hout(idAlga,ng)) THEN
+!        scale=1.0_r8
+!        gtype=gfactor*r2dvar
+!        status=nf_fwrite2d(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idAlga), &
+!     &                     HIS(ng)%Rindex, gtype,                       &
+!     &                     LBi, UBi, LBj, UBj, scale,                   &
+!# ifdef MASKING
+!     &                     GRID(ng) % rmask,                            &
+!# endif
+!     &                     GRID(ng) % p_algae,                          &
+!     &                     SetFillVal = .FALSE.)
+!        IF (status.ne.nf90_noerr) THEN
+!          IF (Master) THEN
+!            WRITE (stdout,10) TRIM(Vname(1,idAlga)), HIS(ng)%Rindex
+!          END IF
+!          exit_flag=3
+!          ioerror=status
+!          RETURN
+!        END IF
+!      END IF
+!
+!  Write out time-dependent Biological 2D fields.
+!
+      DO i=1,NHbio2d
+        ifield=iHbio2(i)
+        IF (Hout(ifield,ng)) THEN
+          scale=1.0_r8
+          gtype=gfactor*r2dvar
+          status=nf_fwrite2d(ng, iNLM, HIS(ng)%ncid,                    &
+     &                     HIS(ng)%Vid(ifield),                         &
+     &                     HIS(ng)%Rindex, gtype,                       &
+     &                     LBi, UBi, LBj, UBj, scale,                   &
+# ifdef MASKING
+     &                     GRID(ng) % rmask,                            &
+# endif
+     &                     OCEAN(ng) % HisBio2d(:,:,i))
+          IF (status.ne.nf90_noerr) THEN
+            IF (Master) THEN
+              WRITE (stdout,10) TRIM(Vname(1,ifield)), HIS(ng)%Rindex
+            END IF
+            exit_flag=3
+            ioerror=status
+            RETURN
+          END IF
+        END IF
+      END DO
+!
+!  Write out time-dependent Biological 3D fields.
+!
+      DO i=1,NHbio3d
+        ifield=iHbio3(i)
+        IF (Hout(ifield,ng)) THEN
+          scale=1.0_r8
+          gtype=gfactor*r3dvar
+          status=nf_fwrite3d(ng, iNLM, HIS(ng)%ncid,                    &
+     &                     HIS(ng)%Vid(ifield),                         &
+     &                     HIS(ng)%Rindex, gtype,                       &
+     &                     LBi, UBi, LBj, UBj, 1, N(ng), scale,         &
+# ifdef MASKING
+     &                     GRID(ng) % rmask,                            &
+# endif
+     &                     OCEAN(ng) % HisBio3d(:,:,:,i))
+          IF (status.ne.nf90_noerr) THEN
+            IF (Master) THEN
+              WRITE (stdout,10) TRIM(Vname(1,ifield)), HIS(ng)%Rindex
+            END IF
+            exit_flag=3
+            ioerror=status
+            RETURN
+          END IF
+        END IF
+      END DO
+
+#endif
+
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
 !-----------------------------------------------------------------------
 !  Synchronize history NetCDF file to disk to allow other processes

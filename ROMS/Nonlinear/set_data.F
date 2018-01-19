@@ -47,6 +47,12 @@
 # if defined HYPOXIA_SRM || defined RED_TIDE
       USE mod_biology
 # endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# ifdef REEF_ECOSYS
+      USE mod_biology
+      USE mod_geochem
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
       USE mod_boundary
       USE mod_clima
       USE mod_forces
@@ -104,7 +110,7 @@
 # endif
 
       integer :: ILB, IUB, JLB, JUB
-      integer :: i, ic, itrc, j, k, my_tile
+      integer :: i, ic, itrc, j, k, my_tile, is !!!<<<<<<<<<<<<<<<<<<<TN: Add is
 
       real(r8) :: cff, cff1, cff2
 
@@ -1056,7 +1062,11 @@
      &                    update)
           IF (FoundError(exit_flag, NoError, __LINE__,                  &
      &                   __FILE__)) RETURN
-
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:add
+#  ifdef SGD_ON
+          SOURCES(ng)%Qsgd=SOURCES(ng)%Qbar(Nsrc(ng))
+#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #  ifdef SOLVE3D
           DO k=1,N(ng)
             DO i=1,Nsrc(ng)
@@ -1093,6 +1103,24 @@
      &                     __FILE__)) RETURN
           END IF
         END DO
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:add
+#   ifdef REEF_ECOSYS
+#    ifdef CARBON_ISOTOPE
+        DO k=1,N(ng)
+          DO is=1,Nsrc(ng)
+            SOURCES(ng)%Tsrc(is,k,iT13C)=R13C_fromd13C(                 &
+     &                                 SOURCES(ng)%Tsrc(is,k,iT13C)     &
+     &                               )*SOURCES(ng)%Tsrc(is,k,iTIC_)
+          END DO
+        END DO
+#    endif
+#   endif
+#   ifdef SGD_ON
+        DO itrc=1,NT(ng)
+          SOURCES(ng)%Tsgd(itrc)=SOURCES(ng)%Tsrc(Nsrc(ng),1,itrc)  !!!!!!!!!!!!!!!!!!!!!!!!!!Test case
+        END DO
+#   endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #  endif
       END IF
 # endif
@@ -1941,6 +1969,50 @@
       IF (LprocessOBC(ng)) THEN
 #  ifdef ANA_TOBC
         CALL ana_tobc (ng, tile, iNLM)
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#  elif defined ANA_TOBC_BIO
+        CALL ana_tobc_bio (ng, tile, iNLM)
+
+        IF (DOMAIN(ng)%SouthWest_Test(tile)) THEN
+           DO itrc=1,NAT
+            IF (LBC(iwest,isTvar(itrc),ng)%acquire) THEN
+              CALL set_ngfld (ng, iNLM, idTbry(iwest,itrc),             &
+     &                        JLB, JUB, N(ng), 0, Mm(ng)+1, N(ng),      &
+     &                        BOUNDARY(ng) % tG_west(:,:,:,itrc),       &
+     &                        BOUNDARY(ng) % t_west(:,:,itrc),          &
+     &                        update)
+              IF (exit_flag.ne.NoError) RETURN
+            END IF
+
+            IF (LBC(ieast,isTvar(itrc),ng)%acquire) THEN
+              CALL set_ngfld (ng, iNLM, idTbry(ieast,itrc),             &
+     &                        JLB, JUB, N(ng), 0, Mm(ng)+1, N(ng),      &
+     &                        BOUNDARY(ng) % tG_east(:,:,:,itrc),       &
+     &                        BOUNDARY(ng) % t_east(:,:,itrc),          &
+     &                        update)
+              IF (exit_flag.ne.NoError) RETURN
+            END IF
+
+            IF (LBC(isouth,isTvar(itrc),ng)%acquire) THEN
+              CALL set_ngfld (ng, iNLM, idTbry(isouth,itrc),            &
+     &                        ILB, IUB, N(ng), 0, Lm(ng)+1, N(ng),      &
+     &                        BOUNDARY(ng) % tG_south(:,:,:,itrc),      &
+     &                        BOUNDARY(ng) % t_south(:,:,itrc),         &
+     &                        update)
+              IF (exit_flag.ne.NoError) RETURN
+            END IF
+
+            IF (LBC(inorth,isTvar(itrc),ng)%acquire) THEN
+              CALL set_ngfld (ng, iNLM, idTbry(inorth,itrc),            &
+     &                        ILB, IUB, N(ng), 0, Lm(ng)+1, N(ng),      &
+     &                        BOUNDARY(ng) % tG_north(:,:,:,itrc),      &
+     &                        BOUNDARY(ng) % t_north(:,:,itrc),         &
+     &                        update)
+              IF (exit_flag.ne.NoError) RETURN
+            END IF
+          END DO
+        END IF
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #  else
         IF (DOMAIN(ng)%SouthWest_Test(tile)) THEN
            DO itrc=1,NT(ng)

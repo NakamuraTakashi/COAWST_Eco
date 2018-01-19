@@ -136,6 +136,10 @@
 #  include <npzd_Powell_mod.h>
 # elif defined BIO_UMAINE
 #  include <umaine_mod.h>
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# elif defined REEF_ECOSYS
+#  include <reef_ecosys_mod.h>
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 # elif defined RED_TIDE
 #  include <red_tide_mod.h>
 # endif

@@ -55,6 +55,11 @@
      &                 GRID(ng) % omn,                                  &
      &                 SEDBED(ng) % bed_thick,                          &
 # endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# ifdef SGD_ON
+     &                 GRID(ng) % sgd_src,                              &
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
      &                 GRID(ng) % Huon,                                 &
      &                 GRID(ng) % Hvom,                                 &
      &                 GRID(ng) % z_w,                                  &
@@ -77,6 +82,11 @@
      &                       nstp, nnew,                                &
      &                       omn, bed_thick,                            &
 # endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# ifdef SGD_ON
+     &                       sgd_src,                                   &
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
      &                       Huon, Hvom,                                &
      &                       z_w,                                       &
 # if defined WEC_VF
@@ -108,6 +118,11 @@
       real(r8), intent(in) :: omn(LBi:,LBj:)
       real(r8), intent(in):: bed_thick(LBi:,LBj:,:)
 #  endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#  ifdef SGD_ON
+      real(r8), intent(in) :: sgd_src(LBi:,LBj:)
+#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
       real(r8), intent(in) :: Huon(LBi:,LBj:,:)
       real(r8), intent(in) :: Hvom(LBi:,LBj:,:)
       real(r8), intent(in) :: z_w(LBi:,LBj:,0:)
@@ -122,6 +137,11 @@
       real(r8), intent(in) :: omn(LBi:UBi,LBj:UBj)
       real(r8), intent(in):: bed_thick(LBi:UBi,LBj:UBj,2)
 #  endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#  ifdef SGD_ON
+      real(r8), intent(in) :: sgd_src(LBi:UBi,LBj:UBj)
+#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
       real(r8), intent(in) :: Huon(LBi:UBi,LBj:UBj,N(ng))
       real(r8), intent(in) :: Hvom(LBi:UBi,LBj:UBj,N(ng))
       real(r8), intent(in) :: z_w(LBi:UBi,LBj:UBj,0:N(ng))
@@ -185,6 +205,16 @@
             END IF
           END DO
         END IF
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# ifdef SGD_ON
+!
+!  Apply mass point sources - Volume influx.
+!
+        DO i=Istr,Iend
+          W(i,j,1)=W(i,j,1)+SOURCES(ng)%Qsgd*sgd_src(i,j)
+        END DO
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
         DO i=Istr,Iend
           wrk(i)=W(i,j,N(ng))/(z_w(i,j,N(ng))-z_w(i,j,0))

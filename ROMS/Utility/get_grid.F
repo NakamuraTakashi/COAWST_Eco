@@ -256,6 +256,50 @@
       END IF
 #  endif
 # endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# ifdef SGD_ON
+      IF (.not.find_string(var_name,n_var,'sgd_src',vindex)) THEN
+        IF (Master) WRITE (stdout,10) 'sgd_src', TRIM(ncname)
+        exit_flag=2
+        RETURN
+      END IF
+# endif
+# ifdef REEF_ECOSYS
+#  ifdef CORAL_POLYP
+      IF (.not.find_string(var_name,n_var,'p_coral',vindex)) THEN
+        IF (Master) WRITE (stdout,10) 'p_coral', TRIM(ncname)
+        exit_flag=2
+        RETURN
+      END IF
+      IF (.not.find_string(var_name,n_var,'p_coral2',vindex)) THEN
+        IF (Master) WRITE (stdout,10) 'p_coral2', TRIM(ncname)
+        exit_flag=2
+        RETURN
+      END IF
+#  endif
+#  ifdef SEAGRASS
+      IF (.not.find_string(var_name,n_var,'p_seagrass',vindex)) THEN
+        IF (Master) WRITE (stdout,10) 'p_seagrass', TRIM(ncname)
+        exit_flag=2
+        RETURN
+      END IF
+#  endif
+#  ifdef MACROALGAE
+      IF (.not.find_string(var_name,n_var,'p_algae',vindex)) THEN
+        IF (Master) WRITE (stdout,10) 'p_algae', TRIM(ncname)
+        exit_flag=2
+        RETURN
+      END IF
+#  endif
+#  ifdef SEDIMENT_ECOSYS
+      IF (.not.find_string(var_name,n_var,'p_sand',vindex)) THEN
+        IF (Master) WRITE (stdout,10) 'p_sand', TRIM(ncname)
+        exit_flag=2
+        RETURN
+      END IF
+#  endif
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
 !  Read in logical switch for spherical grid configuration.
 !

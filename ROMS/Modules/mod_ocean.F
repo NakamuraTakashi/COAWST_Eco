@@ -45,24 +45,24 @@
 #if defined ESTUARYBGC && defined SPECTRAL_LIGHT
 ! PARout        Photosynthetically Available Radiation (PAR)           !
 ! PARs          Spectral PAR                                           !
-! SpKd          Spectral Attenuation     
+! SpKd          Spectral Attenuation
 #endif
-#if defined ESTUARYBGC && defined SAV_BIOMASS                             
+#if defined ESTUARYBGC && defined SAV_BIOMASS
 ! DINwcr        Dissolved Inorganic Nitrogen-water column(mu mols N)   !
 ! DINsed        Dissolved Inorganic Nitrogen-sediment column(mu mols N)!
-! DOwcr         Dissolved Oxygen - water column                        ! 
-! DINwcr_sav    Dissolved Inorganic Nitrogen-water column in SAV(mu M) ! 
+! DOwcr         Dissolved Oxygen - water column                        !
+! DINwcr_sav    Dissolved Inorganic Nitrogen-water column in SAV(mu M) !
 ! AGB           Above ground biomas                                    !
 ! BGB           Below ground biomass                                   !
-! PP                                                                   !  
-! AGM                             
+! PP                                                                   !
+! AGM
 ! AGAR
 ! AGBR
 ! SEARS
 ! AGBG
 ! BGAG
 ! BGR
-! BGM 
+! BGM
 #endif
 #ifdef WEC
 !  Wave effect on currents variables                                   !
@@ -157,7 +157,7 @@
       defined BIO_UMAINE) && defined CARBON
           real(r8), pointer :: pH(:,:)
 # endif
-# if defined ESTUARYBGC && defined SPECTRAL_LIGHT 
+# if defined ESTUARYBGC && defined SPECTRAL_LIGHT
           real(r8), pointer :: PARout(:,:,:)
           real(r8), pointer :: PARs(:,:,:)
           real(r8), pointer :: SpKd(:,:,:)
@@ -179,6 +179,12 @@
           real(r8), pointer :: BGR(:,:,:)
           real(r8), pointer :: BGM(:,:,:)
 # endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# if defined REEF_ECOSYS
+          real(r8), pointer :: HisBio2d(:,:,:)
+          real(r8), pointer :: HisBio3d(:,:,:,:)
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 # ifdef RED_TIDE
           real(r8), pointer :: CystIni(:,:)
           real(r8), pointer :: DIN_obs(:,:,:)
@@ -481,6 +487,12 @@
       allocate ( OCEAN(ng) % BGM(LBi:UBi,LBj:UBj,N(ng)) )
 
 # endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# if defined REEF_ECOSYS
+      allocate ( OCEAN(ng) % HisBio2d(LBi:UBi,LBj:UBj,NHbio2d) )
+      allocate ( OCEAN(ng) % HisBio3d(LBi:UBi,LBj:UBj,N(ng),NHbio3d) )
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 # ifdef RED_TIDE
       allocate ( OCEAN(ng) % CystIni(LBi:UBi,LBj:UBj) )
       allocate ( OCEAN(ng) % DIN_obs(LBi:UBi,LBj:UBj,N(ng)) )

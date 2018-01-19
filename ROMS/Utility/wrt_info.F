@@ -48,7 +48,7 @@
 #ifdef SEDIMENT
       USE mod_sediment
 #endif
-#ifdef VEGETATION 
+#ifdef VEGETATION
       USE mod_vegetation
 #endif
 #ifdef PROPAGATOR
@@ -1477,6 +1477,10 @@
 #  include <npzd_iron_wrt.h>
 # elif defined NPZD_POWELL
 #  include <npzd_Powell_wrt.h>
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# elif defined REEF_ECOSYS
+#  include <reef_ecosys_wrt.h>
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 # elif defined RED_TIDE
 #  include <red_tide_wrt.h>
 # endif
@@ -1485,6 +1489,10 @@
 #if defined FLOATS && defined FLOAT_BIOLOGY
 # if defined FLOAT_OYSTER
 #  include <oyster_floats_wrt.h>
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# elif defined FLOAT_REEF_ECOSYS
+#  include <reef_ecosys_floats_wrt.h>
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 # endif
 #endif
 
@@ -1496,7 +1504,7 @@
 # include <inwave_wrt.h>
 #endif
 
-!#ifdef VEGETATION 
+!#ifdef VEGETATION
 !# include <vegetation_wrt_info.h>
 !#endif
 !

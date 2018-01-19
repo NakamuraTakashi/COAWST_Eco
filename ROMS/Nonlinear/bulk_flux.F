@@ -702,7 +702,7 @@
           LRad(i,j)=LRad(i,j)*rmask(i,j)
 # endif
 # ifdef WET_DRY
-          LRad(i,j)=LRad(i,j)*rmask_wet(i,j)
+!          LRad(i,j)=LRad(i,j)*rmask_wet(i,j) !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:rm
 # endif
 !
 !-----------------------------------------------------------------------
@@ -1008,12 +1008,12 @@
      &        ((TseaC(i)-TairC(i))+(Qsea(i)-Q(i))*Hlv(i,j)/blk_Cpa)
           SHeat(i,j)=(Hs+Hsr)
 # ifdef WET_DRY
-          SHeat(i,j)=SHeat(i,j)*rmask_wet(i,j)
+!          SHeat(i,j)=SHeat(i,j)*rmask_wet(i,j) !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:rm
 # elif defined MASKING
           SHeat(i,j)=SHeat(i,j)*rmask(i,j)
 # endif
 # ifdef WET_DRY
-          SHeat(i,j)=SHeat(i,j)*rmask_wet(i,j)
+!          SHeat(i,j)=SHeat(i,j)*rmask_wet(i,j) !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:rm
 # endif
 !
 !  Compute turbulent latent heat flux (W/m2), Hl.
@@ -1030,12 +1030,12 @@
           LHeat(i,j)=LHeat(i,j)*1.07_r8
 # endif
 # ifdef WET_DRY
-          LHeat(i,j)=LHeat(i,j)*rmask_wet(i,j)
+!          LHeat(i,j)=LHeat(i,j)*rmask_wet(i,j) !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:rm
 # elif defined MASKING
           LHeat(i,j)=LHeat(i,j)*rmask(i,j)
 # endif
 # ifdef WET_DRY
-          LHeat(i,j)=LHeat(i,j)*rmask_wet(i,j)
+!          LHeat(i,j)=LHeat(i,j)*rmask_wet(i,j) !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:rm
 # endif
 !
 !  Compute momentum flux (N/m2) due to rainfall (kg/m2/s).
@@ -1218,7 +1218,7 @@
           stflx(i,j,itemp)=stflx(i,j,itemp)*rmask(i,j)
 # endif
 # ifdef WET_DRY
-          stflx(i,j,itemp)=stflx(i,j,itemp)*rmask_wet(i,j)
+!          stflx(i,j,itemp)=stflx(i,j,itemp)*rmask_wet(i,j) !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:rm
 # endif
 # ifdef EMINUSP
           evap(i,j)=LHeat(i,j)/(Hlv(i,j)+eps)
@@ -1236,7 +1236,7 @@
 #  endif
 # endif
 # ifdef WET_DRY
-          stflx(i,j,itemp)=stflx(i,j,itemp)*rmask_wet(i,j)
+!          stflx(i,j,itemp)=stflx(i,j,itemp)*rmask_wet(i,j) !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:rm
 #   ifdef EMINUSP
           evap(i,j)=evap(i,j)*rmask_wet(i,j)
           stflx(i,j,isalt)=stflx(i,j,isalt)*rmask_wet(i,j)
@@ -1252,7 +1252,7 @@
           stflx(i,j,isalt) = stflx(i,j,isalt) -                         &
      &                        cff*runoff(i,j)
 #  ifdef WET_DRY
-          stflx(i,j,isalt)=stflx(i,j,isalt)*rmask_wet(i,j)
+!          stflx(i,j,isalt)=stflx(i,j,isalt)*rmask_wet(i,j) !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:rm
 #  elif defined MASKING
           stflx(i,j,isalt)=stflx(i,j,isalt)*rmask(i,j)
 #  endif

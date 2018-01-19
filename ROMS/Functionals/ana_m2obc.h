@@ -36,6 +36,13 @@
 #ifdef MASKING
      &                     GRID(ng) % umask,                            &
 #endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#if defined SHIRAHO_REEF || defined FUKIDO
+     &                     krhs(ng), kstp(ng),                          &
+     &                     OCEAN(ng) % ubar,                            &
+     &                     OCEAN(ng) % vbar,                            &
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
      &                     OCEAN(ng) % zeta)
 !
 ! Set analytical header file name used.
@@ -60,6 +67,13 @@
 #ifdef MASKING
      &                           umask,                                 &
 #endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#if defined SHIRAHO_REEF || defined FUKIDO
+     &                           krhs, kstp,                            &
+     &                           ubar,                                  &
+     &                           vbar,                                  &
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
      &                           zeta)
 !***********************************************************************
 !
@@ -75,6 +89,11 @@
       integer, intent(in) :: LBi, UBi, LBj, UBj
       integer, intent(in) :: IminS, ImaxS, JminS, JmaxS
       integer, intent(in) :: knew
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# if defined SHIRAHO_REEF || defined FUKIDO
+      integer, intent(in) :: krhs, kstp
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
 #ifdef ASSUMED_SHAPE
       real(r8), intent(in) :: angler(LBi:,LBj:)
@@ -85,6 +104,12 @@
 # ifdef MASKING
       real(r8), intent(in) :: umask(LBi:,LBj:)
 # endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# if defined SHIRAHO_REEF || defined FUKIDO
+      real(r8), intent(in) :: ubar(LBi:,LBj:,:)
+      real(r8), intent(in) :: vbar(LBi:,LBj:,:)
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
       real(r8), intent(in) :: zeta(LBi:,LBj:,:)
 #else
       real(r8), intent(in) :: angler(LBi:UBi,LBj:UBj)
@@ -95,6 +120,12 @@
 # ifdef MASKING
       real(r8), intent(in) :: umask(LBi:UBi,LBj:UBj)
 # endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# if defined SHIRAHO_REEF || defined FUKIDO
+      real(r8), intent(in) :: ubar(LBi:UBi,LBj:UBj,3)
+      real(r8), intent(in) :: vbar(LBi:UBi,LBj:UBj,3)
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
       real(r8), intent(in) :: zeta(LBi:UBi,LBj:UBj,3)
 #endif
 !
@@ -107,6 +138,13 @@
       real(r8) :: my_area, my_flux, tid_flow, riv_flow, cff1, cff2,     &
      &            model_flux
 #endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#if defined SHIRAHO_REEF || defined FUKIDO
+      integer :: know
+!      real(r8) :: my_area, my_flux, tid_flow, riv_flow, cff1, cff2,     &
+!     &            model_flux
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #if defined TEST_CHAN
       real(r8) :: my_area, my_width
 #endif
@@ -340,6 +378,67 @@
      &                                         COS(omega-phase))
         END DO
       END IF
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#elif defined SHIRAHO_REEF
+!
+!-----------------------------------------------------------------------
+!  Set time-indices
+!-----------------------------------------------------------------------
+!
+      IF (FIRST_2D_STEP) THEN
+        know=krhs
+!        dt2d=dtfast(ng)
+      ELSE IF (PREDICTOR_2D_STEP(ng)) THEN
+        know=krhs
+!        dt2d=2.0_r8*dtfast(ng)
+      ELSE
+        know=kstp
+!        dt2d=dtfast(ng)
+      END IF
+
+! This condition have to use with Flather boundary condition
+
+      IF (LBC(ieast,isUbar,ng)%acquire.and.                             &
+     &    LBC(ieast,isVbar,ng)%acquire.and.                             &
+     &    DOMAIN(ng)%Eastern_Edge(tile)) THEN
+        DO j=JstrT,JendT
+          BOUNDARY(ng)%ubar_east(j)=ubar(Iend,j,know)  !!! kew -> know 160608 �Ԉ����Ă邩��
+        END DO
+        DO j=JstrP,JendT
+          BOUNDARY(ng)%vbar_east(j)=vbar(Iend,j,know)
+        END DO
+      END IF
+
+#elif defined FUKIDO
+!
+!-----------------------------------------------------------------------
+!  Set time-indices
+!-----------------------------------------------------------------------
+!
+      IF (FIRST_2D_STEP) THEN
+        know=krhs
+!        dt2d=dtfast(ng)
+      ELSE IF (PREDICTOR_2D_STEP(ng)) THEN
+        know=krhs
+!        dt2d=2.0_r8*dtfast(ng)
+      ELSE
+        know=kstp
+!        dt2d=dtfast(ng)
+      END IF
+
+! This condition have to use with Flather boundary condition
+
+      IF (LBC(inorth,isUbar,ng)%acquire.and.                            &
+     &    LBC(inorth,isVbar,ng)%acquire.and.                            &
+     &    DOMAIN(ng)%Northern_Edge(tile)) THEN
+        DO i=IstrP,IendT
+          BOUNDARY(ng)%ubar_north(i)=ubar(i,Jend,know)
+        END DO
+        DO i=IstrT,IendT
+          BOUNDARY(ng)%vbar_north(i)=vbar(i,Jend,know)
+        END DO
+      END IF
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #else
       IF (LBC(ieast,isUbar,ng)%acquire.and.                             &
      &    LBC(ieast,isVbar,ng)%acquire.and.                             &

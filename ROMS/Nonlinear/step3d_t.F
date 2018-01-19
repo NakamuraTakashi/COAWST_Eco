@@ -100,6 +100,11 @@
      &                    GRID(ng) % Huon,                              &
      &                    GRID(ng) % Hvom,                              &
      &                    GRID(ng) % z_r,                               &
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# ifdef SGD_ON
+     &                    GRID(ng) % sgd_src,                           &
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
      &                    MIXING(ng) % Akt,                             &
      &                    OCEAN(ng) % W,                                &
 # ifdef WEC_VF
@@ -144,6 +149,11 @@
      &                          pm, pn,                                 &
      &                          Hz, Huon, Hvom,                         &
      &                          z_r,                                    &
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# ifdef SGD_ON
+     &                          sgd_src,                                &
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
      &                          Akt,                                    &
      &                          W,                                      &
 # ifdef WEC_VF
@@ -238,6 +248,11 @@
       real(r8), intent(in) :: Huon(LBi:,LBj:,:)
       real(r8), intent(in) :: Hvom(LBi:,LBj:,:)
       real(r8), intent(in) :: z_r(LBi:,LBj:,:)
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#  ifdef SGD_ON
+      real(r8), intent(in) :: sgd_src(LBi:,LBj:)
+#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #  ifdef SUN
       real(r8), intent(in) :: Akt(LBi:UBi,LBj:UBj,0:N(ng),NAT)
 #  else
@@ -297,6 +312,11 @@
       real(r8), intent(in) :: Huon(LBi:UBi,LBj:UBj,N(ng))
       real(r8), intent(in) :: Hvom(LBi:UBi,LBj:UBj,N(ng))
       real(r8), intent(in) :: z_r(LBi:UBi,LBj:UBj,N(ng))
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#  ifdef SGD_ON
+      real(r8), intent(in) :: sgd_src(LBi:UBi,LBj:UBj)
+#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
       real(r8), intent(in) :: Akt(LBi:UBi,LBj:UBj,0:N(ng),NAT)
       real(r8), intent(in) :: W(LBi:UBi,LBj:UBj,0:N(ng))
 #  ifdef WEC_VF
@@ -966,7 +986,7 @@
      &               0.5_r8*MAX(0.0_r8,                                 &
      &                          MIN(2.0_r8,2.0_r8*ru*rkau,betau))*      &
      &               grad_k(k)*kaz(k)
-                END IF 
+                END IF
                 FC(i,k)=W(i,j,k)*sw
               END IF
             END DO
@@ -1217,6 +1237,17 @@
               END IF
             END DO
           END IF
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# ifdef SGD_ON
+!
+!  Apply mass point sources - Volume influx.
+!
+          DO i=I_RANGE
+            FC(i,0)=FC(i,0)+SOURCES(ng)%Qsgd*                           &
+     &                      SOURCES(ng)%Tsgd(itrc)*sgd_src(i,j)
+          END DO
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
           DO k=1,N(ng)
             DO i=I_RANGE

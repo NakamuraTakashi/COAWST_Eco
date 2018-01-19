@@ -288,7 +288,7 @@
 !end              END DO
 #endif
 #if defined ESTUARYBGC && defined SPECTRAL_LIGHT
-            CASE ('NBAND') 
+            CASE ('NBAND')
               Npts=load_i(Nval, Rval, 1, Ivalue)
               NBAND=Ivalue(1)
               IF (NBAND.le.0) THEN
@@ -2084,6 +2084,17 @@
                 END DO
               END DO
 #endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#if defined SGD_ON
+            CASE ('Hout(idSgds)')
+              IF (idSgds.eq.0) THEN
+                IF (Master) WRITE (out,280) 'idSgds'
+                exit_flag=5
+                RETURN
+              END IF
+              Npts=load_l(Nval, Cval, Ngrids, Hout(idSgds,:))
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #if defined HISTORY2
             CASE ('Hout2(idUvel)')
               Npts=load_l(Nval, Cval, Ngrids, Hout2(idUvel,:))
@@ -4282,7 +4293,7 @@
             CASE ('NBCFILES')
               Npts=load_i(Nval, Rval, Ngrids, nBCfiles)
               DO ng=1,Ngrids
-                IF (nBCfiles(ng).le.0) THEN 
+                IF (nBCfiles(ng).le.0) THEN
                   IF (Master) WRITE (out,260) 'NBCFILES', nBCfiles(ng), &
      &                            'Must be equal or greater than one.'
                   exit_flag=4
@@ -6135,6 +6146,13 @@
      &         'Write out turbulent generic length-scale.'
 # endif
 #endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#if defined SGD_ON
+            IF (Hout(idSgds,ng)) WRITE (out,170) Hout(idSgds,ng),       &
+     &         'Hout(idSgds)',                                          &
+     &         'Write out time-dependent SGD points source.'
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
           END IF
 #if defined HISTORY2
           WRITE (out,'(1x)')

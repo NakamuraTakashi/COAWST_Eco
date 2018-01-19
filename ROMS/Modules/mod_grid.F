@@ -323,6 +323,25 @@
           real(r8), pointer :: ad_z_w(:,:,:)
 # endif
 #endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#ifdef SGD_ON
+          real(r8), pointer :: sgd_src(:,:)
+#endif
+#ifdef REEF_ECOSYS
+# ifdef CORAL_POLYP
+          real(r8), pointer :: p_coral(:,:,:)
+# endif
+# ifdef SEAGRASS
+          real(r8), pointer :: p_seagrass(:,:)
+# endif
+# ifdef MACROALGAE
+          real(r8), pointer :: p_algae(:,:)
+# endif
+# ifdef SEDIMENT_ECOSYS
+          real(r8), pointer :: p_sand(:,:)
+# endif
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
         END TYPE T_GRID
 
         TYPE (T_GRID), allocatable :: GRID(:)
@@ -527,6 +546,25 @@
       allocate ( GRID(ng) % ad_z_w(LBi:UBi,LBj:UBj,0:N(ng)) )
 # endif
 #endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#ifdef SGD_ON
+      allocate ( GRID(ng) % sgd_src(LBi:UBi,LBj:UBj) )
+#endif
+#ifdef REEF_ECOSYS
+# ifdef CORAL_POLYP
+      allocate ( GRID(ng) % p_coral(2,LBi:UBi,LBj:UBj) )
+# endif
+# ifdef SEAGRASS
+      allocate ( GRID(ng) % p_seagrass(LBi:UBi,LBj:UBj) )
+# endif
+# ifdef MACROALGAE
+      allocate ( GRID(ng) % p_algae(LBi:UBi,LBj:UBj) )
+# endif
+# ifdef SEDIMENT_ECOSYS
+      allocate ( GRID(ng) % p_sand(LBi:UBi,LBj:UBj) )
+# endif
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 
       RETURN
       END SUBROUTINE allocate_grid
@@ -744,6 +782,26 @@
             GRID(ng) % Uscope(i,j) = IniVal
             GRID(ng) % Vscope(i,j) = IniVal
 #endif
+!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#ifdef SGD_ON
+            GRID(ng) % sgd_src(i,j) = IniVal
+#endif
+#ifdef REEF_ECOSYS
+# ifdef CORAL_POLYP
+            GRID(ng) % p_coral(1,i,j) = IniVal
+            GRID(ng) % p_coral(2,i,j) = IniVal
+# endif
+# ifdef SEAGRASS
+            GRID(ng) % p_seagrass(i,j) = IniVal
+# endif
+# ifdef MACROALGAE
+            GRID(ng) % p_algae(i,j) = IniVal
+# endif
+# ifdef SEDIMENT_ECOSYS
+            GRID(ng) % p_sand(i,j) = IniVal
+# endif
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
           END DO
 
 #ifdef SOLVE3D

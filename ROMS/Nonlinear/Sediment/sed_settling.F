@@ -68,6 +68,11 @@
      &                        nstp(ng), nnew(ng),                       &
      &                        GRID(ng) % Hz,                            &
      &                        GRID(ng) % z_w,                           &
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# if defined SHIRAHO_REEF
+     &                        GRID(ng) % h,                             &
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
      &                        SEDBED(ng) % settling_flux,               &
      &                        OCEAN(ng) % t)
 # ifdef PROFILE
@@ -82,6 +87,11 @@
      &                              IminS, ImaxS, JminS, JmaxS,         &
      &                              nstp, nnew,                         &
      &                              Hz, z_w,                            &
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# if defined SHIRAHO_REEF
+     &                              h,                                  &
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
      &                              settling_flux,                      &
      &                              t)
 !***********************************************************************
@@ -101,11 +111,21 @@
 # ifdef ASSUMED_SHAPE
       real(r8), intent(in) :: Hz(LBi:,LBj:,:)
       real(r8), intent(in) :: z_w(LBi:,LBj:,0:)
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#  if defined SHIRAHO_REEF
+      real(r8), intent(in) :: h(LBi:,LBj:)
+#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
       real(r8), intent(inout) :: settling_flux(LBi:,LBj:,:)
       real(r8), intent(inout) :: t(LBi:,LBj:,:,:,:)
 # else
       real(r8), intent(in) :: Hz(LBi:UBi,LBj:UBj,N(ng))
       real(r8), intent(in) :: z_w(LBi:UBi,LBj:UBj,0:N(ng))
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#  if defined SHIRAHO_REEF
+      real(r8), intent(in) :: h(LBi:UBi,LBj:UBj)
+#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
       real(r8), intent(inout) :: settling_flux(LBi:UBi,LBj:UBj,NST(ng))
       real(r8), intent(inout) :: t(LBi:UBi,LBj:UBj,N(ng),3,NT(ng))
 # endif
@@ -330,6 +350,13 @@
               t(i,j,k,nnew,indx)=t(i,j,k,nnew,indx)+(FC(i,k)-FC(i,k-1))
             END DO
             settling_flux(i,j,ised)=FC(i,0)
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# if defined SHIRAHO_REEF
+            IF (h(i,j).gt.29.0_r8) THEN
+              settling_flux(i,j,ised)=0.0_r8
+            END IF
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
           END DO
         END DO SED_LOOP
       END DO J_LOOP

@@ -407,6 +407,53 @@
           bottom(i,j,izdef)=Zob(ng)
         END DO
       END DO
+!!!>>>>>>> Shiraho reef case >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN:Add
+# elif defined SHIRAHO_REEF
+      DO j=JstrT,JendT
+        DO i=IstrT,IendT
+!
+!  Set bed layer properties.
+!
+          DO k=1,Nbed
+             bed(i,j,k,iaged)=time(ng)
+             bed(i,j,k,ithck)=0.0_r8   !10.0_r8
+             bed(i,j,k,iporo)=0.50_r8
+             DO ised=1,NST
+               bed_frac(i,j,k,ised)=1.0_r8/REAL(NST,r8)
+             ENDDO
+          END DO
+!
+!  Set exposed sediment layer properties.
+!
+          bottom(i,j,irlen)=0.10_r8
+          bottom(i,j,irhgt)=0.01_r8
+          bottom(i,j,izdef)=Zob(ng)
+        END DO
+      END DO
+!!!>>>>>>> Fukido case >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN:Add
+# elif defined FUKIDO
+      DO j=JstrT,JendT
+        DO i=IstrT,IendT
+!
+!  Set bed layer properties.
+!
+          DO k=1,Nbed !�y�̑w�̐�
+             bed(i,j,k,iaged)=time(ng)
+             bed(i,j,k,ithck)=2.0_r8   !10.0_r8  �����l�̑w�������߂�
+             bed(i,j,k,iporo)=0.7048_r8  !porosity 0�`1 �󌄗� �ϑ��l���ꂽ
+             DO ised=1,NST
+               bed_frac(i,j,k,ised)=1.0_r8/REAL(NST,r8)
+             ENDDO
+          END DO
+!
+!  Set exposed sediment layer properties.
+!
+          bottom(i,j,irlen)=0.10_r8
+          bottom(i,j,irhgt)=0.01_r8
+          bottom(i,j,izdef)=Zob(ng)
+        END DO
+      END DO
+!!!<<<<<<<< Shiraho reef case <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN:Add
 # else
       ana_sediment.h: no values provided for bed, bed_mass, bottom.
 # endif

@@ -15,6 +15,10 @@
 !!
 # if defined FLOAT_OYSTER
 #  include <oyster_floats_inp.h>
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# elif defined FLOAT_REEF_ECOSYS
+#  include <reef_ecosys_floats_inp.h>
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 # endif
 #else
       SUBROUTINE read_FltBioPar

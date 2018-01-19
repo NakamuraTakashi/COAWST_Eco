@@ -89,7 +89,7 @@
 # if defined ESTUARYBGC
       integer :: s3dgrd(4)
 # endif
-#if defined VEGETATION 
+#if defined VEGETATION
 # if defined VEG_DRAG || defined VEG_BIOMASS
       integer :: v3pgrd(4)
 # endif
@@ -206,7 +206,7 @@
         IF (FoundError(exit_flag, NoError, __LINE__,                    &
      &                 __FILE__)) RETURN
 #endif
-        
+
 #ifdef INWAVE_MODEL
         status=def_dim(ng, iNLM, HIS(ng)%ncid, ncname,'ND',             &
                        ND, DimIDs(33))
@@ -329,7 +329,7 @@
      &                 NVEG, DimIDs(35))
         IF (FoundError(exit_flag, NoError, __LINE__,                    &
      &                 __FILE__)) RETURN
-# endif 
+# endif
 #endif
 
 #ifdef ADJUST_BOUNDARY
@@ -505,7 +505,7 @@
         b3dgrd(4)=DimIDs(12)
 #  endif
 # endif
-# if defined ESTUARYBGC 
+# if defined ESTUARYBGC
 !
 !  Define dimension vector for spectral light type variables.
 !
@@ -2056,7 +2056,7 @@
 !
 !  Define Dissolved Inorganic Nitrogen in water column
 !
-        IF (Hout(iddinw,ng)) THEN 
+        IF (Hout(iddinw,ng)) THEN
           Vinfo( 1)=Vname(1,iddinw)
           Vinfo( 2)=Vname(2,iddinw)
           Vinfo( 3)=Vname(3,iddinw)
@@ -2075,7 +2075,7 @@
 !
 !  Define Dissolved Inorganic Nitrogen in sediment column
 !
-        IF (Hout(iddins,ng)) THEN 
+        IF (Hout(iddins,ng)) THEN
           Vinfo( 1)=Vname(1,iddins)
           Vinfo( 2)=Vname(2,iddins)
           Vinfo( 3)=Vname(3,iddins)
@@ -2094,7 +2094,7 @@
 !
 !  Define Dissolved Oxygen in water column
 !
-        IF (Hout(iddowc,ng)) THEN 
+        IF (Hout(iddowc,ng)) THEN
           Vinfo( 1)=Vname(1,iddowc)
           Vinfo( 2)=Vname(2,iddowc)
           Vinfo( 3)=Vname(3,iddowc)
@@ -2111,9 +2111,9 @@
      &                   __FILE__)) RETURN
         END IF
 !
-!  Define Dissolved Inorganic Nitrogen in water column due to SAV 
+!  Define Dissolved Inorganic Nitrogen in water column due to SAV
 !
-        IF (Hout(idwsvl,ng)) THEN 
+        IF (Hout(idwsvl,ng)) THEN
           Vinfo( 1)=Vname(1,idwsvl)
           Vinfo( 2)=Vname(2,idwsvl)
           Vinfo( 3)=Vname(3,idwsvl)
@@ -2265,7 +2265,7 @@
         END IF
 !
 ! AGBG
-! 
+!
         IF (Hout(idsvbg,ng)) THEN
           Vinfo( 1)=Vname(1,idsvbg)
           Vinfo( 2)=Vname(2,idsvbg)
@@ -2284,7 +2284,7 @@
         END IF
 !
 ! BGAG
-! 
+!
         IF (Hout(idsvag,ng)) THEN
           Vinfo( 1)=Vname(1,idsvag)
           Vinfo( 2)=Vname(2,idsvag)
@@ -2302,8 +2302,8 @@
      &                   __FILE__)) RETURN
         END IF
 !
-! BGR 
-! 
+! BGR
+!
         IF (Hout(idsbgr,ng)) THEN
           Vinfo( 1)=Vname(1,idsbgr)
           Vinfo( 2)=Vname(2,idsbgr)
@@ -2322,7 +2322,7 @@
         END IF
 !
 ! BGM
-! 
+!
         IF (Hout(idsbgm,ng)) THEN
           Vinfo( 1)=Vname(1,idsbgm)
           Vinfo( 2)=Vname(2,idsbgm)
@@ -2342,7 +2342,7 @@
 !
 # endif
 !
-#if defined VEGETATION 
+#if defined VEGETATION
 #include "vegetation_def_his.h"
 #endif
 !
@@ -4136,6 +4136,152 @@
      &                   __FILE__)) RETURN
         END IF
 #endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#if defined SGD_ON
+!
+!  Define time-varying SGD point sources.
+!
+        IF (Hout(idSgds,ng)) THEN
+          Vinfo( 1)=Vname(1,idSgds)
+          Vinfo( 2)=Vname(2,idSgds)
+          Vinfo( 3)=Vname(3,idSgds)
+          Vinfo(14)=Vname(4,idSgds)
+          Vinfo(16)=Vname(1,idtime)
+# if defined WRITE_WATER && defined MASKING
+          Vinfo(20)='mask_rho'
+# endif
+          Vinfo(22)='coordinates'
+          Aval(5)=REAL(Iinfo(1,idSgds,ng),r8)
+          status=def_var(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idSgds),   &
+     &                   NF_FOUT, nvd3, t2dgrd, Aval, Vinfo, ncname,    &
+     &                   SetFillVal = .FALSE.)
+          IF (exit_flag.ne.NoError) RETURN
+        END IF
+#endif
+
+#if defined REEF_ECOSYS
+!
+!  Define time-varying coral coverage.
+!
+        IF (Hout(idCrl1,ng)) THEN
+          Vinfo( 1)=Vname(1,idCrl1)
+          Vinfo( 2)=Vname(2,idCrl1)
+          Vinfo( 3)=Vname(3,idCrl1)
+          Vinfo(14)=Vname(4,idCrl1)
+          Vinfo(16)=Vname(1,idtime)
+# if defined WRITE_WATER && defined MASKING
+          Vinfo(20)='mask_rho'
+# endif
+          Vinfo(22)='coordinates'
+          Aval(5)=REAL(Iinfo(1,idCrl1,ng),r8)
+          status=def_var(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idCrl1),   &
+     &                   NF_FOUT, nvd3, t2dgrd, Aval, Vinfo, ncname,    &
+     &                   SetFillVal = .FALSE.)
+          IF (exit_flag.ne.NoError) RETURN
+        END IF
+!
+!  Define time-varying coral2 coverage.
+!
+        IF (Hout(idCrl1,ng)) THEN
+          Vinfo( 1)=Vname(1,idCrl2)
+          Vinfo( 2)=Vname(2,idCrl2)
+          Vinfo( 3)=Vname(3,idCrl2)
+          Vinfo(14)=Vname(4,idCrl2)
+          Vinfo(16)=Vname(1,idtime)
+# if defined WRITE_WATER && defined MASKING
+          Vinfo(20)='mask_rho'
+# endif
+          Vinfo(22)='coordinates'
+          Aval(5)=REAL(Iinfo(1,idCrl2,ng),r8)
+          status=def_var(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idCrl2),   &
+     &                   NF_FOUT, nvd3, t2dgrd, Aval, Vinfo, ncname,    &
+     &                   SetFillVal = .FALSE.)
+          IF (exit_flag.ne.NoError) RETURN
+        END IF
+!
+!  Define time-varying seagrass coverage.
+!
+        IF (Hout(idSgrs,ng)) THEN
+          Vinfo( 1)=Vname(1,idSgrs)
+          Vinfo( 2)=Vname(2,idSgrs)
+          Vinfo( 3)=Vname(3,idSgrs)
+          Vinfo(14)=Vname(4,idSgrs)
+          Vinfo(16)=Vname(1,idtime)
+# if defined WRITE_WATER && defined MASKING
+          Vinfo(20)='mask_rho'
+# endif
+          Vinfo(22)='coordinates'
+          Aval(5)=REAL(Iinfo(1,idSgrs,ng),r8)
+          status=def_var(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idSgrs),   &
+     &                   NF_FOUT, nvd3, t2dgrd, Aval, Vinfo, ncname,    &
+     &                   SetFillVal = .FALSE.)
+          IF (exit_flag.ne.NoError) RETURN
+        END IF
+!
+!  Define time-varying algal coverage.
+!
+        IF (Hout(idAlga,ng)) THEN
+          Vinfo( 1)=Vname(1,idAlga)
+          Vinfo( 2)=Vname(2,idAlga)
+          Vinfo( 3)=Vname(3,idAlga)
+          Vinfo(14)=Vname(4,idAlga)
+          Vinfo(16)=Vname(1,idtime)
+# if defined WRITE_WATER && defined MASKING
+          Vinfo(20)='mask_rho'
+# endif
+          Vinfo(22)='coordinates'
+          Aval(5)=REAL(Iinfo(1,idAlga,ng),r8)
+          status=def_var(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idAlga),   &
+     &                   NF_FOUT, nvd3, t2dgrd, Aval, Vinfo, ncname,    &
+     &                   SetFillVal = .FALSE.)
+          IF (exit_flag.ne.NoError) RETURN
+        END IF
+!
+!  Define time-varying Biological 2D field.
+!
+        DO i=1,NHbio2d
+          ifield=iHbio2(i)
+          IF (Hout(ifield,ng)) THEN
+            Vinfo( 1)=Vname(1,ifield)
+            Vinfo( 2)=Vname(2,ifield)
+            Vinfo( 3)=Vname(3,ifield)
+            Vinfo(14)=Vname(4,ifield)
+            Vinfo(16)=Vname(1,idtime)
+# if defined WRITE_WATER && defined MASKING
+            Vinfo(20)='mask_rho'
+# endif
+            Vinfo(22)='coordinates'
+            Aval(5)=REAL(Iinfo(1,ifield,ng),r8)
+            status=def_var(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(ifield),   &
+     &                     NF_FOUT, nvd3, t2dgrd, Aval, Vinfo, ncname )
+            IF (exit_flag.ne.NoError) RETURN
+          END IF
+        END DO
+!
+!  Define time-varying Biological 3D field.
+!
+        DO i=1,NHbio3d
+          ifield=iHbio3(i)
+          IF (Hout(ifield,ng)) THEN
+            Vinfo( 1)=Vname(1,ifield)
+            Vinfo( 2)=Vname(2,ifield)
+            Vinfo( 3)=Vname(3,ifield)
+            Vinfo(14)=Vname(4,ifield)
+            Vinfo(16)=Vname(1,ifield)
+#  if defined WRITE_WATER && defined MASKING
+            Vinfo(20)='mask_rho'
+#  endif
+            Vinfo(22)='coordinates'
+            Aval(5)=REAL(Iinfo(1,ifield,ng),r8)
+            status=def_var(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(ifield),   &
+     &                     NF_FOUT, nvd4, t3dgrd, Aval, Vinfo, ncname)
+            IF (exit_flag.ne.NoError) RETURN
+          END IF
+        END DO
+
+#endif
+
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
 !-----------------------------------------------------------------------
 !  Leave definition mode.
@@ -4785,7 +4931,7 @@
 
           END IF
 !
-#if defined VEGETATION 
+#if defined VEGETATION
 # if defined VEG_DRAG || defined VEG_BIOMASS
           DO itrc=1,NVEGP
             IF (TRIM(var_name(i)).eq.TRIM(Vname(1,idvprp(itrc)))) THEN
@@ -4793,9 +4939,9 @@
               HIS(ng)%Vid(itrc)=var_id(i)
             END IF
           END DO
-# endif 
+# endif
 #endif
-! 
+!
 #ifdef SOLVE3D
           DO itrc=1,NT(ng)
             IF (TRIM(var_name(i)).eq.TRIM(Vname(1,idTvar(itrc)))) THEN
@@ -5449,7 +5595,7 @@
      &                                  TRIM(ncname)
           exit_flag=3
           RETURN
-        END IF            
+        END IF
 # endif
 # ifdef MELT_PONDS
         IF (.not.got_var(idApond).and.Hout(idApond,ng)) THEN
@@ -5849,18 +5995,18 @@
           END IF
 # endif
         END DO
-# ifdef VEGETATION 
-#  if defined VEG_DRAG || defined VEG_BIOMASS 
-        DO i=1,NVEGP 
+# ifdef VEGETATION
+#  if defined VEG_DRAG || defined VEG_BIOMASS
+        DO i=1,NVEGP
           IF (.not.got_var(idvprp(i)).and.Hout(idvprp(i),ng)) THEN
             IF (Master) WRITE (stdout,70) TRIM(Vname(1,idvprp(i))),     &
      &                                    TRIM(ncname)
             exit_flag=3
             RETURN
           END IF
-        END DO 
+        END DO
 #  endif
-# endif 
+# endif
 # ifdef SEDIMENT
         DO i=1,NST
           IF (.not.got_var(idfrac(i)).and.Hout(idfrac(i),ng)) THEN

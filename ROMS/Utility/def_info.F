@@ -74,7 +74,7 @@
       USE mod_inwave_vars
       USE mod_inwave_bound
 #endif
-!     
+!
       USE def_var_mod, ONLY : def_var
 #if !defined PARALLEL_OUT  && defined DISTRIBUTE
       USE distribute_mod, ONLY : mp_bcasti
@@ -2988,7 +2988,7 @@
 #if defined BIOLOGY && defined SOLVE3D
 # if defined BIO_FENNEL
 #  include <fennel_def.h>
-# elif defined ESTUARYBGC 
+# elif defined ESTUARYBGC
 #  include <estuarybgc_def.h>
 # elif defined ECOSIM
 #  include <ecosim_def.h>
@@ -3004,6 +3004,10 @@
 #  include <npzd_iron_def.h>
 # elif defined NPZD_POWELL
 #  include <npzd_Powell_def.h>
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# elif defined REEF_ECOSYS
+#  include <reef_ecosys_def.h>
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 # elif defined RED_TIDE
 #  include <red_tide_def.h>
 # endif
@@ -3012,6 +3016,10 @@
 #if defined FLOATS && defined FLOAT_BIOLOGY
 # if defined FLOAT_OYSTER
 #  include <oyster_floats_def.h>
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# elif defined FLOAT_REEF_ECOSYS
+#  include <reef_ecosys_floats_def.h>
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 # endif
 #endif
 

@@ -53,9 +53,9 @@
 #if defined SEDIMENT && defined SED_FLOCS
       USE mod_sedflocs, ONLY : allocate_sedflocs, initialize_sedflocs
 #endif
-#if defined VEGETATION 
+#if defined VEGETATION
       USE mod_vegarr,ONLY:allocate_vegarr, initialize_vegarr
-#endif 
+#endif
       USE mod_sources, ONLY : allocate_sources
 #if defined TRC_PSOURCE
       USE mod_trc_sources, ONLY : allocate_trc_sources
@@ -69,6 +69,14 @@
 #if defined ICE_MODEL || defined CICE_MODEL
       USE mod_ice, ONLY : allocate_ice, initialize_ice
 #endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+!!!----------------------------------------------------------------------
+!!!  Initialize coral polyp model parameters
+!!!----------------------------------------------------------------------
+#ifdef REEF_ECOSYS
+      USE mod_reef_ecosys
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
       implicit none
 !
@@ -173,6 +181,14 @@
 #if defined SSH_TIDES || defined UV_TIDES || defined POT_TIDES
           CALL allocate_tides (ng, LBi, UBi, LBj, UBj)
 #endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+!!!----------------------------------------------------------------------
+!!!  Initialize coral polyp model parameters
+!!!----------------------------------------------------------------------
+#ifdef REEF_ECOSYS
+          CALL initialize_reef_ecosys(ng, Ngrids, LBi, UBi, LBj, UBj)
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
           IF (LuvSrc(ng).or.LwSrc(ng).or.ANY(LtracerSrc(:,ng))) THEN
             CALL allocate_sources (ng)
           END IF
@@ -248,7 +264,7 @@
 #if defined SEDIMENT && defined SED_FLOCS
             CALL initialize_sedflocs (ng, TILE, model)
 #endif
-#if defined VEGETATION 
+#if defined VEGETATION
             CALL initialize_vegarr (ng, TILE, model)
 #endif
 #if defined SSH_TIDES || defined UV_TIDES || defined POT_TIDES

@@ -80,6 +80,12 @@
           real(r8), pointer :: TsrcG(:,:,:,:)
 # endif
 #endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# ifdef SGD_ON
+          real(r8), pointer :: Qsgd
+          real(r8), pointer :: Tsgd(:)
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 
         END TYPE T_SOURCES
 
@@ -207,6 +213,12 @@
       allocate ( SOURCES(ng) % TsrcG(Nsrc(ng),N(ng),2,NT(ng)) )
 # endif
 #endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#ifdef SGD_ON
+      allocate ( SOURCES(ng) % Qsgd )
+
+      allocate ( SOURCES(ng) % Tsgd(NT(ng)) )
+#endif
 !
 !-----------------------------------------------------------------------
 !  Initialize module variables.
@@ -258,6 +270,14 @@
         END DO
 #endif
       END DO
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#ifdef SGD_ON
+      SOURCES(ng) % Qsgd = IniVal
+      DO itrc=1,NT(ng)
+        SOURCES(ng) % Tsgd(itrc) = IniVal
+      END DO
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 
       RETURN
       END SUBROUTINE allocate_sources

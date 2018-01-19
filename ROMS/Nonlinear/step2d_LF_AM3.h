@@ -26,13 +26,13 @@
       USE mod_sedbed
 # endif
 # if defined VEGETATION && defined VEG_DRAG
-      USE mod_vegarr 
+      USE mod_vegarr
       USE vegetation_drag_mod, ONLY : vegetation_drag_cal
-# endif 
-# if defined VEGETATION && defined VEG_HMIXING 
-      USE mod_vegarr 
+# endif
+# if defined VEGETATION && defined VEG_HMIXING
+      USE mod_vegarr
       USE vegetation_hmixing_mod, ONLY : vegetation_hmixing_cal
-# endif 
+# endif
       USE mod_stepping
 !
 !  Imported variable declarations.
@@ -78,6 +78,11 @@
 # if defined CURVGRID && defined UV_ADV
      &                  GRID(ng) % dndx,        GRID(ng) % dmde,        &
 # endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# ifdef SGD_ON
+     &                  GRID(ng) % sgd_src,                             &
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 # if defined UV_VIS2 || defined UV_VIS4
      &                  GRID(ng) % pmon_r,      GRID(ng) % pnom_r,      &
      &                  GRID(ng) % pmon_p,      GRID(ng) % pnom_p,      &
@@ -90,13 +95,13 @@
      &                  MIXING(ng) % visc4_p,   MIXING(ng) % visc4_r,   &
 #  endif
 # endif
-# if defined VEGETATION && defined VEG_DRAG 
+# if defined VEGETATION && defined VEG_DRAG
      &                  VEG(ng) % step2d_uveg,                          &
      &                  VEG(ng) % step2d_vveg,                          &
 # endif
-# if defined VEGETATION && defined VEG_HMIXING 
+# if defined VEGETATION && defined VEG_HMIXING
      &                  VEG(ng) % visc2d_r_veg,                         &
-# endif 
+# endif
 # ifdef WEC
 #  ifdef WEC_VF
 #   ifdef WEC_ROLLER
@@ -190,6 +195,11 @@
 # if defined CURVGRID && defined UV_ADV
      &                        dndx, dmde,                               &
 # endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# ifdef SGD_ON
+     &                        sgd_src,                            &
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 # if defined UV_VIS2 || defined UV_VIS4
      &                        pmon_r, pnom_r, pmon_p, pnom_p,           &
      &                        om_r, on_r, om_p, on_p,                   &
@@ -203,7 +213,7 @@
 # if defined VEGETATION && defined VEG_DRAG
      &                        step2d_uveg, step2d_vveg,                 &
 # endif
-# if defined VEGETATION && defined VEG_HMIXING 
+# if defined VEGETATION && defined VEG_HMIXING
      &                        visc2d_r_veg,                             &
 # endif
 # ifdef WEC
@@ -307,6 +317,11 @@
       real(r8), intent(in) :: dndx(LBi:,LBj:)
       real(r8), intent(in) :: dmde(LBi:,LBj:)
 #  endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#  ifdef SGD_ON
+      real(r8), intent(in) :: sgd_src(LBi:,LBj:)
+#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #  if defined UV_VIS2 || defined UV_VIS4
       real(r8), intent(in) :: pmon_r(LBi:,LBj:)
       real(r8), intent(in) :: pnom_r(LBi:,LBj:)
@@ -325,11 +340,11 @@
       real(r8), intent(in) :: visc4_r(LBi:,LBj:)
 #   endif
 #  endif
-#  if defined VEGETATION && defined VEG_DRAG 
+#  if defined VEGETATION && defined VEG_DRAG
       real(r8), intent(in) :: step2d_uveg(LBi:,LBj:)
       real(r8), intent(in) :: step2d_vveg(LBi:,LBj:)
 #  endif
-#  if defined VEGETATION && defined VEG_HMIXING 
+#  if defined VEGETATION && defined VEG_HMIXING
       real(r8), intent(in) :: visc2d_r_veg(LBi:,LBj:)
 #  endif
 #  ifdef WEC
@@ -446,6 +461,11 @@
       real(r8), intent(in) :: dndx(LBi:UBi,LBj:UBj)
       real(r8), intent(in) :: dmde(LBi:UBi,LBj:UBj)
 #  endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#  ifdef SGD_ON
+      real(r8), intent(in) :: sgd_src(LBi:UBi,LBj:UBj)
+#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #  if defined UV_VIS2 || defined UV_VIS4
       real(r8), intent(in) :: pmon_r(LBi:UBi,LBj:UBj)
       real(r8), intent(in) :: pnom_r(LBi:UBi,LBj:UBj)
@@ -468,7 +488,7 @@
       real(r8), intent(in) :: step2d_uveg(LBi:UBi,LBj:UBj)
       real(r8), intent(in) :: step2d_vveg(LBi:UBi,LBj:UBj)
 #  endif
-#  if defined VEGETATION && defined VEG_HMIXING 
+#  if defined VEGETATION && defined VEG_HMIXING
       real(r8), intent(in) :: visc2d_r_veg(LBi:UBi,LBj:UBj)
 #  endif
 #  ifdef WEC
@@ -1072,6 +1092,20 @@
           END IF
         END DO
       END IF
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# ifdef SGD_ON
+!
+!  Apply mass point sources - Volume influx.
+
+      DO j=Jstr,Jend
+        DO i=Istr,Iend
+          zeta(i,j,knew)=zeta(i,j,knew)+                                &
+     &                   SOURCES(ng)%Qsgd*pm(i,j)*pn(i,j)*              &
+     &                   dtfast(ng)*sgd_src(i,j)
+        END DO
+      END DO
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
 !  Set free-surface lateral boundary conditions.
 !

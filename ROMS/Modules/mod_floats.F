@@ -114,6 +114,24 @@
         integer, parameter :: iswim = 14         ! swimming time
         integer, parameter :: iwbio = 15         ! biological w-velocity
         integer, parameter :: iwsin = 16         ! sinking velocity
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# elif defined FLOAT_REEF_ECOSYS
+#  ifdef FLOAT_VWALK
+        integer, parameter :: i1oHz = 13         ! 1/Hz
+        integer, parameter :: isizf = 14         ! larvae size (length)
+        integer, parameter :: ibrhs = 15         ! behavior RHS
+        integer, parameter :: iswim = 16         ! swimming time
+        integer, parameter :: iwbio = 17         ! biological w-velocity
+        integer, parameter :: iwsin = 18         ! sinking velocity
+#  else
+        integer, parameter :: i1oHz = 11         ! 1/Hz
+        integer, parameter :: isizf = 12         ! larvae size (length)
+        integer, parameter :: ibrhs = 13         ! behavior RHS
+        integer, parameter :: iswim = 14         ! swimming time
+        integer, parameter :: iwbio = 15         ! biological w-velocity
+        integer, parameter :: iwsin = 16         ! sinking velocity
+#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #  endif
 # endif
 # ifdef SOLVE3D
@@ -274,6 +292,14 @@
 #  else
         ic=16
 #  endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# elif defined FLOAT_REEF_ECOSYS
+#  ifdef FLOAT_VWALK
+        ic=18
+#  else
+        ic=16
+#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 # else
 #  ifdef FLOAT_VWALK
         ic=12

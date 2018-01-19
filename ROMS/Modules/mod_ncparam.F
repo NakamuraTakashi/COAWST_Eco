@@ -181,6 +181,16 @@
         integer  :: idswim = -8   ! biological float swimming time
         integer  :: idwbio = -9   ! biological float w-velocity
         integer  :: idwsin = -10  ! biological float sinking velocity
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#elif defined FLOAT_REEF_ECOSYS
+!
+!  Biological floats identification indices.
+!
+        integer  :: idsize = -7   ! biological float size (length)
+        integer  :: idswim = -8   ! biological float swimming time
+        integer  :: idwbio = -9   ! biological float w-velocity
+        integer  :: idwsin = -10  ! biological float sinking velocity
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #endif
 !
 !  Input/output identification indices.
@@ -392,7 +402,7 @@
         integer  :: idWamp        ! wave amplitude
         integer  :: idWbeh        ! WEC Bernoulli head
         integer  :: idWbrk        ! percent wave breaking
-        integer  :: idWdif        ! wave dissipation from bottom friction 
+        integer  :: idWdif        ! wave dissipation from bottom friction
         integer  :: idWdib        ! wave dissipation from surface breaking
         integer  :: idWdiw        ! wave dissipation from white capping
         integer  :: idWdir        ! wave direction
@@ -416,6 +426,12 @@
         integer  :: id2dRV        ! 2D relative vorticity
         integer  :: id3dPV        ! 3D potential vorticity
         integer  :: id3dRV        ! 3D relative vorticity
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#ifdef SGD_ON
+!  SGD indices.
+        integer  :: idSgds        ! source points of SGD
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
 !  Last used variable ID counter.
 !
@@ -805,8 +821,8 @@
       USE mod_sediment
 #endif
 #if defined VEGETATION
-      USE mod_vegetation 
-#endif 
+      USE mod_vegetation
+#endif
 !
 !  Local variable declarations.
 !
@@ -2160,6 +2176,12 @@
               CASE ('idVIclm')
                 idVIclm=varid
 #endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#if defined SGD_ON
+            CASE ('idSgds')
+              idSgds=varid
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 
 #ifdef BIOLOGY
 # if defined BIO_FENNEL
@@ -2180,6 +2202,10 @@
 #  include <npzd_Powell_var.h>
 # elif defined NPZD_IRON
 #  include <npzd_iron_var.h>
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# elif defined REEF_ECOSYS
+#  include <reef_ecosys_var.h>
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 # elif defined RED_TIDE
 #  include <red_tide_var.h>
 # endif
@@ -2188,7 +2214,7 @@
 #if defined SEDIMENT || defined BBL_MODEL
 #  include <sediment_var.h>
 #endif
-#if defined VEGETATION 
+#if defined VEGETATION
 #  include <vegetation_var.h>
 #endif
 

@@ -117,7 +117,7 @@
 #  include <bestnpz.h>
 # elif defined BIO_FENNEL
 #  include <fennel.h>
-# elif defined ESTUARYBGC 
+# elif defined ESTUARYBGC
 #  include <estuarybgc.h>
 # elif defined ECOSIM
 #  include <ecosim.h>
@@ -135,6 +135,10 @@
 #  include <umaine.h>
 # elif defined BIO_GOANPZ
 #  include <goanpz.h>
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# elif defined REEF_ECOSYS
+#  include <reef_ecosys.h>
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 # elif defined RED_TIDE
 #  include <red_tide.h>
 # else

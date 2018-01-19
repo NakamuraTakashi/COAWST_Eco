@@ -48,6 +48,11 @@
           real(r8), pointer :: bvstrw(:,:)
           real(r8), pointer :: bustrcwmax(:,:)
           real(r8), pointer :: bvstrcwmax(:,:)
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# ifdef REEF_ECOSYS
+          real(r8), pointer :: bstrcwave(:,:)
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 
         END TYPE T_BBL
 
@@ -87,6 +92,11 @@
       allocate ( BBL(ng) % bvstrw(LBi:UBi,LBj:UBj) )
       allocate ( BBL(ng) % bustrcwmax(LBi:UBi,LBj:UBj) )
       allocate ( BBL(ng) % bvstrcwmax(LBi:UBi,LBj:UBj) )
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# ifdef REEF_ECOSYS
+      allocate ( BBL(ng) % bstrcwave(LBi:UBi,LBj:UBj) )
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 
       RETURN
       END SUBROUTINE allocate_bbl
@@ -170,6 +180,12 @@
 
           BBL(ng) % bustrcwmax(i,j) = IniVal
           BBL(ng) % bvstrcwmax(i,j) = IniVal
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# ifdef REEF_ECOSYS
+
+          BBL(ng) % bstrcwave(i,j) = IniVal
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
         END DO
       END DO
 

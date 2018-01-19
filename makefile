@@ -39,7 +39,7 @@ endif
 
   sources    :=
   libraries  :=
-  c_sources  := 
+  c_sources  :=
 
 #==========================================================================
 #  Start of user-defined options. In some macro definitions below: "on" or
@@ -461,6 +461,7 @@ endif
 ifdef USE_ROMS
  modules  +=	ROMS/Nonlinear \
 		ROMS/Nonlinear/Biology \
+		ROMS/Nonlinear/Biology/reef_ecosys \
 		ROMS/Nonlinear/Sediment \
 		ROMS/Nonlinear/Wec \
 		ROMS/Nonlinear/Vegetation \
@@ -498,6 +499,7 @@ endif
 ifdef USE_ROMS
  includes +=	ROMS/Nonlinear \
 		ROMS/Nonlinear/Biology \
+		ROMS/Nonlinear/Biology/reef_ecosys \
 		ROMS/Nonlinear/Sediment \
 		ROMS/Nonlinear/Wec \
 		ROMS/Nonlinear/Vegetation \

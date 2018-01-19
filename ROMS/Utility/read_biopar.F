@@ -15,7 +15,7 @@
 !!
 # if defined BIO_FENNEL
 #  include <fennel_inp.h>
-# elif defined ESTUARYBGC 
+# elif defined ESTUARYBGC
 #  include <estuarybgc_inp.h>
 # elif defined ECOSIM
 #  include <ecosim_inp.h>
@@ -35,6 +35,10 @@
 #  include <npzd_iron_inp.h>
 # elif defined NPZD_POWELL
 #  include <npzd_Powell_inp.h>
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# elif defined REEF_ECOSYS
+#  include <reef_ecosys_inp.h>
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 # elif defined RED_TIDE
 #  include <red_tide_inp.h>
 # endif

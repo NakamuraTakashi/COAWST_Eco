@@ -22,6 +22,10 @@
 
 # ifdef FLOAT_OYSTER
 #  include <oyster_floats.h>
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# elif defined FLOAT_REEF_ECOSYS
+#  include <reef_ecosys_floats.h>
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 # endif
 
 #endif
