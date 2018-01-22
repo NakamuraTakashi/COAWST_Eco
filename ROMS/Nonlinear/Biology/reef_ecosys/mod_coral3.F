@@ -1,5 +1,5 @@
 
-!!!=== ver 2017/05/12   Copyright (c) 2012-2017 Takashi NAKAMURA  =====
+!!!=== Copyright (c) 2012-2017 Takashi NAKAMURA  =====
 
 #include "cppdefs.h"
 
@@ -11,6 +11,7 @@
     implicit none
 
     integer, parameter :: Ncl= 2    !! Number of coral types
+!    integer, parameter :: Nzx= 1    !! Number of zooxanthellae clade types
 
     TYPE T_CORAL
 
@@ -60,6 +61,8 @@
 
     TYPE T_ZOOX
 
+      real(8), pointer :: Pg(:,:,:) 
+      real(8), pointer :: R (:,:,:) 
       real(8), pointer :: dens(:,:,:)
       real(8), pointer :: QC(:,:,:)
 # if defined CORAL_CARBON_ISOTOPE
@@ -477,6 +480,7 @@
       real(8) :: Si_DIC, Si_TA, Si_DO   !Mass transfer coefficient (cm s-1)
 #if defined ORGANIC_MATTER
       real(8) :: Si_DOC
+      real(8) :: Si_POC
 #endif
 #if defined CORAL_INGESTION
       real(8) :: Si_PHY, Si_ZOO
@@ -1633,7 +1637,7 @@
 
 # if defined CORAL_TESTMODE
 !  Output
-      real(8), parameter :: OUTPUT_INTERVAL = 10.0d     ! Output interval (min)
+      real(8), parameter :: OUTPUT_INTERVAL  = 5.0d0    ! Output interval (min)
       real(8), save :: time(Ncl)         = (/ 0.d0, 0.d0 /) !sec
       real(8), save :: dsec(Ncl)         = (/ 0.d0, 0.d0 /) !sec
       real(8), save :: dday(Ncl)         = (/ 1.d0, 1.d0 /) !day
@@ -1816,10 +1820,10 @@
 !-----Cell quota (pmol/cell) -----------------!!!!!単位変換チェック!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       ZOOX(ng)%QC(n,i,j)=ZOOX(ng)%QC(n,i,j)                     &
-     &              +(                                &
-     &                 Pg-Rz                          &
-     &                -F_Cexcr                        &   !(nmol cm-2 s-1)/(cell cm-2)*1.e3=(pmol cell-1 s-1)
-     &                -C_repro                        &
+     &              +(                                          &
+     &                 ZOOX(ng)%Pg(n,i,j)-ZOOX(ng)%R(n,i,j)     &
+     &                -F_Cexcr                                  &   !(nmol cm-2 s-1)/(cell cm-2)*1.e3=(pmol cell-1 s-1)
+     &                -C_repro                                  &
      &               )*dt
       ZOOX(ng)%QC(n,i,j)=max(ZOOX(ng)%QC(n,i,j),1.0d-1) !!!Error handring
 
@@ -1886,23 +1890,26 @@
       
       if(time(n).ge.dsec(n)) then
         
-        write(54,*) &
-     &    time(n)/86400.0d0,PFDsurf,Pg,Rz  &
-     &   ,ZOOX(ng)%dens(n,i,j),ZOOX(ng)%QC(n,i,j)   &
-     &   ,CORAL(ng)%ROS(n,i,j) &
-     &   ,C_repro,Repro,Morta, F_ROS           &
-     &   ,F_Zexpul,Repro*ZOOX(ng)%dens(n,i,j),Morta*ZOOX(ng)%dens(n,i,j)      &
+        write(30+n,*)                                        &
+     &    time(n)/86400.0d0,',', PFDsurf,','                 &
+     &   ,ZOOX(ng)%Pg(n,i,j),',',  ZOOX(ng)%R(n,i,j),','     &
+     &   ,ZOOX(ng)%dens(n,i,j),',',ZOOX(ng)%QC(n,i,j),','    &
+     &   ,CORAL(ng)%ROS(n,i,j),','                           &
+     &   ,C_repro,',',Repro,',',Morta,',', F_ROS,','         &
 #  if defined CORAL_NUTRIENTS
-     &   ,ZOOX(ng)%QN(n,i,j),ZOOX(ng)%QP(n,i,j)    &
-     &   ,N_repro,P_repro   &
-     &   ,ZOOX(ng)%NO3(n,i,j),ZOOX(ng)%NO2(n,i,j),ZOOX(ng)%NH4(n,i,j),F_ONOO &
-     &   ,NO3_trans,NO2_trans,NH4_trans &
-     &   ,NO3_reduc,NO2_reduc &
-     &   ,N_assim,N_dissim &
-     &   ,ZOOX(ng)%PO4(n,i,j),PO4_trans,P_assim 
+     &   ,ZOOX(ng)%QN(n,i,j),',',ZOOX(ng)%QP(n,i,j),','      &
+     &   ,N_repro,',',P_repro,','                            &
+     &   ,ZOOX(ng)%NO3(n,i,j),',',ZOOX(ng)%NO2(n,i,j),','    &
+     &   ,ZOOX(ng)%NH4(n,i,j),',',F_ONOO,','                 &
+     &   ,NO3_trans,',',NO2_trans,',',NH4_trans,','          &
+     &   ,NO3_reduc,',',NO2_reduc,','                        &
+     &   ,N_assim,',',N_dissim,','                           &
+     &   ,ZOOX(ng)%PO4(n,i,j),',',PO4_trans,',',P_assim,','  &
 #  endif
+     &   ,F_Zexpul,',',Repro*ZOOX(ng)%dens(n,i,j),','        &
+     &   ,Morta*ZOOX(ng)%dens(n,i,j)
 
-      dsec(n)=dsec(n)+OUTPUT_INTERVAL*60.
+      dsec(n)=dsec(n)+OUTPUT_INTERVAL*60.0d0
       
       endif
 # endif
@@ -1913,8 +1920,8 @@
 
 !----- Outoput for coral internal system model (nmol cm-2 s-1)------------------------------------
 
-      Pg=Pg*ZOOX(ng)%dens(n,i,j)*1.0d-3  !=(pmol cell-1 s-1)*(cell cm-1)*1.e-3=(nmol cm-2 s-1)
-      Rz=Rz*ZOOX(ng)%dens(n,i,j)*1.0d-3  !=(pmol cell-1 s-1)*(cell cm-1)*1.e-3=(nmol cm-2 s-1)
+      ZOOX(ng)%Pg(n,i,j)=ZOOX(ng)%Pg(n,i,j)*ZOOX(ng)%dens(n,i,j)*1.0d-3  !=(pmol cell-1 s-1)*(cell cm-1)*1.e-3=(nmol cm-2 s-1)
+      ZOOX(ng)%R (n,i,j)=ZOOX(ng)%R (n,i,j)*ZOOX(ng)%dens(n,i,j)*1.0d-3  !=(pmol cell-1 s-1)*(cell cm-1)*1.e-3=(nmol cm-2 s-1)
 
       F_Cexcr = F_Cexcr*ZOOX(ng)%dens(n,i,j)*1.0d-3  !=(pmol cell-1 s-1)*(cell cm-1)*1.e-3=(nmol cm-2 s-1)
       F_Cwaste = (Death+F_Zexpul)*ZOOX(ng)%QC(n,i,j)*1.0d-3  !=(cell cm-2 s-1)*(pmol cell-1)*1.e-3=(nmol cm-2 s-1)

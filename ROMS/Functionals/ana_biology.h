@@ -15,7 +15,11 @@
       USE mod_param
       USE mod_ncparam
       USE mod_ocean
-
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#ifdef REEF_ECOSYS
+      USE mod_grid
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #ifdef BEST_NPZ
 # if defined CLIM_ICE_1D
       USE mod_clima

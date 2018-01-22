@@ -178,10 +178,21 @@
       integer, parameter :: Nreduce = 4
       integer, parameter :: Ncourant = 5
 # endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# ifdef BIOLOGY
+      real(r8), allocatable :: buffer(:)
+      character (len=3), allocatable :: op_handle(:)
+      character (len=6), allocatable :: C_handle(:)
+# else
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
       real(r8), dimension(Nreduce) :: buffer
-      real(r8), dimension(Ncourant) :: Courant
+!      real(r8), dimension(Ncourant) :: Courant  !!!!!!!!!!!!!!! TN: rm
       character (len=3), dimension(Nreduce) :: op_handle
       character (len=6), dimension(Nreduce) :: C_handle
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# endif
+      real(r8), dimension(Ncourant) :: Courant
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #else
       integer :: my_threadnum
 #endif
@@ -219,9 +230,9 @@
 # ifdef BIOLOGY
       Nreduce = 5 + NBT
 # endif
-!     IF (.not. allocated(buffer))    allocate (buffer(Nreduce))
-!     IF (.not. allocated(op_handle)) allocate (op_handle(Nreduce))
-!     IF (.not. allocated(C_handle))  allocate (C_handle(Nreduce))
+      IF (.not. allocated(buffer))    allocate (buffer(Nreduce))   !!! TN: activate again
+      IF (.not. allocated(op_handle)) allocate (op_handle(Nreduce))   !!! TN: activate again
+      IF (.not. allocated(C_handle))  allocate (C_handle(Nreduce))   !!! TN: activate again
 #endif
 
       IF (MOD(iic(ng)-1,ninfo(ng)).eq.0) THEN

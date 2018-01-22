@@ -89,6 +89,11 @@
 #ifdef SOLVE3D
       integer :: i, itrc, j, k
 #endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# ifdef REEF_ECOSYS
+      integer :: ifield
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
       real(r8) :: scale
 
       real(r8), allocatable :: Ur2d(:,:)

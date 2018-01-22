@@ -114,6 +114,7 @@
         integer, parameter :: iswim = 14         ! swimming time
         integer, parameter :: iwbio = 15         ! biological w-velocity
         integer, parameter :: iwsin = 16         ! sinking velocity
+#  endif
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
 # elif defined FLOAT_REEF_ECOSYS
 #  ifdef FLOAT_VWALK
@@ -132,7 +133,6 @@
         integer, parameter :: iwsin = 16         ! sinking velocity
 #  endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
-#  endif
 # endif
 # ifdef SOLVE3D
 !

@@ -1230,41 +1230,49 @@
       IF (LprocessOBC(ng)) THEN
         DO i=1,NAT
           IF (LBC(iwest,isTvar(i),ng)%acquire) THEN
-            CALL get_ngfld (ng, iNLM, idTbry(iwest,i), BRY(ng)%ncid,    &
-     &                      1, BRY(ng), update(1),                      &
+            CALL get_ngfld (ng, iNLM, idTbry(iwest,i),                  &
+     &                      ncBRYid(idTbry(iwest,i),ng),                &
+     &                      nBCfiles(ng), BRY(1,ng), update(1),         &
      &                      JLB, JUB, N(ng), 2, 0, Mm(ng)+1, N(ng),     &
      &                      BOUNDARY(ng) % tG_west(:,:,:,i))
-            IF (exit_flag.ne.NoError) RETURN
+            IF (FoundError(exit_flag, NoError, __LINE__,                &
+     &                     __FILE__)) RETURN
           END IF
         END DO
 
         DO i=1,NAT
           IF (LBC(ieast,isTvar(i),ng)%acquire) THEN
-            CALL get_ngfld (ng, iNLM, idTbry(ieast,i), BRY(ng)%ncid,    &
-     &                      1, BRY(ng), update(1),                      &
+            CALL get_ngfld (ng, iNLM, idTbry(ieast,i),                  &
+     &                      ncBRYid(idTbry(ieast,i),ng),                &
+     &                      nBCfiles(ng), BRY(1,ng), update(1),         &
      &                      JLB, JUB, N(ng), 2, 0, Mm(ng)+1, N(ng),     &
      &                      BOUNDARY(ng) % tG_east(:,:,:,i))
-            IF (exit_flag.ne.NoError) RETURN
+            IF (FoundError(exit_flag, NoError, __LINE__,                &
+     &                     __FILE__)) RETURN
           END IF
         END DO
 
         DO i=1,NAT
           IF (LBC(isouth,isTvar(i),ng)%acquire) THEN
-            CALL get_ngfld (ng, iNLM, idTbry(isouth,i), BRY(ng)%ncid,   &
-     &                      1, BRY(ng), update(1),                      &
+            CALL get_ngfld (ng, iNLM, idTbry(isouth,i),                 &
+     &                      ncBRYid(idTbry(isouth,i),ng),               &
+     &                      nBCfiles(ng), BRY(1,ng), update(1),         &
      &                      ILB, IUB, N(ng), 2, 0, Lm(ng)+1, N(ng),     &
      &                      BOUNDARY(ng) % tG_south(:,:,:,i))
-            IF (exit_flag.ne.NoError) RETURN
+            IF (FoundError(exit_flag, NoError, __LINE__,                &
+     &                     __FILE__)) RETURN
           END IF
         END DO
 
         DO i=1,NAT
           IF (LBC(inorth,isTvar(i),ng)%acquire) THEN
-            CALL get_ngfld (ng, iNLM, idTbry(inorth,i), BRY(ng)%ncid,   &
-     &                      1, BRY(ng), update(1),                      &
+            CALL get_ngfld (ng, iNLM, idTbry(inorth,i),                 &
+     &                      ncBRYid(idTbry(inorth,i),ng),               &
+     &                      nBCfiles(ng), BRY(1,ng), update(1),         &
      &                      ILB, IUB, N(ng), 2, 0, Lm(ng)+1, N(ng),     &
      &                      BOUNDARY(ng) % tG_north(:,:,:,i))
-            IF (exit_flag.ne.NoError) RETURN
+            IF (FoundError(exit_flag, NoError, __LINE__,                &
+     &                     __FILE__)) RETURN
           END IF
         END DO
       END IF
