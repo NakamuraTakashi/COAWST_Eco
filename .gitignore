@@ -7,7 +7,6 @@
 *.stackdump
 *.exe
 Lib/SCRIP_COAWST/netcdf.inc
-Lib/SCRIP_COAWST/*.nc
 *.nc
 *.bot
 *.grd
