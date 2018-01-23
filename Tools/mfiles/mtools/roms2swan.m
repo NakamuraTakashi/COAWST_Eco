@@ -25,10 +25,10 @@ function ROMS2SWAN(varargin);
 %
 
 if nargin == 1;
-    x_rho = ncread(varargin{1},'lon_rho');
-    y_rho = ncread(varargin{1},'lat_rho');
-%   x_rho = ncread(varargin{1},'x_rho');
-%   y_rho = ncread(varargin{1},'y_rho');
+%   x_rho = ncread(varargin{1},'lon_rho');
+%   y_rho = ncread(varargin{1},'lat_rho');
+    x_rho = ncread(varargin{1},'x_rho');
+    y_rho = ncread(varargin{1},'y_rho');
     h = ncread(varargin{1},'h');
     mask_rho = ncread(varargin{1},'mask_rho');
 elseif nargin == 4;
