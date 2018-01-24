@@ -229,10 +229,11 @@
 #ifdef DISTRIBUTE
 # ifdef BIOLOGY
       Nreduce = 5 + NBT
-# endif
+/*# endif*/  /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!TN:rm*/
       IF (.not. allocated(buffer))    allocate (buffer(Nreduce))   !!! TN: activate again
       IF (.not. allocated(op_handle)) allocate (op_handle(Nreduce))   !!! TN: activate again
       IF (.not. allocated(C_handle))  allocate (C_handle(Nreduce))   !!! TN: activate again
+# endif  /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!TN:add*/
 #endif
 
       IF (MOD(iic(ng)-1,ninfo(ng)).eq.0) THEN
