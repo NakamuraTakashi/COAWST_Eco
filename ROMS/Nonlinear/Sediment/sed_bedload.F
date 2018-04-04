@@ -310,6 +310,8 @@
 
 # if defined BEDLOAD_MPM
       real(r8), dimension(IminS:ImaxS,JminS:JmaxS) :: tau_w
+!     nondimensional critical erosion stress for MPM
+      real(r8), parameter :: tau_mpmc = 0.047_r8
 # endif
 # ifdef BSTRESS_UPWIND
       real(r8), dimension(IminS:ImaxS,JminS:JmaxS) :: tau_wX
@@ -478,8 +480,17 @@
 !
 ! Motion initiation factor.
 !
+#   if defined COHESIVE_BED || defined MIXED_BED
+! Check that both sediment class and bed critical stresses are exceeded
+            cff3=0.5_r8*(1.0_r8+SIGN(1.0_r8,                            &
+     &                   theta_max/                                     &
+     &          (max(tau_ce(ised,ng),bed(i,j,1,ibtcr))*osmgd)-1.0_r8))
+	
+#   else
+! Only sediment class critical stresses needs to be exceeded
             cff3=0.5_r8*(1.0_r8+SIGN(1.0_r8,                            &
      &                   theta_max/(tau_ce(ised,ng)*osmgd)-1.0_r8))
+#   endif
 !
 ! Calculate bed loads in direction of current and perpendicular
 ! direction.
@@ -519,21 +530,51 @@
 ! from upwind direction, still at rho points.
 ! (FX_r and FE_r have dimensions of kg).
 !
-            bedld=8.0_r8*(MAX((ABS(tau_wX(i,j))*osmgd-0.047_r8),        &
+#    if defined COHESIVE_BED || defined MIXED_BED
+            IF (tau_wX(i,j).gt.bed(i,j,1,ibtcr)) THEN
+               cff=1.0_r8
+            ELSE
+               cff=0.0_r8
+            END
+            bedld=8.0_r8*(MAX((ABS(tau_wX(i,j))*osmgd-tau_mpmc),        &
+     &                        0.0_r8)**1.5_r8)*smgdr*                   &
+     &                        SIGN(1.0_r8,tau_wX(i,j))*cff
+            FX_r(i,j)=bedld*on_r(i,j)*dt(ng)
+            IF (tau_wE(i,j).gt.bed(i,j,1,ibtcr)) THEN
+               cff=1.0_r8
+            ELSE
+               cff=0.0_r8
+            END
+            bedld=8.0_r8*(MAX((ABS(tau_wE(i,j))*osmgd-tau_mpmc),        &
+     &                        0.0_r8)**1.5_r8)*smgdr*                   &
+     &                        SIGN(1.0_r8,tau_wE(i,j))*cff
+            FE_r(i,j)=bedld*om_r(i,j)*dt(ng)
+#    else
+            bedld=8.0_r8*(MAX((ABS(tau_wX(i,j))*osmgd-tau_mpmc),        &
      &                        0.0_r8)**1.5_r8)*smgdr*                   &
      &                        SIGN(1.0_r8,tau_wX(i,j))
             FX_r(i,j)=bedld*on_r(i,j)*dt(ng)
-            bedld=8.0_r8*(MAX((ABS(tau_wE(i,j))*osmgd-0.047_r8),        &
+            bedld=8.0_r8*(MAX((ABS(tau_wE(i,j))*osmgd-tau_mpmc),        &
      &                        0.0_r8)**1.5_r8)*smgdr*                   &
      &                        SIGN(1.0_r8,tau_wE(i,j))
             FE_r(i,j)=bedld*om_r(i,j)*dt(ng)
+#    endif
 #   else
 !
 ! Magnitude of bed load at rho points. Meyer-Peter Muller formulation.
 ! (BEDLD has dimensions of kg m-1 s-1).
 !
-            bedld=8.0_r8*(MAX((tau_w(i,j)*osmgd-0.047_r8),              &
-     &                        0.0_r8)**1.5_r8)*smgdr
+#    if defined COHESIVE_BED || defined MIXED_BED
+            IF (tau_w(i,j).gt.bed(i,j,1,ibtcr)) THEN
+              bedld=8.0_r8*(MAX((tau_w(i,j)*osmgd-tau_mpmc),            &
+     &                           0.0_r8)**1.5_r8)*smgdr
+            ELSE
+              bedld=0.0_r8
+            END IF
+#    else
+            bedld=8.0_r8*(MAX((tau_w(i,j)*osmgd-tau_mpmc),              &
+     &                         0.0_r8)**1.5_r8)*smgdr
+#    endif
 !
 ! Partition bedld into xi and eta directions, still at rho points.
 ! (FX_r and FE_r have dimensions of kg).
