@@ -378,32 +378,6 @@
         WRITE(stdout,*) 'Representative period is ',  WAVES(ng)%Trep
       END IF
 !
-      DO d=1,ND
-        DO j=Jstr,Jend
-          DO i=Istr,Iend
-            WAVEP(ng)%Ta(i,j,d)=WAVES(ng)%Trep
-            WAVEP(ng)%Tr(i,j,d)=WAVES(ng)%Trep
-          END DO
-        END DO
-      END DO
-!
-      CALL Tr3dbc_tile (ng, tile,                                       &
-     &                  LBi, UBi, LBj, UBj, ND,                         &
-     &                  WAVEP(ng)%Tr)
-      CALL Tr3dbc_tile (ng, tile,                                       &
-     &                  LBi, UBi, LBj, UBj, ND,                         &
-     &                  WAVEP(ng)%Ta)
-# ifdef DISTRIBUTE
-!
-!  Exchange boundary data.
-!
-      CALL mp_exchange3d (ng, tile, iNLM, 2,                            &
-     &                    LBi, UBi, LBj, UBj, 1, ND,                    &
-     &                    NghostPoints,                                 &
-     &                    EWperiodic(ng), NSperiodic(ng),               &
-     &                    WAVEP(ng)%Tr, WAVEP(ng)%Ta)
-# endif
-!
       GO TO 250
  215  IF (Master) THEN
         WRITE (stdout,*) 'swan_reader.F Error reading swan 2d spec file'

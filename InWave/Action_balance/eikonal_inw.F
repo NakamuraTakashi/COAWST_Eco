@@ -87,7 +87,7 @@
       USE mod_inwave_params
       USE bc_3d_mod
       USE exchange_3d_mod
-      USE Tr3dbc_mod
+      USE kwc3dbc_mod
 
 #  ifdef DISTRIBUTE
       USE mp_exchange_mod, ONLY : mp_exchange3d
@@ -206,9 +206,9 @@
 !
 !  Apply nonperiodic boundary conditions in xi and etai space.
 !
-      CALL Tr3dbc_tile (ng, tile,                                       &
-     &                  LBi, UBi, LBj, UBj, ND,                         &
-     &                  kwc)
+      CALL kwc3dbc_tile (ng, tile,                                      &
+     &                     LBi, UBi, LBj, UBj,                          &
+     &                     kwc)
 !
 !  Apply periodic boundary conditions.
 !
