@@ -72,7 +72,13 @@ endif
 ifdef USE_MPI
          CPPFLAGS += -DMPI
  ifdef USE_MPIF90
-               FC := mpif90
+#               FC := mpif90
+  ifeq "$(which_MPI)" "intelmpi"
+               FC := mpiifort
+  endif
+  ifeq "$(which_MPI)" "openmpi"
+               FC := mpifort
+  endif
  else
              LIBS += -lfmpi-pgi -lmpi-pgi
  endif
@@ -89,7 +95,8 @@ ifdef USE_DEBUG
            CFLAGS += -g
          CXXFLAGS += -g
 else
-           FFLAGS += -ip -O3
+#          FFLAGS += -ip -O3
+           FFLAGS += -O3 -xCORE-AVX2 -mcmodel=large
            CFLAGS += -O3
          CXXFLAGS += -O3
  ifeq ($(CPU),i686)

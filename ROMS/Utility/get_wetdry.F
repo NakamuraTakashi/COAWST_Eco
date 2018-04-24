@@ -63,7 +63,8 @@
 !  Open restart (initial) NetCDF for read/write.
 !
       IF (INI(ng)%ncid.eq.-1) THEN
-        CALL netcdf_open (ng, model, ncname, 1, INI(ng)%ncid)
+!        CALL netcdf_open (ng, model, ncname, 1, INI(ng)%ncid)   !!!>>>>>>>>>>>>>>>>> TN: rm
+        CALL netcdf_open (ng, model, ncname, 0, INI(ng)%ncid)   !!!<<<<<<<<<<<<<<<<< TN: add
         IF (FoundError(exit_flag, NoError, __LINE__,                    &
      &                 __FILE__)) THEN
           WRITE (stdout,10) TRIM(ncname)

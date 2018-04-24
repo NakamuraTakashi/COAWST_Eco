@@ -725,9 +725,10 @@
 # if defined ORGANIC_MATTER
             t(i,j,k,1,iDOC_)=DOC_0(ng)     ! umolC L-1
             t(i,j,k,1,iPOC_)=POC_0(ng)     ! umolC L-1
-!            t(i,j,k,1,iPhy1)=Phy10(ng)     ! umolC L-1
-!            t(i,j,k,1,iPhy2)=Phy20(ng)     ! umolC L-1
-            t(i,j,k,1,iZoop)=Zoop0(ng)     ! umolC L-1
+#  if defined SIMPLE_BIO_BOUNDARY
+            t(i,j,k,1,iPhy1)=Phy10(ng)     ! umolC L-1
+            t(i,j,k,1,iPhy2)=Phy20(ng)     ! umolC L-1
+#  else
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>SA:Add
             IF (z_r(i,j,k).gt.-155_r8) THEN
               t(i,j,k,1,iPhy1)=(-0.00095_r8*(z_r(i,j,k)+50.0_r8)**2+10.5_r8)/24.0_r8     ! umol L-1
@@ -740,6 +741,8 @@
               t(i,j,k,1,iPhy2)=0.0_r8     ! umol L-1
             END IF
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<SA:Add
+#  endif
+            t(i,j,k,1,iZoop)=Zoop0(ng)     ! umolC L-1
 # endif
 # if defined CARBON_ISOTOPE
             t(i,j,k,1,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng) ! umol kg-1  !!! R13C_fromd13C included geochem module
