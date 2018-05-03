@@ -142,6 +142,7 @@
       real(r8) :: alfa_wave, kx, ky, cff, cff1, cff2
       real(r8) :: crk, crx, cry, kh
       real(r8), parameter :: kwc_max = 10.0_r8
+      real(r8), parameter :: kwc_min = 0.015_r8
 
       real(r8), dimension(IminS:ImaxS,JminS:JmaxS) :: FE
       real(r8), dimension(IminS:ImaxS,JminS:JmaxS) :: FX
@@ -193,7 +194,9 @@
      &                   cff*pm(i,j)*pn(i,j)*                           &
      &                  (FX(i+1,j)-FX(i,j)+                             &
      &                   FE(i,j+1)-FE(i,j))
-!           kwc(i,j,d)=MIN(kwc(i,j,d),kwc_max)
+            kwc(i,j,d)=MIN(kwc(i,j,d),kwc_max)
+            kwc(i,j,d)=MAX(kwc_min,kwc(i,j,d))
+
 !#  ifdef MASKING
 !            kwc(i,j,d)=kwc(i,j,d)*rmask(i,j)
 !#  endif

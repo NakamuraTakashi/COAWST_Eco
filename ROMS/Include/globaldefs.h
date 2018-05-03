@@ -669,12 +669,12 @@
 #if (defined BBL_MODEL        && !defined WAVES_UB) ||  \
      defined WEC              || \
      defined ZOS_HSIG         || defined COARE_TAYLOR_YELLAND || \
-     defined BEDLOAD_SOULSBY  || defined WAVES_OCEAN || \
-     defined DRENNAN
+     defined BEDLOAD_SOULSBY  || defined BEDLOAD_VANDERA || \
+     defined WAVES_OCEAN      || defined DRENNAN
 # define WAVES_HEIGHT
 #endif
 
-#if defined WEC || defined BEDLOAD_SOULSBY || \
+#if defined WEC || defined BEDLOAD_SOULSBY || defined BEDLOAD_VANDERA || \
     defined WAVES_OCEAN
 # define WAVES_LENGTH
 #endif
@@ -715,7 +715,7 @@
 ** Define internal option for bedload treatment.
 */
 
-#if defined BEDLOAD_MPM || defined BEDLOAD_SOULSBY
+#if defined BEDLOAD_MPM || defined BEDLOAD_SOULSBY  || defined BEDLOAD_VANDERA
 # define BEDLOAD
 #endif
 
