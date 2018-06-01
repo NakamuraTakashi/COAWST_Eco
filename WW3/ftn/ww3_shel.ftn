@@ -1069,10 +1069,12 @@
 !/OASIS      CALL CPL_OASIS_DEFINE(NDSO, FLDIN, FLDOUT)
 
 !jcw
+#if defined COAWST_COUPLING
 !/COAWST      CALL INIT_WVCP (1)
 !/COAWST      CALL INITIALIZE_WAV_ROUTERS
 !/COAWST      ccount=0
 !/COAWST      CALL COAWST_CPL (ccount)
+#endif
 
 !--- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! 6.  Model without input
@@ -1623,7 +1625,9 @@
 !/COAWST      END IF
 !/PALM  ENDIF
 !/OASIS END IF
+#if defined COAWST_COUPLING
 !/COAWST      CALL FINALIZE_WAV_COUPLING(1)
+#endif
 !
 !
 ! Formats

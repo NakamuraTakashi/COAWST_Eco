@@ -400,10 +400,13 @@ if [ $swtch ]
 then
   echo ' '
   echo '   Setup switch file'
-  if [ -f $path_b/switch_$swtch ]
+# if [ -f $path_b/switch_$swtch ]
+  if [ -f $path_b/$swtch ]
   then
-    cp -f $path_b/switch_$swtch $path_b/switch
-    echo "      $path_b/switch_$swtch => $path_b/switch"
+#   cp -f $path_b/switch_$swtch $path_b/switch
+#   echo "      $path_b/switch_$swtch => $path_b/switch"
+    cp -f $path_b/$swtch $path_b/switch
+    echo "      $path_b/$swtch => $path_b/switch"
   else
     errmsg "$path_b/switch_$swtch not found"
     exit 1

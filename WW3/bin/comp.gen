@@ -83,7 +83,8 @@
 
 ## if [ "$mpi_mod" = 'yes' ]
 ## then
-##   comp=mpif90
+## # comp=mpif90
+##   comp=${FC}
 ## else
 #   comp=pgf90
 ## fi
@@ -141,6 +142,7 @@
 # fext='f'
 
 # opt="-c -qsource -qarch=pwr3 -I$path_m -qnosave"
+# opt="$opt ${FFLAGS}"
 
 # if [ "$name" = 'serv_xnl4v3' ]
 # then

@@ -89,6 +89,7 @@
   fi
 
   # mpi implementation
+
   if [ "$mpi_mod" = 'yes' ]
   then
     comp=mpiifort
@@ -97,10 +98,9 @@
     if [ $OK != 0 ]
     then 
 #     comp=ifort
-#     comp=$FC
-      comp=mpif90
+#     comp=mpif90
+      comp=${FC}
     fi
-    
   else
     comp=ifort
   fi
@@ -120,6 +120,7 @@
   # coawst coupler include mct dirs
   if [ "$coawst_mod" = 'yes' ]
   then
+    opt="$opt ${FFLAGS}"
     opt="$opt -I$MCT_INCDIR"
     opt="$opt -I${WRF_DIR}/frame"
   fi

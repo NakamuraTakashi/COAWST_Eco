@@ -133,8 +133,10 @@
 # This will compile the ftn/* files and create the exe/* files
 #
   cd $main_dir/bin
-
-  echo -e " w3 setup       FORT is $FORT"
+  echo -e "Running coawst_compile_ww3 :"
+  echo -e "FORT is $FORT"
+  echo -e "FC is ${FC}"
+  echo -e "and FFLAGS are ${FFLAGS}"
 
 # headpre="$(echo ${COAWST_APPLICATION} | tr '[A-Z]' '[a-z]')"
 #  OS=`uname`
@@ -151,13 +153,11 @@
 
   if [ "${FORT}" = "ifort" ]
   then
-#    ./w3_setup -c Intel -s COAWST -q ..
      ./w3_setup -c Intel -s $WW3_SWITCH_FILE -t $main_dir/tmp -q ..
   else
-    ./w3_setup -c $FORT -s COAWST -t $main_dir/tmp -q ..
+    ./w3_setup -c $FORT -s $WW3_SWITCH_FILE -t $main_dir/tmp -q ..
   fi
 
-  echo -e " w3 make       FORT is $FORT"
 #  ./w3_make
   cd $main_dir/bin
    ./make_MPI

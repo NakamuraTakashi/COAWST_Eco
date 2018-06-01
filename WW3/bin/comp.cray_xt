@@ -76,6 +76,7 @@
 
   # seq implementation
   comp=ftn
+  comp=${FC}
 
   # open mpi implementation
   if [ "$omp_mod" = 'yes' ]
@@ -92,6 +93,7 @@
   # coawst coupler include mct dirs
   if [ "$coawst_mod" = 'yes' ]
   then
+    opt="$opt ${FFLAGS}"
     opt="$opt -I$MCT_INCDIR"
     opt="$opt -I${WRF_DIR}/frame"
   fi

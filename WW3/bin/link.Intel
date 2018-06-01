@@ -111,8 +111,9 @@
     OK=$?
     if [ $OK != 0 ]
     then
-      comp='ifort -lmpi'
-#     comp="$FC -lmpi"
+#     comp='ifort -lmpi'
+#     comp='mpif90'
+      comp=${FC}
     fi
 #   opt="-O3 -o $prog"
   else

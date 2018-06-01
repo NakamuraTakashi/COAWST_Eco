@@ -385,8 +385,9 @@
 !/OASIS      USE W3OACPMD, ONLY: ID_OASIS_TIME
 !/OASOCM      USE W3OGCMMD, ONLY: SND_FIELDS_TO_OCEAN
 !/OASACM      USE W3AGCMMD, ONLY: SND_FIELDS_TO_ATMOS
+#if defined COAWST_COUPLING && defined MCT_LIB
 !/COAWST      USE CWSTWVCP
-
+#endif
 !/PALM USE palmlib          !interface for palm coupler
 !/PALM USE palm_user_param  !min_palm_time_a etc ...
 !
@@ -1777,11 +1778,12 @@
             TOFRST(2) =  0
 !
 
+#if defined COAWST_COUPLING && defined MCT_LIB
 !          jcw bottom of wavemd calling the coupler
 !/COAWST      IF (ITIME.gt.0) THEN
 !/COAWST        CALL COAWST_CPL (ITIME)
 !/COAWST      END IF
-
+#endif
 
             DO J=1, NOTYPE
               IF ( FLOUT(J) ) THEN

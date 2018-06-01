@@ -3,7 +3,7 @@
 
       MODULE mctww3pa
 
-#if defined COAWST_COUPLING && defined MCT_LIB
+!#if defined COAWST_COUPLING && defined MCT_LIB
 
 # if defined WRF_COUPLING
 
@@ -44,6 +44,7 @@
       integer, parameter :: m8 = selected_real_kind(12,300)  ! 64-bit
 !# endif
 !
+#if defined COAWST_COUPLING && defined MCT_LIB
 # if defined MCT_INTERP_OC2WV || defined MCT_INTERP_OC2AT || \
      defined MCT_INTERP_WV2AT
 !
@@ -143,6 +144,7 @@
       integer :: OCNid
       integer :: WAVid
       integer :: ATMid
+#endif
 
       CONTAINS
 
@@ -186,6 +188,6 @@
       RETURN
       END SUBROUTINE allocate_coupler_params
 # endif
-#endif
+!#endif
 
       END MODULE mctww3pa
