@@ -129,7 +129,7 @@
 !
       real(r8) :: d50, d50_mm
 !
-      d50_mm=d50*0.001_r8
+      d50_mm=d50*1000.0_r8
 !
       IF(d50_mm.le.0.15_r8) THEN
         mu_calc=6.0_r8
@@ -205,7 +205,7 @@
       RETURN
       END FUNCTION fw_calc
 !
-      REAL(r8) FUNCTION fd_calc(dsf, ksd)
+      REAL(r8) FUNCTION fd_calc(umag_curr, Zref, ksd)
 !
       USE mod_kinds
       USE mod_scalars
@@ -215,10 +215,14 @@
 ! Calculate current related friction factor VA2013 Eqn. 20
 ! Assuming logarithmic velocity profile.
 ! 
-      real(r8) :: dsf, ksd
+      real(r8) :: umag_curr, Zref, ksd
       real(r8), parameter :: von_k=0.41_r8
 ! 
-      fd_calc=2.0_r8*(von_k/LOG(30.0_r8*dsf/ksd))**2.0_r8
+      IF(umag_curr.eq.0.0_r8) THEN
+        fd_calc=0.0_r8
+      ELSE
+        fd_calc=2.0_r8*(von_k/LOG(30.0_r8*Zref/ksd))**2.0_r8
+      ENDIF
 !     
       RETURN
       END FUNCTION fd_calc
@@ -261,7 +265,7 @@
       real(r8) :: d50_mm
       real(r8) :: cff
 !
-      d50_mm=d50*0.001_r8
+      d50_mm=d50*1000.0_r8
       IF(d50_mm.le.0.15_r8)THEN
         cff=25.0_r8*theta_i
       ELSEIF(d50_mm.gt.0.15_r8.and.d50_mm.lt.0.20_r8)THEN
