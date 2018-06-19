@@ -238,7 +238,7 @@
       TYPE(domain) , INTENT (IN) :: grid 
       integer, intent(in) :: ia
 
-      include 'mpif.h'
+!     include 'mpif.h'
 !
 !  Local variable declarations.  
 !
