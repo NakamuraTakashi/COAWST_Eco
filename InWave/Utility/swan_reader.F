@@ -372,10 +372,10 @@
 !
       call tpdcalc(WAVES(ng)%Sf,WAVES(ng)%fsw,frep)
 !
-      WAVES(ng)%Trep=1.0_r8/frep
+      WAVEG(ng)%Trep=1.0_r8/frep
       WAVES(ng)%fp=frep
       IF (Master) THEN
-        WRITE(stdout,*) 'Representative period is ',  WAVES(ng)%Trep
+        WRITE(stdout,*) 'Representative period is ',  WAVEG(ng)%Trep
       END IF
 !
       GO TO 250

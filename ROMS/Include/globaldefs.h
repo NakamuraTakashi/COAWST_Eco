@@ -631,8 +631,8 @@
 # endif
 #endif
 
-/* Start of ROMS model coupling cpps. 
-   COAWST coupling uses options above. These are here for 
+/* Start of ROMS model coupling cpps.
+   COAWST coupling uses options above. These are here for
    consistenct between codes. */
 #if defined COAMPS_COUPLING || defined REGCM_COUPLING || \
     defined WRF_COUPLING
@@ -726,6 +726,10 @@
 
 #if defined BBL_MODEL || defined WAVES_OCEAN
 # define WAVES_BOT_PERIOD
+#endif
+
+#if (defined WDISS_GAMMA || defined WDISS_ROELVINK)
+# define WDISS_INWAVE
 #endif
 
 #if (defined TKE_WAVEDISS || defined WEC_VF) && \

@@ -166,11 +166,11 @@
             DO d=1,ND
               DO i=Istr,Iend
 !               L0=g*otwopi*MAX(Tr_min,WAVEP(ng)%Tr(i,Jstr-1,d))**2.0_r8
-                L0=g*otwopi*MAX(Tr_min,WAVES(ng)%Trep)**2.0_r8
+                L0=g*otwopi*MAX(Tr_min,WAVEG(ng)%Trep)**2.0_r8
                 k0=twopi/L0
                 error=100.0_r8
 !               wr=twopi/MAX(Tr_min,WAVEP(ng)%Tr(i,Jstr-1,d))
-                wr=twopi/MAX(Tr_min,WAVES(ng)%Trep)
+                wr=twopi/MAX(Tr_min,WAVEG(ng)%Trep)
                 DO WHILE(error.gt.maxErr)
                   kh=k0*WAVEP(ng)%h_tot(i,Jstr-1)
                   tanhkh=TANH(kh)

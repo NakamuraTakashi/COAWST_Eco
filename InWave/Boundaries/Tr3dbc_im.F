@@ -30,6 +30,7 @@
       USE mod_scalars
       USE mod_inwave_params
       USE mod_inwave_swan
+      USE mod_inwave_vars
 # ifdef REFINED_GRID
       USE mod_stepping
 # endif
@@ -60,7 +61,7 @@
           IF (LBC(iwest,isAC3d,ng)%acquire) THEN
             DO d=1,ND
               DO j=Jstr,Jend
-                Tr(Istr-1,j,d)=WAVES(ng)%Trep
+                Tr(Istr-1,j,d)=WAVEG(ng)%Trep
 #   ifdef MASKING
                 Tr(Istr-1,j,d)=Tr(Istr-1,j,d)*                          &
      &                         GRID(ng)%rmask(Istr-1,j)
@@ -88,7 +89,7 @@
           IF (LBC(ieast,isAC3d,ng)%acquire) THEN
             DO d=1,ND
               DO j=Jstr,Jend
-                Tr(Iend+1,j,d)=WAVES(ng)%Trep
+                Tr(Iend+1,j,d)=WAVEG(ng)%Trep
 #   ifdef MASKING
                 Tr(Iend+1,j,d)=Tr(Iend+1,j,d)*                          &
      &                         GRID(ng)%rmask(Iend+1,j)
@@ -117,7 +118,7 @@
           IF (LBC(isouth,isAC3d,ng)%acquire) THEN
             DO d=1,ND
               DO i=Istr,Iend
-                Tr(i,Jstr-1,d)=WAVES(ng)%Trep
+                Tr(i,Jstr-1,d)=WAVEG(ng)%Trep
 #   ifdef MASKING
                 Tr(i,Jstr-1,d)=Tr(i,Jstr-1,d)*                          &
      &                         GRID(ng)%rmask(i,Jstr-1)
@@ -145,7 +146,7 @@
           IF (LBC(inorth,isAC3d,ng)%acquire) THEN
             DO d=1,ND
               DO i=Istr,Iend
-                Tr(i,Jend+1,d)=WAVES(ng)%Trep
+                Tr(i,Jend+1,d)=WAVEG(ng)%Trep
 #   ifdef MASKING
                 Tr(i,Jend+1,d)=Tr(i,Jend+1,d)*                          &
      &                         GRID(ng)%rmask(i,Jend+1)

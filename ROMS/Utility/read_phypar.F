@@ -1788,7 +1788,7 @@
               END IF
               Npts=load_l(Nval, Cval, Ngrids, Hout(idWpbt,:))
 #endif
-#ifdef WAVES_OCEAN
+#if defined BBL_MODEL || defined WAVES_OCEAN
             CASE ('Hout(idWorb)')
               IF (idWorb.eq.0) THEN
                 IF (Master) WRITE (out,280) 'idWorb'
@@ -2591,7 +2591,7 @@
             CASE ('Qout(idWpbt)')
               Npts=load_l(Nval, Cval, Ngrids, Qout(idWpbt,:))
 #endif
-#ifdef WAVES_UB
+#if defined BBL_MODEL || defined WAVES_OCEAN
             CASE ('Qout(idWorb)')
               Npts=load_l(Nval, Cval, Ngrids, Qout(idWorb,:))
 #endif
@@ -2811,7 +2811,7 @@
             CASE ('Aout(idWpbt)')
               Npts=load_l(Nval, Cval, Ngrids, Aout(idWpbt,:))
 # endif
-# ifdef WAVES_OCEAN
+# if defined BBL_MODEL || defined WAVES_OCEAN
             CASE ('Aout(idWorb)')
               Npts=load_l(Nval, Cval, Ngrids, Aout(idWorb,:))
 # endif
@@ -6000,7 +6000,7 @@
      &         'Hout(idWpbt)',                                          &
      &         'Write out wave bottom period.'
 #endif
-#ifdef WAVES_OCEAN
+#if defined BBL_MODEL || defined WAVES_OCEAN
             IF (Hout(idWorb,ng)) WRITE (out,170) Hout(idWorb,ng),       &
      &         'Hout(idWorb)',                                          &
      &         'Write out wave bottom orbital velocity.'
@@ -6628,7 +6628,7 @@
      &         'Qout(idWpbt)',                                          &
      &         'Write out wave bottom period.'
 #endif
-#ifdef WAVES_UB
+#if defined BBL_MODEL || defined WAVES_OCEAN
             IF (Qout(idWorb,ng)) WRITE (out,170) Qout(idWorb,ng),       &
      &         'Qout(idWorb)',                                          &
      &         'Write out wave bottom orbital velocity.'

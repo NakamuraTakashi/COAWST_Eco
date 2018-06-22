@@ -85,6 +85,12 @@
      &                       BBL(ng) % Ur,                              &
      &                       BBL(ng) % Vr,                              &
      &                       GRID(ng) % angler,                         &
+# ifdef SED_DUNEFACE
+     &                       GRID(ng) % on_u,                           &
+     &                       GRID(ng) % om_v,                           &
+     &                       OCEAN(ng) % ubar,                          &
+     &                       OCEAN(ng) % vbar,                          &
+# endif
 # if defined SED_MORPH
      &                       SEDBED(ng) % bed_thick,                    &
 # endif
@@ -125,6 +131,10 @@
      &                             bustr, bvstr,                        &
      &                             Ur, Vr,                              &
      &                             angler,                              &
+# ifdef SED_DUNEFACE
+     &                             on_u, om_v,                          &
+     &                             ubar, vbar,                          &
+# endif
 # if defined SED_MORPH
      &                             bed_thick,                           &
 # endif
@@ -180,6 +190,12 @@
       real(r8), intent(in) :: Ur(LBi:,LBj:)
       real(r8), intent(in) :: Vr(LBi:,LBj:)
       real(r8), intent(in) :: angler(LBi:,LBj:)
+#  ifdef SED_DUNEFACE
+      real(r8), intent(in) :: on_u(LBi:,LBj:)
+      real(r8), intent(in) :: om_v(LBi:,LBj:)
+      real(r8), intent(in) :: ubar(LBi:,LBj:,:)
+      real(r8), intent(in) :: vbar(LBi:,LBj:,:)
+#  endif
 #  if defined SED_MORPH
       real(r8), intent(inout):: bed_thick(LBi:,LBj:,:)
 #  endif
@@ -219,6 +235,12 @@
       real(r8), intent(in) :: Ur(LBi:UBi,LBj:UBj)
       real(r8), intent(in) :: Vr(LBi:UBi,LBj:UBj)
       real(r8), intent(in) :: angler(LBi:UBi,LBj:UBj)
+#  ifdef SED_DUNEFACE
+      real(r8), intent(in) :: on_u(LBi:UBi,LBj:UBj)
+      real(r8), intent(in) :: om_v(LBi:UBi,LBj:UBj)
+      real(r8), intent(in) :: ubar(LBi:UBi,LBj:UBj)
+      real(r8), intent(in) :: vbar(LBi:UBi,LBj:UBj)
+#  endif
 #  if defined SED_MORPH
       real(r8), intent(inout):: bed_thick(LBi:UBi,LBj:UBj,2)
 #  endif
@@ -246,6 +268,9 @@
       real(r8) :: a_slopex, a_slopey, sed_angle
       real(r8) :: bedld, bedld_mass, dzdx, dzdy
       real(r8) :: rhs_bed, Ua, Ra, Clim, phi_cw
+# ifdef SED_SLUMP
+      real(r8) :: sedslope_wet, sedslope_dry, slopefac_wet, slopefac_dry
+# endif
 !
       real(r8) :: Hs, Td, depth
       real(r8) :: d50, d90, rhos
@@ -281,6 +306,7 @@
 !
       real(r8) :: wavecycle
       real(r8) :: Zref
+
 !
       real(r8), parameter :: eps = 1.0E-14_r8
 !
