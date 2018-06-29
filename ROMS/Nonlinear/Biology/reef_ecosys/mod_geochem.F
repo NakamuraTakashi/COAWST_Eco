@@ -1,5 +1,5 @@
 
-!!!=== ver 2017/03/10   Copyright (c) 2012-2017 Takashi NAKAMURA  =====
+!!!=== Copyright (c) 2012-2018 Takashi NAKAMURA  =====
 
   module mod_geochem
 
@@ -20,6 +20,8 @@
     real(8), parameter :: dif_PO4  = 0.85d-9   ! H2PO4-                (m2 s-1)
     real(8), parameter :: dif_H    = 9.31d-9   ! Proton H+             (m2 s-1)
     real(8), parameter :: dif_OH   = 5.27d-9   ! OH-                   (m2 s-1)
+! ----------------------------------------------------------------------------
+    real(8), parameter :: dif_H2O2 = 1.19d-9   ! H2O2                  (m2 s-1)
 ! ------ kinematic viscosity of seawater @ 25 degC, 35 psu -----
     real(8), parameter :: vis_sw   = 0.94d-6   ! kinematic viscosity   (m2 s-1)
     

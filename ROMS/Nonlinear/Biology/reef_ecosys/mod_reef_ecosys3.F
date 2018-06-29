@@ -1,5 +1,5 @@
 
-!!!=== ver 2017/03/10   Copyright (c) 2012-2017 Takashi NAKAMURA  =====
+!!!=== vCopyright (c) 2012-2018 Takashi NAKAMURA  =====
 
 #include "cppdefs.h"
 
@@ -1046,12 +1046,18 @@
       IF(time.ge.dsec) THEN
         cff1=0.01d0*p_coral(1)*P2R(1)*3600.0d0  ! cff1: convert [nmol cm-2 s-1] to [mmol m-2 h-1]
         cff2=0.01d0*p_coral(2)*P2R(2)*3600.0d0  ! cff1: convert [nmol cm-2 s-1] to [mmol m-2 h-1]
+# ifdef SEAGRASS
         cff3 = p_sgrass*3600.0d0        ! cff2: convert [mmol m-2 s-1] to [mmol m-2 h-1]
+# endif
+# ifdef MACROALGAE
         cff4 = p_algae *3600.0d0        ! cff3: convert [mmol m-2 s-1] to [mmol m-2 h-1]
-# if defined  SEDIMENT_EMPIRIXCAL
+# endif
+# if defined SEDIMENT_ECOSYS
+#  if defined  SEDIMENT_EMPIRIXCAL
         cff5 = p_sand  *3600.0d0        ! cff4: convert [mmol m-2 s-1] to [mmol m-2 h-1]
-# else
+#  else
         cff5 = 0.01d0*p_sand*3600.0d0   ! cff4: convert [nmol cm-2 s-1] to [mmol m-2 h-1]
+#  endif
 # endif
 
         write(40,*) time/86400.0d0,',',PFDbott,','                    &
