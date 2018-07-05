@@ -14,10 +14,10 @@ NGRIDS_WRF=1;
 
 %%%%%%%%%%%%%%%%%  END OF USER INPUT  %%%%%%%%%%%%%%%%%%%
 
-num_str=(NGRIDS_ROMS+NGRIDS_SWAN+NGRIDS_WW3+NGRIDS_WRF);
-for mm=1:num_str
-  strnames(mm,:)='            ';
-end
+%num_str=(NGRIDS_ROMS+NGRIDS_SWAN+NGRIDS_WW3+NGRIDS_WRF);
+%for mm=1:num_str
+%  strnames(mm,:)='            ';
+%end
 count=0;
 for mo=1:NGRIDS_ROMS
   for mw=1:NGRIDS_SWAN
@@ -68,10 +68,10 @@ for ma=1:NGRIDS_WRF
   end
 end
 
-if (count~=num_str)
-  disp('error : numstrings not = number of grid connections');
-  return
-end
+%if (count~=num_str)
+%  disp('error : numstrings not = number of grid connections');
+%  return
+%end
 for mm=1:count
   str=strnames(mm,:);
   remap=ncread(fname,['/',str,'_weights.nc/remap_matrix']);
