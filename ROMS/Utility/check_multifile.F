@@ -99,8 +99,8 @@
       IF (model.eq.iADM) THEN
         Tfinal=time(ng)-ntimes(ng)*dt(ng)
       ELSE
-        Tfinal=time(ng)+ntimes(ng)*dt(ng)
-!       Tfinal=dstart*day2sec+ntimes(ng)*dt(ng)
+!       Tfinal=time(ng)+ntimes(ng)*dt(ng)
+        Tfinal=dstart*day2sec+ntimes(ng)*dt(ng)
       END IF
       CALL time_string (tfinal, F_code)
 !
