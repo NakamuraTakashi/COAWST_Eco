@@ -921,5 +921,3 @@
       END SUBROUTINE initialize_filter
 #endif
       END MODULE mod_filter
-
- 
