@@ -35,7 +35,15 @@
       real(r8) :: x, y, t, omega
 !
       omega=2.0_r8*pi/Td
-      x=omega**2.0_r8*depth/g
+        
+!
+! depth (i.e.x) cannot go negative to avoid negative wave number
+!
+      IF(depth.lt.0.0_r8) THEN 
+        x=0.0_r8
+      ELSE 
+        x=omega**2.0_r8*depth/g
+      ENDIF 
 !
       IF(x.lt.1.0_r8) THEN
         y=SQRT(x)
@@ -58,7 +66,7 @@
       cff=(y*t-x)/(t+y*(1.0_r8-t*t))
       y=y-cff
       kh=y
-!     
+!
       RETURN
       END FUNCTION
 ! 
@@ -96,6 +104,7 @@
 !
       implicit none 
 !     
+      real(r8), parameter :: eps_inv=1.0E14_r8
       real(r8) :: Hs, Td, depth, RR, zws, w_s
       real(r8) :: cff, worb1, worb2, worb 
 !      
@@ -111,6 +120,9 @@
      &               worb2*SIN(2.0_r8*ACOS(cff*(-worb1+                 &
      &          SQRT(worb1**2.0_r8+32.0_r8*worb2**2.0_r8))/worb2))
 !
+! Prevent worb from going to Infinity when worb2=0.0 
+! 
+      worb=MIN(worb, eps_inv)
       w_sc_calc=worb
 !
       RETURN  
@@ -205,27 +217,54 @@
       RETURN
       END FUNCTION fw_calc
 !
-      REAL(r8) FUNCTION fd_calc(umag_curr, Zref, ksd)
+! This function is not getting used at the time because
+! we compute current frction factor from bottom current stress 
+! 
+!      REAL(r8) FUNCTION fd_calc(umag_curr, Zref, ksd)
+!
+!     USE mod_kinds
+!     USE mod_scalars
+!
+!     implicit none
+!
+! Calculate current related friction factor VA2013 Eqn. 20
+! Assuming logarithmic velocity profile.
+! 
+!     real(r8) :: umag_curr, Zref, ksd
+!     real(r8), parameter :: von_k=0.41_r8
+! 
+!     IF(umag_curr.eq.0.0_r8) THEN
+!       fd_calc=0.0_r8
+!     ELSE
+!       fd_calc=2.0_r8*(von_k/LOG(30.0_r8*Zref/ksd))**2.0_r8
+!     ENDIF
+!     
+!     RETURN
+!     END FUNCTION fd_calc
+!
+      REAL(r8) FUNCTION fd_calc_new(udelta, mag_bstrc)
 !
       USE mod_kinds
       USE mod_scalars
 !
       implicit none
 !
-! Calculate current related friction factor VA2013 Eqn. 20
-! Assuming logarithmic velocity profile.
+! Calculate current related friction factor 
+! directly from the current stresses. 
 ! 
-      real(r8) :: umag_curr, Zref, ksd
-      real(r8), parameter :: von_k=0.41_r8
+      real(r8), parameter :: eps=1.0E-14_r8
+      real(r8), parameter :: min_udelta=1.0E-5_r8
+      real(r8) :: udelta, mag_bstrc
 ! 
-      IF(umag_curr.eq.0.0_r8) THEN
-        fd_calc=0.0_r8
+      IF(udelta.lt.min_udelta) THEN
+        fd_calc_new=0.0_r8
       ELSE
-        fd_calc=2.0_r8*(von_k/LOG(30.0_r8*Zref/ksd))**2.0_r8
+        !fd_calc_new=MAX((mag_bstrc/(0.5_r8*udelta*udelta*rho0)),eps)
+        fd_calc_new=MAX((mag_bstrc/(0.5_r8*udelta*udelta)),eps)
       ENDIF
 !     
       RETURN
-      END FUNCTION fd_calc
+      END FUNCTION fd_calc_new
 !
       REAL(r8) FUNCTION fwi_calc(T_iu, T_i, ahat, ksw)
 !
@@ -236,19 +275,30 @@
 !
       implicit none
 !
+      real(r8), parameter :: eps = 1.0E-14_r8
       real(r8) :: T_iu, T_i, ahat, ksw
       real(r8) :: c1, ratio, fwi
-      real(r8) :: cff
+      real(r8) :: cff1, cff2, cff3
 !
+      fwi_calc=0.3_r8
+!      
       c1=2.6_r8
       ratio=ahat/ksw
       IF(ratio.gt.1.587_r8) THEN
-        cff=(2.0_r8*T_iu/T_i)**c1
-        fwi_calc=0.00251_r8*EXP(5.21_r8*(cff*ratio)**(-0.19_r8))
-      ELSE
-        fwi_calc=0.3_r8
-      ENDIF
-!     
+        cff1=MAX( (T_iu/T_i),0.0_r8 )
+        cff2=(2.0_r8*cff1)**c1
+        cff3=cff2*ratio
+!
+! These if condition prevents arithematic overflow error
+! when 0.0**-0.19_r8, think about that 
+!
+        IF(cff3.le.0.0_r8) THEN 
+          fwi_calc=0.0_r8
+        ELSE 
+          fwi_calc=0.00251_r8*EXP(5.21_r8*(cff3)**(-0.19_r8))
+        END IF
+      END IF 
+!
       RETURN
       END FUNCTION fwi_calc
 !
