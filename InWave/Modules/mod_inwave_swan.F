@@ -236,14 +236,12 @@
       allocate (zeta_filt(WAVES(ng)%Insteps))
       DO dir_index=1,ND
         DO i=1,WAVES(ng)%Insteps
+          WAVES(ng)%Ampzeta_tot(i)=WAVES(ng)%Ampzeta_tot(i)+            &
+     &                             WAVES(ng)%bndwave(i)
           WAVES(ng)%Ampzeta(i,dir_index)=0.5_r8*g*rho0*                 &
      &                                   (WAVES(ng)%Ampzeta_tot(i)*     &
      &                                   WAVES(ng)%SDD(dir_index)/      &
      &                                   WAVES(ng)%int)**2.0_r8
-          IF (dir_index.eq.INT(ND/2)) THEN
-            WAVES(ng)%Ampzeta(i,dir_index)=                             &
-     &        WAVES(ng)%Ampzeta(i,dir_index)+WAVES(ng)%bndwave(i)
-          END IF
           zeta_filt(i)=WAVES(ng)%Ampzeta(i,dir_index)
         ENDDO
 ! do a filter on ampzeta
@@ -307,8 +305,7 @@
 !-----------------------------------------------------------------------
 !
       IF (first.eq.1) THEN
-!       WAVES(ng)%nfreq=1000 ! because Mai wanted it that way.
-        WAVES(ng)%nfreq=80
+        WAVES(ng)%nfreq=1000 ! because Mai wanted it that way.
         WAVES(ng)%fnyq=3.0_r8*WAVES(ng)%fp
 !       WAVES(ng)%fmax=WAVES(ng)%fnyq
 !       WAVES(ng)%df=(WAVES(ng)%fmax-WAVES(ng)%fmin)/                   &
@@ -688,6 +685,7 @@
 !                A double summation technique                           !
 !***********************************************************************
 !
+      USE mod_parallel
       USE mod_scalars
       USE mod_inwave_vars
 
@@ -700,17 +698,23 @@
 !  Local variable declarations.
 !
       integer                         :: i, j, p1, p2, f1, f2, dum
+      integer                         :: Npts, MyError
       real(r8)                        :: cff, cff1, cff2, cff3, cff4
       real(r8)                        :: twopi, otwopi
-      real(r8)                        :: error, Tr_min
+      real(r8)                        :: error, Tr_min, fmin, fmax
       real(r8)                        :: fac1, fac2, fac3, fac4
       real(r8)                        :: L0, k0, k1, kh, wr
       real(r8)                        :: F, FDER, tanhkh
-      real(r8)                        :: DDf, DDtheta, k3, Z_bw
+      real(r8)                        :: DDf, A3, Z_bw
+      real(r8)                        :: DDtheta, k3
       real(r8)                        :: D1, D2, D3, D4, D1a, D3a, DTOT
-      real(r8)                        :: h0, E3, A3, dir3
+      real(r8)                        :: h0, E3, dir3
 
+      real(r8), allocatable           :: E1d(:), D1d(:), P1d(:)
       real(r8), allocatable           :: k(:)
+# ifdef DISTRIBUTE
+      real(r8), allocatable :: wrk(:)
+# endif
 
       real(r8), parameter :: maxErr = 0.1_r8
 !     real(r8), parameter :: kwc_max = 10.0_r8
@@ -719,8 +723,9 @@
       twopi=2.0_r8*pi
       otwopi=1.0_r8/(2.0_r8*pi)
       Tr_min=1.0_r8
-      h0=15.0_r8   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  this needs to be updates
-
+      fmin=1.0_r8/400.0_r8
+      fmax=1.0_r8/30.0_r8
+      h0=18.0_r8   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  this needs to be updates
 !
 !  Allocate bouundwave array.
 !
@@ -736,10 +741,10 @@
 ! dont we already have this...
 !
       DO i=1,WAVES(ng)%nfreq
-        L0=g*otwopi*WAVEG(ng)%Trep**2.0_r8
+        L0=g*otwopi*(1.0_r8/WAVES(ng)%f(i))**2.0_r8
         k0=twopi/L0
         error=100.0_r8
-        wr=twopi/MAX(Tr_min,WAVEG(ng)%Trep)
+        wr=twopi*WAVES(ng)%f(i)
         DO WHILE(error.gt.maxErr)
           kh=k0*h0
           tanhkh=TANH(kh)
@@ -756,9 +761,77 @@
         k(i)=k0
       END DO
 !
-! Compute the energy transfer for each pair of frequency bins
+!  Make it a 1D spectrum for now to compute boudnwave.
 !
-      fac4=1.0_r8/REAL(WAVES(ng)%Insteps,r8)
+      allocate (E1d(WAVES(ng)%nfreq))
+      allocate (D1d(WAVES(ng)%nfreq))
+      allocate (P1d(WAVES(ng)%nfreq))
+      DO i=1,WAVES(ng)%nfreq
+        E1d(i)=0.0_r8
+        D1d(i)=0.0_r8
+        P1d(i)=0.0_r8
+      ENDDO
+!
+! Compute mean direction.
+!
+      DO i=1,WAVES(ng)%nfreq
+        cff1=0.0_r8
+        cff2=0.0_r8
+        DO j=1,ND
+          cff1=cff1+WAVES(ng)%SD(i,j)*WAVEG(ng)%wd(j)
+          cff2=cff2+WAVES(ng)%SD(i,j)
+        END DO
+        D1d(i)=cff1/(cff2+eps)
+      END DO
+!
+! Compute 1D Energy.
+!
+      DO i=1,WAVES(ng)%nfreq
+        DO j=1,ND
+          E1d(i)=E1d(i)+WAVES(ng)%SD(i,j)*WAVEG(ng)%pd
+        END DO
+      END DO
+!
+! Compute Random number for phase.
+!
+        call random_number(P1d)
+# ifdef DISTRIBUTE
+      IF (Master) THEN
+# endif
+        DO i=1,WAVES(ng)%nfreq
+          P1d(i)=P1d(i)*twopi
+        END DO
+# ifdef DISTRIBUTE
+      END IF
+# endif
+# ifdef DISTRIBUTE
+!
+!  Scatter phase to all the nodes.
+!
+      Npts=WAVES(ng)%nfreq
+      allocate(wrk(Npts))
+      IF (Master) THEN
+        j=0
+        DO i=1,WAVES(ng)%nfreq
+            j=j+1
+            wrk(j)=P1d(i)
+        END DO
+      END IF
+      CALL MPI_BCAST(wrk, Npts, MP_FLOAT, 0,                            &
+     &               OCN_COMM_WORLD, MyError)
+      j=0
+      DO i=1,WAVES(ng)%nfreq
+          j=j+1
+          P1d(i)=wrk(j)
+      END DO
+!
+      deallocate(wrk)
+# endif
+!
+! Compute the energy transfer for each pair of frequency bins.
+!
+      write(*,*) 'Computing bound wave'
+      fac4=WAVES(ng)%df
       DO f1=1,WAVES(ng)%nfreq-1
 !
 !  write percent done.
@@ -771,70 +844,57 @@
           fac3=1.0_r8/cosh(k(f2)*h0)
           DDf=WAVES(ng)%f(f2)-WAVES(ng)%f(f1)
 !
+!  Limit the freq diff range from 1/400 to 1/30, that is
+!  df=1/400=.0025 to df=1/30=0.033
+!
+          IF ((DDf.ge.fmin).and.(DDf.le.fmax)) THEN
+!
 !  Do part of the D summations here that are not funcions of dtheta.
 !
-          D1a=g*k(f1)*k(f2)/(8.0_r8*pi**2*fac1)*                        &
-     &        fac2*fac3
-          D3a=((2.0_r8*pi)**4*(fac1)**2)/(g**2)
-          D4=-0.5*(-WAVES(ng)%f(f1)*k(f2)**2*fac3**2+                   &
-     &              WAVES(ng)%f(f2)*k(f1)**2*fac2**2)
-!
-          DO p1=1,ND
-            DO p2=1,ND
+            D1a=g*k(f1)*k(f2)/(8.0_r8*pi**2*fac1)*                      &
+     &          fac2*fac3
+            D3a=((2.0_r8*pi)**4*(fac1)**2)/(g**2)
+            D4=-0.5*(-WAVES(ng)%f(f1)*k(f2)**2*fac3**2+                 &
+     &                WAVES(ng)%f(f2)*k(f1)**2*fac2**2)
 !
 ! Compute the freq diff, dir diff, wave number, and phase of bound wave.
 !
-              DDtheta=WAVEG(ng)%wd(p2)-WAVEG(ng)%wd(p1)
-              k3=sqrt(k(f1)**2+k(f2)**2-2.0_r8*k(f1)*k(f2)*COS(DDtheta))
-              Z_bw=WAVES(ng)%phase(f1,p1)-WAVES(ng)%phase(f2,p2)+pi
+            DDtheta=D1d(f2)-D1d(f1)
+            k3=sqrt(k(f1)**2+k(f2)**2-2.0_r8*k(f1)*k(f2)*COS(DDtheta))
+            Z_bw=P1d(f1)-P1d(f2)+pi
 !
 !  Compute the double summation.
 !
-!             D1=g*k(f1)*k(f2)*COS(DDtheta+pi)/                         &
-!    &           (8.0_r8*pi**2*fac1)*                                   &
-!    &           cosh(k3*h0)*fac2*fac3
-!             D3=DDf*(((2.0_r8*pi)**4*(fac1)**2)/                       &
-!    &           (g**2)-k(f1)*k(f2)*COS(DDtheta+pi))
-              D1=D1a*COS(DDtheta+pi)*cosh(k3*h0)
-              D2=-g*(DDf)/((g*k3*tanh(k3*h0)-(2.0_r8*pi)**2*DDf**2)*    &
-     &           fac1+eps)
-              D3=DDf*(D3a-k(f1)*k(f2)*COS(DDtheta+pi))
-              DTOT=D1+D2*(D3+D4)
+            D1=D1a*COS(DDtheta+pi)*MIN(cosh(k3*h0),1.0E10_r8)
+            D2=-g*(DDf)/((g*k3*tanh(k3*h0)-(2.0_r8*pi)**2*DDf**2)*        &
+     &             fac1+eps)
+            D3=DDf*(D3a-k(f1)*k(f2)*COS(DDtheta+pi))
+            DTOT=D1+D2*(D3+D4)
 !
 !  Compute energy of bound wave
 !
-              E3=2.0_r8*DTOT**2*                                        &
-     &            WAVES(ng)%SD(f1,p1)*WAVES(ng)%SD(f2,p2)*              &
-     &            WAVEG(ng)%pd*WAVEG(ng)%pd*fac4
-              A3=SQRT(2.0_r8*E3*fac4)
-!
-!  Compute bnd wave direction
-!
-              cff1=k(f2)*sin(WAVEG(ng)%wd(p2))
-              cff2=k(f1)*sin(WAVEG(ng)%wd(p1))
-              cff3=k(f2)*cos(WAVEG(ng)%wd(p2))
-              cff4=k(f1)*cos(WAVEG(ng)%wd(p1))
-              dir3=ATAN2((cff1-cff2),(cff3-cff4+eps))+0.5_r8*pi
+            E3=2.0_r8*DTOT**2*                                           &
+     &         E1d(f1)*E1d(f2)*fac4
+            A3=SQRT(2.0_r8*E3*fac4)
 !
 !  Compute this contribution to the bndwave, but use only the normal
 !  componenet. Use mid bin to get normal direction.
 !
-              DO i=1,WAVES(ng)%Insteps
-                cff=REAL((i-1),r8)*dt(ng)
-                cff1=0.5_r8*A3*COS(2.0_r8*pi*DDf*cff+Z_bw)
-                cff1=MAX(cff1*COS(pi+WAVEG(ng)%wd(INT(ND/2))-dir3),0.0_r8)
-                WAVES(ng)%bndwave(i)=WAVES(ng)%bndwave(i)+cff1
-              END DO
+            DO i=1,WAVES(ng)%Insteps
+              cff=REAL((i-1),r8)*dt(ng)
+              cff1=0.5_r8*A3*COS(2.0_r8*pi*DDf*cff+Z_bw)
+              WAVES(ng)%bndwave(i)=WAVES(ng)%bndwave(i)+cff1
             END DO
-          END DO
+          END IF
         END DO
       END DO
+!
 
 # ifdef SANDY_INWAVE
       write(*,*) 'bnd wave is ', WAVES(ng)%bndwave
 # endif
       
-      deallocate (k)
+      deallocate (k, E1D, D1d, P1d)
 
       RETURN
 
