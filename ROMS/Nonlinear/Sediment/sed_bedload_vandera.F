@@ -495,10 +495,10 @@
             cff1=MAX(0.5_r8*T_t/T_tu, 0.0_r8)
 !
             cff2=sqrt(mag_theta_t)*(om_tt+cff1*om_ct)
-            cff3=MAX(theta_tx/mag_theta_t, eps)
+            cff3=(theta_tx/mag_theta_t)
             bedld_tx=cff2*cff3
 !
-            cff3=MAX(theta_ty/mag_theta_t, eps)
+            cff3=(theta_ty/mag_theta_t)
             bedld_ty=cff2*cff3
 !
 !-----------------------------------------------------------------------
@@ -1258,7 +1258,8 @@
       integer  :: iter
       integer,  parameter :: total_iters=10
       real(r8), parameter :: tol=0.001_r8, von_k=0.41_r8
-      real(r8), parameter :: eps = 1.0E-14_r8
+      real(r8), parameter :: eps=1.0E-14_r8
+      real(r8), parameter :: crs_fac=1.0_r8
       real(r8) :: theta_timeavg_old, theta_timeavg, theta_hat_i
       real(r8) :: k_wn 
       real(r8) :: psi  ! maximum mobility number
@@ -1328,7 +1329,8 @@
 !      ustarw=0.5_r8*fw*uhat**2.0_r8 
 !
       ustarw=SQRT(0.5_r8*fw*uhat**2.0_r8)
-      delw=2.0_r8*von_k*ustarw/omega 
+      delw=2.0_r8*von_k*ustarw/omega
+      delw=delw*crs_fac 
 !
 ! Can also hardwire delw
 ! delw=0.2_r8
@@ -1339,10 +1341,8 @@
         udelta=0.05_r8
       ELSE 
         udelta=MAX( ((cff/von_k)*log(30.0_r8*delw/ksd)), eps )
+!        udelta=udelta*crs_inc
       ENDIF 
-!      udelta= ((cff/von_k)*log(30.0_r8*delw/ksd)) 
-!      udelta=umag_curr 
-
 !
 ! Calculate full-cycle current friction factor from VA2013 Eqn. 20
 !
@@ -1494,7 +1494,7 @@
 !
       real(r8) :: unet_xdir, udelta, delt
 !
-      unet_xdir=unet*cos(phi_curwave/180*pi)
+      unet_xdir=unet*cos(phi_curwave)
 
       IF(RR.eq.0.5_r8) THEN
         T_c=0.5_r8*Td
