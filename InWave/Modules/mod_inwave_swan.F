@@ -236,8 +236,8 @@
       allocate (zeta_filt(WAVES(ng)%Insteps))
       DO dir_index=1,ND
         DO i=1,WAVES(ng)%Insteps
-          WAVES(ng)%Ampzeta_tot(i)=WAVES(ng)%Ampzeta_tot(i)+            &
-     &                             WAVES(ng)%bndwave(i)
+!         WAVES(ng)%Ampzeta_tot(i)=WAVES(ng)%Ampzeta_tot(i)+            &
+!    &                             WAVES(ng)%bndwave(i)
           WAVES(ng)%Ampzeta(i,dir_index)=0.5_r8*g*rho0*                 &
      &                                   (WAVES(ng)%Ampzeta_tot(i)*     &
      &                                   WAVES(ng)%SDD(dir_index)/      &
