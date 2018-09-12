@@ -4,13 +4,13 @@
 !
 !svn $Id: t3dbc_im.F 732 2008-09-07 01:55:51Z jcwarner $
 !=======================================================================
-!  Copyright (c) 2002-2008 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2018 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                           Hernan G. Arango   !
-!========================================== Alexander F. Shchepetkin ===
+!                                                   John C. Warner     !
 !                                                                      !
-!  This subroutine sets lateral boundary conditions for the ITRC-th    !
-!  tracer field.                                                       !
+!  This subroutine sets lateral boundary conditions for the            !
+!  wave action density field.                                          !
 !                                                                      !
 !=======================================================================
 !

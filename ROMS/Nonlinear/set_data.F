@@ -44,9 +44,9 @@
 !***********************************************************************
 !
       USE mod_param
-#if defined HYPOXIA_SRM || defined RED_TIDE
+# if defined HYPOXIA_SRM || defined RED_TIDE
       USE mod_biology
-#endif
+# endif
       USE mod_boundary
       USE mod_clima
       USE mod_forces
@@ -57,6 +57,10 @@
       USE mod_stepping
       USE mod_scalars
       USE mod_sources
+# ifdef INWAVE_MODEL
+      USE bndwavebc_mod
+# endif
+
 # if defined TRC_PSOURCE
       USE mod_trc_sources
 # endif
@@ -1179,6 +1183,9 @@
             IF (FoundError(exit_flag, NoError, __LINE__,                &
      &                     __FILE__)) RETURN
           END IF
+#  ifdef INWAVE_MODEL
+          CALL bndwavebc (ng, tile)
+#  endif
         END IF
 # endif
 

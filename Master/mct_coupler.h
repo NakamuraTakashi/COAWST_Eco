@@ -359,11 +359,11 @@
           WRITE (stdout,25) iw, dtwav(iw),io, dtocn(io),                &
      &                      TI_WAV2OCN, nWAV2OCN(iw,io)
  25       FORMAT (/,7x,'WAVgrid ',i2.2,' dt= ',f5.1,' -to- OCNgrid ',   &
-     &            i2.2,' dt= ',f5.1,', CplInt: ',f5.1,' Steps: ',i3.3)
+     &            i2.2,' dt= ',f5.1,', CplInt: ',f7.1,' Steps: ',i3.3)
           WRITE (stdout,26) io, dtocn(io),iw, dtwav(iw),                &
      &                      TI_OCN2WAV, nOCN2WAV(io,iw)
  26       FORMAT (/,7x,'OCNgrid ',i2.2,' dt= ',f5.1,' -to- WAVgrid ',   &
-     &            i2.2,' dt= ',f5.1,', CplInt: ',f5.1,' Steps: ',i3.3)
+     &            i2.2,' dt= ',f5.1,', CplInt: ',f7.1,' Steps: ',i3.3)
         END DO
       END DO
 #endif
@@ -373,11 +373,11 @@
           WRITE (stdout,27) ia, dtatm(ia),io, dtocn(io),                &
      &                      TI_ATM2OCN, nATM2OCN(ia,io)
  27       FORMAT (/,7x,'ATMgrid ',i2.2,' dt= ',f5.1,' -to- OCNgrid ',   &
-     &            i2.2,' dt= ',f5.1,', CplInt: ',f5.1,' Steps: ',i3.3)
+     &            i2.2,' dt= ',f5.1,', CplInt: ',f7.1,' Steps: ',i3.3)
           WRITE (stdout,28) io, dtocn(io),ia, dtatm(ia),                &
      &                      TI_OCN2ATM, nOCN2ATM(io,ia)
  28       FORMAT (/,7x,'OCNgrid ',i2.2,' dt= ',f5.1,' -to- ATMgrid ',   &
-     &            i2.2,' dt= ',f5.1,', CplInt: ',f5.1,' Steps: ',i3.3)
+     &            i2.2,' dt= ',f5.1,', CplInt: ',f7.1,' Steps: ',i3.3)
         END DO
       END DO
 #endif
@@ -387,11 +387,11 @@
           WRITE (stdout,29) ia, dtatm(ia),iw, dtwav(iw),                &
      &                      TI_ATM2WAV, nATM2WAV(ia,iw)
  29       FORMAT (/,7x,'ATMgrid ',i2.2,' dt= ',f5.1,' -to- WAVgrid ',   &
-     &            i2.2,' dt= ',f5.1,', CplInt: ',f5.1,' Steps: ',i3.3)
+     &            i2.2,' dt= ',f5.1,', CplInt: ',f7.1,' Steps: ',i3.3)
           WRITE (stdout,30) iw, dtwav(iw),ia, dtatm(ia),                &
      &                      TI_WAV2ATM, nWAV2ATM(iw,ia)
  30       FORMAT (/,7x,'WAVgrid ',i2.2,' dt= ',f5.1,' -to- ATMgrid ',   &
-     &            i2.2,' dt= ',f5.1,', CplInt: ',f5.1,' Steps: ',i3.3)
+     &            i2.2,' dt= ',f5.1,', CplInt: ',f7.1,' Steps: ',i3.3)
         END DO
       END DO
 #endif

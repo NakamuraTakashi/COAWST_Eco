@@ -108,7 +108,7 @@
          real(r8), pointer :: Ampzeta(:,:)
          real(r8), pointer :: Ampzeta_tot(:)
          real(r8), pointer :: position(:)
-         real(r8), pointer :: bndwave(:)
+         real(r8), pointer :: bndwave(:,:)
 
          complex(fftkind),dimension(:),allocatable   :: CompFn, Comptemp
          complex(fftkind),dimension(:),allocatable   :: Comptemp_tot
@@ -218,7 +218,7 @@
 ! Compute the boundwave
 !-----------------------------------------------------------------------
 !
-      call boundwave (ng, first)
+      call boundwave (ng, tile, first)
 !
 !-----------------------------------------------------------------------
 ! Compute the Hilbert transform
@@ -236,8 +236,6 @@
       allocate (zeta_filt(WAVES(ng)%Insteps))
       DO dir_index=1,ND
         DO i=1,WAVES(ng)%Insteps
-!         WAVES(ng)%Ampzeta_tot(i)=WAVES(ng)%Ampzeta_tot(i)+            &
-!    &                             WAVES(ng)%bndwave(i)
           WAVES(ng)%Ampzeta(i,dir_index)=0.5_r8*g*rho0*                 &
      &                                   (WAVES(ng)%Ampzeta_tot(i)*     &
      &                                   WAVES(ng)%SDD(dir_index)/      &
@@ -639,11 +637,10 @@
       integer                         :: i, j
       real(r8)                        :: cff
       real(r8)                        :: twopi
-      complex(kind(0.0d0))            :: compi
 
       twopi=2.0_r8*pi
 
-      compi = (0.0_r8,1.0_r8)
+
 
 ! COMPUTES THE FOURIER COMPONENTS
       DO i=1,WAVES(ng)%Insteps
@@ -675,30 +672,67 @@
       RETURN
 
       END SUBROUTINE FourierComp
-!
+
 !***********************************************************************
-      SUBROUTINE boundwave (ng, first)
-!                                                                       !
-!                compute the                                            !
-!                wave envelope and the associated bound wave (Hasselman,!
-!                1962; Herbers et al., 1994; Van Dongeren et al., 2003).!
-!                A double summation technique                           !
+      SUBROUTINE boundwave (ng, tile, first)
 !***********************************************************************
 !
-      USE mod_parallel
-      USE mod_scalars
-      USE mod_inwave_vars
-
-      implicit none
-
+      USE mod_param
+!
 !  Imported variable declarations.
 !
-      integer, intent(in) :: ng, first
+      integer, intent(in) :: ng, first, tile
+!
+!  Local variable declarations.
+!
+      integer :: Insteps
 
+# include "tile.h"
+
+      Insteps=WAVES(ng)%Insteps
+!
+      CALL boundwave_tile (ng, tile, first,                             &
+     &                     LBi, UBi, LBj, UBj,                          &
+     &                     IminS, ImaxS, JminS, JmaxS,                  &
+     &                     Insteps)
+      RETURN
+      END SUBROUTINE boundwave
+!
+!***********************************************************************
+      SUBROUTINE boundwave_tile (ng, tile, first,                       &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          IminS, ImaxS, JminS, JmaxS,             &
+     &                          Insteps)
+!                                                                       !
+!                compute the wave envelope and the associated bound     !
+!                wave using a double summation technique.               !
+!                (Hasselman, 1962; Herbers et al., 1994;                !
+!                 Van Dongeren et al., 2003).                           !
+!***********************************************************************
+
+      USE mod_boundary
+      USE mod_grid
+      USE mod_ocean
+      USE mod_parallel
+      USE mod_param
+      USE mod_ncparam
+      USE mod_scalars
+      USE mod_inwave_vars
+# ifdef DISTRIBUTE
+      USE distribute_mod, ONLY : mp_bcasti, mp_gather2d
+# endif
+      implicit none
+!
+!  Imported variable declarations.
+!
+      integer, intent(in) :: ng, tile, first, Insteps
+      integer, intent(in) :: LBi, UBi, LBj, UBj
+      integer, intent(in) :: IminS, ImaxS, JminS, JmaxS
+!
 !  Local variable declarations.
 !
       integer                         :: i, j, p1, p2, f1, f2, dum
-      integer                         :: Npts, MyError
+      integer                         :: Npts, MyError, blength
       real(r8)                        :: cff, cff1, cff2, cff3, cff4
       real(r8)                        :: twopi, otwopi
       real(r8)                        :: error, Tr_min, fmin, fmax
@@ -709,32 +743,150 @@
       real(r8)                        :: DDtheta, k3
       real(r8)                        :: D1, D2, D3, D4, D1a, D3a, DTOT
       real(r8)                        :: h0, E3, dir3
+      real(r8), dimension((Lm(ng)+2)*(Mm(ng)+2)) :: Awrk
+      real(r8), dimension((Lm(ng)+2),(Mm(ng)+2)) :: h_local
+      real(r8), dimension((Lm(ng)+2),(Mm(ng)+2)) :: zeta_local
 
       real(r8), allocatable           :: E1d(:), D1d(:), P1d(:)
-      real(r8), allocatable           :: k(:)
+      real(r8), allocatable           :: k(:), dist(:)
+      real(r8), allocatable           :: cosa(:), sina(:)
+      real(r8), allocatable           :: cosb(:), sinb(:)
 # ifdef DISTRIBUTE
       real(r8), allocatable :: wrk(:)
 # endif
-
       real(r8), parameter :: maxErr = 0.1_r8
-!     real(r8), parameter :: kwc_max = 10.0_r8
       real(r8), parameter :: eps = 1.0E-10_r8
+
+# include "set_bounds.h"
 
       twopi=2.0_r8*pi
       otwopi=1.0_r8/(2.0_r8*pi)
       Tr_min=1.0_r8
       fmin=1.0_r8/400.0_r8
       fmax=1.0_r8/30.0_r8
-      h0=18.0_r8   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  this needs to be updates
 !
-!  Allocate bouundwave array.
+!  Gather the depth and zeta to determine total depth at boundary point.
+!
+      DO j=1,Mm(ng)+2
+        DO i=1,Lm(ng)+2
+          h_local(i,j)=0.0_r8
+          zeta_local(i,j)=0.0_r8
+        END DO
+      END DO
+# ifdef DISTRIBUTE
+      CALL mp_gather2d (ng, iNLM, LBi, UBi, LBj, UBj,                   &
+     &                  0, r2dvar, 1.0_r8,                              &
+     &                  GRID(ng) % rmask,                               &
+     &                  GRID(ng)%h(:,:), Npts, Awrk)
+      p1=0
+      DO j=1,Mm(ng)+2
+        DO i=1,Lm(ng)+2
+          p1=p1+1
+          h_local(i,j)=Awrk(p1)
+        END DO
+      END DO
+!
+      CALL mp_gather2d (ng, iNLM, LBi, UBi, LBj, UBj,                   &
+     &                  0, r2dvar, 1.0_r8,                              &
+     &                  GRID(ng) % rmask,                               &
+     &                  OCEAN(ng)%zeta(:,:,1), Npts, Awrk)
+      p1=0
+      DO j=1,Mm(ng)+2
+        DO i=1,Lm(ng)+2
+          p1=p1+1
+          zeta_local(i,j)=Awrk(p1)
+        END DO
+      END DO
+# else
+      DO j=1,Mm(ng)+2
+        DO i=1,Lm(ng)+2
+          h_local(i,j)=GRID(ng)%h(i-1,j-1)
+          zeta_local(i,j)=OCEAN(ng)%zeta(i-1,j-1,1)
+        END DO
+      END DO
+# endif
+!
+!  Now set h0 based on the middle boundary total depth.
+!
+# ifdef DISTRIBUTE
+      IF (Master) THEN
+# endif
+      IF (LBC(iwest,isAC3d,ng)%acquire) THEN
+        j=INT(Mm(ng)/2)
+        h0=h_local(1,j)+zeta_local(1,j)
+      ELSE IF (LBC(ieast,isAC3d,ng)%acquire) THEN
+        j=INT(Mm(ng)/2)
+        h0=h_local(Lm(ng)+2,j)+zeta_local(Lm(ng)+2,j)
+      ELSE IF (LBC(inorth,isAC3d,ng)%acquire) THEN
+        i=INT(Lm(ng)/2)
+        h0=h_local(i,Mm(ng)+2)+zeta_local(i,Mm(ng)+2)
+      ELSE IF (LBC(isouth,isAC3d,ng)%acquire) THEN
+        i=INT(Lm(ng)/2)
+        h0=h_local(i,1)+zeta_local(i,1)
+      END IF        
+# ifdef DISTRIBUTE
+      END IF
+      CALL MPI_BCAST(h0, 1, MP_FLOAT, 0,                                &
+     &               OCN_COMM_WORLD, MyError)
+# endif
+# ifdef DISTRIBUTE
+      IF (Master) THEN
+# endif
+      write(*,*) 'Mean offshore water depth for bndwave is ', h0
+# ifdef DISTRIBUTE
+      END IF
+# endif
+
+!
+!  Allocate bouundwave and local wavenumber arrays.
+!  Determine length along the active side. This is used to 
+!  phase the bndwave along the boundary.
 !
       allocate (k(WAVES(ng)%nfreq))
+      IF (LBC(iwest,isAC3d,ng)%acquire) THEN
+        blength=Mm(ng)+2
+        allocate (dist(blength))
+        dist(1)=0.0_r8
+        DO j=2,blength
+          dist(j)=dist(j-1)+REAL(j,r8)/GRID(ng)%pn(Istr-1,j)
+        END DO
+      ELSE IF (LBC(ieast,isAC3d,ng)%acquire) THEN
+        blength=Mm(ng)+2
+        allocate (dist(blength))
+        dist(1)=0.0_r8
+        DO j=2,blength
+          dist(j)=dist(j-1)+REAL(j,r8)/GRID(ng)%pn(Iend+1,j)
+        END DO
+      ELSE IF (LBC(inorth,isAC3d,ng)%acquire) THEN
+        blength=Lm(ng)+2
+        allocate (dist(blength))
+        dist(1)=0.0_r8
+        DO i=2,blength
+          dist(i)=dist(i-1)+REAL(i,r8)/GRID(ng)%pm(i,Jend+1)
+        END DO
+      ELSE IF (LBC(isouth,isAC3d,ng)%acquire) THEN
+        blength=Lm(ng)+2
+        allocate (dist(blength))
+        dist(1)=0.0_r8
+        DO i=2,blength
+          dist(i)=dist(i-1)+REAL(i,r8)/GRID(ng)%pm(i,Jstr-1)
+        END DO
+      END IF
       IF (first.eq.1) THEN
-        allocate(WAVES(ng)%bndwave(WAVES(ng)%Insteps))
+        allocate(WAVES(ng)%bndwave(blength,WAVES(ng)%Insteps))
       ENDIF
-      DO i=1,WAVES(ng)%Insteps
-        WAVES(ng)%bndwave(i)=0.0_r8
+      allocate(cosa(blength))
+      allocate(sina(blength))
+      allocate(cosb(WAVES(ng)%Insteps))
+      allocate(sinb(WAVES(ng)%Insteps))
+      DO j=1,WAVES(ng)%Insteps
+        cosb(j)=0.0_r8
+        sinb(j)=0.0_r8
+        DO i=1,blength
+          cosa(i)=0.0_r8
+          sina(i)=0.0_r8
+          WAVES(ng)%bndwave(i,j)=0.0_r8
+        END DO
       END DO
 !
 ! Compute the wave number or each freq bin
@@ -760,6 +912,7 @@
         END DO
         k(i)=k0
       END DO
+
 !
 !  Make it a 1D spectrum for now to compute boudnwave.
 !
@@ -830,14 +983,19 @@
 !
 ! Compute the energy transfer for each pair of frequency bins.
 !
+# ifdef DISTRIBUTE
+      IF (Master) THEN
+# endif
       write(*,*) 'Computing bound wave'
+# ifdef DISTRIBUTE
+      END IF
+# endif
+!     fac4=1.0_r8/REAL(WAVES(ng)%Insteps,r8)
       fac4=WAVES(ng)%df
       DO f1=1,WAVES(ng)%nfreq-1
 !
-!  write percent done.
+!  Do the double summation loop.
 !
-        write(*,*) 'Computing bound wave %done = ',                     &
-     &              REAL(f1,r8)/REAL(WAVES(ng)%nfreq,r8)*100.0_r8
         DO f2=f1,WAVES(ng)%nfreq
           fac1=WAVES(ng)%f(f1)*WAVES(ng)%f(f2)
           fac2=1.0_r8/cosh(k(f1)*h0)
@@ -877,28 +1035,45 @@
      &         E1d(f1)*E1d(f2)*fac4
             A3=SQRT(2.0_r8*E3*fac4)
 !
-!  Compute this contribution to the bndwave, but use only the normal
-!  componenet. Use mid bin to get normal direction.
+!  Compute bnd wave direction
 !
-            DO i=1,WAVES(ng)%Insteps
-              cff=REAL((i-1),r8)*dt(ng)
-              cff1=0.5_r8*A3*COS(2.0_r8*pi*DDf*cff+Z_bw)
-              WAVES(ng)%bndwave(i)=WAVES(ng)%bndwave(i)+cff1
+            cff1=k(f2)*sin(WAVEG(ng)%wd(p2))
+            cff2=k(f1)*sin(WAVEG(ng)%wd(p1))
+            cff3=k(f2)*cos(WAVEG(ng)%wd(p2))
+            cff4=k(f1)*cos(WAVEG(ng)%wd(p1))
+            dir3=ATAN2((cff1-cff2),(cff3-cff4+eps))+0.5_r8*pi
+!
+!  Compute this contribution to the bndwave.
+!
+!  NOT sure about the 0.5 here
+!
+            DO j=1,WAVES(ng)%Insteps
+              cff=REAL((j-1),r8)*dt(ng)
+              cosb(j)=COS(2.0_r8*pi*DDf*cff+Z_bw)
+              sinb(j)=SIN(2.0_r8*pi*DDf*cff+Z_bw)
+            END DO
+            DO i=1,blength
+              cff=k3*sin(dir3)*dist(i)
+              cosa(i)=COS(cff)
+              sina(i)=SIN(cff)
+            END DO
+            DO i=1,blength
+              DO j=1,WAVES(ng)%Insteps
+                 WAVES(ng)%bndwave(i,j)=WAVES(ng)%bndwave(i,j)+         &
+     &                      0.5_r8*A3*(cosa(i)*cosb(j)-sina(i)*sinb(j))
+              END DO
             END DO
           END IF
         END DO
       END DO
 !
-
-# ifdef SANDY_INWAVE
-      write(*,*) 'bnd wave is ', WAVES(ng)%bndwave
-# endif
-      
-      deallocate (k, E1D, D1d, P1d)
+     
+      deallocate (k, dist, E1D, D1d, P1d)
+      deallocate (cosa, sina, cosb, sinb)
 
       RETURN
 
-      END SUBROUTINE boundwave
+      END SUBROUTINE boundwave_tile
 
 #endif
 

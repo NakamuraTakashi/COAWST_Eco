@@ -342,6 +342,9 @@
       temp=sum(WAVES(ng)%SDSW, DIM = 1)
       i=maxval(maxloc(temp))
       WAVES(ng)%mainang=WAVES(ng)%theta(i)
+      IF (Master) THEN
+        WRITE(stdout,*) 'Peak dir from ', WAVES(ng)%mainang*180.0_r8/pi
+      END IF
       deallocate(temp)
 !
 !-----------------------------------------------------------------------
