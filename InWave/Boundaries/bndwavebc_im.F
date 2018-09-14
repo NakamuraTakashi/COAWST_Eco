@@ -17,7 +17,7 @@
       implicit none
 
       PRIVATE
-      PUBLIC  :: bndwavebc_tile
+      PUBLIC  :: bndwavebc
 
       CONTAINS
 !
