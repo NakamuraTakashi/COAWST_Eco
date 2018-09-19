@@ -1183,10 +1183,10 @@
             IF (FoundError(exit_flag, NoError, __LINE__,                &
      &                     __FILE__)) RETURN
           END IF
-#  ifdef INWAVE_MODEL
-          CALL bndwavebc (ng, tile)
-#  endif
         END IF
+#  ifdef INWAVE_MODEL
+        CALL bndwavebc (ng, tile)
+#  endif
 # endif
 
 # if defined WET_DRY

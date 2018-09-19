@@ -96,11 +96,11 @@
           DO d=1,ND
             DO j=Jstr,Jend
 #ifdef VARY_ACBC
-            cff1=0.5_r8*(WAVEP(ng)%cy(Istr-1,j  ,d)+                     &
+            cff1=0.5_r8*(WAVEP(ng)%cy(Istr-1,j  ,d)+                    &
                          WAVEP(ng)%cy(Istr-1,j+1,d))
             cff2=WAVEP(ng)%cx(Istr-1,j,d)
             cw=sqrt(cff1**2+cff2**2)
-            dist=REAL(j,r8)/GRID(ng)%pn(Istr-1,j)*sin(WAVEG(ng)%wd(d)-   &
+            dist=REAL(j,r8)/GRID(ng)%pn(Istr-1,j)*sin(WAVEG(ng)%wd(d)-  &
      &           GRID(ng)%angler(Istr-1,j))
             toff=ABS(dist/(cw+eps))
             cff1=toff/dt(ng)
@@ -127,11 +127,11 @@
           DO d=1,ND
             DO j=Jstr,Jend
 #ifdef VARY_ACBC
-            cff1=0.5_r8*(WAVEP(ng)%cy(Iend+1,j  ,d)+                     &
+            cff1=0.5_r8*(WAVEP(ng)%cy(Iend+1,j  ,d)+                    &
                          WAVEP(ng)%cy(Iend+1,j+1,d))
             cff2=WAVEP(ng)%cx(Iend+1,j,d)
             cw=sqrt(cff1**2+cff2**2)
-            dist=REAL(j,r8)/GRID(ng)%pn(Iend+1,j)*sin(WAVEG(ng)%wd(d)-   &
+            dist=REAL(j,r8)/GRID(ng)%pn(Iend+1,j)*sin(WAVEG(ng)%wd(d)-  &
      &           GRID(ng)%angler(Iend+1,j))
             toff=ABS(dist/(cw+eps))
             cff1=toff/dt(ng)
@@ -158,11 +158,11 @@
           DO d=1,ND
             DO i=Istr,Iend
 #ifdef VARY_ACBC
-            cff1=0.5_r8*(WAVEP(ng)%cx(i  ,Jend+1,d)+                     &
+            cff1=0.5_r8*(WAVEP(ng)%cx(i  ,Jend+1,d)+                    &
                          WAVEP(ng)%cx(i+1,Jend+1,d))
             cff2=WAVEP(ng)%cy(i  ,Jend+1,d)
             cw=sqrt(cff1**2+cff2**2)
-            dist=REAL(i,r8)/GRID(ng)%pm(i,Jend+1)*sin(WAVEG(ng)%wd(d)-   &
+            dist=REAL(i,r8)/GRID(ng)%pm(i,Jend+1)*sin(WAVEG(ng)%wd(d)-  &
      &           GRID(ng)%angler(i,Jend+1))
             toff=ABS(dist/(cw+eps))
             cff1=toff/dt(ng)
@@ -189,11 +189,11 @@
           DO d=1,ND
             DO i=Istr,Iend
 #ifdef VARY_ACBC
-            cff1=0.5_r8*(WAVEP(ng)%cx(i  ,Jstr-1,d)+                     &
+            cff1=0.5_r8*(WAVEP(ng)%cx(i  ,Jstr-1,d)+                    &
                          WAVEP(ng)%cx(i+1,Jstr-1,d))
             cff2=WAVEP(ng)%cy(i  ,Jstr-1,d)
             cw=sqrt(cff1**2+cff2**2)
-            dist=REAL(i,r8)/GRID(ng)%pm(i,Jstr-1)*sin(WAVEG(ng)%wd(d)-   &
+            dist=REAL(i,r8)/GRID(ng)%pm(i,Jstr-1)*sin(WAVEG(ng)%wd(d)-  &
      &           GRID(ng)%angler(i,Jstr-1))
             toff=ABS(dist/(cw+eps))
             cff1=toff/dt(ng)

@@ -244,7 +244,7 @@
 !
       j=0
       DO WHILE (j==0)
-        READ (inp,'(a)',ERR=215,END=240) rline 
+        READ (inp,'(a)',ERR=215,END=245) rline 
         IF(rline(41:44).eq.'date') THEN
           read(rline(1:15),*) WAVES(ng)%SpecTimeIso(2)
           read(rline(1:4),'(I4)') INTTIM(1)
@@ -294,6 +294,7 @@
           END IF
         END IF
       END DO
+ 245  CONTINUE
       close(inp)
 !
 !-----------------------------------------------------------------------

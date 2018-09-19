@@ -108,7 +108,7 @@
          real(r8), pointer :: Ampzeta(:,:)
          real(r8), pointer :: Ampzeta_tot(:)
          real(r8), pointer :: position(:)
-         real(r8), pointer :: bndwave(:,:)
+         real(r8), pointer :: bndwave(:)
 
          complex(fftkind),dimension(:),allocatable   :: CompFn, Comptemp
          complex(fftkind),dimension(:),allocatable   :: Comptemp_tot
@@ -459,6 +459,7 @@
         allocate(WAVES(ng)%zeta(WAVES(ng)%Insteps,WAVES(ng)%ndir))
         allocate(WAVES(ng)%Ampzeta(WAVES(ng)%Insteps,WAVES(ng)%ndir))
         allocate(WAVES(ng)%Ampzeta_tot(WAVES(ng)%Insteps))
+        allocate(WAVES(ng)%bndwave(WAVES(ng)%Insteps))
 !
 !-----------------------------------------------------------------------
 ! Create frequency and directional arrays for the spectra
@@ -640,8 +641,6 @@
 
       twopi=2.0_r8*pi
 
-
-
 ! COMPUTES THE FOURIER COMPONENTS
       DO i=1,WAVES(ng)%Insteps
         WAVES(ng)%CompFn(i)=0.0_r8
@@ -685,16 +684,14 @@
 !
 !  Local variable declarations.
 !
-      integer :: Insteps
+!     integer :: Insteps
 
 # include "tile.h"
 
-      Insteps=WAVES(ng)%Insteps
-!
       CALL boundwave_tile (ng, tile, first,                             &
      &                     LBi, UBi, LBj, UBj,                          &
      &                     IminS, ImaxS, JminS, JmaxS,                  &
-     &                     Insteps)
+     &                     WAVES(ng)%Insteps, WAVES(ng)%bndwave)
       RETURN
       END SUBROUTINE boundwave
 !
@@ -702,7 +699,7 @@
       SUBROUTINE boundwave_tile (ng, tile, first,                       &
      &                          LBi, UBi, LBj, UBj,                     &
      &                          IminS, ImaxS, JminS, JmaxS,             &
-     &                          Insteps)
+     &                          Insteps, bndwave)
 !                                                                       !
 !                compute the wave envelope and the associated bound     !
 !                wave using a double summation technique.               !
@@ -728,11 +725,17 @@
       integer, intent(in) :: ng, tile, first, Insteps
       integer, intent(in) :: LBi, UBi, LBj, UBj
       integer, intent(in) :: IminS, ImaxS, JminS, JmaxS
+
+#ifdef ASSUMED_SHAPE
+      real(r8), intent(inout) :: bndwave(:)
+#else
+      real(r8), intent(inout) :: bndwave(1:Insteps)
+#endif
 !
 !  Local variable declarations.
 !
       integer                         :: i, j, p1, p2, f1, f2, dum
-      integer                         :: Npts, MyError, blength
+      integer                         :: Npts, MyError
       real(r8)                        :: cff, cff1, cff2, cff3, cff4
       real(r8)                        :: twopi, otwopi
       real(r8)                        :: error, Tr_min, fmin, fmax
@@ -742,15 +745,13 @@
       real(r8)                        :: DDf, A3, Z_bw
       real(r8)                        :: DDtheta, k3
       real(r8)                        :: D1, D2, D3, D4, D1a, D3a, DTOT
-      real(r8)                        :: h0, E3, dir3
+      real(r8)                        :: h0, E3
       real(r8), dimension((Lm(ng)+2)*(Mm(ng)+2)) :: Awrk
       real(r8), dimension((Lm(ng)+2),(Mm(ng)+2)) :: h_local
       real(r8), dimension((Lm(ng)+2),(Mm(ng)+2)) :: zeta_local
 
       real(r8), allocatable           :: E1d(:), D1d(:), P1d(:)
-      real(r8), allocatable           :: k(:), dist(:)
-      real(r8), allocatable           :: cosa(:), sina(:)
-      real(r8), allocatable           :: cosb(:), sinb(:)
+      real(r8), allocatable           :: k(:)
 # ifdef DISTRIBUTE
       real(r8), allocatable :: wrk(:)
 # endif
@@ -843,50 +844,8 @@
 !  phase the bndwave along the boundary.
 !
       allocate (k(WAVES(ng)%nfreq))
-      IF (LBC(iwest,isAC3d,ng)%acquire) THEN
-        blength=Mm(ng)+2
-        allocate (dist(blength))
-        dist(1)=0.0_r8
-        DO j=2,blength
-          dist(j)=dist(j-1)+REAL(j,r8)/GRID(ng)%pn(Istr-1,j)
-        END DO
-      ELSE IF (LBC(ieast,isAC3d,ng)%acquire) THEN
-        blength=Mm(ng)+2
-        allocate (dist(blength))
-        dist(1)=0.0_r8
-        DO j=2,blength
-          dist(j)=dist(j-1)+REAL(j,r8)/GRID(ng)%pn(Iend+1,j)
-        END DO
-      ELSE IF (LBC(inorth,isAC3d,ng)%acquire) THEN
-        blength=Lm(ng)+2
-        allocate (dist(blength))
-        dist(1)=0.0_r8
-        DO i=2,blength
-          dist(i)=dist(i-1)+REAL(i,r8)/GRID(ng)%pm(i,Jend+1)
-        END DO
-      ELSE IF (LBC(isouth,isAC3d,ng)%acquire) THEN
-        blength=Lm(ng)+2
-        allocate (dist(blength))
-        dist(1)=0.0_r8
-        DO i=2,blength
-          dist(i)=dist(i-1)+REAL(i,r8)/GRID(ng)%pm(i,Jstr-1)
-        END DO
-      END IF
-      IF (first.eq.1) THEN
-        allocate(WAVES(ng)%bndwave(blength,WAVES(ng)%Insteps))
-      ENDIF
-      allocate(cosa(blength))
-      allocate(sina(blength))
-      allocate(cosb(WAVES(ng)%Insteps))
-      allocate(sinb(WAVES(ng)%Insteps))
       DO j=1,WAVES(ng)%Insteps
-        cosb(j)=0.0_r8
-        sinb(j)=0.0_r8
-        DO i=1,blength
-          cosa(i)=0.0_r8
-          sina(i)=0.0_r8
-          WAVES(ng)%bndwave(i,j)=0.0_r8
-        END DO
+          bndwave(i)=0.0_r8
       END DO
 !
 ! Compute the wave number or each freq bin
@@ -1024,52 +983,30 @@
 !  Compute the double summation.
 !
             D1=D1a*COS(DDtheta+pi)*MIN(cosh(k3*h0),1.0E10_r8)
-            D2=-g*(DDf)/((g*k3*tanh(k3*h0)-(2.0_r8*pi)**2*DDf**2)*        &
+            D2=-g*(DDf)/((g*k3*tanh(k3*h0)-(2.0_r8*pi)**2*DDf**2)*      &
      &             fac1+eps)
             D3=DDf*(D3a-k(f1)*k(f2)*COS(DDtheta+pi))
             DTOT=D1+D2*(D3+D4)
 !
 !  Compute energy of bound wave
 !
-            E3=2.0_r8*DTOT**2*                                           &
+            E3=2.0_r8*DTOT**2*                                          &
      &         E1d(f1)*E1d(f2)*fac4
             A3=SQRT(2.0_r8*E3*fac4)
 !
-!  Compute bnd wave direction
-!
-            cff1=k(f2)*sin(WAVEG(ng)%wd(p2))
-            cff2=k(f1)*sin(WAVEG(ng)%wd(p1))
-            cff3=k(f2)*cos(WAVEG(ng)%wd(p2))
-            cff4=k(f1)*cos(WAVEG(ng)%wd(p1))
-            dir3=ATAN2((cff1-cff2),(cff3-cff4+eps))+0.5_r8*pi
-!
 !  Compute this contribution to the bndwave.
-!
 !  NOT sure about the 0.5 here
 !
-            DO j=1,WAVES(ng)%Insteps
-              cff=REAL((j-1),r8)*dt(ng)
-              cosb(j)=COS(2.0_r8*pi*DDf*cff+Z_bw)
-              sinb(j)=SIN(2.0_r8*pi*DDf*cff+Z_bw)
-            END DO
-            DO i=1,blength
-              cff=k3*sin(dir3)*dist(i)
-              cosa(i)=COS(cff)
-              sina(i)=SIN(cff)
-            END DO
-            DO i=1,blength
-              DO j=1,WAVES(ng)%Insteps
-                 WAVES(ng)%bndwave(i,j)=WAVES(ng)%bndwave(i,j)+         &
-     &                      0.5_r8*A3*(cosa(i)*cosb(j)-sina(i)*sinb(j))
-              END DO
+            DO i=1,WAVES(ng)%Insteps
+              cff=REAL((i-1),r8)*dt(ng)
+              cff1=2.0_r8*pi*DDf*cff+Z_bw
+              bndwave(i)=bndwave(i)+0.5_r8*A3*COS(cff1)
             END DO
           END IF
         END DO
       END DO
 !
-     
-      deallocate (k, dist, E1D, D1d, P1d)
-      deallocate (cosa, sina, cosb, sinb)
+      deallocate (k, E1D, D1d, P1d)
 
       RETURN
 
