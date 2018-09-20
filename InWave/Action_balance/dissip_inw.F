@@ -218,7 +218,7 @@
 !=======================================================================
 !  Distribute dissipation over directions and recompute Ac
 !=======================================================================
-          oEW=1.0_r8/EW
+          oEW=1.0_r8/MAX(EW,EWlim)
           DO d=1,ND
             IF ((h_tot(i,j).ge.Dcrit(ng)).and.(EW.gt.EWlim)) THEN
               EN(d)=MAX(0.0_r8,EN(d)-Dissip_break(i,j)*EN(d)*oEW)

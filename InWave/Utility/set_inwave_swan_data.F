@@ -77,7 +77,7 @@
 
       real(r8):: twopi, otwopi, cff1, cff2, cff3
       real(r8):: phiw, cw, dist, toff
-      real(r8), parameter :: eps = 1.0E-10_r8
+      real(r8), parameter :: eps = 0.0001_r8
 
       logical :: update = .FALSE.
 
@@ -103,6 +103,7 @@
             dist=REAL(j,r8)/GRID(ng)%pn(Istr-1,j)*sin(WAVEG(ng)%wd(d)-  &
      &           GRID(ng)%angler(Istr-1,j))
             toff=ABS(dist/(cw+eps))
+            toff=MIN(toff,2.0_r8*WAVES(ng)%dur)
             cff1=toff/dt(ng)
             nt1=tidx+INT(cff1)
             IF (nt1.le.0) nt1=MOD(nt1,WAVES(ng)%Insteps)
@@ -134,6 +135,7 @@
             dist=REAL(j,r8)/GRID(ng)%pn(Iend+1,j)*sin(WAVEG(ng)%wd(d)-  &
      &           GRID(ng)%angler(Iend+1,j))
             toff=ABS(dist/(cw+eps))
+            toff=MIN(toff,2.0_r8*WAVES(ng)%dur)
             cff1=toff/dt(ng)
             nt1=tidx+INT(cff1)
             IF (nt1.le.0) nt1=MOD(nt1,WAVES(ng)%Insteps)
@@ -165,6 +167,7 @@
             dist=REAL(i,r8)/GRID(ng)%pm(i,Jend+1)*sin(WAVEG(ng)%wd(d)-  &
      &           GRID(ng)%angler(i,Jend+1))
             toff=ABS(dist/(cw+eps))
+            toff=MIN(toff,2.0_r8*WAVES(ng)%dur)
             cff1=toff/dt(ng)
             nt1=tidx+INT(cff1)
             IF (nt1.le.0) nt1=MOD(nt1,WAVES(ng)%Insteps)
@@ -196,6 +199,7 @@
             dist=REAL(i,r8)/GRID(ng)%pm(i,Jstr-1)*sin(WAVEG(ng)%wd(d)-  &
      &           GRID(ng)%angler(i,Jstr-1))
             toff=ABS(dist/(cw+eps))
+            toff=MIN(toff,2.0_r8*WAVES(ng)%dur)
             cff1=toff/dt(ng)
             nt1=tidx+INT(cff1)
             IF (nt1.le.0) nt1=MOD(nt1,WAVES(ng)%Insteps)

@@ -78,7 +78,7 @@
       integer :: i, j, d, nt1, nt2, tidx
       real(r8):: cff, cff1, cff2, cff3, ramp
       real(r8):: phiw, cw, dist, toff, bndtot
-      real(r8), parameter :: eps =1.0E-20_r8
+      real(r8), parameter :: eps =0.0001_r8
 
 # include "set_bounds.h"
 # ifdef RAMP_INWAVE
@@ -94,7 +94,7 @@
 !-----------------------------------------------------------------------
 !
       IF (DOMAIN(ng)%Western_Edge(tile)) THEN
-        IF (LBC(iwest,isFsur,ng)%acquire) THEN
+        IF (LBC(iwest,isAC3d,ng)%acquire) THEN
           DO j=Jstr,Jend
 # ifdef VARY_ACBC
             bndtot=0.0_r8
@@ -106,6 +106,7 @@
               dist=REAL(j,r8)/GRID(ng)%pn(Istr-1,j)*                    &
      &             sin(WAVEG(ng)%wd(d)-GRID(ng)%angler(Istr-1,j))
               toff=ABS(dist/(cw+eps))
+              toff=MIN(toff,2.0_r8*WAVES(ng)%dur)
               cff1=toff/dt(ng)
               nt1=tidx+INT(cff1)
               IF (nt1.le.0) nt1=MOD(nt1,WAVES(ng)%Insteps)
@@ -132,7 +133,7 @@
 !-----------------------------------------------------------------------
 !
       IF (DOMAIN(ng)%Eastern_Edge(tile)) THEN
-        IF (LBC(ieast,isFsur,ng)%acquire) THEN
+        IF (LBC(ieast,isAC3d,ng)%acquire) THEN
           DO j=Jstr,Jend
 #ifdef VARY_ACBC
             bndtot=0.0_r8
@@ -144,6 +145,7 @@
               dist=REAL(j,r8)/GRID(ng)%pn(Iend+1,j)*                    &
      &             sin(WAVEG(ng)%wd(d)-GRID(ng)%angler(Iend+1,j))
               toff=ABS(dist/(cw+eps))
+              toff=MIN(toff,2.0_r8*WAVES(ng)%dur)
               cff1=toff/dt(ng)
               nt1=tidx+INT(cff1)
               IF (nt1.le.0) nt1=MOD(nt1,WAVES(ng)%Insteps)
@@ -170,7 +172,7 @@
 !-----------------------------------------------------------------------
 !
       IF (DOMAIN(ng)%Southern_Edge(tile)) THEN
-        IF (LBC(isouth,isFsur,ng)%acquire) THEN
+        IF (LBC(isouth,isAC3d,ng)%acquire) THEN
           DO i=Istr,Iend
 #ifdef VARY_ACBC
             bndtot=0.0_r8
@@ -182,6 +184,7 @@
               dist=REAL(i,r8)/GRID(ng)%pm(i,Jstr-1)*                    &
      &             sin(WAVEG(ng)%wd(d)-GRID(ng)%angler(i,Jstr-1))
               toff=ABS(dist/(cw+eps))
+              toff=MIN(toff,2.0_r8*WAVES(ng)%dur)
               cff1=toff/dt(ng)
               nt1=tidx+INT(cff1)
               IF (nt1.le.0) nt1=MOD(nt1,WAVES(ng)%Insteps)
@@ -208,7 +211,7 @@
 !-----------------------------------------------------------------------
 !
       IF (DOMAIN(ng)%Northern_Edge(tile)) THEN
-        IF (LBC(inorth,isFsur,ng)%acquire) THEN
+        IF (LBC(inorth,isAC3d,ng)%acquire) THEN
           DO i=Istr,Iend
 #ifdef VARY_ACBC
             bndtot=0.0_r8
@@ -220,6 +223,7 @@
               dist=REAL(i,r8)/GRID(ng)%pm(i,Jend+1)*                    &
      &             sin(WAVEG(ng)%wd(d)-GRID(ng)%angler(i,Jend+1))
               toff=ABS(dist/(cw+eps))
+              toff=MIN(toff,2.0_r8*WAVES(ng)%dur)
               cff1=toff/dt(ng)
               nt1=tidx+INT(cff1)
               IF (nt1.le.0) nt1=MOD(nt1,WAVES(ng)%Insteps)
