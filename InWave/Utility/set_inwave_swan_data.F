@@ -1,5 +1,5 @@
 #include "cppdefs.h"
-#define VARY_ACBC
+#undef VARY_ACBC
 #if defined INWAVE_MODEL & defined INWAVE_SWAN_COUPLING
       SUBROUTINE set_inwave_swan_data (ng, tile)
 !

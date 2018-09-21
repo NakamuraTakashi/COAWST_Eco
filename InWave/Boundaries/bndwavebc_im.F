@@ -1,5 +1,5 @@
 #include "cppdefs.h"
-#define VARY_ACBC
+#undef VARY_ACBC
       MODULE bndwavebc_mod
 #ifdef SOLVE3D
 !
