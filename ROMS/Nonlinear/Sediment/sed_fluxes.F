@@ -70,6 +70,12 @@
 # endif
      &                      FORCES(ng) % bustr,                         &
      &                      FORCES(ng) % bvstr,                         &
+# ifdef SED_DUNEFACE
+     &                      FORCES(ng) % Dissip_roller,                 &
+     &                      GRID(ng) % pm, GRID(ng) % pn,               &
+     &                      OCEAN(ng) % ubar,                           &
+     &                      OCEAN(ng) % vbar,                           &
+# endif
      &                      OCEAN(ng) % t,                              &
      &                      SEDBED(ng) % ero_flux,                      &
      &                      SEDBED(ng) % settling_flux,                 &
@@ -100,6 +106,11 @@
      &                            bustrcwmax, bvstrcwmax,               &
 # endif
      &                            bustr, bvstr,                         &
+# ifdef SED_DUNEFACE
+     &                            Dissip_roller,                        &
+     &                            pm, pn,                               &
+     &                            ubar, vbar,                           &
+# endif
      &                            t,                                    &
      &                            ero_flux, settling_flux,              &
 # if defined SED_MORPH
@@ -135,6 +146,13 @@
 #  endif
       real(r8), intent(in) :: bustr(LBi:,LBj:)
       real(r8), intent(in) :: bvstr(LBi:,LBj:)
+#  ifdef SED_DUNEFACE
+      real(r8), intent(in) :: Dissip_roller(LBi:,LBj:)
+      real(r8), intent(in) :: pm(LBi:,LBj:)
+      real(r8), intent(in) :: pn(LBi:,LBj:)
+      real(r8), intent(in) :: ubar(LBi:,LBj:,:)
+      real(r8), intent(in) :: vbar(LBi:,LBj:,:)
+#  endif
 #  if defined SED_MORPH
       real(r8), intent(inout):: bed_thick(LBi:,LBj:,:)
 #  endif
@@ -159,6 +177,13 @@
 #  endif
       real(r8), intent(in) :: bustr(LBi:UBi,LBj:UBj)
       real(r8), intent(in) :: bvstr(LBi:UBi,LBj:UBj)
+#  ifdef SED_DUNEFACE
+      real(r8), intent(in) :: Dissip_roller(LBi:UBi,LBj:UBj)
+      real(r8), intent(in) :: pm(LBi:UBi,LBj:UBj)
+      real(r8), intent(in) :: pn(LBi:UBi,LBj:UBj)
+      real(r8), intent(in) :: ubar(LBi:UBi,LBj:UBj,3)
+      real(r8), intent(in) :: vbar(LBi:UBi,LBj:UBj,3)
+#  endif
 #  if defined SED_MORPH
       real(r8), intent(inout):: bed_thick(LBi:UBi,LBj:UBj,2)
 #  endif
@@ -177,6 +202,7 @@
       integer :: bnew
 
       real(r8) :: cff, cff1, cff2, cff3, cff4, cff5
+      real(r8) :: cff6, cff7, cff8, cff9, cff10
 
       real(r8), dimension(IminS:ImaxS,JminS:JmaxS) :: tau_w
 
@@ -251,6 +277,24 @@
 !
             cff1=(1.0_r8-bed(i,j,1,iporo))*bed_frac(i,j,1,ised)
             cff2=dt(ng)*Erate(ised,ng)*cff1
+# ifdef SED_DUNEFACE
+            cff2=cff2*(1.0_r8+Dissip_roller(i,j)*5.0_r8)
+!
+! for lateral shear
+!
+! left side
+            cff6=0.5_r8*(vbar(i-1,j,1)+vbar(i-1,j+1,1))
+            cff7=0.5_r8*(vbar(i  ,j,1)+vbar(i  ,j+1,1))
+            cff8=ABS(cff6-cff7)*0.5_r8*(pm(i-1,j)+pm(i,j))
+            cff9=MAX(cff8-0.05_r8,0.0_r8)*(1.0_r8-rmask_wet(i-1,j))
+! right side
+!           cff7=0.5_r8*(vbar(i  ,j,1)+vbar(i  ,j+1,1))
+            cff6=0.5_r8*(vbar(i+1,j,1)+vbar(i+1,j+1,1))
+            cff8=ABS(cff6-cff7)*0.5_r8*(pm(i,j)+pm(i+1,j))
+            cff10=MAX(cff8-0.05_r8,0.0_r8)*(1.0_r8-rmask_wet(i+1,j))
+!
+            cff2=cff2+(cff9+cff10)*1.0_r8
+# endif
             cff3=Srho(ised,ng)*cff1
             cff4=bed_mass(i,j,1,bnew,ised)
             cff5=settling_flux(i,j,ised) !CRS
