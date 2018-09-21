@@ -76,7 +76,7 @@
 !  Local variable declarations.
 !
       integer :: i, j, d, nt1, nt2, tidx
-      real(r8):: cff, cff1, cff2, cff3, ramp
+      real(r8):: cff, cff1, cff2, cff3, ramp, alpha
       real(r8):: phiw, cw, dist, toff, bndtot
       real(r8), parameter :: eps =0.0001_r8
 
@@ -180,15 +180,14 @@
               cff1=0.5_r8*(WAVEP(ng)%cx(i  ,Jstr-1,d)+                  &
                            WAVEP(ng)%cx(i+1,Jstr-1,d))
               cff2=WAVEP(ng)%cy(i  ,Jstr-1,d)
-              cw=sqrt(cff1**2+cff2**2)
+              alpha=GRID(ng)%angler(i,Jstr-1)
+              cw=cff1*cos(alpha)-cff2*sin(alpha)
               dist=REAL(i,r8)/GRID(ng)%pm(i,Jstr-1)*                    &
-     &             sin(WAVEG(ng)%wd(d)-GRID(ng)%angler(i,Jstr-1))
+     &             sin(pi-WAVEG(ng)%wd(d))
               toff=ABS(dist/(cw+eps))
-              toff=MIN(toff,2.0_r8*WAVES(ng)%dur)
               cff1=toff/dt(ng)
               nt1=tidx+INT(cff1)
-              IF (nt1.le.0) nt1=MOD(nt1,WAVES(ng)%Insteps)
-              IF (nt1.le.0) nt1=nt1+WAVES(ng)%Insteps
+              nt1=MAX(MOD(nt1,WAVES(ng)%Insteps),1)
               nt2=nt1+1
               IF (nt2>WAVES(ng)%Insteps) nt2=nt2-WAVES(ng)%Insteps
               phiw=toff/dt(ng)-INT(toff/dt(ng))
