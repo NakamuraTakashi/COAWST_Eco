@@ -895,7 +895,7 @@
 
 #   endif
 #  endif
-            FX(i,j)=FX(i,j)+cff3
+!            FX(i,j)=FX(i,j)+cff3
           END DO
         END DO
         DO j=Jstr,Jend+1
@@ -917,7 +917,7 @@
           ((1.0_r8-vmask_wet(i,j-1))*vmask_wet(i,j)*umask_wet(i,j+1))
 #    endif
 #   endif
-            FE(i,j)=FE(i,j)+cff3
+!            FE(i,j)=FE(i,j)+cff3
           END DO
         END DO
 #  endif
