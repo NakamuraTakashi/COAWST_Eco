@@ -147,7 +147,7 @@
 !
       integer :: i, j, d
       real(r8) :: TRM, H, DIRE, DIRN, twopi
-      real(r8) :: EN, EW, KM
+      real(r8) :: EN, EW, KM, DwaveE, DwaveN
       real(r8), parameter :: Lmin=10.0_r8
       real(r8), parameter :: Lmax=1000.0_r8
       real(r8), parameter :: Pmin=2.0_r8
