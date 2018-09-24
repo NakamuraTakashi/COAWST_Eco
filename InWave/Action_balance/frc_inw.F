@@ -146,8 +146,8 @@
 !  Local variable declarations.
 !
       integer :: i, j, d
-      real(r8) :: EW, KM, TRM, H, DIRM, twopi
-      real(r8) :: EN
+      real(r8) :: TRM, H, DIRE, DIRN, twopi
+      real(r8) :: EN, EW, KM
       real(r8), parameter :: Lmin=10.0_r8
       real(r8), parameter :: Lmax=1000.0_r8
       real(r8), parameter :: Pmin=2.0_r8
@@ -173,7 +173,8 @@
           EW=0.0_r8
           KM=0.0_r8
           TRM=0.0_r8
-          DIRM=0.0_r8
+          DIRE=0.0_r8
+          DIRN=0.0_r8
           IF (h_tot(i,j).ge.Dcrit(ng)) THEN
             DO d=1,ND
 !=======================================================================
@@ -192,12 +193,16 @@
 !=======================================================================
               KM=KM+kwc(i,j,d)*EN
               TRM=TRM+Tr(i,j,d)*EN
-              DIRM=DIRM+WD(d)*EN
+!             DIRM=DIRM+WD(d)*EN
+              DIRE=DIRE+sin(WD(d))*EN
+              DIRN=DIRN+cos(WD(d))*EN
             ENDDO
             IF (EW.ge.0.001_r8) THEN
               KM=KM/EW
               Lwave(i,j)=MIN(twopi/KM,Lmax)
-              Dwave(i,j)=DIRM/EW
+              DwaveE=DIRE/EW
+              DwaveN=DIRN/EW
+              Dwave(i,j)=ATAN2(DwaveE,DwaveN)
 !=======================================================================
 !  Compute the wave height Hwave (Significant).
 !=======================================================================
