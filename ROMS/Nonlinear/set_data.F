@@ -57,7 +57,7 @@
       USE mod_stepping
       USE mod_scalars
       USE mod_sources
-# ifdef INWAVE_MODEL
+# if defined INWAVE_MODEL && defined INWAVE_SWAN_COUPLING
       USE bndwavebc_mod
 # endif
 
@@ -1183,10 +1183,10 @@
             IF (FoundError(exit_flag, NoError, __LINE__,                &
      &                     __FILE__)) RETURN
           END IF
-        END IF
-#  ifdef INWAVE_MODEL
-        CALL bndwavebc (ng, tile)
+#  if defined INWAVE_MODEL && defined INWAVE_SWAN_COUPLING
+          CALL bndwavebc (ng, tile)
 #  endif
+        END IF
 # endif
 
 # if defined WET_DRY

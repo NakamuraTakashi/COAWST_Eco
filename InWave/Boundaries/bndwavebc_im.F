@@ -1,7 +1,8 @@
 #include "cppdefs.h"
 #undef VARY_ACBC
       MODULE bndwavebc_mod
-#ifdef SOLVE3D
+#ifdef INWAVE_SWAN_COUPLING
+# ifdef SOLVE3D
 !
 !svn $Id: bndwavebc_im.F 732 2008-09-07 01:55:51Z jcwarner $
 !=======================================================================
@@ -45,8 +46,6 @@
      &                     LBi, UBi, LBj, UBj,                          &
      &                     IminS, ImaxS, JminS, JmaxS,                  &
      &                     Insteps)
-!     ,                                     &
-!     &                     WAVES(ng)%bndwave)
       RETURN
       END SUBROUTINE bndwavebc
 
@@ -56,8 +55,6 @@
      &                          LBi, UBi, LBj, UBj,                     &
      &                          IminS, ImaxS, JminS, JmaxS,             &
      &                          Insteps)
-!     ,                                &
-!     &                          bndwave)
 !***********************************************************************
 
       USE mod_grid
@@ -80,12 +77,12 @@
       real(r8):: phiw, cw, dist, toff, bndtot
       real(r8), parameter :: eps =0.0001_r8
 
-# include "set_bounds.h"
-# ifdef RAMP_INWAVE
+#  include "set_bounds.h"
+#  ifdef RAMP_INWAVE
       ramp=TANH((tdays(ng)-dstart)/0.14_r8)
-# else
+#  else
       ramp=1.0_r8
-# endif
+#  endif
 
       tidx=MOD(iic(ng),Insteps)+1
 !
@@ -96,7 +93,7 @@
       IF (DOMAIN(ng)%Western_Edge(tile)) THEN
         IF (LBC(iwest,isAC3d,ng)%acquire) THEN
           DO j=Jstr,Jend
-# ifdef VARY_ACBC
+#  ifdef VARY_ACBC
             bndtot=0.0_r8
             DO d=1,ND
               cff1=0.5_r8*(WAVEP(ng)%cy(Istr-1,j  ,d)+                  &
@@ -119,9 +116,9 @@
               cff2=cff2*WAVES(ng)%SDD(d)/WAVES(ng)%int
               bndtot=bndtot+cff2
             END DO
-# else
+#  else
             bndtot=WAVES(ng)%bndwave(tidx)
-# endif
+#  endif
             BOUNDARY(ng)%zeta_west(j)=BOUNDARY(ng)%zeta_west(j)+        &
      &                                bndtot*ramp
           END DO
@@ -135,7 +132,7 @@
       IF (DOMAIN(ng)%Eastern_Edge(tile)) THEN
         IF (LBC(ieast,isAC3d,ng)%acquire) THEN
           DO j=Jstr,Jend
-#ifdef VARY_ACBC
+#  ifdef VARY_ACBC
             bndtot=0.0_r8
             DO d=1,ND
               cff1=0.5_r8*(WAVEP(ng)%cy(Iend+1,j  ,d)+                  &
@@ -158,9 +155,9 @@
               cff2=cff2*WAVES(ng)%SDD(d)/WAVES(ng)%int
               bndtot=bndtot+cff2
             END DO
-# else
+#  else
             bndtot=WAVES(ng)%bndwave(tidx)
-# endif
+#  endif
             BOUNDARY(ng)%zeta_east(j)=BOUNDARY(ng)%zeta_east(j)+        &
      &                                bndtot*ramp
           END DO
@@ -174,7 +171,7 @@
       IF (DOMAIN(ng)%Southern_Edge(tile)) THEN
         IF (LBC(isouth,isAC3d,ng)%acquire) THEN
           DO i=Istr,Iend
-#ifdef VARY_ACBC
+#  ifdef VARY_ACBC
             bndtot=0.0_r8
             DO d=1,ND
               cff1=0.5_r8*(WAVEP(ng)%cx(i  ,Jstr-1,d)+                  &
@@ -196,9 +193,9 @@
               cff2=cff2*WAVES(ng)%SDD(d)/WAVES(ng)%int
               bndtot=bndtot+cff2
             END DO
-# else
+#  else
             bndtot=WAVES(ng)%bndwave(tidx)
-# endif
+#  endif
             BOUNDARY(ng)%zeta_south(i)=BOUNDARY(ng)%zeta_south(i)+      &
      &                                bndtot*ramp
           END DO
@@ -212,7 +209,7 @@
       IF (DOMAIN(ng)%Northern_Edge(tile)) THEN
         IF (LBC(inorth,isAC3d,ng)%acquire) THEN
           DO i=Istr,Iend
-#ifdef VARY_ACBC
+#  ifdef VARY_ACBC
             bndtot=0.0_r8
             DO d=1,ND
               cff1=0.5_r8*(WAVEP(ng)%cx(i  ,Jend+1,d)+                  &
@@ -235,9 +232,9 @@
               cff2=cff2*WAVES(ng)%SDD(d)/WAVES(ng)%int
               bndtot=bndtot+cff2
             END DO
-# else
+#  else
             bndtot=WAVES(ng)%bndwave(tidx)
-# endif
+#  endif
             BOUNDARY(ng)%zeta_north(i)=BOUNDARY(ng)%zeta_north(i)+      &
      &                                bndtot*ramp
           END DO
@@ -246,5 +243,6 @@
 !
       RETURN
       END SUBROUTINE bndwavebc_tile
+# endif
 #endif
       END MODULE bndwavebc_mod
