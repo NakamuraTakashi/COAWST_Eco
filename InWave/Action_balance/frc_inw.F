@@ -203,6 +203,9 @@
               DwaveE=DIRE/EW
               DwaveN=DIRN/EW
               Dwave(i,j)=ATAN2(DwaveE,DwaveN)
+              IF (Dwave(i,j).lt.0.0_r8) THEN
+                Dwave(i,j)=Dwave(i,j)+2.0_r8*pi
+              END IF
 !=======================================================================
 !  Compute the wave height Hwave (Significant).
 !=======================================================================
