@@ -90,7 +90,8 @@
 !  Lateral boundary conditions at the western edge.
 !-----------------------------------------------------------------------
 !
-      IF (DOMAIN(ng)%Western_Edge(tile)) THEN
+      IF (LBC(iwest,isFsur,ng)%acquire.and.                             &
+     &    DOMAIN(ng)%Western_Edge(tile)) THEN
         IF (LBC(iwest,isAC3d,ng)%acquire) THEN
           DO j=Jstr,Jend
 #  ifdef VARY_ACBC
@@ -129,7 +130,8 @@
 !  Lateral boundary conditions at the eastern edge.
 !-----------------------------------------------------------------------
 !
-      IF (DOMAIN(ng)%Eastern_Edge(tile)) THEN
+      IF (LBC(ieast,isFsur,ng)%acquire.and.                             &
+     &    DOMAIN(ng)%Eastern_Edge(tile)) THEN
         IF (LBC(ieast,isAC3d,ng)%acquire) THEN
           DO j=Jstr,Jend
 #  ifdef VARY_ACBC
@@ -168,7 +170,8 @@
 !  Lateral boundary conditions at the southern edge.
 !-----------------------------------------------------------------------
 !
-      IF (DOMAIN(ng)%Southern_Edge(tile)) THEN
+      IF (LBC(isouth,isFsur,ng)%acquire.and.                            &
+     &    DOMAIN(ng)%Southern_Edge(tile)) THEN
         IF (LBC(isouth,isAC3d,ng)%acquire) THEN
           DO i=Istr,Iend
 #  ifdef VARY_ACBC
@@ -206,7 +209,8 @@
 !  Lateral boundary conditions at the northern edge.
 !-----------------------------------------------------------------------
 !
-      IF (DOMAIN(ng)%Northern_Edge(tile)) THEN
+      IF (LBC(inorth,isFsur,ng)%acquire.and.                            &
+     &    DOMAIN(ng)%Northern_Edge(tile)) THEN
         IF (LBC(inorth,isAC3d,ng)%acquire) THEN
           DO i=Istr,Iend
 #  ifdef VARY_ACBC

@@ -1183,12 +1183,11 @@
             IF (FoundError(exit_flag, NoError, __LINE__,                &
      &                     __FILE__)) RETURN
           END IF
-#  if defined INWAVE_MODEL && defined INWAVE_SWAN_COUPLING
-          CALL bndwavebc (ng, tile)
-#  endif
         END IF
 # endif
-
+# if defined INWAVE_MODEL && defined INWAVE_SWAN_COUPLING
+        CALL bndwavebc (ng, tile)
+# endif
 # if defined WET_DRY
 !
 ! Ensure that water level on boundary cells is above bed elevation.

@@ -844,7 +844,7 @@
 !  phase the bndwave along the boundary.
 !
       allocate (k(WAVES(ng)%nfreq))
-      DO j=1,WAVES(ng)%Insteps
+      DO i=1,WAVES(ng)%Insteps
           bndwave(i)=0.0_r8
       END DO
 !
@@ -949,7 +949,6 @@
 # ifdef DISTRIBUTE
       END IF
 # endif
-!     fac4=1.0_r8/REAL(WAVES(ng)%Insteps,r8)
       fac4=WAVES(ng)%df
       DO f1=1,WAVES(ng)%nfreq-1
 !
