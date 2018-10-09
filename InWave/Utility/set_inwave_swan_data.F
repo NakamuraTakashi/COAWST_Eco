@@ -115,7 +115,7 @@
      &           phiw*WAVES(ng)%Ampzeta(nt2,d)
             WAVEB(ng)%AC_west(j,d)=cff2*WAVEP(ng)%Tr(Istr-1,j,d)*otwopi
 #else
-            WAVEB(ng)%AC_west(i,d)=WAVES(ng)%Ampzeta(tidx,d)*           &
+            WAVEB(ng)%AC_west(j,d)=WAVES(ng)%Ampzeta(tidx,d)*           &
      &                             WAVEP(ng)%Tr(Istr-1,j,d)*otwopi
 #endif
             END DO
@@ -147,7 +147,7 @@
      &           phiw*WAVES(ng)%Ampzeta(nt2,d)
             WAVEB(ng)%AC_east(j,d)=cff2*WAVEP(ng)%Tr(Iend+1,j,d)*otwopi
 #else
-            WAVEB(ng)%AC_east(i,d)=WAVES(ng)%Ampzeta(tidx,d)*           &
+            WAVEB(ng)%AC_east(j,d)=WAVES(ng)%Ampzeta(tidx,d)*           &
      &                             WAVEP(ng)%Tr(Iend+1,j,d)*otwopi
 #endif
             END DO
