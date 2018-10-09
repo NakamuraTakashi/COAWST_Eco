@@ -258,16 +258,16 @@
           DO d_bnd=1,WAVEB(ng)%ND_bnd
             DO k=1,ND
               IF(WAVEB(ng)%WD_bnd(d_bnd).EQ.WAVEG(ng)%wd(k)) THEN
-                IF (LBC_apply(ng)%east(j)) THEN
-                  DO j=Jstr,Jend
+                DO j=Jstr,Jend
+                  IF (LBC_apply(ng)%east(j)) THEN
                     AC(Iend+1,j,k,nout)=WAVEB(ng)%AC_east(j,d_bnd)*ramp
 # ifdef MASKING
                     AC(Iend+1,j,k,nout)=AC(Iend+1,j,k,nout)*            &
      &                                  GRID(ng)%rmask(Iend+1,j)
 # endif
-                  END DO
-                ENDIF
-              ENDIF
+                  END IF
+                END DO
+              END IF
             END DO
           END DO
 !
