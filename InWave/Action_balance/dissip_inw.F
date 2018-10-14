@@ -135,7 +135,7 @@
 !  Local variable declarations.
 !
       integer :: i, j, d
-      real(r8) :: EW, oEW, KM, TRM, H, Qb, Hmax_r, diff, Emax_r
+      real(r8) :: EW, oEW, TRM, H, Qb, Hmax_r, diff, Emax_r
       real(r8) :: twopi, otwopi, ogrho0, cff
       real(r8), parameter :: Trmin=1.0_r8
       real(r8), parameter :: alfa=1.0_r8
@@ -153,7 +153,6 @@
       DO j=Jstr,Jend
         DO i=Istr,Iend
           EW=0.0_r8
-!         KM=0.0_r8
 #  ifdef WDISS_ROELVINK
           TRM=0.0_r8
 #  endif
@@ -171,18 +170,16 @@
 !  What we do is give more importance to those wave 
 !  numbers with more energy
 !=======================================================================
-!           KM=KM+kwc(i,j,d)*EN(d)
 #  ifdef WDISS_ROELVINK
             TRM=TRM+Tr(i,j,d)*EN(d)
 #  endif
           ENDDO
-!         KM=KM*cff
 #  ifdef WDISS_ROELVINK
-          cff=1.0_r8/(ND*max(EW,EWlim))
+          cff=1.0_r8/(max(EW,EWlim))
           TRM=TRM*cff
 #  endif
-!        EW=MAX(EW,EWlim)
-         EW=MAX(EW,0.0_r8)  !this was needed
+!         EW=MAX(EW,EWlim)
+          EW=MAX(EW,0.0_r8)  !this was needed
 #  ifdef WDISS_ROELVINK
 !=======================================================================
 !  Compute the wave height. This is based on Hrms.
@@ -196,7 +193,7 @@
             Hmax_r=break*(MAX(h_tot(i,j),0.0_r8))
 #  ifdef WDISS_ROELVINK
             Qb=MIN(1.0_r8,1.0_r8-EXP(-(H/Hmax_r)**n_r))
-            IF (TRM.gt.0.0_r8) THEN
+            IF (TRM.gt.0.0001_r8) THEN
               Dissip_break(i,j)=2.0_r8*alfa/TRM*EW*Qb*dt(ng)
             ELSE
               Dissip_break(i,j)=0.0_r8
