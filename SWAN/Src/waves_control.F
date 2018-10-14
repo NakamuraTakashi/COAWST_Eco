@@ -249,7 +249,7 @@
 #endif
             CALL SWAN_RUN (iics(ng), ng, ngc, ngp, 1, NUM_SGRIDS)
             run_grid(ng)=0
-            CALL SWAN_RST (iics(ng), ng)
+!           CALL SWAN_RST (iics(ng), ng)
           END IF
         END DO
 !
@@ -274,6 +274,11 @@
           CALL SWAN_CPL (1)
         END IF
 #endif
+        DO ng=1,NUM_SGRIDS
+          IF (run_grid(1).eq.1) THEN
+            CALL SWAN_RST (iics(ng), ng)
+          END IF
+        END DO
       END DO
       IF (ALLOCATED(run_grid)) DEALLOCATE (run_grid)
       IF (ALLOCATED(run_cplr)) DEALLOCATE (run_cplr)
