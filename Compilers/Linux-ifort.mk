@@ -96,13 +96,9 @@ ifdef USE_DEBUG
            CFLAGS += -g
          CXXFLAGS += -g
 else
-<<<<<<< HEAD
 #          FFLAGS += -ip -O3
            FFLAGS += -O3 -xCORE-AVX2 -mcmodel=large
-=======
-           FFLAGS += -ip -O3
 #          FFLAGS += -Wl,-stack_size,0x64000000
->>>>>>> COAWST_original
            CFLAGS += -O3
          CXXFLAGS += -O3
  ifeq ($(CPU),i686)
