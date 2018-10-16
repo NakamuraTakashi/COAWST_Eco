@@ -1,6 +1,6 @@
 # svn $Id: Linux-ifort.mk 834 2017-01-25 18:49:17Z arango $
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-# Copyright (c) 2002-2017 The ROMS/TOMS Group                           :::
+# Copyright (c) 2002-2018 The ROMS/TOMS Group                           :::
 #   Licensed under a MIT/X style license                                :::
 #   See License_ROMS.txt                                                :::
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -28,7 +28,8 @@
 # First the defaults
 #
                FC := ifort
-           FFLAGS := -heap-arrays -fp-model precise
+           FFLAGS := -fp-model precise
+#          FFLAGS += -heap-arrays
               CPP := /usr/bin/cpp
          CPPFLAGS := -P -traditional
                CC := gcc
@@ -95,8 +96,13 @@ ifdef USE_DEBUG
            CFLAGS += -g
          CXXFLAGS += -g
 else
+<<<<<<< HEAD
 #          FFLAGS += -ip -O3
            FFLAGS += -O3 -xCORE-AVX2 -mcmodel=large
+=======
+           FFLAGS += -ip -O3
+#          FFLAGS += -Wl,-stack_size,0x64000000
+>>>>>>> COAWST_original
            CFLAGS += -O3
          CXXFLAGS += -O3
  ifeq ($(CPU),i686)
@@ -109,13 +115,6 @@ endif
 
 ifdef USE_SWAN
            FFLAGS += -assume byterecl
-endif
-
-ifdef USE_MCT
-       MCT_INCDIR ?= /opt/intelsoft/mct/include
-       MCT_LIBDIR ?= /opt/intelsoft/mct/lib
-           FFLAGS += -I$(MCT_INCDIR)
-             LIBS += -L$(MCT_LIBDIR) -lmct -lmpeu
 endif
 
 ifdef USE_ESMF
@@ -149,6 +148,13 @@ endif
 ifdef USE_WW3
              FFLAGS += -I${COAWST_WW3_DIR}/mod_DIST/
              LIBS += WW3/obj/libWW3.a
+endif
+
+ifdef USE_MCT
+       MCT_INCDIR ?= /opt/intelsoft/mct/include
+       MCT_LIBDIR ?= /opt/intelsoft/mct/lib
+           FFLAGS += -I$(MCT_INCDIR)
+             LIBS += -L$(MCT_LIBDIR) -lmct -lmpeu
 endif
 
        clean_list += ifc* work.pc*

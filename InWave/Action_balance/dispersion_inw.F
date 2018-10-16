@@ -117,16 +117,15 @@
 !  Local variable declarations.
 !
       integer :: i, is, itrc, j, k, d
-      integer :: Isup, Iinf, Jsup, Jinf
 
       real(r8) :: twopi, otwopi
       real(r8) :: error, Tr_min
-      real(r8) :: L0, k0, k1, tkh, kh, kx, ky, wr
-      real(r8) :: F, FDER
+      real(r8) :: L0, k0, k1, kh, wr
+      real(r8) :: F, FDER, tanhkh
       real(r8) :: cff, cff1, cff2
-      real(r8) :: tanhkh, sinhtkh, o2aa, Vcur, cosde, sinde
       real(r8), parameter :: maxErr = 0.1_r8
       real(r8), parameter :: kwc_max = 10.0_r8
+      real(r8), parameter :: kwc_min = 0.015_r8
 
 # include "set_bounds.h"
 !
@@ -155,7 +154,7 @@
         DO j=Jstr,Jend
           DO i=Istr,Iend
             IF(h_tot(i,j).ge.Dcrit(ng))THEN
-              L0=g*otwopi*MAX(Tr_min,Tr(i,j,d))**2.0_r8
+              L0=g*otwopi*(MAX(Tr_min,Tr(i,j,d)))**2.0_r8
               k0=twopi/L0
               error=100.0_r8
               wr=twopi/MAX(Tr_min,Tr(i,j,d))
@@ -172,7 +171,8 @@
                 error=100.0_r8*ABS((k1-k0)/k0)
                 k0=k1
               END DO
-              kwc(i,j,d)=k0
+!             kwc(i,j,d)=k0
+              kwc(i,j,d)=MAX(kwc_min,MIN(k0,kwc_max))
               cwc(i,j,d)=SQRT(g*k0*tanhkh)/SINH(2.0_r8*kh)
             ELSE
               kwc(i,j,d)=kwc_max

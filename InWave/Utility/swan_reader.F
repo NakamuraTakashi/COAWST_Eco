@@ -244,7 +244,7 @@
 !
       j=0
       DO WHILE (j==0)
-        READ (inp,'(a)',ERR=215,END=240) rline 
+        READ (inp,'(a)',ERR=215,END=245) rline 
         IF(rline(41:44).eq.'date') THEN
           read(rline(1:15),*) WAVES(ng)%SpecTimeIso(2)
           read(rline(1:4),'(I4)') INTTIM(1)
@@ -294,6 +294,7 @@
           END IF
         END IF
       END DO
+ 245  CONTINUE
       close(inp)
 !
 !-----------------------------------------------------------------------
@@ -342,6 +343,9 @@
       temp=sum(WAVES(ng)%SDSW, DIM = 1)
       i=maxval(maxloc(temp))
       WAVES(ng)%mainang=WAVES(ng)%theta(i)
+      IF (Master) THEN
+        WRITE(stdout,*) 'Peak dir from ', WAVES(ng)%mainang*180.0_r8/pi
+      END IF
       deallocate(temp)
 !
 !-----------------------------------------------------------------------
@@ -372,37 +376,11 @@
 !
       call tpdcalc(WAVES(ng)%Sf,WAVES(ng)%fsw,frep)
 !
-      WAVES(ng)%Trep=1.0_r8/frep
+      WAVEG(ng)%Trep=1.0_r8/frep
       WAVES(ng)%fp=frep
       IF (Master) THEN
-        WRITE(stdout,*) 'Representative period is ',  WAVES(ng)%Trep
+        WRITE(stdout,*) 'Representative period is ',  WAVEG(ng)%Trep
       END IF
-!
-      DO d=1,ND
-        DO j=Jstr,Jend
-          DO i=Istr,Iend
-            WAVEP(ng)%Ta(i,j,d)=WAVES(ng)%Trep
-            WAVEP(ng)%Tr(i,j,d)=WAVES(ng)%Trep
-          END DO
-        END DO
-      END DO
-!
-      CALL Tr3dbc_tile (ng, tile,                                       &
-     &                  LBi, UBi, LBj, UBj, ND,                         &
-     &                  WAVEP(ng)%Tr)
-      CALL Tr3dbc_tile (ng, tile,                                       &
-     &                  LBi, UBi, LBj, UBj, ND,                         &
-     &                  WAVEP(ng)%Ta)
-# ifdef DISTRIBUTE
-!
-!  Exchange boundary data.
-!
-      CALL mp_exchange3d (ng, tile, iNLM, 2,                            &
-     &                    LBi, UBi, LBj, UBj, 1, ND,                    &
-     &                    NghostPoints,                                 &
-     &                    EWperiodic(ng), NSperiodic(ng),               &
-     &                    WAVEP(ng)%Tr, WAVEP(ng)%Ta)
-# endif
 !
       GO TO 250
  215  IF (Master) THEN
