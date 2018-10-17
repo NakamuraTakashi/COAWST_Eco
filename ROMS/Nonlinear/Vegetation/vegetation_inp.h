@@ -201,7 +201,8 @@
 !-----------------------------------------------------------------------
 !  Report output parameters (switched on in vegetation.in).
 !-----------------------------------------------------------------------
-! 
+!
+        DO ng=1,Ngrids   !!!!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Add: TN 
 #ifdef VEG_DRAG
 !      IF (Hout(idvprp(pdens),ng)WRITE (out,90) Hout(idvprp(pdens),ng),  & 
 !     &  'Hout(ipdens)',                                                 &
@@ -240,6 +241,7 @@
      &       'Hout(idTton)',                                            &
      &       'Write out Tonelli masking based thrust due to waves.'
 #endif 
+         END DO   !!!!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Add: TN
        END IF 
    30  FORMAT (/,' read_VegPar - variable info not yet loaded, ',a)
    40  FORMAT (/,' read_VegPar - Error while processing line: ',/,a)

@@ -75,6 +75,14 @@
           BOUNDARY(ng)%zeta_north(i)=cff
         END DO
       END IF
+#elif defined VEG_TEST
+      IF (LBC(inorth,isFsur,ng)%acquire.and.                            &
+     &    DOMAIN(ng)%Northern_Edge(tile)) THEN
+        cff=-0.5_r8*sin(2.0_r8*pi*time(ng)/(12.0_r8*3600.0_r8))
+        DO i=IstrR,IendR
+          BOUNDARY(ng)%zeta_north(i)=cff
+        END DO
+      END IF
 #elif defined KELVIN
       fac=1.0_r8                                ! zeta0
       omega=2.0_r8*pi/(12.42_r8*3600.0_r8)      ! M2 Tide period
