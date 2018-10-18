@@ -175,7 +175,17 @@
           BOUNDARY(ng)%zeta_east(j)=fac*val*COS(omega-phase)
         END DO
       END IF
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#elif defined FUKIDO
+      IF (LBC(inorth,isFsur,ng)%acquire.and.                            &
+     &    DOMAIN(ng)%Northern_Edge(tile)) THEN
+        cff=-0.6_r8*sin(2.0_r8*pi*time(ng)/(12.0_r8*3600.0_r8))
+        DO i=IstrR,IendR
+          BOUNDARY(ng)%zeta_north(i)=cff
+        END DO
+      END IF
 #else
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
       IF (LBC(ieast,isFsur,ng)%acquire.and.                             &
      &    DOMAIN(ng)%Eastern_Edge(tile)) THEN
         DO j=JstrT,JendT
