@@ -47,8 +47,7 @@
       USE bulk_flux_mod,        ONLY : bulk_flux
 #  endif
 # endif
-/*# if (defined ALBEDO_CLOUD || defined NCEP_FLUXES) && !defined BENCHMARK*/ /*>>>> TN: rm*/
-# if (defined ALBEDO_CLOUD && defined NCEP_FLUXES) && !defined BENCHMARK     /*<<<< TN: add*/
+# if (defined ALBEDO_CLOUD || defined NCEP_FLUXES) && !defined BENCHMARK
       USE cawdir_eval_mod,      ONLY : cawdir_eval
 # endif
 # if defined ALBEDO && defined SHORTWAVE
@@ -420,8 +419,7 @@
             DO ig=1,GridsInLayer(nl)
               ng=GridNumber(ig,nl)
               DO tile=first_tile(ng),last_tile(ng),+1
-/*# if (defined ALBEDO_CLOUD || defined NCEP_FLUXES) && !defined BENCHMARK*/ /*>>>> TN: rm*/
-# if (defined ALBEDO_CLOUD && defined NCEP_FLUXES) && !defined BENCHMARK     /*<<<< TN: add*/
+# if (defined ALBEDO_CLOUD || defined NCEP_FLUXES) && !defined BENCHMARK
                 CALL cawdir_eval(ng, tile)
 # endif
 # if defined ALBEDO && defined SHORTWAVE

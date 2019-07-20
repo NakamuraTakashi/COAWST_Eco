@@ -680,9 +680,11 @@
 # endif
 # if defined ALBEDO && defined SHORTWAVE
 #   if defined ALBEDO_CLOUD && !defined BENCHMARK
-          SRad(i,j) = SRad(i,j)*cawdir(i,j)
+          SRad(i,j) = SRad(i,j)*cawdir(i,j) !>>> LB: Remove
+!          SRad(i,j) = SRad(i,j)*1.0_r8  !<<< LB: Add
 #  else
-          SRad(i,j) = SRad(i,j)*(1.0_r8-albedo(i,j))
+          SRad(i,j) = SRad(i,j)*(1.0_r8-albedo(i,j)) !>>> LB: Remove
+!          SRad(i,j) = SRad(i,j)*1.0_r8 !<<< LB: Add
 #  endif
 # endif
           Tcff(i)=alpha(i,j)
@@ -714,14 +716,14 @@
 !  specific humidity in units of kg/kg
           vap_p=PairM*RH/(1.0_r8+0.378_r8*RH)             !WPB
 #  else
-      IF(RH.lt.2.0_r8) THEN                               !WPB
+      IF(RH.lt.2.0_r8) THEN                               !WPB   >>> LB: Remove
           cff=(0.7859_r8+0.03477_r8*TairC(i))/                          &
      &        (1.0_r8+0.00412_r8*TairC(i))
           e_sat=10.0_r8**cff   ! saturation vapor pressure (hPa or mbar)
           vap_p=e_sat*RH       ! water vapor pressure (hPa or mbar)
-      ELSE                                                !WPB
-          vap_p=0.001_r8*PairM*RH/(1.0_r8+0.000378_r8*RH) !WPB
-      ENDIF                                               !WPB
+      ELSE                                                !WPB   >>> LB: Remove
+          vap_p=0.001_r8*PairM*RH/(1.0_r8+0.000378_r8*RH) !WPB   >>> LB: Remove
+      ENDIF                                               !WPB   >>> LB: Remove
 #  endif
           cff2=TairK(i)*TairK(i)*TairK(i)
           cff1=cff2*TairK(i)
@@ -796,7 +798,7 @@
 #else
           IF (RH.lt.2.0_r8) THEN                       !RH fraction
             cff=cff*RH                                 !Vapor pres (mb)
-            Q(i)=0.62197_r8*(cff/(PairM-0.378_r8*cff+eps)) !Spec hum (kg/kg)
+           Q(i)=0.62197_r8*(cff/(PairM-0.378_r8*cff+eps)) !Spec hum (kg/kg)
           ELSE          !RH input was actually specific humidity in g/kg
             Q(i)=RH/1000.0_r8                          !Spec Hum (kg/kg)
           END IF
@@ -1254,11 +1256,13 @@
 # endif
 # if defined ALBEDO && defined SHORTWAVE
 #   if defined ALBEDO_CLOUD && !defined BENCHMARK
-          cawdif = 1._r8-albw_d
+          cawdif = 1._r8-albw_d                                  ! >>>LB: Remove
           srflx(i,j) = srflx(i,j)*(cawdir(i,j)*                         &
-     &                 (1._r8-cloud(i,j))+cawdif*cloud(i,j))
+     &                 (1._r8-cloud(i,j))+cawdif*cloud(i,j))     ! >>>LB: Remove 
+!          srflx(i,j) = srflx(i,j)*1.0_r8    !<<< LB: Add   
 #  else
-          srflx(i,j) = srflx(i,j)*(1._r8-albedo(i,j))
+          srflx(i,j) = srflx(i,j)*(1._r8-albedo(i,j))   !>>>LB: Remove
+!          srflx(i,j) = srflx(i,j)*1.0_r8   !<<< LB: Add
 #  endif
 # endif
           lrflx(i,j) = LRad(i,j)*Hscale2
