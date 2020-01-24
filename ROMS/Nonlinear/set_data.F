@@ -1975,7 +1975,6 @@
         CALL ana_tobc (ng, tile, iNLM)
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
 #  elif defined ANA_TOBC_BIO
-        CALL ana_tobc_bio (ng, tile, iNLM)
 
         IF (DOMAIN(ng)%SouthWest_Test(tile)) THEN
            DO itrc=1,NAT
@@ -2016,6 +2015,8 @@
             END IF
           END DO
         END IF
+
+        CALL ana_tobc_bio (ng, tile, iNLM)
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #  else
         IF (DOMAIN(ng)%SouthWest_Test(tile)) THEN

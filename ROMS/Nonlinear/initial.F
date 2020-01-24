@@ -525,19 +525,21 @@
       END DO
 #endif
 
-#if defined ANA_BIOLOGY && defined SOLVE3D
+!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> FA: MOVED
+!#if defined ANA_BIOLOGY && defined SOLVE3D
 !
 !  Analytical initial conditions for biology tracers.
 !
-      DO ng=1,Ngrids
-        IF (nrrec(ng).eq.0) THEN
-          DO tile=first_tile(ng),last_tile(ng),+1
-            CALL ana_biology (ng, tile, iNLM)
-          END DO
+!      DO ng=1,Ngrids
+!        IF (nrrec(ng).eq.0) THEN
+!          DO tile=first_tile(ng),last_tile(ng),+1
+!            CALL ana_biology (ng, tile, iNLM)
+!          END DO
 !$OMP BARRIER
-        END IF
-      END DO
-#endif
+!        END IF
+!      END DO
+!#endif
+!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< FA: MOVED
 
 #if defined ANA_SEDIMENT && defined SOLVE3D
 !
@@ -606,6 +608,22 @@
         END IF
       END DO
 #endif
+
+!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> FA: MOVED
+#if defined ANA_BIOLOGY && defined SOLVE3D
+!
+!  Analytical initial conditions for biology tracers.
+!
+      DO ng=1,Ngrids
+        IF (nrrec(ng).eq.0) THEN
+          DO tile=first_tile(ng),last_tile(ng),+1
+            CALL ana_biology (ng, tile, iNLM)
+          END DO
+!$OMP BARRIER
+        END IF
+      END DO
+#endif
+!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< FA: MOVED
 
 #ifdef ANA_ICE
 !

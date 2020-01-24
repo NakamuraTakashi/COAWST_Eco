@@ -84,7 +84,9 @@
 #endif
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>SA:Add
 #ifdef REEF_ECOSYS
-      real(r8) :: c_NO3_s, c_NO3_sc, c_NO3_d, c_NO3_dc, c_PO4_s, c_PO4_sc, c_PO4_d, c_PO4_dc
+      real(r8) :: DOC_t0, POC_t0, Phy1_t0, Phy2_t0, Zoop_t0
+      real(r8) :: NO3_t0, NO2_t0, NH4_t0, PO4_t0
+      real(r8) :: DON_t0, PON_t0, DOP_t0, POP_t0
 #endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<SA:Add
 !
@@ -100,6 +102,10 @@
 !-----------------------------------------------------------------------
 !
 #ifdef SHIRAHO_REEF
+!-----------------------------------------------------------------------
+!                       SHIRAHO REEF ECOSYSTEM MODEL
+!                          OPEN BOUNDARY -START-
+!-----------------------------------------------------------------------
       IF (ANY(LBC(ieast,isTvar(:),ng)%acquire).and.                     &
      &    DOMAIN(ng)%Eastern_Edge(tile)) THEN
         DO k=1,N(ng)
@@ -149,20 +155,19 @@
 
           END DO
         END DO
+!-----------------------------------------------------------------------
+!                    SHIRAHO REEF ECOSYSTEM MODEL
+!                        OPEN BOUNDARY -END-
+!-----------------------------------------------------------------------
       END IF
-      
 ! YAEYAMA2 case
-#elif defined YAEYAMA2
-!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>SA:Add
-      c_NO3_s=-0.0508_r8
-      c_NO3_sc=-2.9698_r8
-      c_NO3_d=0.0018_r8
-      c_NO3_dc=43.891_r8
-      c_PO4_s=-0.0037_r8
-      c_PO4_sc=-0.1513_r8
-      c_PO4_d=0.0002_r8
-      c_PO4_dc=3.3429_r8
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<SA:Add
+
+
+#elif defined CORAL_TRIANGLE || defined YAEYAMA2
+!-----------------------------------------------------------------------
+!               CORAL TRIANGLE REGIONAL ECOSYSTEM MODEL
+!                       OPEN BOUNDARY -START-
+!-----------------------------------------------------------------------
       IF (ANY(LBC(ieast,isTvar(:),ng)%acquire).and.                     &
      &    DOMAIN(ng)%Eastern_Edge(tile)) THEN
         DO k=1,N(ng)
@@ -171,30 +176,24 @@
             BOUNDARY(ng)%t_east(j,k,idmud(1))=0.0_r8  !(kg/m3 = g/L)
 #  endif
 #  ifdef REEF_ECOSYS
-            BOUNDARY(ng)%t_east(j,k,iTIC_)=TIC_0(ng)
-            BOUNDARY(ng)%t_east(j,k,iTAlk)=TAlk0(ng)
-            BOUNDARY(ng)%t_east(j,k,iOxyg)=Oxyg0(ng)
+
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>FA:Change
+            BOUNDARY(ng)%t_east(j,k,iTIC_) =                          &
+          &   DIC_Profile( BOUNDARY(ng)%t_east(j,k,iTemp))
+            BOUNDARY(ng)%t_east(j,k,iTAlk) =                          &
+          &   TA_Profile ( BOUNDARY(ng)%t_east(j,k,iTemp))
+            BOUNDARY(ng)%t_east(j,k,iOxyg) =                          &
+          &   DO_Profile ( BOUNDARY(ng)%t_east(j,k,iTemp))
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<FA:Change
 #   if defined ORGANIC_MATTER
-            BOUNDARY(ng)%t_east(j,k,iDOC_)=DOC_0(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_east(j,k,iPOC_)=POC_0(ng)     ! umolC L-1
-#    if defined SIMPLE_BIO_BOUNDARY
-            BOUNDARY(ng)%t_east(j,k,iPhy1)=Phy10(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_east(j,k,iPhy2)=Phy20(ng)     ! umolC L-1
-#    else
-!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>SA:Add
-            IF (z_r(Iend,j,k).gt.-155_r8) THEN
-              BOUNDARY(ng)%t_east(j,k,iPhy1)=(-0.00095_r8*(z_r(i,j,k)+50.0_r8)**2+10.5_r8)/24.0_r8     ! umol L-1
-            ELSE IF (z_r(Iend,j,k).le.-155_r8) THEN
-              BOUNDARY(ng)%t_east(j,k,iPhy1)=0.0_r8     ! umol L-1
-            END IF
-            IF (z_r(Iend,j,k).gt.-155_r8) THEN
-              BOUNDARY(ng)%t_east(j,k,iPhy2)=(-0.00095_r8*(z_r(i,j,k)+50.0_r8)**2+10.5_r8)/24.0_r8     ! umol L-1
-            ELSE IF (z_r(Iend,j,k).le.-155_r8) THEN
-              BOUNDARY(ng)%t_east(j,k,iPhy2)=0.0_r8     ! umol L-1
-            END IF
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<SA:Add
-#    endif
-            BOUNDARY(ng)%t_east(j,k,iZoop)=Zoop0(ng)     ! umolC L-1
+            BOUNDARY(ng)%t_east(j,k,iDOC_)= DOC_0(ng) ! umolC L-1
+            BOUNDARY(ng)%t_east(j,k,iPOC_)= POC_0(ng) ! umolC L-1
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>FA:Change
+            BOUNDARY(ng)%t_east(j,k,iPhy1) = PHY1_Profile( z_r(Iend+1,j,k) )
+            BOUNDARY(ng)%t_east(j,k,iPhy2) = PHY2_Profile( z_r(Iend+1,j,k) )
+            BOUNDARY(ng)%t_east(j,k,iZoop) = ZOO_Profile ( z_r(Iend+1,j,k) )
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<FA:Change
+
 #   endif
 #   if defined CARBON_ISOTOPE
             BOUNDARY(ng)%t_east(j,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng) ! umol kg-1  !!! R13C_fromd13C included geochem module
@@ -206,31 +205,33 @@
 #    endif
 #   endif
 #   if defined NUTRIENTS
-            BOUNDARY(ng)%t_east(j,k,iNO3_)=NO3_0(ng)     ! umol L-1
-            BOUNDARY(ng)%t_east(j,k,iNO2_)=NO2_0(ng)     ! umol L-1
-            BOUNDARY(ng)%t_east(j,k,iNH4_)=NH4_0(ng)     ! umol L-1
-            BOUNDARY(ng)%t_east(j,k,iPO4_)=PO4_0(ng)     ! umol L-1
-!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>SA:Add
-            IF (z_r(Iend,j,k).gt.-63.9196_r8) THEN
-              BOUNDARY(ng)%t_east(j,k,iNO3_)=NO3_0(ng)                      ! umol L-1
-            ELSE IF (z_r(Iend,j,k).gt.-900_r8) THEN
-              BOUNDARY(ng)%t_east(j,k,iNO3_)=c_NO3_s*z_r(Iend,j,k)+c_NO3_sc ! umol L-1
-            ELSE IF (z_r(Iend,j,k).le.-900_r8) THEN
-              BOUNDARY(ng)%t_east(j,k,iNO3_)=c_NO3_d*z_r(Iend,j,k)+c_NO3_dc ! umol L-1
-            END IF
-            IF (z_r(Iend,j,k).gt.-52.716_r8) THEN
-              BOUNDARY(ng)%t_east(j,k,iPO4_)=PO4_0(ng)                      ! umol L-1
-            ELSE IF (z_r(Iend,j,k).gt.-950_r8) THEN
-              BOUNDARY(ng)%t_east(j,k,iPO4_)=c_PO4_s*z_r(Iend,j,k)+c_PO4_sc ! umol L-1
-            ELSE IF (z_r(Iend,j,k).le.-950_r8) THEN
-              BOUNDARY(ng)%t_east(j,k,iPO4_)=c_PO4_d*z_r(Iend,j,k)+c_PO4_dc ! umol L-1
-            END IF
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<SA:Add
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>FA:Change
+!            BOUNDARY(ng)%t_east(j,k,iNO3_)= 31.29_r8 +               &
+!            & (4.85_r8*BOUNDARY(ng)%t_east(j,k,iTemp)) -             &
+!            & (0.85_r8*(BOUNDARY(ng)%t_east(j,k,iTemp)**2)) +        &
+!            & (0.038_r8*(BOUNDARY(ng)%t_east(j,k,iTemp)**3)) -       &
+!            & (0.0005_r8*(BOUNDARY(ng)%t_east(j,k,iTemp)**4))
+
+            BOUNDARY(ng)%t_east(j,k,iNO3_) =                          &
+          &   NO3_Profile( BOUNDARY(ng)%t_east(j,k,iTIC_ ) )
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<FA:Change
+            BOUNDARY(ng)%t_east(j,k,iNO2_)= NO2_0(ng) ! umol L-1
+            BOUNDARY(ng)%t_east(j,k,iNH4_)= NH4_0(ng) ! umol L-1
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>FA:Change
+!            BOUNDARY(ng)%t_east(j,k,iPO4_)= 2.16_r8 +    &
+!            & (0.37259_r8*BOUNDARY(ng)%t_east(j,k,iTemp)) -            &
+!            & (0.06304_r8*(BOUNDARY(ng)%t_east(j,k,iTemp)**2)) +       &
+!            & (0.00277_r8*(BOUNDARY(ng)%t_east(j,k,iTemp)**3)) -       &
+!            & (0.0000388_r8*(BOUNDARY(ng)%t_east(j,k,iTemp)**4))
+
+            BOUNDARY(ng)%t_east(j,k,iPO4_) =                          &
+          &   PO4_Profile( BOUNDARY(ng)%t_east(j,k,iNO3_) )
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<FA:Change
 #    if defined ORGANIC_MATTER
-            BOUNDARY(ng)%t_east(j,k,iDON_)=DON_0(ng)     ! umolN L-1
-            BOUNDARY(ng)%t_east(j,k,iPON_)=PON_0(ng)     ! umolN L-1
-            BOUNDARY(ng)%t_east(j,k,iDOP_)=DOP_0(ng)     ! umolP L-1
-            BOUNDARY(ng)%t_east(j,k,iPOP_)=POP_0(ng)     ! umolP L-1
+            BOUNDARY(ng)%t_east(j,k,iDON_)= DON_0(ng) ! umolN L-1
+            BOUNDARY(ng)%t_east(j,k,iPON_)= PON_0(ng) ! umolN L-1
+            BOUNDARY(ng)%t_east(j,k,iDOP_)= DOP_0(ng) ! umolP L-1
+            BOUNDARY(ng)%t_east(j,k,iPOP_)= POP_0(ng) ! umolP L-1
 #    endif
 #   endif
 #   if defined COT_STARFISH
@@ -250,30 +251,23 @@
             BOUNDARY(ng)%t_west(j,k,idmud(1))=0.0_r8  !(kg/m3 = g/L)
 #  endif
 #  ifdef REEF_ECOSYS
-            BOUNDARY(ng)%t_west(j,k,iTIC_)=TIC_0(ng)
-            BOUNDARY(ng)%t_west(j,k,iTAlk)=TAlk0(ng)
-            BOUNDARY(ng)%t_west(j,k,iOxyg)=Oxyg0(ng)
+
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>FA:Change
+            BOUNDARY(ng)%t_west(j,k,iTIC_) =                          &
+          &   DIC_Profile( BOUNDARY(ng)%t_west(j,k,iTemp))
+            BOUNDARY(ng)%t_west(j,k,iTAlk) =                          &
+          &   TA_Profile ( BOUNDARY(ng)%t_west(j,k,iTemp))
+            BOUNDARY(ng)%t_west(j,k,iOxyg) =                          &
+          &   DO_Profile ( BOUNDARY(ng)%t_west(j,k,iTemp))
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<FA:Change
 #   if defined ORGANIC_MATTER
-            BOUNDARY(ng)%t_west(j,k,iDOC_)=DOC_0(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_west(j,k,iPOC_)=POC_0(ng)     ! umolC L-1
-#    if defined SIMPLE_BIO_BOUNDARY
-            BOUNDARY(ng)%t_west(j,k,iPhy1)=Phy10(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_west(j,k,iPhy2)=Phy20(ng)     ! umolC L-1
-#    else
-!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>SA:Add
-            IF (z_r(Istr,j,k).gt.-155_r8) THEN
-              BOUNDARY(ng)%t_west(j,k,iPhy1)=(-0.00095_r8*(z_r(i,j,k)+50.0_r8)**2+10.5_r8)/24.0_r8     ! umol L-1
-            ELSE IF (z_r(Istr,j,k).le.-155_r8) THEN
-              BOUNDARY(ng)%t_west(j,k,iPhy1)=0.0_r8     ! umol L-1
-            END IF
-            IF (z_r(Istr,j,k).gt.-155_r8) THEN
-              BOUNDARY(ng)%t_west(j,k,iPhy2)=(-0.00095_r8*(z_r(i,j,k)+50.0_r8)**2+10.5_r8)/24.0_r8     ! umol L-1
-            ELSE IF (z_r(Istr,j,k).le.-155_r8) THEN
-              BOUNDARY(ng)%t_west(j,k,iPhy2)=0.0_r8     ! umol L-1
-            END IF
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<SA:Add
-#    endif
-            BOUNDARY(ng)%t_west(j,k,iZoop)=Zoop0(ng)     ! umolC L-1
+            BOUNDARY(ng)%t_west(j,k,iDOC_)= DOC_0(ng) ! umolC L-1
+            BOUNDARY(ng)%t_west(j,k,iPOC_)= POC_0(ng) ! umolC L-1
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>FA:Change
+            BOUNDARY(ng)%t_west(j,k,iPhy1) = PHY1_Profile( z_r(Istr-1,j,k) )
+            BOUNDARY(ng)%t_west(j,k,iPhy2) = PHY2_Profile( z_r(Istr-1,j,k) )
+            BOUNDARY(ng)%t_west(j,k,iZoop) = ZOO_Profile ( z_r(Istr-1,j,k) )
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<FA:Change
 #   endif
 #   if defined CARBON_ISOTOPE
             BOUNDARY(ng)%t_west(j,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng) ! umol kg-1  !!! R13C_fromd13C included geochem module
@@ -285,31 +279,33 @@
 #    endif
 #   endif
 #   if defined NUTRIENTS
-!            BOUNDARY(ng)%t_west(j,k,iNO3_)=NO3_0(ng)     ! umol L-1
-            BOUNDARY(ng)%t_west(j,k,iNO2_)=NO2_0(ng)     ! umol L-1
-            BOUNDARY(ng)%t_west(j,k,iNH4_)=NH4_0(ng)     ! umol L-1
-!            BOUNDARY(ng)%t_west(j,k,iPO4_)=PO4_0(ng)     ! umol L-1
-!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>SA:Add
-            IF (z_r(Istr,j,k).gt.-63.9196_r8) THEN
-              BOUNDARY(ng)%t_west(j,k,iNO3_)=NO3_0(ng)                      ! umol L-1
-            ELSE IF (z_r(Istr,j,k).gt.-900_r8) THEN
-              BOUNDARY(ng)%t_west(j,k,iNO3_)=c_NO3_s*z_r(Istr,j,k)+c_NO3_sc ! umol L-1
-            ELSE IF (z_r(Istr,j,k).le.-900_r8) THEN
-              BOUNDARY(ng)%t_west(j,k,iNO3_)=c_NO3_d*z_r(Istr,j,k)+c_NO3_dc ! umol L-1
-            END IF
-            IF (z_r(Istr,j,k).gt.-52.716_r8) THEN
-              BOUNDARY(ng)%t_west(j,k,iPO4_)=PO4_0(ng)                      ! umol L-1
-            ELSE IF (z_r(Istr,j,k).gt.-950_r8) THEN
-              BOUNDARY(ng)%t_west(j,k,iPO4_)=c_PO4_s*z_r(Istr,j,k)+c_PO4_sc ! umol L-1
-            ELSE IF (z_r(Istr,j,k).le.-950_r8) THEN
-              BOUNDARY(ng)%t_west(j,k,iPO4_)=c_PO4_d*z_r(Istr,j,k)+c_PO4_dc ! umol L-1
-            END IF
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<SA:Add
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>FA:Add
+!            BOUNDARY(ng)%t_west(j,k,iNO3_)= 31.29_r8 +               &
+!            & (4.85_r8*BOUNDARY(ng)%t_west(j,k,iTemp)) -             &
+!            & (0.85_r8*(BOUNDARY(ng)%t_west(j,k,iTemp)**2)) +        &
+!            & (0.038_r8*(BOUNDARY(ng)%t_west(j,k,iTemp)**3)) -       &
+!            & (0.0005_r8*(BOUNDARY(ng)%t_west(j,k,iTemp)**4))
+
+            BOUNDARY(ng)%t_west(j,k,iNO3_) =                          &
+          &   NO3_Profile( BOUNDARY(ng)%t_west(j,k,iTIC_ ) )
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<FA:Add
+            BOUNDARY(ng)%t_west(j,k,iNO2_)= NO2_0(ng) ! umol L-1
+            BOUNDARY(ng)%t_west(j,k,iNH4_)= NH4_0(ng) ! umol L-1
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>FA:Add
+!            BOUNDARY(ng)%t_west(j,k,iPO4_)= 2.16_r8 +                  &
+!            & (0.37259_r8*BOUNDARY(ng)%t_west(j,k,iTemp)) -            &
+!            & (0.06304_r8*(BOUNDARY(ng)%t_west(j,k,iTemp)**2)) +       &
+!            & (0.00277_r8*(BOUNDARY(ng)%t_west(j,k,iTemp)**3)) -       &
+!            & (0.0000388_r8*(BOUNDARY(ng)%t_west(j,k,iTemp)**4))
+
+            BOUNDARY(ng)%t_west(j,k,iPO4_) =                          &
+          &   PO4_Profile( BOUNDARY(ng)%t_west(j,k,iNO3_) )
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<FA:Add
 #    if defined ORGANIC_MATTER
-            BOUNDARY(ng)%t_west(j,k,iDON_)=DON_0(ng)     ! umolN L-1
-            BOUNDARY(ng)%t_west(j,k,iPON_)=PON_0(ng)     ! umolN L-1
-            BOUNDARY(ng)%t_west(j,k,iDOP_)=DOP_0(ng)     ! umolP L-1
-            BOUNDARY(ng)%t_west(j,k,iPOP_)=POP_0(ng)     ! umolP L-1
+            BOUNDARY(ng)%t_west(j,k,iDON_)= DON_0(ng) ! umolN L-1
+            BOUNDARY(ng)%t_west(j,k,iPON_)= PON_0(ng) ! umolN L-1
+            BOUNDARY(ng)%t_west(j,k,iDOP_)= DOP_0(ng) ! umolP L-1
+            BOUNDARY(ng)%t_west(j,k,iPOP_)= POP_0(ng) ! umolP L-1
 #    endif
 #   endif
 #   if defined COT_STARFISH
@@ -329,30 +325,22 @@
             BOUNDARY(ng)%t_south(i,k,idmud(1))=0.0_r8  !(kg/m3 = g/L)
 #  endif
 #  ifdef REEF_ECOSYS
-            BOUNDARY(ng)%t_south(i,k,iTIC_)=TIC_0(ng)
-            BOUNDARY(ng)%t_south(i,k,iTAlk)=TAlk0(ng)
-            BOUNDARY(ng)%t_south(i,k,iOxyg)=Oxyg0(ng)
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>FA:Change
+            BOUNDARY(ng)%t_south(i,k,iTIC_) =                          &
+          &   DIC_Profile( BOUNDARY(ng)%t_south(i,k,iTemp))
+            BOUNDARY(ng)%t_south(i,k,iTAlk) =                          &
+          &   TA_Profile ( BOUNDARY(ng)%t_south(i,k,iTemp))
+            BOUNDARY(ng)%t_south(i,k,iOxyg) =                          &
+          &   DO_Profile ( BOUNDARY(ng)%t_south(i,k,iTemp))
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<FA:Change
 #   if defined ORGANIC_MATTER
-            BOUNDARY(ng)%t_south(i,k,iDOC_)=DOC_0(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_south(i,k,iPOC_)=POC_0(ng)     ! umolC L-1
-#    if defined SIMPLE_BIO_BOUNDARY
-            BOUNDARY(ng)%t_south(i,k,iPhy1)=Phy10(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_south(i,k,iPhy2)=Phy20(ng)     ! umolC L-1
-#    else
-!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>SA:Add
-            IF (z_r(i,Jstr,k).gt.-155_r8) THEN
-              BOUNDARY(ng)%t_south(i,k,iPhy1)=(-0.00095_r8*(z_r(i,j,k)+50.0_r8)**2+10.5_r8)/24.0_r8     ! umol L-1
-            ELSE IF (z_r(i,Jstr,k).le.-155_r8) THEN
-              BOUNDARY(ng)%t_south(i,k,iPhy1)=0.0_r8     ! umol L-1
-            END IF
-            IF (z_r(i,Jstr,k).gt.-155_r8) THEN
-              BOUNDARY(ng)%t_south(i,k,iPhy2)=(-0.00095_r8*(z_r(i,j,k)+50.0_r8)**2+10.5_r8)/24.0_r8     ! umol L-1
-            ELSE IF (z_r(i,Jstr,k).le.-155_r8) THEN
-              BOUNDARY(ng)%t_south(i,k,iPhy2)=0.0_r8     ! umol L-1
-            END IF
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<SA:Add
-#    endif
-            BOUNDARY(ng)%t_south(i,k,iZoop)=Zoop0(ng)     ! umolC L-1
+            BOUNDARY(ng)%t_south(i,k,iDOC_)= DOC_0(ng) ! umolC L-1
+            BOUNDARY(ng)%t_south(i,k,iPOC_)= POC_0(ng) ! umolC L-1
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>FA:Change
+            BOUNDARY(ng)%t_south(i,k,iPhy1) = PHY1_Profile( z_r(i,Jstr-1,k) )
+            BOUNDARY(ng)%t_south(i,k,iPhy2) = PHY2_Profile( z_r(i,Jstr-1,k) )
+            BOUNDARY(ng)%t_south(i,k,iZoop) = ZOO_Profile ( z_r(i,Jstr-1,k) )
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<FA:Change
 #   endif
 #   if defined CARBON_ISOTOPE
             BOUNDARY(ng)%t_south(i,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng) ! umol kg-1  !!! R13C_fromd13C included geochem module
@@ -364,31 +352,33 @@
 #    endif
 #   endif
 #   if defined NUTRIENTS
-!            BOUNDARY(ng)%t_south(i,k,iNO3_)=NO3_0(ng)     ! umol L-1
-            BOUNDARY(ng)%t_south(i,k,iNO2_)=NO2_0(ng)     ! umol L-1
-            BOUNDARY(ng)%t_south(i,k,iNH4_)=NH4_0(ng)     ! umol L-1
-!            BOUNDARY(ng)%t_south(i,k,iPO4_)=PO4_0(ng)     ! umol L-1
-!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>SA:Add
-            IF (z_r(i,Jstr,k).gt.-63.9196_r8) THEN
-              BOUNDARY(ng)%t_south(i,k,iNO3_)=NO3_0(ng)                      ! umol L-1
-            ELSE IF (z_r(i,Jstr,k).gt.-900_r8) THEN
-              BOUNDARY(ng)%t_south(i,k,iNO3_)=c_NO3_s*z_r(i,Jstr,k)+c_NO3_sc ! umol L-1
-            ELSE IF (z_r(i,Jstr,k).le.-900_r8) THEN
-              BOUNDARY(ng)%t_south(i,k,iNO3_)=c_NO3_d*z_r(i,Jstr,k)+c_NO3_dc ! umol L-1
-            END IF
-            IF (z_r(i,Jstr,k).gt.-52.716_r8) THEN
-              BOUNDARY(ng)%t_south(i,k,iPO4_)=PO4_0(ng)                      ! umol L-1
-            ELSE IF (z_r(i,Jstr,k).gt.-950_r8) THEN
-              BOUNDARY(ng)%t_south(i,k,iPO4_)=c_PO4_s*z_r(i,Jstr,k)+c_PO4_sc ! umol L-1
-            ELSE IF (z_r(i,Jstr,k).le.-950_r8) THEN
-              BOUNDARY(ng)%t_south(i,k,iPO4_)=c_PO4_d*z_r(i,Jstr,k)+c_PO4_dc ! umol L-1
-            END IF
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<SA:Add
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>FA:Add
+!            BOUNDARY(ng)%t_south(i,k,iNO3_)= 31.29_r8 +                &
+!            & (4.85_r8*BOUNDARY(ng)%t_south(i,k,iTemp)) -             &
+!            & (0.85_r8*(BOUNDARY(ng)%t_south(i,k,iTemp)**2)) +        &
+!            & (0.038_r8*(BOUNDARY(ng)%t_south(i,k,iTemp)**3)) -       &
+!            & (0.0005_r8*(BOUNDARY(ng)%t_south(i,k,iTemp)**4))
+
+            BOUNDARY(ng)%t_south(i,k,iNO3_) =                          &
+          &   NO3_Profile( BOUNDARY(ng)%t_south(i,k,iTIC_ ) )
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<FA:Add
+            BOUNDARY(ng)%t_south(i,k,iNO2_)= NO2_0(ng) ! umol L-1
+            BOUNDARY(ng)%t_south(i,k,iNH4_)= NH4_0(ng) ! umol L-1
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>FA:Add
+!            BOUNDARY(ng)%t_south(i,k,iPO4_)= 2.16_r8 +                  &
+!            & (0.37259_r8*BOUNDARY(ng)%t_south(i,k,iTemp)) -            &
+!            & (0.06304_r8*(BOUNDARY(ng)%t_south(i,k,iTemp)**2)) +       &
+!            & (0.00277_r8*(BOUNDARY(ng)%t_south(i,k,iTemp)**3)) -       &
+!            & (0.0000388_r8*(BOUNDARY(ng)%t_south(i,k,iTemp)**4))
+
+            BOUNDARY(ng)%t_south(i,k,iPO4_) =                          &
+          &   PO4_Profile( BOUNDARY(ng)%t_south(i,k,iNO3_) )
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<FA:Add
 #    if defined ORGANIC_MATTER
-            BOUNDARY(ng)%t_south(i,k,iDON_)=DON_0(ng)     ! umolN L-1
-            BOUNDARY(ng)%t_south(i,k,iPON_)=PON_0(ng)     ! umolN L-1
-            BOUNDARY(ng)%t_south(i,k,iDOP_)=DOP_0(ng)     ! umolP L-1
-            BOUNDARY(ng)%t_south(i,k,iPOP_)=POP_0(ng)     ! umolP L-1
+            BOUNDARY(ng)%t_south(i,k,iDON_)= DON_0(ng) ! umolN L-1
+            BOUNDARY(ng)%t_south(i,k,iPON_)= PON_0(ng) ! umolN L-1
+            BOUNDARY(ng)%t_south(i,k,iDOP_)= DOP_0(ng) ! umolP L-1
+            BOUNDARY(ng)%t_south(i,k,iPOP_)= POP_0(ng) ! umolP L-1
 #    endif
 #   endif
 #   if defined COT_STARFISH
@@ -408,30 +398,22 @@
             BOUNDARY(ng)%t_north(i,k,idmud(1))=0.0_r8  !(kg/m3 = g/L)
 #  endif
 #  ifdef REEF_ECOSYS
-            BOUNDARY(ng)%t_north(i,k,iTIC_)=TIC_0(ng)
-            BOUNDARY(ng)%t_north(i,k,iTAlk)=TAlk0(ng)
-            BOUNDARY(ng)%t_north(i,k,iOxyg)=Oxyg0(ng)
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>FA:Change
+            BOUNDARY(ng)%t_north(i,k,iTIC_) =                          &
+          &   DIC_Profile( BOUNDARY(ng)%t_north(i,k,iTemp))
+            BOUNDARY(ng)%t_north(i,k,iTAlk) =                          &
+          &   TA_Profile ( BOUNDARY(ng)%t_north(i,k,iTemp))
+            BOUNDARY(ng)%t_north(i,k,iOxyg) =                          &
+          &   DO_Profile ( BOUNDARY(ng)%t_north(i,k,iTemp))
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<FA:Change
 #   if defined ORGANIC_MATTER
-            BOUNDARY(ng)%t_north(i,k,iDOC_)=DOC_0(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_north(i,k,iPOC_)=POC_0(ng)     ! umolC L-1
-#    if defined SIMPLE_BIO_BOUNDARY
-            BOUNDARY(ng)%t_north(i,k,iPhy1)=Phy10(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_north(i,k,iPhy2)=Phy20(ng)     ! umolC L-1
-#    else
-!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>SA:Add
-            IF (z_r(i,Jend,k).gt.-155_r8) THEN
-              BOUNDARY(ng)%t_north(i,k,iPhy1)=(-0.00095_r8*(z_r(i,j,k)+50.0_r8)**2+10.5_r8)/24.0_r8     ! umol L-1
-            ELSE IF (z_r(i,Jend,k).le.-155_r8) THEN
-              BOUNDARY(ng)%t_north(i,k,iPhy1)=0.0_r8     ! umol L-1
-            END IF
-            IF (z_r(i,Jend,k).gt.-155_r8) THEN
-              BOUNDARY(ng)%t_north(i,k,iPhy2)=(-0.00095_r8*(z_r(i,j,k)+50.0_r8)**2+10.5_r8)/24.0_r8     ! umol L-1
-            ELSE IF (z_r(i,Jend,k).le.-155_r8) THEN
-              BOUNDARY(ng)%t_north(i,k,iPhy2)=0.0_r8     ! umol L-1
-            END IF
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<SA:Add
-#    endif
-            BOUNDARY(ng)%t_north(i,k,iZoop)=Zoop0(ng)     ! umolC L-1
+            BOUNDARY(ng)%t_north(i,k,iDOC_)= DOC_0(ng) ! umolC L-1
+            BOUNDARY(ng)%t_north(i,k,iPOC_)= POC_0(ng) ! umolC L-1
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>FA:Change
+            BOUNDARY(ng)%t_north(i,k,iPhy1) = PHY1_Profile( z_r(i,Jend+1,k) )
+            BOUNDARY(ng)%t_north(i,k,iPhy2) = PHY2_Profile( z_r(i,Jend+1,k) )
+            BOUNDARY(ng)%t_north(i,k,iZoop) = ZOO_Profile ( z_r(i,Jend+1,k) )
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<FA:Change
 #   endif
 #   if defined CARBON_ISOTOPE
             BOUNDARY(ng)%t_north(i,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng) ! umol kg-1  !!! R13C_fromd13C included geochem module
@@ -443,31 +425,33 @@
 #    endif
 #   endif
 #   if defined NUTRIENTS
-!            BOUNDARY(ng)%t_north(i,k,iNO3_)=NO3_0(ng)     ! umol L-1
-            BOUNDARY(ng)%t_north(i,k,iNO2_)=NO2_0(ng)     ! umol L-1
-            BOUNDARY(ng)%t_north(i,k,iNH4_)=NH4_0(ng)     ! umol L-1
-!            BOUNDARY(ng)%t_north(i,k,iPO4_)=PO4_0(ng)     ! umol L-1
-!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>SA:Add
-            IF (z_r(i,Jend,k).gt.-63.9196_r8) THEN
-              BOUNDARY(ng)%t_north(i,k,iNO3_)=NO3_0(ng)                      ! umol L-1
-            ELSE IF (z_r(i,Jend,k).gt.-900_r8) THEN
-              BOUNDARY(ng)%t_north(i,k,iNO3_)=c_NO3_s*z_r(i,Jend,k)          ! umol L-1
-            ELSE IF (z_r(i,Jend,k).le.-900_r8) THEN
-              BOUNDARY(ng)%t_north(i,k,iNO3_)=c_NO3_d*z_r(i,Jend,k)+c_NO3_dc ! umol L-1
-            END IF
-            IF (z_r(i,Jend,k).gt.-52.716_r8) THEN
-              BOUNDARY(ng)%t_north(i,k,iPO4_)=PO4_0(ng)                      ! umol L-1
-            ELSE IF (z_r(i,Jend,k).gt.-950_r8) THEN
-              BOUNDARY(ng)%t_north(i,k,iPO4_)=c_PO4_s*z_r(i,Jend,k)+c_PO4_sc ! umol L-1
-            ELSE IF (z_r(i,Jend,k).le.-950_r8) THEN
-              BOUNDARY(ng)%t_north(i,k,iPO4_)=c_PO4_d*z_r(i,Jend,k)+c_PO4_dc ! umol L-1
-            END IF
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<SA:Add
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>FA:Add
+!            BOUNDARY(ng)%t_north(i,k,iNO3_)= 31.29_r8 +               &
+!            & (4.85_r8*BOUNDARY(ng)%t_north(i,k,iTemp)) -             &
+!            & (0.85_r8*(BOUNDARY(ng)%t_north(i,k,iTemp)**2)) +        &
+!            & (0.038_r8*(BOUNDARY(ng)%t_north(i,k,iTemp)**3)) -       &
+!            & (0.0005_r8*(BOUNDARY(ng)%t_north(i,k,iTemp)**4))
+
+            BOUNDARY(ng)%t_north(i,k,iNO3_) =                          &
+          &   NO3_Profile( BOUNDARY(ng)%t_north(i,k,iTIC_ ) )
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<FA:Add
+            BOUNDARY(ng)%t_north(i,k,iNO2_)= NO2_0(ng) ! umol L-1
+            BOUNDARY(ng)%t_north(i,k,iNH4_)= NH4_0(ng) ! umol L-1
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>FA:Add
+!            BOUNDARY(ng)%t_north(i,k,iPO4_)= 2.16_r8 +                  &
+!            & (0.37259_r8*BOUNDARY(ng)%t_north(i,k,iTemp)) -            &
+!            & (0.06304_r8*(BOUNDARY(ng)%t_north(i,k,iTemp)**2)) +       &
+!            & (0.00277_r8*(BOUNDARY(ng)%t_north(i,k,iTemp)**3)) -       &
+!            & (0.0000388_r8*(BOUNDARY(ng)%t_north(i,k,iTemp)**4))
+
+            BOUNDARY(ng)%t_north(i,k,iPO4_) =                          &
+          &   PO4_Profile( BOUNDARY(ng)%t_north(i,k,iNO3_) )
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<FA:Add
 #    if defined ORGANIC_MATTER
-            BOUNDARY(ng)%t_north(i,k,iDON_)=DON_0(ng)     ! umolN L-1
-            BOUNDARY(ng)%t_north(i,k,iPON_)=PON_0(ng)     ! umolN L-1
-            BOUNDARY(ng)%t_north(i,k,iDOP_)=DOP_0(ng)     ! umolP L-1
-            BOUNDARY(ng)%t_north(i,k,iPOP_)=POP_0(ng)     ! umolP L-1
+            BOUNDARY(ng)%t_north(i,k,iDON_)= DON_0(ng) ! umolN L-1
+            BOUNDARY(ng)%t_north(i,k,iPON_)= PON_0(ng) ! umolN L-1
+            BOUNDARY(ng)%t_north(i,k,iDOP_)= DOP_0(ng) ! umolP L-1
+            BOUNDARY(ng)%t_north(i,k,iPOP_)= POP_0(ng) ! umolP L-1
 #    endif
 #   endif
 #   if defined COT_STARFISH
@@ -477,6 +461,10 @@
 #  endif
           END DO
         END DO
+!-----------------------------------------------------------------------
+!               CORAL TRIANGLE REGIONAL ECOSYSTEM MODEL
+!                         OPEN BOUNDARY -END-
+!-----------------------------------------------------------------------
       END IF
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 
