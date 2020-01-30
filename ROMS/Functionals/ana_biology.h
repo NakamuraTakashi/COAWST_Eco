@@ -309,9 +309,6 @@
 #if defined REEF_ECOSYS
       real(r8) :: TmpK, Salt, sspH, cCO3, cCO2aq, ssfCO2, ssCO2flux
       real(r8) :: DOsatu, ssO2flux
-!!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>SA:Add
-      real(r8) :: c_NO3_s, c_NO3_sc, c_NO3_d, c_NO3_dc, c_PO4_s, c_PO4_sc, c_PO4_d, c_PO4_dc
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<SA:Add
 #endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 
@@ -700,61 +697,205 @@
         END DO
       END DO
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
-
 #elif defined REEF_ECOSYS
 !
 !-----------------------------------------------------------------------
 !  Coral reef ecosystem model.
 !-----------------------------------------------------------------------
 !
-# if defined CORAL_TRIANGLE || defined YAEYAMA2
-!-----------------------------------------------------------------------
-!  Iinitial conditions for Coral Triangle domain
-!  developed by Faisal AMRI
-!-----------------------------------------------------------------------
+# if defined CORAL_TRIANGLE
+!------------------------------------------------------------------------
+!   CORAL_TRIANGLE CASE
+!------------------------------------------------------------------------
+      DO k=1,N(ng)
+        DO j=JstrT,JendT
+          DO i=IstrT,IendT
+            t(i,j,k,1,iTIC_) = DIC_Profile( t(i,j,k,1,iTemp) )        
+            t(i,j,k,1,iTAlk) = TA_Profile ( t(i,j,k,1,iTemp) )
+            t(i,j,k,1,iOxyg) = DO_Profile ( t(i,j,k,1,iTemp) )
+#  if defined ORGANIC_MATTER
+            DO itrc=1,N_dom
+              t(i,j,k,1,iDOC(itrc)) = DOC_0(itrc,ng)     ! umolC L-1
+            END DO
+            DO itrc=1,N_pom
+              t(i,j,k,1,iPOC(itrc)) = POC_0(itrc,ng)     ! umolC L-1
+            END DO
+            !!!SIMPLIFIED BELL-SHAPED PHYTOPLANKTON VERTICAL PROFILE IN STRATIFIED WATER COLUMN!!!
+            t(i,j,k,1,iPhyt(1)) = PHY1_Profile( z_r(i,j,k) )
+            t(i,j,k,1,iPhyt(2)) = PHY2_Profile( z_r(i,j,k) )
+            t(i,j,k,1,iPhyt(3)) = Phyt_0(3,ng)
+
+            t(i,j,k,1,iZoop(1)) = ZOO_Profile( z_r(i,j,k) )    ! umolC L-1
+
+            DO itrc=1,N_pim
+              t(i,j,k,1,iPIC(itrc)) = PIC_0(itrc,ng)     ! umolC L-1
+            END DO
+#  endif
+#  if defined CARBON_ISOTOPE
+            t(i,j,k,1,iT13C) = R13C_fromd13C( d13C_TIC0(ng) )*t(i,j,k,1,iTIC_) ! umol kg-1  !!! R13C_fromd13C included geochem module
+#   if defined ORGANIC_MATTER
+            DO itrc=1,N_dom
+              t(i,j,k,1,iDO13C(itrc)) = R13C_fromd13C( d13C_DOC_0(itrc,ng) )*t(i,j,k,1,iDOC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
+            END DO
+            DO itrc=1,N_pom
+              t(i,j,k,1,iPO13C(itrc)) = R13C_fromd13C( d13C_POC_0(itrc,ng) )*t(i,j,k,1,iPOC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
+            END DO
+            DO itrc=1,N_phyt
+              t(i,j,k,1,iPhyt13C(itrc)) = R13C_fromd13C( d13C_Phyt_0(itrc,ng) )*t(i,j,k,1,iPhyt(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
+            END DO
+            DO itrc=1,N_zoop
+              t(i,j,k,1,iZoop13C(itrc)) = R13C_fromd13C( d13C_Zoop_0(itrc,ng) )*t(i,j,k,1,iZoop(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
+            END DO
+            DO itrc=1,N_pim
+              t(i,j,k,1,iPI13C(itrc)) = R13C_fromd13C( d13C_PIC_0(itrc,ng) )*t(i,j,k,1,iPIC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
+            END DO
+#   endif
+#  endif
+#  if defined NUTRIENTS
+            t(i,j,k,1,iNO3_) = NO3_Profile( t(i,j,k,1,iTIC_) )   ! umolN L-1
+            t(i,j,k,1,iNO2_) = NO2_0(ng)  ! umolN L-1
+            t(i,j,k,1,iNH4_) = NH4_0(ng)  ! umolN L-1
+            t(i,j,k,1,iPO4_) = PO4_Profile( t(i,j,k,1,iNO3_) )  ! umolP L-1
+
+#   if defined ORGANIC_MATTER
+            DO itrc=1,N_dom
+              t(i,j,k,1,iDON(itrc)) = DON_0(itrc,ng)     ! umolC L-1
+            END DO
+            DO itrc=1,N_pom
+              t(i,j,k,1,iPON(itrc)) = PON_0(itrc,ng)     ! umolC L-1
+            END DO
+            DO itrc=1,N_dom
+              t(i,j,k,1,iDOP(itrc)) = DOP_0(itrc,ng)     ! umolC L-1
+            END DO
+            DO itrc=1,N_pom
+              t(i,j,k,1,iPOP(itrc)) = POP_0(itrc,ng)     ! umolC L-1
+            END DO
+#   endif
+#   if defined NITROGEN_ISOTOPE
+            t(i,j,k,1,i15NO3) = R15N_fromd15N( d13C_TIC0(ng) )*t(i,j,k,1,iNO3_) ! umol kg-1  !!! R15N_fromd15N included geochem module
+            t(i,j,k,1,i15NO2) = R15N_fromd15N( d13C_TIC0(ng) )*t(i,j,k,1,iNO2_) ! umol kg-1  !!! R15N_fromd15N included geochem module
+            t(i,j,k,1,i15NH4) = R15N_fromd15N( d13C_TIC0(ng) )*t(i,j,k,1,iNH4_) ! umol kg-1  !!! R15N_fromd15N included geochem module
+#    if defined ORGANIC_MATTER
+            DO itrc=1,N_dom
+              t(i,j,k,1,iDO15N(itrc)) = R15N_fromd15N( d15N_DOC_0(itrc,ng) )*t(i,j,k,1,iDON(itrc)) ! umol L-1  !!! R15N_fromd15N included geochem module
+            END DO
+            DO itrc=1,N_pom
+              t(i,j,k,1,iPO15N(itrc)) = R15N_fromd15N( d15N_POC_0(itrc,ng) )*t(i,j,k,1,iPON(itrc)) ! umol L-1  !!! R15N_fromd15N included geochem module
+            END DO
+            DO itrc=1,N_phyt
+              t(i,j,k,1,iPhyt15N(itrc)) = R15N_fromd15N( d15N_Phyt_0(itrc,ng) )*t(i,j,k,1,iPhyt(itrc))/9.2_r8 ! umol L-1  !!! R15N_fromd15N included geochem module
+            END DO
+            DO itrc=1,N_zoop
+              t(i,j,k,1,iZoop15N(itrc)) = R15N_fromd15N( d15N_Zoop_0(itrc,ng) )*t(i,j,k,1,iZoop(itrc))/9.2d0 ! umol L-1  !!! R15N_fromd15N included geochem module
+            END DO
+#    endif
+#   endif
+#  endif
+#  if defined COT_STARFISH
+            t(i,j,k,1,iCOTe) = COTe0(ng)     ! umolC L-1
+            t(i,j,k,1,iCOTl) = COTl0(ng)     ! umolC L-1
+#  endif
+
+#  if defined CARBON_ISOTOPE
+            HisBio3d(i,j,k,id13C) = d13C_TIC0(ng)
+#  endif
+  
+          END DO
+        END DO
+      END DO
+
+# elif defined YAEYAMA2
+!------------------------------------------------------------------------
+!   YAEYAMA2 CASE
+!------------------------------------------------------------------------
     DO k=1,N(ng)
       DO j=JstrT,JendT
         DO i=IstrT,IendT
           t(i,j,k,1,iTIC_) = DIC_Profile( t(i,j,k,1,iTemp) )        
           t(i,j,k,1,iTAlk) = TA_Profile ( t(i,j,k,1,iTemp) )
-          t(i,j,k,1,iOxyg) = DO_Profile ( t(i,j,k,1,iTemp) )
+          t(i,j,k,1,iOxyg) = DO_Profile2( t(i,j,N(ng),1,iTemp)              &
+   &        , t(i,j,N(ng),1,iSalt), TIC_0(ng), t(i,j,k,1,iTIC_) )
 
-!!!SIMPLIFIED BELL-SHAPED PHYTOPLANKTON VERTICAL PROFILE IN STRATIFIED WATER COLUMN!!!
-          t(i,j,k,1,iPhy1) = PHY1_Profile( z_r(i,j,k) )
-          t(i,j,k,1,iPhy2) = PHY2_Profile( z_r(i,j,k) )
 #  if defined ORGANIC_MATTER
-          t(i,j,k,1,iDOC_) = DOC_0(ng)     ! umolC L-1
-          t(i,j,k,1,iPOC_) = POC_0(ng)     ! umolC L-1
-#   if defined SIMPLE_BIO_BOUNDARY
-
-#   else
-#   endif
-          t(i,j,k,1,iZoop) = ZOO_Profile( z_r(i,j,k) )    ! umolC L-1
+          DO itrc=1,N_dom
+            t(i,j,k,1,iDOC(itrc)) = DOC_0(itrc,ng)     ! umolC L-1
+          END DO
+          DO itrc=1,N_pom
+            t(i,j,k,1,iPOC(itrc)) = POC_0(itrc,ng)     ! umolC L-1
+          END DO
+          t(i,j,k,1,iPhyt(1)) = PHY1_Profile2( z_r(i,j,k) )
+          t(i,j,k,1,iPhyt(2)) = PHY2_Profile2( z_r(i,j,k) )
+          t(i,j,k,1,iPhyt(3)) = Phyt_0(3,ng)
+!          DO itrc=1,N_zoop
+!            t(i,j,k,1,iZoop(itrc))=Zoop_0(itrc,ng)     ! umolC L-1
+!          END DO
+          t(i,j,k,1,iZoop(1)) = ZOO_Profile2( z_r(i,j,k) )    ! umolC L-1
+          DO itrc=1,N_pim
+            t(i,j,k,1,iPIC(itrc)) = PIC_0(itrc,ng)     ! umolC L-1
+          END DO
 #  endif
 #  if defined CARBON_ISOTOPE
-          t(i,j,k,1,iT13C) = R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng) ! umol kg-1  !!! R13C_fromd13C included geochem module
+          t(i,j,k,1,iT13C) = R13C_fromd13C( d13C_TIC0(ng) )*t(i,j,k,1,iTIC_) ! umol kg-1  !!! R13C_fromd13C included geochem module
 #   if defined ORGANIC_MATTER
-          t(i,j,k,1,iDO13) = R13C_fromd13C( d13C_DOC0(ng) )*DOC_0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-          t(i,j,k,1,iPO13) = R13C_fromd13C( d13C_POC0(ng) )*POC_0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-          t(i,j,k,1,iP113) = R13C_fromd13C( d13C_Ph10(ng) )*Phy10(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-          t(i,j,k,1,iP213) = R13C_fromd13C( d13C_Ph20(ng) )*Phy20(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-          t(i,j,k,1,iZo13) = R13C_fromd13C( d13C_Zoo0(ng) )*Zoop0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
+          DO itrc=1,N_dom
+            t(i,j,k,1,iDO13C(itrc)) = R13C_fromd13C( d13C_DOC_0(itrc,ng) )*t(i,j,k,1,iDOC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
+          END DO
+          DO itrc=1,N_pom
+            t(i,j,k,1,iPO13C(itrc)) = R13C_fromd13C( d13C_POC_0(itrc,ng) )*t(i,j,k,1,iPOC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
+          END DO
+          DO itrc=1,N_phyt
+            t(i,j,k,1,iPhyt13C(itrc)) = R13C_fromd13C( d13C_Phyt_0(itrc,ng) )*t(i,j,k,1,iPhyt(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
+          END DO
+          DO itrc=1,N_zoop
+            t(i,j,k,1,iZoop13C(itrc)) = R13C_fromd13C( d13C_Zoop_0(itrc,ng) )*t(i,j,k,1,iZoop(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
+          END DO
+          DO itrc=1,N_pim
+            t(i,j,k,1,iPI13C(itrc)) = R13C_fromd13C( d13C_PIC_0(itrc,ng) )*t(i,j,k,1,iPIC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
+          END DO
 #   endif
 #  endif
 #  if defined NUTRIENTS
-          t(i,j,k,1,iNO3_) = NO3_Profile( t(i,j,k,1,iTIC_) )   ! umolN L-1
-          
-          t(i,j,k,1,iNO2_) = 0.05_r8    ! umolN L-1
+!          t(i,j,k,1,iNO3_) = NO3_Profile2( z_r(i,j,k) )           &
+          t(i,j,k,1,iNO3_) = NO3_Profile3( NO3_0(ng)           &
+     &            , TIC_0(ng), t(i,j,k,1,iTIC_) )   ! umolN L-1
+          t(i,j,k,1,iNO2_) = NO2_0(ng)  ! umolN L-1
           t(i,j,k,1,iNH4_) = NH4_0(ng)  ! umolN L-1
-          
-          t(i,j,k,1,iPO4_) = PO4_Profile( t(i,j,k,1,iNO3_) )  ! umolP L-1
+!          t(i,j,k,1,iPO4_) = PO4_Profile2( z_r(i,j,k) )  ! umolP L-1
+          t(i,j,k,1,iPO4_) = PO4_Profile3( PO4_0(ng)           &
+     &            , TIC_0(ng), t(i,j,k,1,iTIC_) )   ! umolN L-1
 
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<FA:CHANGE
 #   if defined ORGANIC_MATTER
-          t(i,j,k,1,iDON_) = DON_0(ng)     ! umolN L-1
-          t(i,j,k,1,iPON_) = PON_0(ng)     ! umolN L-1
-          t(i,j,k,1,iDOP_) = DOP_0(ng)     ! umolP L-1
-          t(i,j,k,1,iPOP_) = POP_0(ng)     ! umolP L-1
+          DO itrc=1,N_dom
+            t(i,j,k,1,iDON(itrc)) = DON_0(itrc,ng)     ! umolC L-1
+          END DO
+          DO itrc=1,N_pom
+            t(i,j,k,1,iPON(itrc)) = PON_0(itrc,ng)     ! umolC L-1
+          END DO
+          DO itrc=1,N_dom
+            t(i,j,k,1,iDOP(itrc)) = DOP_0(itrc,ng)     ! umolC L-1
+          END DO
+          DO itrc=1,N_pom
+            t(i,j,k,1,iPOP(itrc)) = POP_0(itrc,ng)     ! umolC L-1
+          END DO
+#   endif
+#   if defined NITROGEN_ISOTOPE
+          t(i,j,k,1,i15NO3) = R15N_fromd15N( d13C_TIC0(ng) )*t(i,j,k,1,iNO3_) ! umol kg-1  !!! R15N_fromd15N included geochem module
+          t(i,j,k,1,i15NO2) = R15N_fromd15N( d13C_TIC0(ng) )*t(i,j,k,1,iNO2_) ! umol kg-1  !!! R15N_fromd15N included geochem module
+          t(i,j,k,1,i15NH4) = R15N_fromd15N( d13C_TIC0(ng) )*t(i,j,k,1,iNH4_) ! umol kg-1  !!! R15N_fromd15N included geochem module
+#    if defined ORGANIC_MATTER
+          DO itrc=1,N_dom
+            t(i,j,k,1,iDO15N(itrc)) = R15N_fromd15N( d15N_DOC_0(itrc,ng) )*t(i,j,k,1,iDON(itrc)) ! umol L-1  !!! R15N_fromd15N included geochem module
+          END DO
+          DO itrc=1,N_pom
+            t(i,j,k,1,iPO15N(itrc)) = R15N_fromd15N( d15N_POC_0(itrc,ng) )*t(i,j,k,1,iPON(itrc)) ! umol L-1  !!! R15N_fromd15N included geochem module
+          END DO
+          DO itrc=1,N_phyt
+            t(i,j,k,1,iPhyt15N(itrc)) = R15N_fromd15N( d15N_Phyt_0(itrc,ng) )*t(i,j,k,1,iPhyt(itrc))/9.2_r8 ! umol L-1  !!! R15N_fromd15N included geochem module
+          END DO
+          DO itrc=1,N_zoop
+            t(i,j,k,1,iZoop15N(itrc)) = R15N_fromd15N( d15N_Zoop_0(itrc,ng) )*t(i,j,k,1,iZoop(itrc))/9.2d0 ! umol L-1  !!! R15N_fromd15N included geochem module
+          END DO
+#    endif
 #   endif
 #  endif
 #  if defined COT_STARFISH
@@ -762,7 +903,6 @@
           t(i,j,k,1,iCOTl) = COTl0(ng)     ! umolC L-1
 #  endif
 
-          HisBio3d(i,j,k,iPPro) = 0.0_r8
 #  if defined CARBON_ISOTOPE
           HisBio3d(i,j,k,id13C) = d13C_TIC0(ng)
 #  endif
@@ -772,100 +912,105 @@
     END DO
 
 # else
-!-----------------------------------------------------------------------
-!  Iinitial conditions for SIHRAHO_REEF, YAEYAMA2, etc.
-!-----------------------------------------------------------------------
-
-!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>SA:Add
-      c_NO3_s=-0.0508_r8
-      c_NO3_sc=-2.9698_r8
-      c_NO3_d=0.0018_r8
-      c_NO3_dc=43.891_r8
-      c_PO4_s=-0.0037_r8
-      c_PO4_sc=-0.1513_r8
-      c_PO4_d=0.0002_r8
-      c_PO4_dc=3.3429_r8
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<SA:Add
-      DO k=1,N(ng)
-        DO j=JstrT,JendT
-          DO i=IstrT,IendT
-            t(i,j,k,1,iTIC_)=TIC_0(ng)     ! umol kg-1
-            t(i,j,k,1,iTAlk)=TAlk0(ng)     ! umol kg-1
-            t(i,j,k,1,iOxyg)=Oxyg0(ng)     ! umol L-1
+!------------------------------------------------------------------------
+!   OTHER CASES
+!------------------------------------------------------------------------
+    DO k=1,N(ng)
+      DO j=JstrT,JendT
+        DO i=IstrT,IendT
+          t(i,j,k,1,iTIC_) = TIC_0(ng)     ! umol kg-1
+          t(i,j,k,1,iTAlk) = TAlk0(ng)     ! umol kg-1
+!            t(i,j,k,1,iOxyg) = Oxyg0(ng) ! umol L-1
+          t(i,j,k,1,iOxyg) = O2satu(t(i,j,k,1,iTemp)+273.15_r8, t(i,j,k,1,iSalt)) ! umol L-1
 #  if defined ORGANIC_MATTER
-            t(i,j,k,1,iDOC_)=DOC_0(ng)     ! umolC L-1
-            t(i,j,k,1,iPOC_)=POC_0(ng)     ! umolC L-1
-#   if defined SIMPLE_BIO_BOUNDARY
-            t(i,j,k,1,iPhy1)=Phy10(ng)     ! umolC L-1
-            t(i,j,k,1,iPhy2)=Phy20(ng)     ! umolC L-1
-#   else
-!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>SA:Add
-            IF (z_r(i,j,k).gt.-155_r8) THEN
-              t(i,j,k,1,iPhy1)=(-0.00095_r8*(z_r(i,j,k)+50.0_r8)**2+10.5_r8)/24.0_r8     ! umol L-1
-            ELSE IF (z_r(i,j,k).le.-155_r8) THEN
-              t(i,j,k,1,iPhy1)=0.0_r8     ! umol L-1
-            END IF
-            IF (z_r(i,j,k).gt.-155_r8) THEN
-              t(i,j,k,1,iPhy2)=(-0.00095_r8*(z_r(i,j,k)+50.0_r8)**2+10.5_r8)/24.0_r8     ! umol L-1
-            ELSE IF (z_r(i,j,k).le.-155_r8) THEN
-              t(i,j,k,1,iPhy2)=0.0_r8     ! umol L-1
-            END IF
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<SA:Add
-#   endif
-            t(i,j,k,1,iZoop)=Zoop0(ng)     ! umolC L-1
+          DO itrc=1,N_dom
+            t(i,j,k,1,iDOC(itrc)) = DOC_0(itrc,ng)     ! umolC L-1
+          END DO
+          DO itrc=1,N_pom
+            t(i,j,k,1,iPOC(itrc)) = POC_0(itrc,ng)     ! umolC L-1
+          END DO
+          DO itrc=1,N_phyt
+            t(i,j,k,1,iPhyt(itrc))=Phyt_0(itrc,ng)     ! umolC L-1
+          END DO     
+          DO itrc=1,N_zoop
+            t(i,j,k,1,iZoop(itrc))=Zoop_0(itrc,ng)     ! umolC L-1
+          END DO
+          DO itrc=1,N_pim
+            t(i,j,k,1,iPIC(itrc)) = PIC_0(itrc,ng)     ! umolC L-1
+          END DO
 #  endif
 #  if defined CARBON_ISOTOPE
-            t(i,j,k,1,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng) ! umol kg-1  !!! R13C_fromd13C included geochem module
+          t(i,j,k,1,iT13C) = R13C_fromd13C( d13C_TIC0(ng) )*t(i,j,k,1,iTIC_) ! umol kg-1  !!! R13C_fromd13C included geochem module
 #   if defined ORGANIC_MATTER
-            t(i,j,k,1,iDO13)=R13C_fromd13C( d13C_DOC0(ng) )*DOC_0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-            t(i,j,k,1,iPO13)=R13C_fromd13C( d13C_POC0(ng) )*POC_0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-            t(i,j,k,1,iP113)=R13C_fromd13C( d13C_Ph10(ng) )*Phy10(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-            t(i,j,k,1,iP213)=R13C_fromd13C( d13C_Ph20(ng) )*Phy20(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-            t(i,j,k,1,iZo13)=R13C_fromd13C( d13C_Zoo0(ng) )*Zoop0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
+          DO itrc=1,N_dom
+            t(i,j,k,1,iDO13C(itrc)) = R13C_fromd13C( d13C_DOC_0(itrc,ng) )*t(i,j,k,1,iDOC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
+          END DO
+          DO itrc=1,N_pom
+            t(i,j,k,1,iPO13C(itrc)) = R13C_fromd13C( d13C_POC_0(itrc,ng) )*t(i,j,k,1,iPOC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
+          END DO
+          DO itrc=1,N_phyt
+            t(i,j,k,1,iPhyt13C(itrc)) = R13C_fromd13C( d13C_Phyt_0(itrc,ng) )*t(i,j,k,1,iPhyt(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
+          END DO
+          DO itrc=1,N_zoop
+            t(i,j,k,1,iZoop13C(itrc)) = R13C_fromd13C( d13C_Zoop_0(itrc,ng) )*t(i,j,k,1,iZoop(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
+          END DO
+          DO itrc=1,N_pim
+            t(i,j,k,1,iPI13C(itrc)) = R13C_fromd13C( d13C_PIC_0(itrc,ng) )*t(i,j,k,1,iPIC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
+          END DO
 #   endif
 #  endif
-#  if defined NUTRIENTS
-!            t(i,j,k,1,iNO3_)=NO3_0(ng)     ! umol L-1  !exclude
-            t(i,j,k,1,iNO2_)=NO2_0(ng)     ! umol L-1
-            t(i,j,k,1,iNH4_)=NH4_0(ng)     ! umol L-1
-!            t(i,j,k,1,iPO4_)=PO4_0(ng)     ! umol L-1  !exclude
-!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>SA:Add
-            IF (z_r(i,j,k).gt.-63.9196_r8) THEN
-              t(i,j,k,1,iNO3_)=NO3_0(ng)     ! umol L-1
-            ELSE IF (z_r(i,j,k).gt.-900_r8) THEN
-              t(i,j,k,1,iNO3_)=c_NO3_s*z_r(i,j,k)+c_NO3_sc     ! umol L-1
-            ELSE IF (z_r(i,j,k).le.-900_r8) THEN
-              t(i,j,k,1,iNO3_)=c_NO3_d*z_r(i,j,k)+c_NO3_dc     ! umol L-1
-            END IF
-            IF (z_r(i,j,k).gt.-52.716_r8) THEN
-              t(i,j,k,1,iPO4_)=PO4_0(ng)     ! umol L-1
-            ELSE IF (z_r(i,j,k).gt.-950_r8) THEN
-              t(i,j,k,1,iPO4_)=c_PO4_s*z_r(i,j,k)+c_PO4_sc     ! umol L-1
-            ELSE IF (z_r(i,j,k).le.-950_r8) THEN
-              t(i,j,k,1,iPO4_)=c_PO4_d*z_r(i,j,k)+c_PO4_dc     ! umol L-1
-            END IF
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<SA:Add
+#  if defined NUTRIENTS         
+          t(i,j,k,1,iNO3_) = NO3_0(ng)     ! umol L-1  !exclude
+          t(i,j,k,1,iNO2_) = NO2_0(ng)     ! umol L-1
+          t(i,j,k,1,iNH4_) = NH4_0(ng)     ! umol L-1
+          t(i,j,k,1,iPO4_) = PO4_0(ng)     ! umol L-1  !exclude
+          
 #   if defined ORGANIC_MATTER
-            t(i,j,k,1,iDON_)=DON_0(ng)     ! umolN L-1
-            t(i,j,k,1,iPON_)=PON_0(ng)     ! umolN L-1
-            t(i,j,k,1,iDOP_)=DOP_0(ng)     ! umolP L-1
-            t(i,j,k,1,iPOP_)=POP_0(ng)     ! umolP L-1
+          DO itrc=1,N_dom
+            t(i,j,k,1,iDON(itrc)) = DON_0(itrc,ng)     ! umolC L-1
+          END DO
+          DO itrc=1,N_pom
+            t(i,j,k,1,iPON(itrc)) = PON_0(itrc,ng)     ! umolC L-1
+          END DO
+          DO itrc=1,N_dom
+            t(i,j,k,1,iDOP(itrc)) = DOP_0(itrc,ng)     ! umolC L-1
+          END DO
+          DO itrc=1,N_pom
+            t(i,j,k,1,iPOP(itrc)) = POP_0(itrc,ng)     ! umolC L-1
+          END DO
+#   endif
+#   if defined NITROGEN_ISOTOPE
+          t(i,j,k,1,i15NO3) = R15N_fromd15N( d13C_TIC0(ng) )*t(i,j,k,1,iNO3_) ! umol kg-1  !!! R15N_fromd15N included geochem module
+          t(i,j,k,1,i15NO2) = R15N_fromd15N( d13C_TIC0(ng) )*t(i,j,k,1,iNO2_) ! umol kg-1  !!! R15N_fromd15N included geochem module
+          t(i,j,k,1,i15NH4) = R15N_fromd15N( d13C_TIC0(ng) )*t(i,j,k,1,iNH4_) ! umol kg-1  !!! R15N_fromd15N included geochem module
+#    if defined ORGANIC_MATTER
+          DO itrc=1,N_dom
+            t(i,j,k,1,iDO15N(itrc)) = R15N_fromd15N( d15N_DOC_0(itrc,ng) )*t(i,j,k,1,iDON(itrc)) ! umol L-1  !!! R15N_fromd15N included geochem module
+          END DO
+          DO itrc=1,N_pom
+            t(i,j,k,1,iPO15N(itrc)) = R15N_fromd15N( d15N_POC_0(itrc,ng) )*t(i,j,k,1,iPON(itrc)) ! umol L-1  !!! R15N_fromd15N included geochem module
+          END DO
+          DO itrc=1,N_phyt
+            t(i,j,k,1,iPhyt15N(itrc)) = R15N_fromd15N( d15N_Phyt_0(itrc,ng) )*t(i,j,k,1,iPhyt(itrc))/9.2_r8 ! umol L-1  !!! R15N_fromd15N included geochem module
+          END DO
+          DO itrc=1,N_zoop
+            t(i,j,k,1,iZoop15N(itrc)) = R15N_fromd15N( d15N_Zoop_0(itrc,ng) )*t(i,j,k,1,iZoop(itrc))/9.2d0 ! umol L-1  !!! R15N_fromd15N included geochem module
+          END DO
+#    endif
 #   endif
 #  endif
 #  if defined COT_STARFISH
-            t(i,j,k,1,iCOTe)=COTe0(ng)     ! umolC L-1
-            t(i,j,k,1,iCOTl)=COTl0(ng)     ! umolC L-1
+          t(i,j,k,1,iCOTe) = COTe0(ng)     ! umolC L-1
+          t(i,j,k,1,iCOTl) = COTl0(ng)     ! umolC L-1
 #  endif
 
-            HisBio3d(i,j,k,iPPro) = 0.0_r8
 #  if defined CARBON_ISOTOPE
-            HisBio3d(i,j,k,id13C) = d13C_TIC0(ng)
+          HisBio3d(i,j,k,id13C) = d13C_TIC0(ng)
 #  endif
 
-          END DO
         END DO
       END DO
-
+    END DO
 # endif
 !------------------------------------------------------------------------
       DO j=JstrT,JendT

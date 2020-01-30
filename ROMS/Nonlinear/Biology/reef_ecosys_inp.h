@@ -6,9 +6,10 @@
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
+!================================================== Takashi Nakamura ===
 !                                                                      !
-!  This routine reads in Fennel et al. (2006) ecosystem model input    !
-!  parameters. They are specified in input script "fennel.in".         !
+!  This routine reads in Coral Reef ecosystem model input parameters.  !
+!  They are specified in input script "bio_reef_ecosys.in".            !
 !                                                                      !
 !=======================================================================
 !
@@ -43,6 +44,11 @@
       real(r8), dimension(NBT,Ngrids) :: Rbio
 
       real(r8), dimension(100) :: Rval
+      real(r8), dimension(N_phyt,Ngrids) :: Rphyt
+      real(r8), dimension(N_zoop,Ngrids) :: Rzoop
+      real(r8), dimension(N_dom,Ngrids) :: Rdom
+      real(r8), dimension(N_pom,Ngrids) :: Rpom
+      real(r8), dimension(N_pim,Ngrids) :: Rpim
 
       character (len=40 ) :: KeyWord
       character (len=256) :: line
@@ -59,7 +65,7 @@
       nline=0                            ! LBC multi-line counter
 !
 !-----------------------------------------------------------------------
-!  Read in Fennel et al. (2006) biological model parameters.
+!  Read in Coral Reef ecosystem parameters.
 !-----------------------------------------------------------------------
 !
       DO WHILE (.TRUE.)
@@ -79,64 +85,6 @@
               Npts=load_r(Nval, Rval, Ngrids, AttChl)
             CASE ('PARfrac')
               Npts=load_r(Nval, Rval, Ngrids, PARfrac)
-            CASE ('Vp0')
-              Npts=load_r(Nval, Rval, Ngrids, Vp0)
-            CASE ('I_thNH4')
-              Npts=load_r(Nval, Rval, Ngrids, I_thNH4)
-            CASE ('D_p5NH4')
-              Npts=load_r(Nval, Rval, Ngrids, D_p5NH4)
-            CASE ('NitriR')
-              Npts=load_r(Nval, Rval, Ngrids, NitriR)
-            CASE ('K_NO3')
-              Npts=load_r(Nval, Rval, Ngrids, K_NO3)
-            CASE ('K_NH4')
-              Npts=load_r(Nval, Rval, Ngrids, K_NH4)
-            CASE ('K_Phy')
-              Npts=load_r(Nval, Rval, Ngrids, K_Phy)
-            CASE ('Chl2C_m')
-              Npts=load_r(Nval, Rval, Ngrids, Chl2C_m)
-            CASE ('ChlMin')
-              Npts=load_r(Nval, Rval, Ngrids, ChlMin)
-            CASE ('PhyCN')
-              Npts=load_r(Nval, Rval, Ngrids, PhyCN)
-            CASE ('PhyIP')
-              Npts=load_r(Nval, Rval, Ngrids, PhyIP)
-            CASE ('PhyIS')
-              Npts=load_r(Nval, Rval, Ngrids, PhyIS)
-            CASE ('PhyMin')
-              Npts=load_r(Nval, Rval, Ngrids, PhyMin)
-            CASE ('PhyMR')
-              Npts=load_r(Nval, Rval, Ngrids, PhyMR)
-            CASE ('ZooAE_N')
-              Npts=load_r(Nval, Rval, Ngrids, ZooAE_N)
-            CASE ('ZooBM')
-              Npts=load_r(Nval, Rval, Ngrids, ZooBM)
-            CASE ('ZooCN')
-              Npts=load_r(Nval, Rval, Ngrids, ZooCN)
-            CASE ('ZooER')
-              Npts=load_r(Nval, Rval, Ngrids, ZooER)
-            CASE ('ZooGR')
-              Npts=load_r(Nval, Rval, Ngrids, ZooGR)
-            CASE ('ZooMin')
-              Npts=load_r(Nval, Rval, Ngrids, ZooMin)
-            CASE ('ZooMR')
-              Npts=load_r(Nval, Rval, Ngrids, ZooMR)
-            CASE ('LDeRRN')
-              Npts=load_r(Nval, Rval, Ngrids, LDeRRN)
-            CASE ('LDeRRC')
-              Npts=load_r(Nval, Rval, Ngrids, LDeRRC)
-            CASE ('CoagR')
-              Npts=load_r(Nval, Rval, Ngrids, CoagR)
-            CASE ('SDeRRN')
-              Npts=load_r(Nval, Rval, Ngrids, SDeRRN)
-            CASE ('SDeRRC')
-              Npts=load_r(Nval, Rval, Ngrids, SDeRRC)
-            CASE ('wPhy')
-              Npts=load_r(Nval, Rval, Ngrids, wPhy)
-            CASE ('wLDet')
-              Npts=load_r(Nval, Rval, Ngrids, wLDet)
-            CASE ('wSDet')
-              Npts=load_r(Nval, Rval, Ngrids, wSDet)
             CASE ('pCO2air')
               Npts=load_r(Nval, Rval, Ngrids, pCO2air)
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
@@ -148,28 +96,80 @@
               Npts=load_r(Nval, Rval, Ngrids, Oxyg0)
 #if defined ORGANIC_MATTER
             CASE ('DOC_0')
-              Npts=load_r(Nval, Rval, Ngrids, DOC_0)
+              Npts=load_r(Nval, Rval, N_dom*Ngrids, Rdom)
+              DO ng=1,Ngrids
+                DO itrc=1,N_dom
+                  DOC_0(itrc,ng)=Rdom(itrc,ng)
+                END DO
+              END DO
             CASE ('POC_0')
-              Npts=load_r(Nval, Rval, Ngrids, POC_0)
-            CASE ('Phy10')
-              Npts=load_r(Nval, Rval, Ngrids, Phy10)
-            CASE ('Phy20')
-              Npts=load_r(Nval, Rval, Ngrids, Phy20)
-            CASE ('Zoop0')
-              Npts=load_r(Nval, Rval, Ngrids, Zoop0)
+              Npts=load_r(Nval, Rval, N_pom*Ngrids, Rpom)
+              DO ng=1,Ngrids
+                DO itrc=1,N_pom
+                  POC_0(itrc,ng)=Rpom(itrc,ng)
+                END DO
+              END DO
+            CASE ('Phyt_0')
+              Npts=load_r(Nval, Rval, N_phyt*Ngrids, Rphyt)
+              DO ng=1,Ngrids
+                DO itrc=1,N_phyt
+                  Phyt_0(itrc,ng)=Rphyt(itrc,ng)
+                END DO
+              END DO
+            CASE ('Zoop_0')
+              Npts=load_r(Nval, Rval, N_zoop*Ngrids, Rzoop)
+              DO ng=1,Ngrids
+                DO itrc=1,N_zoop
+                  Zoop_0(itrc,ng)=Rzoop(itrc,ng)
+                END DO
+              END DO
+            CASE ('PIC_0')
+              Npts=load_r(Nval, Rval, N_pim*Ngrids, Rpim)
+              DO ng=1,Ngrids
+                DO itrc=1,N_pim
+                  PIC_0(itrc,ng)=Rpim(itrc,ng)
+                END DO
+              END DO
 #endif
 #if defined CARBON_ISOTOPE
             CASE ('d13C_TIC0')
               Npts=load_r(Nval, Rval, Ngrids, d13C_TIC0)
 # if defined ORGANIC_MATTER
-            CASE ('d13C_DOC0')
-              Npts=load_r(Nval, Rval, Ngrids, d13C_DOC0)
-            CASE ('d13C_POC0')
-              Npts=load_r(Nval, Rval, Ngrids, d13C_POC0)
-            CASE ('d13C_Phy0')
-              Npts=load_r(Nval, Rval, Ngrids, d13C_Phy0)
-            CASE ('d13C_Zoo0')
-              Npts=load_r(Nval, Rval, Ngrids, d13C_Zoo0)
+            CASE ('d13C_DOC_0')
+              Npts=load_r(Nval, Rval, N_dom*Ngrids, Rdom)
+              DO ng=1,Ngrids
+                DO itrc=1,N_dom
+                  d13C_DOC_0(itrc,ng)=Rdom(itrc,ng)
+                END DO
+              END DO
+            CASE ('d13C_POC_0')
+              Npts=load_r(Nval, Rval, N_pom*Ngrids, Rpom)
+              DO ng=1,Ngrids
+                DO itrc=1,N_pom
+                  d13C_POC_0(itrc,ng)=Rpom(itrc,ng)
+                END DO
+              END DO
+            CASE ('d13C_Phyt_0')
+              Npts=load_r(Nval, Rval, N_phyt*Ngrids, Rphyt)
+              DO ng=1,Ngrids
+                DO itrc=1,N_phyt
+                  d13C_Phyt_0(itrc,ng)=Rphyt(itrc,ng)
+                END DO
+              END DO
+            CASE ('d13C_Zoop_0')
+              Npts=load_r(Nval, Rval, N_zoop*Ngrids, Rzoop)
+              DO ng=1,Ngrids
+                DO itrc=1,N_zoop
+                  d13C_Zoop_0(itrc,ng)=Rzoop(itrc,ng)
+                END DO
+              END DO
+            CASE ('d13C_PIC_0')
+              Npts=load_r(Nval, Rval, N_pim*Ngrids, Rpom)
+              DO ng=1,Ngrids
+                DO itrc=1,N_pim
+                  d13C_PIC_0(itrc,ng)=Rpim(itrc,ng)
+                END DO
+              END DO
 # endif
 #endif
 #if defined NUTRIENTS
@@ -183,13 +183,71 @@
               Npts=load_r(Nval, Rval, Ngrids, PO4_0)
 # if defined ORGANIC_MATTER
             CASE ('DON_0')
-              Npts=load_r(Nval, Rval, Ngrids, DON_0)
+              Npts=load_r(Nval, Rval, N_dom*Ngrids, Rdom)
+              DO ng=1,Ngrids
+                DO itrc=1,N_dom
+                  DON_0(itrc,ng)=Rdom(itrc,ng)
+                END DO
+              END DO
             CASE ('PON_0')
-              Npts=load_r(Nval, Rval, Ngrids, PON_0)
+              Npts=load_r(Nval, Rval, N_pom*Ngrids, Rpom)
+              DO ng=1,Ngrids
+                DO itrc=1,N_pom
+                  PON_0(itrc,ng)=Rpom(itrc,ng)
+                END DO
+              END DO
             CASE ('DOP_0')
-              Npts=load_r(Nval, Rval, Ngrids, DOP_0)
+              Npts=load_r(Nval, Rval, N_dom*Ngrids, Rdom)
+              DO ng=1,Ngrids
+                DO itrc=1,N_dom
+                  DOP_0(itrc,ng)=Rdom(itrc,ng)
+                END DO
+              END DO
             CASE ('POP_0')
-              Npts=load_r(Nval, Rval, Ngrids, POP_0)
+              Npts=load_r(Nval, Rval, N_pom*Ngrids, Rpom)
+              DO ng=1,Ngrids
+                DO itrc=1,N_pom
+                  POP_0(itrc,ng)=Rpom(itrc,ng)
+                END DO
+              END DO
+# endif
+# if defined NITROGEN_ISOTOPE
+            CASE ('d15N_NO3_0')
+              Npts=load_r(Nval, Rval, Ngrids, d15N_NO3_0)
+            CASE ('d15N_NO2_0')
+              Npts=load_r(Nval, Rval, Ngrids, d15N_NO2_0)
+            CASE ('d15N_NH4_0')
+              Npts=load_r(Nval, Rval, Ngrids, d15N_NH4_0)
+#  if defined ORGANIC_MATTER
+            CASE ('d15N_DON_0')
+              Npts=load_r(Nval, Rval, N_dom*Ngrids, Rdom)
+              DO ng=1,Ngrids
+                DO itrc=1,N_dom
+                  d15N_DON_0(itrc,ng)=Rdom(itrc,ng)
+                END DO
+              END DO
+            CASE ('d15N_PON_0')
+              Npts=load_r(Nval, Rval, N_pom*Ngrids, Rpom)
+              DO ng=1,Ngrids
+                DO itrc=1,N_pom
+                  d15N_PON_0(itrc,ng)=Rpom(itrc,ng)
+                END DO
+              END DO
+            CASE ('d15N_Phyt_0')
+              Npts=load_r(Nval, Rval, N_phyt*Ngrids, Rphyt)
+              DO ng=1,Ngrids
+                DO itrc=1,N_phyt
+                  d15N_Phyt_0(itrc,ng)=Rphyt(itrc,ng)
+                END DO
+              END DO
+            CASE ('d15N_Zoop_0')
+              Npts=load_r(Nval, Rval, N_zoop*Ngrids, Rzoop)
+              DO ng=1,Ngrids
+                DO itrc=1,N_zoop
+                  d15N_Zoop_0(itrc,ng)=Rzoop(itrc,ng)
+                END DO
+              END DO
+#  endif
 # endif
 #endif
 #if defined COT_STARFISH
@@ -515,70 +573,6 @@
             WRITE (out,90) PARfrac(ng), 'PARfrac',                      &
      &            'Fraction of shortwave radiation that is',            &
      &            'photosynthetically active (nondimensional).'
-            WRITE (out,90) Vp0(ng), 'Vp0',                              &
-     &            'Eppley temperature-limited growth parameter',        &
-     &            '(nondimensional).'
-            WRITE (out,80) I_thNH4(ng), 'I_thNH4',                      &
-     &            'Radiation threshold for nitrification (W/m2).'
-            WRITE (out,80) D_p5NH4(ng), 'D_p5NH4',                      &
-     &            'Half-saturation radiation for nitrification (W/m2).'
-            WRITE (out,80) NitriR(ng), 'NitriR',                        &
-     &            'Nitrification rate (day-1).'
-            WRITE (out,90) K_NO3(ng), 'K_NO3',                          &
-     &            'Inverse half-saturation for phytoplankton NO3',      &
-     &            'uptake (1/(mmol_N m-3)).'
-            WRITE (out,90) K_NH4(ng), 'K_NH4',                          &
-     &            'Inverse half-saturation for phytoplankton NH4',      &
-     &            'uptake (1/(mmol_N m-3)).'
-            WRITE (out,90) K_Phy(ng), 'K_Phy',                          &
-     &            'Zooplankton half-saturation constant for ingestion', &
-     &            '(mmol_N m-3)^2.'
-            WRITE (out,80) Chl2C_m(ng), 'Chl2C_m',                      &
-     &            'Maximum chlorophyll to carbon ratio (mg_Chl/mg_C).'
-            WRITE (out,80) ChlMin(ng), 'ChlMin',                        &
-     &            'Chlorophyll minimum threshold (mg_Chl/m3).'
-            WRITE (out,80) PhyCN(ng), 'PhyCN',                          &
-     &            'Phytoplankton Carbon:Nitrogen ratio (mol_C/mol_N).'
-            WRITE (out,80) PhyIP(ng), 'PhyIP',                          &
-     &            'Phytoplankton NH4 inhibition parameter (1/mmol_N).'
-            WRITE (out,90) PhyIS(ng), 'PhyIS',                          &
-     &            'Phytoplankton growth, initial slope of P-I curve',   &
-     &            '(mg_C/(mg_Chl Watts m-2 day)).'
-            WRITE (out,80) PhyMin(ng), 'PhyMin',                        &
-     &            'Phytoplankton minimum threshold (mmol_N/m3).'
-            WRITE (out,80) PhyMR(ng), 'PhyMR',                          &
-     &            'Phytoplankton mortality rate (day-1).'
-            WRITE (out,90) ZooAE_N(ng), 'ZooAE_N',                      &
-     &            'Zooplankton nitrogen assimilation efficiency',       &
-     &            '(nondimensional).'
-            WRITE (out,80) ZooBM(ng), 'ZooBM',                          &
-     &            'Rate for zooplankton basal metabolism (1/day).'
-            WRITE (out,80) ZooCN(ng), 'ZooCN',                          &
-     &            'Zooplankton Carbon:Nitrogen ratio (mol_C/mol_N).'
-            WRITE (out,80) ZooER(ng), 'ZooER',                          &
-     &            'Zooplankton specific excretion rate (day-1).'
-            WRITE (out,80) ZooGR(ng), 'ZooGR',                          &
-     &            'Zooplankton maximum growth rate (day-1).'
-            WRITE (out,80) ZooMin(ng), 'ZooMin',                        &
-     &            'Zooplankton minimum threshold (mmol_N/m3).'
-            WRITE (out,80) ZooMR(ng), 'ZooMR',                          &
-     &            'Zooplankton mortality rate (day-1).'
-            WRITE (out,80) LDeRRN(ng), 'LDeRRN',                        &
-     &            'Large detritus N re-mineralization rate (day-1).'
-            WRITE (out,80) LDeRRC(ng), 'LDeRRC',                        &
-     &            'Large detritus C re-mineralization rate (day-1).'
-            WRITE (out,80) CoagR(ng), 'CoagR',                          &
-     &            'Coagulation rate (day-1).'
-            WRITE (out,80) SDeRRN(ng), 'SDeRRN',                        &
-     &            'Remineralization rate for small detritus N (day-1).'
-            WRITE (out,80) SDeRRC(ng), 'SDeRRC',                        &
-     &            'Remineralization rate for small detritus C (day-1).'
-            WRITE (out,80) wPhy(ng), 'wPhy',                            &
-     &            'Phytoplankton sinking velocity (m/day).'
-            WRITE (out,80) wLDet(ng), 'wLDet',                          &
-     &            'Large detritus sinking velocity (m/day).'
-            WRITE (out,80) wSDet(ng), 'wSDet',                          &
-     &            'Small detritus sinking velocity (m/day).'
             WRITE (out,80) pCO2air(ng), 'pCO2air',                      &
      &            'CO2 partial pressure in air (ppm by volume).'
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
@@ -589,29 +583,47 @@
             WRITE (out,80) Oxyg0(ng), 'Oxyg0',                          &
      &            'Dissolved oxygen (umol/L).'
 #if defined ORGANIC_MATTER
-            WRITE (out,80) DOC_0(ng), 'DOC_0',                          &
+            DO itrc=1,N_dom
+              WRITE (out,140) DOC_0(itrc,ng), 'DOC_0', itrc,                          &
      &            'Dissolved organic carbon (umolC/L).'
-            WRITE (out,80) POC_0(ng), 'POC_0',                          &
+            END DO
+            DO itrc=1,N_pom
+              WRITE (out,140)  POC_0(itrc,ng), 'POC_0', itrc,                          &
      &            'Particulate organic carbon (umolC/L).'
-            WRITE (out,80) Phy10(ng), 'Phy10',                          &
-     &            'Phytoplankton1 (umolC/L).'
-            WRITE (out,80) Phy20(ng), 'Phy20',                          &
-     &            'Phytoplankton2 (umolC/L).'
-            WRITE (out,80) Zoop0(ng), 'Zoop0',                          &
+            END DO
+            DO itrc=1,N_phyt
+              WRITE (out,140) Phyt_0(itrc,ng), 'Phyt_0', itrc,                          &
+     &            'Phytoplankton (umolC/L).'
+            END DO
+            DO itrc=1,N_zoop
+              WRITE (out,140) Zoop_0(itrc,ng), 'Zoop_0', itrc,                          &
      &            'Zooplankton (umolC/L).'
+            END DO
 #endif
 #if defined CARBON_ISOTOPE
             WRITE (out,80) d13C_TIC0(ng), 'd13C_TIC0',                      &
      &            'd13C of DIC (permil VPDB).'
 # if defined ORGANIC_MATTER
-            WRITE (out,80) d13C_DOC0(ng), 'd13C_DOC0',                      &
+            DO itrc=1,N_dom
+              WRITE (out,140) d13C_DOC_0(itrc,ng), 'd13C_DOC_0', itrc,                      &
      &            'd13C of DOC (permil VPDB).'
-            WRITE (out,80) d13C_POC0(ng), 'd13C_POC0',                      &
+            END DO
+            DO itrc=1,N_pom
+              WRITE (out,140) d13C_POC_0(itrc,ng), 'd13C_POC_0', itrc,                      &
      &            'd13C of POC (permil VPDB).'
-            WRITE (out,80) d13C_Phy0(ng), 'd13C_Phy0',                      &
+            END DO
+            DO itrc=1,N_phyt
+              WRITE (out,140) d13C_Phyt_0(itrc,ng), 'd13C_Phyt_0', itrc,                      &
      &            'd13C of phytoplankton (permil VPDB).'
-            WRITE (out,80) d13C_Zoo0(ng), 'd13C_Zoo0',                      &
+            END DO
+            DO itrc=1,N_zoop
+              WRITE (out,140) d13C_Zoop_0(itrc,ng), 'd13C_Zoop_0', itrc,                      &
      &            'd13C of zooplankton (permil VPDB).'
+            END DO
+            DO itrc=1,N_pim
+              WRITE (out,140) d13C_Zoop_0(itrc,ng), 'd13C_Zoop_0', itrc,                      &
+     &            'd13C of zooplankton (permil VPDB).'
+            END DO
 # endif
 #endif
 #if defined NUTRIENTS
@@ -624,14 +636,48 @@
             WRITE (out,80) PO4_0(ng), 'PO4_0',                          &
      &            'PO4 (umol/L).'
 # if defined ORGANIC_MATTER
-            WRITE (out,80) DON_0(ng), 'DON_0',                          &
+            DO itrc=1,N_dom
+              WRITE (out,140) DON_0(itrc,ng), 'DON_0', itrc,                          &
      &            'DON (umolN/L).'
-            WRITE (out,80) PON_0(ng), 'PON_0',                          &
+            END DO
+            DO itrc=1,N_pom
+              WRITE (out,140) PON_0(itrc,ng), 'PON_0', itrc,                          &
      &            'PON (umolN/L).'
-            WRITE (out,80) DOP_0(ng), 'DOP_0',                          &
+            END DO
+            DO itrc=1,N_dom
+              WRITE (out,140) DOP_0(itrc,ng), 'DOP_0', itrc,                          &
      &            'DOP (umolP/L).'
-            WRITE (out,80) POP_0(ng), 'POP_0',                          &
+            END DO
+            DO itrc=1,N_pom
+              WRITE (out,140) POP_0(itrc,ng), 'POP_0', itrc,                          &
      &            'POP (umolP/L).'
+            END DO
+# endif
+# if defined NITROGEN_ISOTOPE
+            WRITE (out,80) d15N_NO3_0(ng), 'd15N_NO3_0',                      &
+     &            'd15N of NO3 (permil).'
+            WRITE (out,80) d15N_NO2_0(ng), 'd15N_NO2_0',                      &
+     &            'd15N of NO2 (permil).'
+            WRITE (out,80) d15N_NH4_0(ng), 'd15N_NH4_0',                      &
+     &            'd15N of NH4 (permil).'
+#  if defined ORGANIC_MATTER
+            DO itrc=1,N_dom
+              WRITE (out,140) d15N_DON_0(itrc,ng), 'd15N_DOC_0', itrc,                      &
+     &            'd15N of DOC (permil).'
+            END DO
+            DO itrc=1,N_pom
+              WRITE (out,140) d15N_PON_0(itrc,ng), 'd15N_POC_0', itrc,                      &
+     &            'd15N of POC (permil).'
+            END DO
+            DO itrc=1,N_dom
+              WRITE (out,140) d15N_Phyt_0(itrc,ng), 'd15N_Phyt_0', itrc,                      &
+     &            'd15N of phytoplankton (permil).'
+            END DO
+            DO itrc=1,N_pom
+              WRITE (out,140) d15N_Zoop_0(itrc,ng), 'd15N_Zoop_0', itrc,                      &
+     &            'd15N of zooplankton (permil).'
+            END DO
+#  endif
 # endif
 #endif
 #if defined COT_STARFISH
@@ -897,6 +943,7 @@
  110  FORMAT (10x,l1,2x,a,'(',i2.2,')',t30,a,i2.2,':',1x,a)
  120  FORMAT (10x,l1,2x,a,t30,a,i2.2,':',1x,a)
  130  FORMAT (10x,l1,2x,a,t30,a,1x,a)
+ 140  FORMAT (1p,e11.4,2x,a,': ',i2.2,t30,a)
 
       RETURN
       END SUBROUTINE read_BioPar

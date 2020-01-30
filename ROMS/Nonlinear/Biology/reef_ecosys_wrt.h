@@ -5,14 +5,15 @@
 **   Licensed under a MIT/X style license                             **
 **   See License_ROMS.txt                                             **
 ************************************************************************
+*************************************************** Takashi Nakamura ***
 **                                                                    **
-**  Writes Fennel et al. (2006) ecosystem model input parameters into **
+**  Writes Coral reef ecosystem model input parameters into           **
 **  output NetCDF files. It is included in routine "wrt_info.F".      **
 **                                                                    **
 ************************************************************************
 */
 !
-!  Write out Fennel et al. (2006) ecosystem model parameters.
+!  Write out Coral reef ecosystem model parameters.
 !
 !      CALL netcdf_put_ivar (ng, model, ncname, 'CrlIter',               &
 !     &                      CrlIter(ng), (/0/), (/0/),                  &
@@ -36,151 +37,6 @@
 
       CALL netcdf_put_fvar (ng, model, ncname, 'PARfrac',               &
      &                      PARfrac(ng), (/0/), (/0/),                  &
-     &                      ncid = ncid)
-      IF (exit_flag.ne.NoError) RETURN
-
-      CALL netcdf_put_fvar (ng, model, ncname, 'Vp0',                   &
-     &                      Vp0(ng), (/0/), (/0/),                      &
-     &                      ncid = ncid)
-      IF (exit_flag.ne.NoError) RETURN
-
-      CALL netcdf_put_fvar (ng, model, ncname, 'I_thNH4',               &
-     &                      I_thNH4(ng), (/0/), (/0/),                  &
-     &                      ncid = ncid)
-      IF (exit_flag.ne.NoError) RETURN
-
-      CALL netcdf_put_fvar (ng, model, ncname, 'D_p5NH4',               &
-     &                      D_p5NH4(ng), (/0/), (/0/),                  &
-     &                      ncid = ncid)
-      IF (exit_flag.ne.NoError) RETURN
-
-      CALL netcdf_put_fvar (ng, model, ncname, 'NitriR',                &
-     &                      NitriR(ng), (/0/), (/0/),                   &
-     &                      ncid = ncid)
-      IF (exit_flag.ne.NoError) RETURN
-
-      CALL netcdf_put_fvar (ng, model, ncname, 'K_NO3',                 &
-     &                      K_NO3(ng), (/0/), (/0/),                    &
-     &                      ncid = ncid)
-      IF (exit_flag.ne.NoError) RETURN
-
-      CALL netcdf_put_fvar (ng, model, ncname, 'K_NH4',                 &
-     &                      K_NH4(ng), (/0/), (/0/),                    &
-     &                      ncid = ncid)
-      IF (exit_flag.ne.NoError) RETURN
-
-      CALL netcdf_put_fvar (ng, model, ncname, 'K_Phy',                 &
-     &                      K_Phy(ng), (/0/), (/0/),                    &
-     &                      ncid = ncid)
-      IF (exit_flag.ne.NoError) RETURN
-
-      CALL netcdf_put_fvar (ng, model, ncname, 'Chl2C_m',               &
-     &                      Chl2C_m(ng), (/0/), (/0/),                  &
-     &                      ncid = ncid)
-      IF (exit_flag.ne.NoError) RETURN
-
-      CALL netcdf_put_fvar (ng, model, ncname, 'ChlMin',                &
-     &                      ChlMin(ng), (/0/), (/0/),                   &
-     &                      ncid = ncid)
-      IF (exit_flag.ne.NoError) RETURN
-
-      CALL netcdf_put_fvar (ng, model, ncname, 'PhyCN',                 &
-     &                      PhyCN(ng), (/0/), (/0/),                    &
-     &                      ncid = ncid)
-      IF (exit_flag.ne.NoError) RETURN
-
-      CALL netcdf_put_fvar (ng, model, ncname, 'PhyIP',                 &
-     &                      PhyIP(ng), (/0/), (/0/),                    &
-     &                      ncid = ncid)
-      IF (exit_flag.ne.NoError) RETURN
-
-      CALL netcdf_put_fvar (ng, model, ncname, 'PhyIS',                 &
-     &                      PhyIS(ng), (/0/), (/0/),                    &
-     &                      ncid = ncid)
-      IF (exit_flag.ne.NoError) RETURN
-
-      CALL netcdf_put_fvar (ng, model, ncname, 'PhyMin',                &
-     &                      PhyMin(ng), (/0/), (/0/),                   &
-     &                      ncid = ncid)
-      IF (exit_flag.ne.NoError) RETURN
-
-      CALL netcdf_put_fvar (ng, model, ncname, 'PhyMR',                 &
-     &                      PhyMR(ng), (/0/), (/0/),                    &
-     &                      ncid = ncid)
-      IF (exit_flag.ne.NoError) RETURN
-
-      CALL netcdf_put_fvar (ng, model, ncname, 'ZooAE_N',               &
-     &                      ZooAE_N(ng), (/0/), (/0/),                  &
-     &                      ncid = ncid)
-      IF (exit_flag.ne.NoError) RETURN
-
-      CALL netcdf_put_fvar (ng, model, ncname, 'ZooBM',                 &
-     &                      ZooBM(ng), (/0/), (/0/),                    &
-     &                      ncid = ncid)
-      IF (exit_flag.ne.NoError) RETURN
-
-      CALL netcdf_put_fvar (ng, model, ncname, 'ZooCN',                 &
-     &                      ZooCN(ng), (/0/), (/0/),                    &
-     &                      ncid = ncid)
-      IF (exit_flag.ne.NoError) RETURN
-
-      CALL netcdf_put_fvar (ng, model, ncname, 'ZooER',                 &
-     &                      ZooER(ng), (/0/), (/0/),                    &
-     &                      ncid = ncid)
-      IF (exit_flag.ne.NoError) RETURN
-
-      CALL netcdf_put_fvar (ng, model, ncname, 'ZooGR',                 &
-     &                      ZooGR(ng), (/0/), (/0/),                    &
-     &                      ncid = ncid)
-      IF (exit_flag.ne.NoError) RETURN
-
-      CALL netcdf_put_fvar (ng, model, ncname, 'ZooMin',                &
-     &                      ZooMin(ng), (/0/), (/0/),                   &
-     &                      ncid = ncid)
-      IF (exit_flag.ne.NoError) RETURN
-
-      CALL netcdf_put_fvar (ng, model, ncname, 'ZooMR',                 &
-     &                      ZooMR(ng), (/0/), (/0/),                    &
-     &                      ncid = ncid)
-      IF (exit_flag.ne.NoError) RETURN
-
-      CALL netcdf_put_fvar (ng, model, ncname, 'LDeRRN',                &
-     &                      LDeRRN(ng), (/0/), (/0/),                   &
-     &                      ncid = ncid)
-      IF (exit_flag.ne.NoError) RETURN
-
-      CALL netcdf_put_fvar (ng, model, ncname, 'LDeRRC',                &
-     &                      LDeRRC(ng), (/0/), (/0/),                   &
-     &                      ncid = ncid)
-      IF (exit_flag.ne.NoError) RETURN
-
-      CALL netcdf_put_fvar (ng, model, ncname, 'CoagR',                 &
-     &                      CoagR(ng), (/0/), (/0/),                    &
-     &                      ncid = ncid)
-      IF (exit_flag.ne.NoError) RETURN
-
-      CALL netcdf_put_fvar (ng, model, ncname, 'SDeRRN',                &
-     &                      SDeRRN(ng), (/0/), (/0/),                   &
-     &                      ncid = ncid)
-      IF (exit_flag.ne.NoError) RETURN
-
-      CALL netcdf_put_fvar (ng, model, ncname, 'SDeRRC',                &
-     &                      SDeRRC(ng), (/0/), (/0/),                   &
-     &                      ncid = ncid)
-      IF (exit_flag.ne.NoError) RETURN
-
-      CALL netcdf_put_fvar (ng, model, ncname, 'wPhy',                  &
-     &                      wPhy(ng), (/0/), (/0/),                     &
-     &                      ncid = ncid)
-      IF (exit_flag.ne.NoError) RETURN
-
-      CALL netcdf_put_fvar (ng, model, ncname, 'wLDet',                 &
-     &                      wLDet(ng), (/0/), (/0/),                    &
-     &                      ncid = ncid)
-      IF (exit_flag.ne.NoError) RETURN
-
-      CALL netcdf_put_fvar (ng, model, ncname, 'wSDet',                 &
-     &                      wSDet(ng), (/0/), (/0/),                    &
      &                      ncid = ncid)
       IF (exit_flag.ne.NoError) RETURN
 

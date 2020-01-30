@@ -1,13 +1,13 @@
       SUBROUTINE biology (ng,tile)
 
-!!!=== Copyright (c) 2012-2018 Takashi NAKAMURA  =====
+!!!=== Copyright (c) 2012-2020 Takashi NAKAMURA  =====
 !***********************************************************************
 !  References:                                                         !
 !                                                                      !
 !    Nakamura T, Nadaoka K, Watanabe A, Yamamoto T, Miyajima T,        !
-!     Blanco AC (2017) Reef-scale modeling of coral calcification      !
+!     Blanco AC (2018) Reef-scale modeling of coral calcification      !
 !     responses to ocean acidification and sea-level rise.             !
-!     Coral Reefs, in press. doi: 10.1007/s00338-017-1632-3.           !
+!     Coral Reefs 37:37–53. doi: 10.1007/s00338-017-1632-3.            !
 !                                                                      !
 !    Nakamura T, Nadaoka K, Watanabe A (2013) A coral polyp model of   !
 !     photosynthesis, respiration and calcification incorporating      !
@@ -306,12 +306,13 @@
 
         DO i=Istr,Iend
 ! Set initial zero 
-          DO k=1,N(ng)
-            DO itrc=1,NBT
-              ibio=idbio(itrc)
-              dtrc_dt(k,ibio)=0.0_r8
-            END DO
-          END DO
+          dtrc_dt(:,:)=0.0_r8
+!          DO k=1,N(ng)
+!            DO itrc=1,NBT
+!              ibio=idbio(itrc)
+!              dtrc_dt(k,ibio)=0.0_r8
+!            END DO
+!          END DO
           sspH      = 8.0_r8         ! sea surface pH
           ssfCO2    = 380.0_r8         ! sea surface fCO2 (uatm)
           ssWarg    = 4.0_r8         ! sea surface aragonite saturation state
@@ -356,7 +357,7 @@
 
 !----- Ecosystem model ----------------------------------------
 
-            CALL reef_ecosys          &
+            CALL reef_ecosys           &
 !          input parameters
      &            (ng, i, j            &   ! ng: nested grid number; i,j: position
      &            ,N(ng)               &   ! Number of vertical grid (following ROMS vertical grid)
@@ -380,21 +381,25 @@
 #ifdef SEDIMENT_ECOSYS
      &            ,p_sand(i,j)         &   ! sediment coverage (0-1)
 #endif
-
      &            ,t(i,j,:,nstp,iTemp)     &   ! Tmp(N): Temperature (oC)
      &            ,t(i,j,:,nstp,iSalt)     &   ! Sal(N): Salinity (PSU)
      &            ,t(i,j,:,nstp,iTIC_)     &   ! DIC(N): Total dissolved inorganic carbon (DIC: umol kg-1)
      &            ,t(i,j,:,nstp,iTAlk)     &   ! TA (N): Total alkalinity (TA: umol kg-1)
      &            ,t(i,j,:,nstp,iOxyg)     &   ! DOx(N): Dissolved oxygen (umol L-1)
 #if defined ORGANIC_MATTER
-     &            ,t(i,j,:,nstp,iDOC_)     &   ! DOC(N): Dissolved organic carbon (DOC: umol L-1)
-     &            ,t(i,j,:,nstp,iPOC_)     &   ! POC(N): Particulate organic carbon (POC: umol L-1)
-     &            ,t(i,j,:,nstp,iPhy1)     &   ! PHY1(N): phytoplankton1 (umol C L-1)
-     &            ,t(i,j,:,nstp,iPhy2)     &   ! PHY2(N): phytoplankton2 (umol C L-1)
-     &            ,t(i,j,:,nstp,iZoop)     &   ! ZOO(N): zooplankton (umol C L-1)
+     &            ,t(i,j,:,nstp,iDOC(:))   &   ! DOC(N): Dissolved organic carbon (DOC: umol L-1)
+     &            ,t(i,j,:,nstp,iPOC(:))   &   ! POC(N): Particulate organic carbon (POC: umol L-1)
+     &            ,t(i,j,:,nstp,iPhyt(:))  &   ! PHY(N): phytoplankton1 (umol C L-1), dinoflagellate
+     &            ,t(i,j,:,nstp,iZoop(:))  &   ! ZOO(N): zooplankton (umol C L-1)
+     &            ,t(i,j,:,nstp,iPIC(:))   &   ! PIC(N): Particulate inorganic carbon (PIC: umol L-1), coccolith (CaCO3)
 #endif
 #if defined CARBON_ISOTOPE
-     &            ,t(i,j,:,nstp,iT13C)     &   ! DI13C(N): 13C of DIC (umol kg-1)
+     &            ,t(i,j,:,nstp,iT13C)         &   ! DI13C (N): 13C of DIC (umol kg-1)
+     &            ,t(i,j,:,nstp,iDO13C(:))     &   ! DO13C (N): 13C of Labile Dissolved organic carbon (LDOC: umol L-1)
+     &            ,t(i,j,:,nstp,iPO13C(:))     &   ! PO13C (N): 13C of Particulate organic carbon (POC: umol L-1)
+     &            ,t(i,j,:,nstp,iPhyt13C(:))   &   ! PHY13C(N): 13C of phytoplankton1 (umol C L-1), dinoflagellate
+     &            ,t(i,j,:,nstp,iZoop13C(:))   &   ! ZOO13C(N): 13C of zooplankton (umol C L-1)
+     &            ,t(i,j,:,nstp,iPI13C(:))     &   ! PI13C (N): 13C of Particulate inorganic carbon (PIC: umol L-1), coccolith (CaCO3)
 #endif
 #if defined NUTRIENTS         
      &            ,t(i,j,:,nstp,iNO3_)     &   ! NO3(N): NO3 (umol L-1)
@@ -402,10 +407,21 @@
      &            ,t(i,j,:,nstp,iNH4_)     &   ! NH4(N): NH4 (umol L-1)
      &            ,t(i,j,:,nstp,iPO4_)     &   ! PO4(N): PO4 (umol L-1)
 # if defined ORGANIC_MATTER
-     &            ,t(i,j,:,nstp,iDON_)     &   ! DON(N): Dissolved organic nitrogen (DON: umol L-1)
-     &            ,t(i,j,:,nstp,iPON_)     &   ! PON(N): Particulate organic nitrogen (PON: umol L-1)
-     &            ,t(i,j,:,nstp,iDOP_)     &   ! DOP(N): Dissolved organic phosporius (DOP: umol L-1)
-     &            ,t(i,j,:,nstp,iPOP_)     &   ! POP(N): Particulate organic phosporius (POP: umol L-1)
+     &            ,t(i,j,:,nstp,iDON(:))   &   ! DON(N): Dissolved organic nitrogen (DON: umol L-1)
+     &            ,t(i,j,:,nstp,iPON(:))   &   ! PON(N): Particulate organic nitrogen (PON: umol L-1)
+     &            ,t(i,j,:,nstp,iDOP(:))   &   ! DOP(N): Dissolved organic phosporius (DOP: umol L-1)
+     &            ,t(i,j,:,nstp,iPOP(:))   &   ! POP(N): Particulate organic phosporius (POP: umol L-1)
+# endif
+# if defined NITROGEN_ISOTOPE
+    &            ,t(i,j,:,nstp,i15NO3)     &   ! NO3_15N(N): 15N of NO3 (umol L-1)
+    &            ,t(i,j,:,nstp,i15NO2)     &   ! NO2_15N(N): 15N of NO2 (umol L-1)
+    &            ,t(i,j,:,nstp,i15NH4)     &   ! NH4_15N(N): 15N of NH4 (umol L-1)
+#  if defined ORGANIC_MATTER
+    &            ,t(i,j,:,nstp,iDO15N(:))     &   ! DO15N (N): 15N of Labile Dissolved organic nitrogen (LDON: umol L-1)
+    &            ,t(i,j,:,nstp,iPO15N(:))     &   ! PO15N (N): 15N of Particulate organic nitrogen (PON: umol L-1)
+    &            ,t(i,j,:,nstp,iPhyt15N(:))   &   ! PHY15N(N): 15N of phytoplankton1 (umol C L-1), dinoflagellate
+    &            ,t(i,j,:,nstp,iZoop15N(:))   &   ! ZOO15N(N): 15N of zooplankton (umol C L-1)
+#  endif
 # endif
 #endif
 #if defined COT_STARFISH         
@@ -413,34 +429,50 @@
      &            ,t(i,j,:,nstp,iCOTl)     &   ! COTl(N): COT starfish larvae (umol L-1)
 #endif
 !          output parameters
-     &            ,dtrc_dt(:,iTIC_)   &   ! dDIC_dt(N): dDIC/dt (umol kg-1 s-1)
-     &            ,dtrc_dt(:,iTAlk)   &   ! dTA_dt (N): dTA/dt (umol kg-1 s-1)
-     &            ,dtrc_dt(:,iOxyg)   &   ! dDOx_dt(N): dDO/dt (umol L-1 s-1)
-#if defined ORGANIC_MATTER
-     &            ,dtrc_dt(:,iDOC_)   &   ! dDOC_dt(N): dDOC/dt (umol L-1 s-1)
-     &            ,dtrc_dt(:,iPOC_)   &   ! dPOC_dt(N): dPOC/dt (umol L-1 s-1)
-     &            ,dtrc_dt(:,iPhy1)   &   ! dPHY1_dt(N): dPHY1/dt (umol C L-1 s-1)
-     &            ,dtrc_dt(:,iPhy2)   &   ! dPHY2_dt(N): dPHY2/dt (umol C L-1 s-1)
-     &            ,dtrc_dt(:,iZoop)   &   ! dZOO_dt(N): dZOO/dt (umol C L-1 s-1)
+     &            ,dtrc_dt(:,iTIC_)        &   ! dDIC_dt(N): dDIC/dt (umol kg-1 s-1)
+     &            ,dtrc_dt(:,iTAlk)        &   ! dTA_dt (N): dTA/dt (umol kg-1 s-1)
+     &            ,dtrc_dt(:,iOxyg)        &   ! dDOx_dt(N): dDO/dt (umol L-1 s-1)
+#if defined ORGANIC_MATTER     
+     &            ,dtrc_dt(:,iDOC(1):iDOC(N_dom))      &   ! dDOC_dt(N): dDOC/dt (umol L-1 s-1)
+     &            ,dtrc_dt(:,iPOC(1):iPOC(N_pom))      &   ! dPOC_dt(N): dPOC/dt (umol L-1 s-1)
+     &            ,dtrc_dt(:,iPhyt(1):iPhyt(N_phyt))   &   ! dPHY_dt(N): dPHY/dt (umol C L-1 s-1)
+     &            ,dtrc_dt(:,iZoop(1):iZoop(N_zoop))   &   ! dZOO_dt(N): dZOO/dt (umol C L-1 s-1)
+     &            ,dtrc_dt(:,iPIC(1):iPIC(N_pim))      &   ! dPIC_dt(N): dPIC/dt (umol L-1 s-1)
 #endif
 #if defined CARBON_ISOTOPE
-     &            ,dtrc_dt(:,iT13C)   &   ! dDI13C_dt(N): dDI13C/dt (umol kg-1 s-1)
-#endif
-#if defined NUTRIENTS 
-     &            ,dtrc_dt(:,iNO3_)   &   ! dNO3_dt(N): dNO3/dt (umol L-1 s-1)
-     &            ,dtrc_dt(:,iNO2_)   &   ! dNO2_dt(N): dNO2/dt (umol L-1 s-1)
-     &            ,dtrc_dt(:,iNH4_)   &   ! dNH4_dt(N): dNH4/dt (umol L-1 s-1)
-     &            ,dtrc_dt(:,iPO4_)   &   ! dPO4_dt(N): dPO4/dt (umol L-1 s-1)
-# if defined ORGANIC_MATTER
-     &            ,dtrc_dt(:,iDON_)   &   ! dDON_dt(N): dDON/dt (umol L-1 s-1)
-     &            ,dtrc_dt(:,iPON_)   &   ! dPON_dt(N): dPON/dt (umol L-1 s-1)
-     &            ,dtrc_dt(:,iDOP_)   &   ! dDOP_dt(N): dDOP/dt (umol L-1 s-1)
-     &            ,dtrc_dt(:,iPOP_)   &   ! dPOP_dt(N): dPOP/dt (umol L-1 s-1)
+     &            ,dtrc_dt(:,iT13C)        &   ! dDI13C_dt (N): dDI13C/dt (umol kg-1 s-1)
+     &            ,dtrc_dt(:,iDO13C(1):iDO13C(N_dom))    &   ! dDO13C_dt (N): dDO13C/dt  (umol L-1 s-1) 
+     &            ,dtrc_dt(:,iPO13C(1):iPO13C(N_pom))    &   ! dPO13C_dt (N): dPO13C/dt  (umol L-1 s-1) 
+     &            ,dtrc_dt(:,iPhyt13C(1):iPhyt13C(N_phyt))  &   ! dPHY13C_dt(N): dPHY13C/dt  (umol L-1 s-1)  
+     &            ,dtrc_dt(:,iZoop13C(1):iZoop13C(N_zoop))  &   ! dZOO13C_dt(N): dZOO13C/dt  (umol L-1 s-1)  
+     &            ,dtrc_dt(:,iPI13C(1):iPI13C(N_pim))    &   ! dPI13C_dt (N): dPI13C/dt  (umol L-1 s-1)  
+#endif     
+#if defined NUTRIENTS      
+     &            ,dtrc_dt(:,iNO3_)        &   ! dNO3_dt(N): dNO3/dt (umol L-1 s-1)
+     &            ,dtrc_dt(:,iNO2_)        &   ! dNO2_dt(N): dNO2/dt (umol L-1 s-1)
+     &            ,dtrc_dt(:,iNH4_)        &   ! dNH4_dt(N): dNH4/dt (umol L-1 s-1)
+     &            ,dtrc_dt(:,iPO4_)        &   ! dPO4_dt(N): dPO4/dt (umol L-1 s-1)
+# if defined ORGANIC_MATTER     
+     &            ,dtrc_dt(:,iDON(1):iDON(N_dom))      &   ! dDON_dt(N): dDON/dt (umol L-1 s-1)
+     &            ,dtrc_dt(:,iPON(1):iPON(N_pom))      &   ! dPON_dt(N): dPON/dt (umol L-1 s-1)
+     &            ,dtrc_dt(:,iDOP(1):iDOP(N_dom))      &   ! dDOP_dt(N): dDOP/dt (umol L-1 s-1)
+     &            ,dtrc_dt(:,iPOP(1):iPOP(N_pom))      &   ! dPOP_dt(N): dPOP/dt (umol L-1 s-1)
+# endif     
+# if defined NITROGEN_ISOTOPE
+    &            ,dtrc_dt(:,i15NO3)        &   ! dNO3_15N_dt(N): dNO3_15N/dt (umol L-1 s-1)
+    &            ,dtrc_dt(:,i15NO2)        &   ! dNO2_15N_dt(N): dNO2_15N/dt (umol L-1 s-1)
+    &            ,dtrc_dt(:,i15NH4)        &   ! dNH4_15N_dt(N): dNH4_15N/dt (umol L-1 s-1)
+#  if defined ORGANIC_MATTER
+    &            ,dtrc_dt(:,iDO15N(1):iDO15N(N_dom))     &   ! dDO15N_dt (N): dDO15N/dt  (umol L-1 s-1) 
+    &            ,dtrc_dt(:,iPO15N(1):iPO15N(N_pom))     &   ! dPO15N_dt (N): dPO15N/dt  (umol L-1 s-1) 
+    &            ,dtrc_dt(:,iPhyt15N(1):iPhyt15N(N_phyt))   &   ! dPHY15N_dt(N): dPHY1_15N/dt  (umol L-1 s-1)  
+    &            ,dtrc_dt(:,iZoop15N(1):iZoop15N(N_zoop))   &   ! dZOO15N_dt(N): dZOO_15N/dt  (umol L-1 s-1)  
+#  endif
 # endif
-#endif
-#if defined COT_STARFISH         
-     &            ,dtrc_dt(:,iCOTe)   &   ! dCOTe/dt(N): (umol L-1 s-1)
-     &            ,dtrc_dt(:,iCOTl)   &   ! dCOTl/dt(N): (umol L-1 s-1)
+#endif     
+#if defined COT_STARFISH              
+     &            ,dtrc_dt(:,iCOTe)        &   ! dCOTe/dt(N): (umol L-1 s-1)
+     &            ,dtrc_dt(:,iCOTl)        &   ! dCOTl/dt(N): (umol L-1 s-1)
 #endif
      &            ,sspH           &   ! sea surface pH
      &            ,ssfCO2         &   ! sea surface fCO2 (uatm)

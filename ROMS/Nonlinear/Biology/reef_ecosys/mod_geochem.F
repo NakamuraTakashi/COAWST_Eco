@@ -24,6 +24,8 @@ module mod_geochem
   real(8), parameter :: dif_H2O2 = 1.19d-9   ! H2O2                  (m2 s-1)
 ! ------ kinematic viscosity of seawater @ 25 degC, 35 psu -----
   real(8), parameter :: vis_sw   = 0.94d-6   ! kinematic viscosity   (m2 s-1)
+
+  real(8), parameter :: grav    = 9.80665d0 ! Gravitational acceleration [m/s2]
     
 contains
 !!!***********************************************************************
@@ -1549,14 +1551,13 @@ contains
     return
   end function aB_Palmer1987
 
-!-----------------------------------------------------------------------
-
+!!!*********************************************************************
 !!!***********************************************************************
 !!!   Empirical vertical profiles of biogeochemical parameters
-!!!                                   developed by Faisal AMRI
 !!!*********************************************************************** 
 
-  !--- Dissolved Inorganic Carbon (DIC) ----------------
+!--- Dissolved Inorganic Carbon (DIC) ----------------
+!     developed by Faisal AMRI
 
   real(8) function DIC_Profile(t_oC)
     implicit none
@@ -1569,6 +1570,7 @@ contains
   end function DIC_Profile
 
 !--- Total Alikalinity (TA) ------------------------------
+!     developed by Faisal AMRI
 
   real(8) function TA_Profile(t_oC)
     implicit none
@@ -1581,6 +1583,7 @@ contains
   end function TA_Profile
 
 !--- Dissolved Oxygen (DO) ------------------------------
+!     developed by Faisal AMRI
 
   real(8) function DO_Profile(t_oC)
     implicit none
@@ -1592,7 +1595,27 @@ contains
 
   end function DO_Profile
 
-!--- Phytoplankton1 -------------------------------------
+!--- Dissolved Oxygen (DO) ------------------------------
+!     TN test
+
+  real(8) function DO_Profile2(SST, SSS, SSDIC, DIC)
+    implicit none
+    real(8), intent(in) :: SST   ! Sea Surface Temperatureture (oC)
+    real(8), intent(in) :: SSS   ! Sea Surface Salinity (psu)
+    real(8), intent(in) :: SSDIC ! Sea Surface DIC (umol kg-1)
+    real(8), intent(in) :: DIC   ! in situ DIC (umol kg-1)
+
+    ! C106 H212 O106 N16 P (POM) + 127.25*O2 + 9.5*H2O
+    ! --> 106*CO2 + 106*H2O +19*H+ + 16*NO3- + PO43-
+
+    DO_Profile2 = O2satu(SST+273.15d0, SSS) - ( DIC - SSDIC )*127.25d0/106.0d0
+    DO_Profile2 = max( DO_Profile2, 10.0d0 ) !! Error handling
+
+  end function DO_Profile2
+
+
+!--- Phytoplankton_01 -------------------------------------
+!     developed by Faisal AMRI
 
   real(8) function PHY1_Profile(d)
     implicit none
@@ -1606,7 +1629,8 @@ contains
 
   end function PHY1_Profile
 
-!--- Phytoplankton1 -------------------------------------
+!--- Phytoplankton_02 -------------------------------------
+!     developed by Faisal AMRI
 
   real(8) function PHY2_Profile(d)
     implicit none
@@ -1620,7 +1644,39 @@ contains
 
   end function PHY2_Profile
 
+!--- Phytoplankton_01 -------------------------------------
+!     developed by Shinya AMANO
+
+  real(8) function PHY1_Profile2(d)
+    implicit none
+    real(8), intent(in) :: d   ! elevation (m) = -depth
+
+    IF (d.gt.-155.0d0) THEN
+      PHY1_Profile2=(-0.00095d0*(d+50.0d0)**2 + 10.5d0)/24.0d0     ! umol L-1
+    ELSE IF (d.le.-155.0d0) THEN
+      PHY1_Profile2=0.0d0     ! umol L-1
+    END IF
+
+  end function PHY1_Profile2
+
+!--- Phytoplankton_02 -------------------------------------
+!     developed by Shinya AMANO
+
+  real(8) function PHY2_Profile2(d)
+    implicit none
+    real(8), intent(in) :: d   ! elevation (m) = -depth  
+ 
+    IF (d.gt.-155.0d0) THEN
+      PHY2_Profile2=(-0.00095d0*(d+50.0d0)**2 + 10.5d0)/24.0d0     ! umol L-1
+    ELSE IF (d.le.-155d0) THEN
+      PHY2_Profile2=0.0d0     ! umol L-1
+    END IF
+
+  end function PHY2_Profile2
+
+
 !--- Zooplankton -------------------------------------
+!     developed by Faisal AMRI
 
   real(8) function ZOO_Profile(d)
     implicit none
@@ -1629,12 +1685,28 @@ contains
     IF(( d .GE. -400.0d0) .AND. ( d .LE. 0.0d0 )) THEN
       ZOO_Profile = 2.5d0+(d/200.0d0)    ! umolC L-1
     ELSE IF( d .LT. -400.0d0) THEN
-      ZOO_Profile = 0.0d08                            ! umolC L-1
+      ZOO_Profile = 0.0d0                            ! umolC L-1
     END IF
 
   end function ZOO_Profile
 
+!--- Zooplankton -------------------------------------
+!     TN test
+
+  real(8) function ZOO_Profile2(d)
+    implicit none
+    real(8), intent(in) :: d   ! elevation (m) = -depth  
+ 
+    IF(( d .GE. -200.0d0) .AND. ( d .LE. 0.0d0 )) THEN
+      ZOO_Profile2 = max( 0.25d0+(d/200.0d0), 0.0d0 )    ! umolC L-1
+    ELSE IF( d .LT. -200.0d0) THEN
+      ZOO_Profile2 = 0.0d0               ! umolC L-1
+    END IF
+
+  end function ZOO_Profile2
+
 !--- NO3 -------------------------------------
+!     developed by Faisal AMRI
 
   real(8) function NO3_Profile( DIC )
     implicit none
@@ -1647,7 +1719,47 @@ contains
 
   end function NO3_Profile
 
+!--- NO3 -------------------------------------
+!     developed by Shinya AMANO
+
+  real(8) function NO3_Profile2( d )
+    implicit none
+    real(8), intent(in) :: d   ! elevation (m) = -depth  
+    real(8), parameter :: c_NO3_s=-0.0508d0
+    real(8), parameter :: c_NO3_sc=-2.9698d0
+    real(8), parameter :: c_NO3_d=0.0018d0
+    real(8), parameter :: c_NO3_dc=43.891d0
+
+    IF (d.gt.-63.9196d0) THEN
+      NO3_Profile2 = 0.5d0     ! umol L-1
+    ELSE IF (d.gt.-900d0) THEN
+      NO3_Profile2 = c_NO3_s*d + c_NO3_sc     ! umol L-1
+    ELSE IF (d.le.-900d0) THEN
+      NO3_Profile2 = c_NO3_d*d + c_NO3_dc     ! umol L-1
+    END IF
+
+  end function NO3_Profile2
+
+!--- NO3 -------------------------------------
+!     TN test 
+
+  real(8) function NO3_Profile3( SSNO3, SSDIC, DIC )
+    implicit none
+    real(8), intent(in) :: SSNO3 ! Sea surface NO3 (umol L-1)
+    real(8), intent(in) :: SSDIC ! Sea Surface DIC (umol kg-1)
+    real(8), intent(in) :: DIC   ! in situ DIC (umol kg-1)
+
+    ! C106 H212 O106 N16 P (POM) + 127.25*O2 + 9.5*H2O
+    ! --> 106*CO2 + 106*H2O +19*H+ + 16*NO3- + PO43-
+ 
+    NO3_Profile3 = SSNO3 + ( DIC - SSDIC )*16.0d0/106.0d0
+    NO3_Profile3 = max( NO3_Profile3, SSNO3 )  !! Error handling
+
+  end function NO3_Profile3
+
+
 !--- PO4 -------------------------------------
+!     developed by Faisal AMRI
 
   real(8) function PO4_Profile( NO3 )
     implicit none
@@ -1659,6 +1771,44 @@ contains
     END IF
 
   end function PO4_Profile
+
+!--- PO4 -------------------------------------
+!     developed by Shinya AMANO
+
+  real(8) function PO4_Profile2( d )
+    implicit none
+    real(8), intent(in) :: d   ! elevation (m) = -depth  
+    real(8), parameter :: c_PO4_s=-0.0037d0
+    real(8), parameter :: c_PO4_sc=-0.1513d0
+    real(8), parameter :: c_PO4_d=0.0002d0
+    real(8), parameter :: c_PO4_dc=3.3429d0
+
+    IF (d.gt.-52.716d0) THEN
+      PO4_Profile2=0.04     ! umol L-1
+    ELSE IF (d.gt.-950d0) THEN
+      PO4_Profile2=c_PO4_s*d + c_PO4_sc     ! umol L-1
+    ELSE IF (d.le.-950d0) THEN
+      PO4_Profile2=c_PO4_d*d + c_PO4_dc     ! umol L-1
+    END IF
+
+  end function PO4_Profile2
+
+!--- PO4 -------------------------------------
+!     TN test
+
+  real(8) function PO4_Profile3( SSPO4, SSDIC, DIC )
+    implicit none
+    real(8), intent(in) :: SSPO4 ! Sea surface PO4 (umol L-1)
+    real(8), intent(in) :: SSDIC ! Sea Surface DIC (umol kg-1)
+    real(8), intent(in) :: DIC   ! in situ DIC (umol kg-1)
+
+    ! C106 H212 O106 N16 P (POM) + 127.25*O2 + 9.5*H2O
+    ! --> 106*CO2 + 106*H2O +19*H+ + 16*NO3- + PO43-
+ 
+    PO4_Profile3 = SSPO4 + ( DIC - SSDIC )/106.0d0
+    PO4_Profile3 = max(PO4_Profile3, SSPO4)  !! Error handling
+
+  end function PO4_Profile3
 
 !!!*********************************************************************
 

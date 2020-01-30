@@ -226,399 +226,478 @@
       END IF
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
 #elif defined SHIRAHO_REEF || defined FUKIDO
+!-----------------------------------------------------------------------
+!  SHIRAHO_REEF & FUKIDO CASES
+!-----------------------------------------------------------------------
+
+! ---- Eastern boundary -----------------------------------------------
       IF (ANY(LBC(ieast,isTvar(:),ng)%acquire).and.                     &
      &    DOMAIN(ng)%Eastern_Edge(tile)) THEN
         DO k=1,N(ng)
           DO j=JstrT,JendT
             BOUNDARY(ng)%t_east(j,k,itemp)=T0(ng)
             BOUNDARY(ng)%t_east(j,k,isalt)=S0(ng)
-#  ifdef SEDIMENT
-            BOUNDARY(ng)%t_east(j,k,idmud(1))=0.0_r8  !(kg/m3 = g/L)
-#  endif
-#  ifdef REEF_ECOSYS
+# ifdef SEDIMENT
+            DO ised=1,NST
+              BOUNDARY(ng)%t_east(j,k,idsed(ised))=0.0_r8
+            END DO
+# endif
+# ifdef REEF_ECOSYS
             BOUNDARY(ng)%t_east(j,k,iTIC_)=TIC_0(ng)
             BOUNDARY(ng)%t_east(j,k,iTAlk)=TAlk0(ng)
-            BOUNDARY(ng)%t_east(j,k,iOxyg)=Oxyg0(ng)
-#   if defined ORGANIC_MATTER
-            BOUNDARY(ng)%t_east(j,k,iDOC_)=DOC_0(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_east(j,k,iPOC_)=POC_0(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_east(j,k,iPhy1)=Phy10(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_east(j,k,iPhy2)=Phy20(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_east(j,k,iZoop)=Zoop0(ng)     ! umolC L-1
-#   endif
-#   if defined CARBON_ISOTOPE
+!            BOUNDARY(ng)%t_east(j,k,iOxyg)=Oxyg0(ng)
+            BOUNDARY(ng)%t_east(j,k,iOxyg)=                            &
+     &         O2satu(BOUNDARY(ng)%t_east(j,k,iTemp)+273.15_r8,        &
+     &                BOUNDARY(ng)%t_east(j,k,iSalt))
+#  if defined ORGANIC_MATTER
+            DO itrc=1,N_dom
+              BOUNDARY(ng)%t_east(j,k,iDOC(itrc))=DOC_0(itrc,ng)     ! umolC L-1
+            END DO
+            DO itrc=1,N_pom
+              BOUNDARY(ng)%t_east(j,k,iPOC(itrc)) = POC_0(itrc,ng)     ! umolC L-1
+            END DO
+            DO itrc=1,N_phyt
+              BOUNDARY(ng)%t_east(j,k,iPhyt(itrc))=Phyt_0(itrc,ng)     ! umolC L-1
+            END DO
+            DO itrc=1,N_zoop
+              BOUNDARY(ng)%t_east(j,k,iZoop(itrc))=Zoop_0(itrc,ng)     ! umolC L-1
+            END DO
+            DO itrc=1,N_pim
+              BOUNDARY(ng)%t_east(j,k,iPIC(itrc)) = PIC_0(itrc,ng)     ! umolC L-1
+            END DO
+#  endif
+#  if defined CARBON_ISOTOPE
             BOUNDARY(ng)%t_east(j,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng) ! umol kg-1  !!! R13C_fromd13C included geochem module
-#    if defined ORGANIC_MATTER
-            BOUNDARY(ng)%t_east(j,k,iDO13)=R13C_fromd13C( d13C_DOC0(ng) )*DOC_0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-            BOUNDARY(ng)%t_east(j,k,iPO13)=R13C_fromd13C( d13C_POC0(ng) )*POC_0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-            BOUNDARY(ng)%t_east(j,k,iPh13)=R13C_fromd13C( d13C_Phy0(ng) )*Phyt0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-            BOUNDARY(ng)%t_east(j,k,iZo13)=R13C_fromd13C( d13C_Zoo0(ng) )*Zoop0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-#    endif
+#   if defined ORGANIC_MATTER
+            DO itrc=1,N_dom
+              BOUNDARY(ng)%t_east(j,k,iDO13C(itrc)) = R13C_fromd13C( d13C_DOC_0(itrc,ng) )   &
+     &                                                *BOUNDARY(ng)%t_east(j,k,iDOC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
+            END DO
+            DO itrc=1,N_pom
+              BOUNDARY(ng)%t_east(j,k,iPO13C(itrc)) = R13C_fromd13C( d13C_POC_0(itrc,ng) )   &
+     &                                                *BOUNDARY(ng)%t_east(j,k,iPOC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
+            END DO
+            DO itrc=1,N_phyt
+              BOUNDARY(ng)%t_east(j,k,iPhyt13C(itrc)) = R13C_fromd13C( d13C_Phyt_0(itrc,ng) ) &
+     &                                                  *BOUNDARY(ng)%t_east(j,k,iPhyt(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
+            END DO
+            DO itrc=1,N_zoop
+              BOUNDARY(ng)%t_east(j,k,iZoop13C(itrc)) = R13C_fromd13C( d13C_Zoop_0(itrc,ng) ) &
+     &                                                  *BOUNDARY(ng)%t_east(j,k,iZoop(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
+            END DO
+            DO itrc=1,N_pim
+              BOUNDARY(ng)%t_east(j,k,iPI13C(itrc)) = R13C_fromd13C( d13C_PIC_0(itrc,ng) )    &
+     &                                                  *BOUNDARY(ng)%t_east(j,k,iPIC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
+            END DO
 #   endif
-#   if defined NUTRIENTS
+#  endif
+#  if defined NUTRIENTS
             BOUNDARY(ng)%t_east(j,k,iNO3_)=NO3_0(ng)     ! umol L-1
             BOUNDARY(ng)%t_east(j,k,iNO2_)=NO2_0(ng)     ! umol L-1
             BOUNDARY(ng)%t_east(j,k,iNH4_)=NH4_0(ng)     ! umol L-1
             BOUNDARY(ng)%t_east(j,k,iPO4_)=PO4_0(ng)     ! umol L-1
+#   if defined ORGANIC_MATTER
+            DO itrc=1,N_dom
+              BOUNDARY(ng)%t_east(j,k,iDON(itrc)) = DON_0(itrc,ng)     ! umolC L-1
+            END DO
+            DO itrc=1,N_pom
+              BOUNDARY(ng)%t_east(j,k,iPON(itrc)) = PON_0(itrc,ng)     ! umolC L-1
+            END DO
+            DO itrc=1,N_dom
+              BOUNDARY(ng)%t_east(j,k,iDOP(itrc)) = DOP_0(itrc,ng)     ! umolC L-1
+            END DO
+            DO itrc=1,N_pom
+              BOUNDARY(ng)%t_east(j,k,iPOP(itrc)) = POP_0(itrc,ng)     ! umolC L-1
+            END DO
+#   endif
+#   if defined NITROGEN_ISOTOPE
+            BOUNDARY(ng)%t_east(j,k,i15NO3) = R15N_fromd15N( d13C_TIC0(ng) )  &
+     &                                        *BOUNDARY(ng)%t_east(j,k,iNO3_) ! umol kg-1  !!! R15N_fromd15N included geochem module
+            BOUNDARY(ng)%t_east(j,k,i15NO2) = R15N_fromd15N( d13C_TIC0(ng) )  &
+     &                                        *BOUNDARY(ng)%t_east(j,k,iNO2_) ! umol kg-1  !!! R15N_fromd15N included geochem module
+            BOUNDARY(ng)%t_east(j,k,i15NH4) = R15N_fromd15N( d13C_TIC0(ng) )  &
+     &                                        *BOUNDARY(ng)%t_east(j,k,iNH4_) ! umol kg-1  !!! R15N_fromd15N included geochem module
 #    if defined ORGANIC_MATTER
-            BOUNDARY(ng)%t_east(j,k,iDON_)=DON_0(ng)     ! umolN L-1
-            BOUNDARY(ng)%t_east(j,k,iPON_)=PON_0(ng)     ! umolN L-1
-            BOUNDARY(ng)%t_east(j,k,iDOP_)=DOP_0(ng)     ! umolP L-1
-            BOUNDARY(ng)%t_east(j,k,iPOP_)=POP_0(ng)     ! umolP L-1
+            DO itrc=1,N_dom
+              BOUNDARY(ng)%t_east(j,k,iDO15N(itrc)) = R15N_fromd15N( d15N_DOC_0(itrc,ng) )    &
+     &                                                *BOUNDARY(ng)%t_east(j,k,iDON(itrc)) ! umol L-1  !!! R15N_fromd15N included geochem module
+            END DO
+            DO itrc=1,N_pom
+              BOUNDARY(ng)%t_east(j,k,iPO15N(itrc)) = R15N_fromd15N( d15N_POC_0(itrc,ng) )    &
+     &                                                *BOUNDARY(ng)%t_east(j,k,iPON(itrc)) ! umol L-1  !!! R15N_fromd15N included geochem module
+            END DO
+            DO itrc=1,N_phyt
+              BOUNDARY(ng)%t_east(j,k,iPhyt15N(itrc)) = R15N_fromd15N( d15N_Phyt_0(itrc,ng) ) &
+     &                                                  *BOUNDARY(ng)%t_east(j,k,iPhyt(itrc))/9.2_r8 ! umol L-1  !!! R15N_fromd15N included geochem module
+            END DO
+            DO itrc=1,N_zoop
+              BOUNDARY(ng)%t_east(j,k,iZoop15N(itrc)) = R15N_fromd15N( d15N_Zoop_0(itrc,ng) ) &
+     &                                                  *BOUNDARY(ng)%t_east(j,k,iZoop(itrc))/9.2d0 ! umol L-1  !!! R15N_fromd15N included geochem module
+            END DO
 #    endif
 #   endif
-#   if defined COT_STARFISH
+#  endif
+#  if defined COT_STARFISH
             BOUNDARY(ng)%t_east(j,k,iCOTe)=COTe0(ng)     ! umolC L-1
             BOUNDARY(ng)%t_east(j,k,iCOTl)=COTl0(ng)     ! umolC L-1
-#   endif
 #  endif
+# endif
 
           END DO
         END DO
       END IF
+
+! ---- Western boundary -----------------------------------------------
       IF (ANY(LBC(iwest,isTvar(:),ng)%acquire).and.                     &
      &    DOMAIN(ng)%Western_Edge(tile)) THEN
         DO k=1,N(ng)
           DO j=JstrT,JendT
             BOUNDARY(ng)%t_west(j,k,itemp)=T0(ng)
             BOUNDARY(ng)%t_west(j,k,isalt)=S0(ng)
-#  ifdef SEDIMENT
-            BOUNDARY(ng)%t_west(j,k,idmud(1))=0.0_r8  !(kg/m3 = g/L)
-#  endif
-#  ifdef REEF_ECOSYS
+# ifdef SEDIMENT
+            DO ised=1,NST
+              BOUNDARY(ng)%t_west(j,k,idsed(ised))=0.0_r8
+            END DO
+# endif
+# ifdef REEF_ECOSYS
             BOUNDARY(ng)%t_west(j,k,iTIC_)=TIC_0(ng)
             BOUNDARY(ng)%t_west(j,k,iTAlk)=TAlk0(ng)
-            BOUNDARY(ng)%t_west(j,k,iOxyg)=Oxyg0(ng)
+!            BOUNDARY(ng)%t_west(j,k,iOxyg)=Oxyg0(ng)
+            BOUNDARY(ng)%t_west(j,k,iOxyg)=                            &
+     &         O2satu(BOUNDARY(ng)%t_west(j,k,iTemp)+273.15_r8,        &
+     &                BOUNDARY(ng)%t_west(j,k,iSalt))
+#  if defined ORGANIC_MATTER
+            DO itrc=1,N_dom
+              BOUNDARY(ng)%t_west(j,k,iDOC(itrc))=DOC_0(itrc,ng)     ! umolC L-1
+            END DO
+            DO itrc=1,N_pom
+              BOUNDARY(ng)%t_west(j,k,iPOC(itrc)) = POC_0(itrc,ng)     ! umolC L-1
+            END DO
+            DO itrc=1,N_phyt
+              BOUNDARY(ng)%t_west(j,k,iPhyt(itrc))=Phyt_0(itrc,ng)     ! umolC L-1
+            END DO
+            DO itrc=1,N_zoop
+              BOUNDARY(ng)%t_west(j,k,iZoop(itrc))=Zoop_0(itrc,ng)     ! umolC L-1
+            END DO
+            DO itrc=1,N_pim
+              BOUNDARY(ng)%t_west(j,k,iPIC(itrc)) = PIC_0(itrc,ng)     ! umolC L-1
+            END DO
+#  endif
+#  if defined CARBON_ISOTOPE
+            BOUNDARY(ng)%t_west(j,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng)   &
+     &                                                *BOUNDARY(ng)%t_west(j,k,iTIC_) ! umol kg-1  !!! R13C_fromd13C included geochem module
 #   if defined ORGANIC_MATTER
-            BOUNDARY(ng)%t_west(j,k,iDOC_)=DOC_0(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_west(j,k,iPOC_)=POC_0(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_west(j,k,iPhy1)=Phy10(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_west(j,k,iPhy2)=Phy20(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_west(j,k,iZoop)=Zoop0(ng)     ! umolC L-1
+            DO itrc=1,N_dom
+              BOUNDARY(ng)%t_west(j,k,iDO13C(itrc)) = R13C_fromd13C( d13C_DOC_0(itrc,ng) )   &
+     &                                                *BOUNDARY(ng)%t_west(j,k,iDOC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
+            END DO
+            DO itrc=1,N_pom
+              BOUNDARY(ng)%t_west(j,k,iPO13C(itrc)) = R13C_fromd13C( d13C_POC_0(itrc,ng) )   &
+     &                                                *BOUNDARY(ng)%t_west(j,k,iPOC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
+            END DO
+            DO itrc=1,N_phyt
+              BOUNDARY(ng)%t_west(j,k,iPhyt13C(itrc)) = R13C_fromd13C( d13C_Phyt_0(itrc,ng) ) &
+     &                                                  *BOUNDARY(ng)%t_west(j,k,iPhyt(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
+            END DO
+            DO itrc=1,N_zoop
+              BOUNDARY(ng)%t_west(j,k,iZoop13C(itrc)) = R13C_fromd13C( d13C_Zoop_0(itrc,ng) ) &
+     &                                                  *BOUNDARY(ng)%t_west(j,k,iZoop(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
+            END DO
+            DO itrc=1,N_pim
+              BOUNDARY(ng)%t_west(j,k,iPI13C(itrc)) = R13C_fromd13C( d13C_PIC_0(itrc,ng) )    &
+     &                                                  *BOUNDARY(ng)%t_west(j,k,iPIC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
+            END DO
 #   endif
-#   if defined CARBON_ISOTOPE
-            BOUNDARY(ng)%t_west(j,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng) ! umol kg-1  !!! R13C_fromd13C included geochem module
-#    if defined ORGANIC_MATTER
-            BOUNDARY(ng)%t_west(j,k,iDO13)=R13C_fromd13C( d13C_DOC0(ng) )*DOC_0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-            BOUNDARY(ng)%t_west(j,k,iPO13)=R13C_fromd13C( d13C_POC0(ng) )*POC_0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-            BOUNDARY(ng)%t_west(j,k,iPh13)=R13C_fromd13C( d13C_Phy0(ng) )*Phyt0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-            BOUNDARY(ng)%t_west(j,k,iZo13)=R13C_fromd13C( d13C_Zoo0(ng) )*Zoop0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-#    endif
-#   endif
-#   if defined NUTRIENTS
+#  endif
+#  if defined NUTRIENTS
             BOUNDARY(ng)%t_west(j,k,iNO3_)=NO3_0(ng)     ! umol L-1
             BOUNDARY(ng)%t_west(j,k,iNO2_)=NO2_0(ng)     ! umol L-1
             BOUNDARY(ng)%t_west(j,k,iNH4_)=NH4_0(ng)     ! umol L-1
             BOUNDARY(ng)%t_west(j,k,iPO4_)=PO4_0(ng)     ! umol L-1
+#   if defined ORGANIC_MATTER
+            DO itrc=1,N_dom
+              BOUNDARY(ng)%t_west(j,k,iDON(itrc)) = DON_0(itrc,ng)     ! umolC L-1
+            END DO
+            DO itrc=1,N_pom
+              BOUNDARY(ng)%t_west(j,k,iPON(itrc)) = PON_0(itrc,ng)     ! umolC L-1
+            END DO
+            DO itrc=1,N_dom
+              BOUNDARY(ng)%t_west(j,k,iDOP(itrc)) = DOP_0(itrc,ng)     ! umolC L-1
+            END DO
+            DO itrc=1,N_pom
+              BOUNDARY(ng)%t_west(j,k,iPOP(itrc)) = POP_0(itrc,ng)     ! umolC L-1
+            END DO
+#   endif
+#   if defined NITROGEN_ISOTOPE
+            BOUNDARY(ng)%t_west(j,k,i15NO3) = R15N_fromd15N( d13C_TIC0(ng) )  &
+     &                                        *BOUNDARY(ng)%t_west(j,k,iNO3_) ! umol kg-1  !!! R15N_fromd15N included geochem module
+            BOUNDARY(ng)%t_west(j,k,i15NO2) = R15N_fromd15N( d13C_TIC0(ng) )  &
+     &                                        *BOUNDARY(ng)%t_west(j,k,iNO2_) ! umol kg-1  !!! R15N_fromd15N included geochem module
+            BOUNDARY(ng)%t_west(j,k,i15NH4) = R15N_fromd15N( d13C_TIC0(ng) )  &
+     &                                        *BOUNDARY(ng)%t_west(j,k,iNH4_) ! umol kg-1  !!! R15N_fromd15N included geochem module
 #    if defined ORGANIC_MATTER
-            BOUNDARY(ng)%t_west(j,k,iDON_)=DON_0(ng)     ! umolN L-1
-            BOUNDARY(ng)%t_west(j,k,iPON_)=PON_0(ng)     ! umolN L-1
-            BOUNDARY(ng)%t_west(j,k,iDOP_)=DOP_0(ng)     ! umolP L-1
-            BOUNDARY(ng)%t_west(j,k,iPOP_)=POP_0(ng)     ! umolP L-1
+            DO itrc=1,N_dom
+              BOUNDARY(ng)%t_west(j,k,iDO15N(itrc)) = R15N_fromd15N( d15N_DOC_0(itrc,ng) )    &
+     &                                                *BOUNDARY(ng)%t_west(j,k,iDON(itrc)) ! umol L-1  !!! R15N_fromd15N included geochem module
+            END DO
+            DO itrc=1,N_pom
+              BOUNDARY(ng)%t_west(j,k,iPO15N(itrc)) = R15N_fromd15N( d15N_POC_0(itrc,ng) )    &
+     &                                                *BOUNDARY(ng)%t_west(j,k,iPON(itrc)) ! umol L-1  !!! R15N_fromd15N included geochem module
+            END DO
+            DO itrc=1,N_phyt
+              BOUNDARY(ng)%t_west(j,k,iPhyt15N(itrc)) = R15N_fromd15N( d15N_Phyt_0(itrc,ng) ) &
+     &                                                  *BOUNDARY(ng)%t_west(j,k,iPhyt(itrc))/9.2_r8 ! umol L-1  !!! R15N_fromd15N included geochem module
+            END DO
+            DO itrc=1,N_zoop
+              BOUNDARY(ng)%t_west(j,k,iZoop15N(itrc)) = R15N_fromd15N( d15N_Zoop_0(itrc,ng) ) &
+     &                                                  *BOUNDARY(ng)%t_west(j,k,iZoop(itrc))/9.2d0 ! umol L-1  !!! R15N_fromd15N included geochem module
+            END DO
 #    endif
 #   endif
-#   if defined COT_STARFISH
+#  endif
+#  if defined COT_STARFISH
             BOUNDARY(ng)%t_west(j,k,iCOTe)=COTe0(ng)     ! umolC L-1
             BOUNDARY(ng)%t_west(j,k,iCOTl)=COTl0(ng)     ! umolC L-1
-#   endif
 #  endif
+# endif
           END DO
         END DO
       END IF
 
+! ---- Southern boundary -----------------------------------------------
       IF (ANY(LBC(isouth,isTvar(:),ng)%acquire).and.                    &
      &    DOMAIN(ng)%Southern_Edge(tile)) THEN
         DO k=1,N(ng)
           DO i=IstrT,IendT
             BOUNDARY(ng)%t_south(i,k,itemp)=T0(ng)
             BOUNDARY(ng)%t_south(i,k,isalt)=S0(ng)
-#  ifdef SEDIMENT
-            BOUNDARY(ng)%t_south(i,k,idmud(1))=0.0_r8  !(kg/m3 = g/L)
-#  endif
-#  ifdef REEF_ECOSYS
+# ifdef SEDIMENT
+            DO ised=1,NST
+              BOUNDARY(ng)%t_south(i,k,idsed(ised))=0.0_r8
+            END DO
+# endif
+# ifdef REEF_ECOSYS
             BOUNDARY(ng)%t_south(i,k,iTIC_)=TIC_0(ng)
             BOUNDARY(ng)%t_south(i,k,iTAlk)=TAlk0(ng)
-            BOUNDARY(ng)%t_south(i,k,iOxyg)=Oxyg0(ng)
+!            BOUNDARY(ng)%t_south(i,k,iOxyg)=Oxyg0(ng)
+            BOUNDARY(ng)%t_south(i,k,iOxyg)=                            &
+     &         O2satu(BOUNDARY(ng)%t_south(i,k,iTemp)+273.15_r8,        &
+     &                BOUNDARY(ng)%t_south(i,k,iSalt))
+#  if defined ORGANIC_MATTER
+            DO itrc=1,N_dom
+              BOUNDARY(ng)%t_south(i,k,iDOC(itrc))=DOC_0(itrc,ng)     ! umolC L-1
+            END DO
+            DO itrc=1,N_pom
+              BOUNDARY(ng)%t_south(i,k,iPOC(itrc)) = POC_0(itrc,ng)     ! umolC L-1
+            END DO
+            DO itrc=1,N_phyt
+              BOUNDARY(ng)%t_south(i,k,iPhyt(itrc))=Phyt_0(itrc,ng)     ! umolC L-1
+            END DO
+            DO itrc=1,N_zoop
+              BOUNDARY(ng)%t_south(i,k,iZoop(itrc))=Zoop_0(itrc,ng)     ! umolC L-1
+            END DO
+            DO itrc=1,N_pim
+              BOUNDARY(ng)%t_south(i,k,iPIC(itrc)) = PIC_0(itrc,ng)     ! umolC L-1
+            END DO
+#  endif
+#  if defined CARBON_ISOTOPE
+            BOUNDARY(ng)%t_south(i,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng)   &
+     &                                                *BOUNDARY(ng)%t_south(i,k,iTIC_) ! umol kg-1  !!! R13C_fromd13C included geochem module
 #   if defined ORGANIC_MATTER
-            BOUNDARY(ng)%t_south(i,k,iDOC_)=DOC_0(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_south(i,k,iPOC_)=POC_0(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_south(i,k,iPhy1)=Phy10(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_south(i,k,iPhy2)=Phy20(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_south(i,k,iZoop)=Zoop0(ng)     ! umolC L-1
+            DO itrc=1,N_dom
+              BOUNDARY(ng)%t_south(i,k,iDO13C(itrc)) = R13C_fromd13C( d13C_DOC_0(itrc,ng) )   &
+     &                                                *BOUNDARY(ng)%t_south(i,k,iDOC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
+            END DO
+            DO itrc=1,N_pom
+              BOUNDARY(ng)%t_south(i,k,iPO13C(itrc)) = R13C_fromd13C( d13C_POC_0(itrc,ng) )   &
+     &                                                *BOUNDARY(ng)%t_south(i,k,iPOC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
+            END DO
+            DO itrc=1,N_phyt
+              BOUNDARY(ng)%t_south(i,k,iPhyt13C(itrc)) = R13C_fromd13C( d13C_Phyt_0(itrc,ng) ) &
+     &                                                  *BOUNDARY(ng)%t_south(i,k,iPhyt(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
+            END DO
+            DO itrc=1,N_zoop
+              BOUNDARY(ng)%t_south(i,k,iZoop13C(itrc)) = R13C_fromd13C( d13C_Zoop_0(itrc,ng) ) &
+     &                                                  *BOUNDARY(ng)%t_south(i,k,iZoop(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
+            END DO
+            DO itrc=1,N_pim
+              BOUNDARY(ng)%t_south(i,k,iPI13C(itrc)) = R13C_fromd13C( d13C_PIC_0(itrc,ng) )    &
+     &                                                  *BOUNDARY(ng)%t_south(i,k,iPIC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
+            END DO
 #   endif
-#   if defined CARBON_ISOTOPE
-            BOUNDARY(ng)%t_south(i,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng) ! umol kg-1  !!! R13C_fromd13C included geochem module
-#    if defined ORGANIC_MATTER
-            BOUNDARY(ng)%t_south(i,k,iDO13)=R13C_fromd13C( d13C_DOC0(ng) )*DOC_0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-            BOUNDARY(ng)%t_south(i,k,iPO13)=R13C_fromd13C( d13C_POC0(ng) )*POC_0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-            BOUNDARY(ng)%t_south(i,k,iPh13)=R13C_fromd13C( d13C_Phy0(ng) )*Phyt0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-            BOUNDARY(ng)%t_south(i,k,iZo13)=R13C_fromd13C( d13C_Zoo0(ng) )*Zoop0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-#    endif
-#   endif
-#   if defined NUTRIENTS
+#  endif
+#  if defined NUTRIENTS
             BOUNDARY(ng)%t_south(i,k,iNO3_)=NO3_0(ng)     ! umol L-1
             BOUNDARY(ng)%t_south(i,k,iNO2_)=NO2_0(ng)     ! umol L-1
             BOUNDARY(ng)%t_south(i,k,iNH4_)=NH4_0(ng)     ! umol L-1
             BOUNDARY(ng)%t_south(i,k,iPO4_)=PO4_0(ng)     ! umol L-1
+#   if defined ORGANIC_MATTER
+            DO itrc=1,N_dom
+              BOUNDARY(ng)%t_south(i,k,iDON(itrc)) = DON_0(itrc,ng)     ! umolC L-1
+            END DO
+            DO itrc=1,N_pom
+              BOUNDARY(ng)%t_south(i,k,iPON(itrc)) = PON_0(itrc,ng)     ! umolC L-1
+            END DO
+            DO itrc=1,N_dom
+              BOUNDARY(ng)%t_south(i,k,iDOP(itrc)) = DOP_0(itrc,ng)     ! umolC L-1
+            END DO
+            DO itrc=1,N_pom
+              BOUNDARY(ng)%t_south(i,k,iPOP(itrc)) = POP_0(itrc,ng)     ! umolC L-1
+            END DO
+#   endif
+#   if defined NITROGEN_ISOTOPE
+            BOUNDARY(ng)%t_south(i,k,i15NO3) = R15N_fromd15N( d13C_TIC0(ng) )  &
+     &                                        *BOUNDARY(ng)%t_south(i,k,iNO3_) ! umol kg-1  !!! R15N_fromd15N included geochem module
+            BOUNDARY(ng)%t_south(i,k,i15NO2) = R15N_fromd15N( d13C_TIC0(ng) )  &
+     &                                        *BOUNDARY(ng)%t_south(i,k,iNO2_) ! umol kg-1  !!! R15N_fromd15N included geochem module
+            BOUNDARY(ng)%t_south(i,k,i15NH4) = R15N_fromd15N( d13C_TIC0(ng) )  &
+     &                                        *BOUNDARY(ng)%t_south(i,k,iNH4_) ! umol kg-1  !!! R15N_fromd15N included geochem module
 #    if defined ORGANIC_MATTER
-            BOUNDARY(ng)%t_south(i,k,iDON_)=DON_0(ng)     ! umolN L-1
-            BOUNDARY(ng)%t_south(i,k,iPON_)=PON_0(ng)     ! umolN L-1
-            BOUNDARY(ng)%t_south(i,k,iDOP_)=DOP_0(ng)     ! umolP L-1
-            BOUNDARY(ng)%t_south(i,k,iPOP_)=POP_0(ng)     ! umolP L-1
+            DO itrc=1,N_dom
+              BOUNDARY(ng)%t_south(i,k,iDO15N(itrc)) = R15N_fromd15N( d15N_DOC_0(itrc,ng) )    &
+     &                                                *BOUNDARY(ng)%t_south(i,k,iDON(itrc)) ! umol L-1  !!! R15N_fromd15N included geochem module
+            END DO
+            DO itrc=1,N_pom
+              BOUNDARY(ng)%t_south(i,k,iPO15N(itrc)) = R15N_fromd15N( d15N_POC_0(itrc,ng) )    &
+     &                                                *BOUNDARY(ng)%t_south(i,k,iPON(itrc)) ! umol L-1  !!! R15N_fromd15N included geochem module
+            END DO
+            DO itrc=1,N_phyt
+              BOUNDARY(ng)%t_south(i,k,iPhyt15N(itrc)) = R15N_fromd15N( d15N_Phyt_0(itrc,ng) ) &
+     &                                                  *BOUNDARY(ng)%t_south(i,k,iPhyt(itrc))/9.2_r8 ! umol L-1  !!! R15N_fromd15N included geochem module
+            END DO
+            DO itrc=1,N_zoop
+              BOUNDARY(ng)%t_south(i,k,iZoop15N(itrc)) = R15N_fromd15N( d15N_Zoop_0(itrc,ng) ) &
+     &                                                  *BOUNDARY(ng)%t_south(i,k,iZoop(itrc))/9.2d0 ! umol L-1  !!! R15N_fromd15N included geochem module
+            END DO
 #    endif
 #   endif
-#   if defined COT_STARFISH
+#  endif
+#  if defined COT_STARFISH
             BOUNDARY(ng)%t_south(i,k,iCOTe)=COTe0(ng)     ! umolC L-1
             BOUNDARY(ng)%t_south(i,k,iCOTl)=COTl0(ng)     ! umolC L-1
-#   endif
 #  endif
+# endif
           END DO
         END DO
       END IF
 
+! ---- Northern boundary -----------------------------------------------
       IF (ANY(LBC(inorth,isTvar(:),ng)%acquire).and.                    &
      &    DOMAIN(ng)%Northern_Edge(tile)) THEN
         DO k=1,N(ng)
           DO i=IstrT,IendT
             BOUNDARY(ng)%t_north(i,k,itemp)=T0(ng)
             BOUNDARY(ng)%t_north(i,k,isalt)=S0(ng)
-#  ifdef SEDIMENT
-            BOUNDARY(ng)%t_north(i,k,idmud(1))=0.0_r8  !(kg/m3 = g/L)
-#  endif
-#  ifdef REEF_ECOSYS
+# ifdef SEDIMENT
+            DO ised=1,NST
+              BOUNDARY(ng)%t_north(i,k,idsed(ised))=0.0_r8
+            END DO
+# endif
+# ifdef REEF_ECOSYS
             BOUNDARY(ng)%t_north(i,k,iTIC_)=TIC_0(ng)
             BOUNDARY(ng)%t_north(i,k,iTAlk)=TAlk0(ng)
-            BOUNDARY(ng)%t_north(i,k,iOxyg)=Oxyg0(ng)
+!            BOUNDARY(ng)%t_north(i,k,iOxyg)=Oxyg0(ng)
+            BOUNDARY(ng)%t_north(i,k,iOxyg)=                            &
+     &         O2satu(BOUNDARY(ng)%t_north(i,k,iTemp)+273.15_r8,        &
+     &                BOUNDARY(ng)%t_north(i,k,iSalt))
+#  if defined ORGANIC_MATTER
+            DO itrc=1,N_dom
+              BOUNDARY(ng)%t_north(i,k,iDOC(itrc))=DOC_0(itrc,ng)     ! umolC L-1
+            END DO
+            DO itrc=1,N_pom
+              BOUNDARY(ng)%t_north(i,k,iPOC(itrc)) = POC_0(itrc,ng)     ! umolC L-1
+            END DO
+            DO itrc=1,N_phyt
+              BOUNDARY(ng)%t_north(i,k,iPhyt(itrc))=Phyt_0(itrc,ng)     ! umolC L-1
+            END DO
+            DO itrc=1,N_zoop
+              BOUNDARY(ng)%t_north(i,k,iZoop(itrc))=Zoop_0(itrc,ng)     ! umolC L-1
+            END DO
+            DO itrc=1,N_pim
+              BOUNDARY(ng)%t_north(i,k,iPIC(itrc)) = PIC_0(itrc,ng)     ! umolC L-1
+            END DO
+#  endif
+#  if defined CARBON_ISOTOPE
+            BOUNDARY(ng)%t_north(i,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng)   &
+     &                                                *BOUNDARY(ng)%t_north(i,k,iTIC_) ! umol kg-1  !!! R13C_fromd13C included geochem module
 #   if defined ORGANIC_MATTER
-            BOUNDARY(ng)%t_north(i,k,iDOC_)=DOC_0(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_north(i,k,iPOC_)=POC_0(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_north(i,k,iPhy1)=Phy10(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_north(i,k,iPhy2)=Phy20(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_north(i,k,iZoop)=Zoop0(ng)     ! umolC L-1
+            DO itrc=1,N_dom
+              BOUNDARY(ng)%t_north(i,k,iDO13C(itrc)) = R13C_fromd13C( d13C_DOC_0(itrc,ng) )   &
+     &                                                *BOUNDARY(ng)%t_north(i,k,iDOC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
+            END DO
+            DO itrc=1,N_pom
+              BOUNDARY(ng)%t_north(i,k,iPO13C(itrc)) = R13C_fromd13C( d13C_POC_0(itrc,ng) )   &
+     &                                                *BOUNDARY(ng)%t_north(i,k,iPOC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
+            END DO
+            DO itrc=1,N_phyt
+              BOUNDARY(ng)%t_north(i,k,iPhyt13C(itrc)) = R13C_fromd13C( d13C_Phyt_0(itrc,ng) ) &
+     &                                                  *BOUNDARY(ng)%t_north(i,k,iPhyt(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
+            END DO
+            DO itrc=1,N_zoop
+              BOUNDARY(ng)%t_north(i,k,iZoop13C(itrc)) = R13C_fromd13C( d13C_Zoop_0(itrc,ng) ) &
+     &                                                  *BOUNDARY(ng)%t_north(i,k,iZoop(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
+            END DO
+            DO itrc=1,N_pim
+              BOUNDARY(ng)%t_north(i,k,iPI13C(itrc)) = R13C_fromd13C( d13C_PIC_0(itrc,ng) )    &
+     &                                                  *BOUNDARY(ng)%t_north(i,k,iPIC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
+            END DO
 #   endif
-#   if defined CARBON_ISOTOPE
-            BOUNDARY(ng)%t_north(i,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng) ! umol kg-1  !!! R13C_fromd13C included geochem module
-#    if defined ORGANIC_MATTER
-            BOUNDARY(ng)%t_north(i,k,iDO13)=R13C_fromd13C( d13C_DOC0(ng) )*DOC_0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-            BOUNDARY(ng)%t_north(i,k,iPO13)=R13C_fromd13C( d13C_POC0(ng) )*POC_0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-            BOUNDARY(ng)%t_north(i,k,iPh13)=R13C_fromd13C( d13C_Phy0(ng) )*Phyt0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-            BOUNDARY(ng)%t_north(i,k,iZo13)=R13C_fromd13C( d13C_Zoo0(ng) )*Zoop0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-#    endif
-#   endif
-#   if defined NUTRIENTS
+#  endif
+#  if defined NUTRIENTS
             BOUNDARY(ng)%t_north(i,k,iNO3_)=NO3_0(ng)     ! umol L-1
             BOUNDARY(ng)%t_north(i,k,iNO2_)=NO2_0(ng)     ! umol L-1
             BOUNDARY(ng)%t_north(i,k,iNH4_)=NH4_0(ng)     ! umol L-1
             BOUNDARY(ng)%t_north(i,k,iPO4_)=PO4_0(ng)     ! umol L-1
+#   if defined ORGANIC_MATTER
+            DO itrc=1,N_dom
+              BOUNDARY(ng)%t_north(i,k,iDON(itrc)) = DON_0(itrc,ng)     ! umolC L-1
+            END DO
+            DO itrc=1,N_pom
+              BOUNDARY(ng)%t_north(i,k,iPON(itrc)) = PON_0(itrc,ng)     ! umolC L-1
+            END DO
+            DO itrc=1,N_dom
+              BOUNDARY(ng)%t_north(i,k,iDOP(itrc)) = DOP_0(itrc,ng)     ! umolC L-1
+            END DO
+            DO itrc=1,N_pom
+              BOUNDARY(ng)%t_north(i,k,iPOP(itrc)) = POP_0(itrc,ng)     ! umolC L-1
+            END DO
+#   endif
+#   if defined NITROGEN_ISOTOPE
+            BOUNDARY(ng)%t_north(i,k,i15NO3) = R15N_fromd15N( d13C_TIC0(ng) )  &
+     &                                        *BOUNDARY(ng)%t_north(i,k,iNO3_) ! umol kg-1  !!! R15N_fromd15N included geochem module
+            BOUNDARY(ng)%t_north(i,k,i15NO2) = R15N_fromd15N( d13C_TIC0(ng) )  &
+     &                                        *BOUNDARY(ng)%t_north(i,k,iNO2_) ! umol kg-1  !!! R15N_fromd15N included geochem module
+            BOUNDARY(ng)%t_north(i,k,i15NH4) = R15N_fromd15N( d13C_TIC0(ng) )  &
+     &                                        *BOUNDARY(ng)%t_north(i,k,iNH4_) ! umol kg-1  !!! R15N_fromd15N included geochem module
 #    if defined ORGANIC_MATTER
-            BOUNDARY(ng)%t_north(i,k,iDON_)=DON_0(ng)     ! umolN L-1
-            BOUNDARY(ng)%t_north(i,k,iPON_)=PON_0(ng)     ! umolN L-1
-            BOUNDARY(ng)%t_north(i,k,iDOP_)=DOP_0(ng)     ! umolP L-1
-            BOUNDARY(ng)%t_north(i,k,iPOP_)=POP_0(ng)     ! umolP L-1
+            DO itrc=1,N_dom
+              BOUNDARY(ng)%t_north(i,k,iDO15N(itrc)) = R15N_fromd15N( d15N_DOC_0(itrc,ng) )    &
+     &                                                *BOUNDARY(ng)%t_north(i,k,iDON(itrc)) ! umol L-1  !!! R15N_fromd15N included geochem module
+            END DO
+            DO itrc=1,N_pom
+              BOUNDARY(ng)%t_north(i,k,iPO15N(itrc)) = R15N_fromd15N( d15N_POC_0(itrc,ng) )    &
+     &                                                *BOUNDARY(ng)%t_north(i,k,iPON(itrc)) ! umol L-1  !!! R15N_fromd15N included geochem module
+            END DO
+            DO itrc=1,N_phyt
+              BOUNDARY(ng)%t_north(i,k,iPhyt15N(itrc)) = R15N_fromd15N( d15N_Phyt_0(itrc,ng) ) &
+     &                                                  *BOUNDARY(ng)%t_north(i,k,iPhyt(itrc))/9.2_r8 ! umol L-1  !!! R15N_fromd15N included geochem module
+            END DO
+            DO itrc=1,N_zoop
+              BOUNDARY(ng)%t_north(i,k,iZoop15N(itrc)) = R15N_fromd15N( d15N_Zoop_0(itrc,ng) ) &
+     &                                                  *BOUNDARY(ng)%t_north(i,k,iZoop(itrc))/9.2d0 ! umol L-1  !!! R15N_fromd15N included geochem module
+            END DO
 #    endif
 #   endif
-#   if defined COT_STARFISH
+#  endif
+#  if defined COT_STARFISH
             BOUNDARY(ng)%t_north(i,k,iCOTe)=COTe0(ng)     ! umolC L-1
             BOUNDARY(ng)%t_north(i,k,iCOTl)=COTl0(ng)     ! umolC L-1
-#   endif
 #  endif
+# endif
           END DO
         END DO
       END IF
 
-! YAEYAMA2 case
-#elif defined YAEYAMA2
-      IF (ANY(LBC(ieast,isTvar(:),ng)%acquire).and.                     &
-     &    DOMAIN(ng)%Eastern_Edge(tile)) THEN
-        DO k=1,N(ng)
-          DO j=JstrT,JendT
-#  ifdef SEDIMENT
-            BOUNDARY(ng)%t_east(j,k,idmud(1))=0.0_r8  !(kg/m3 = g/L)
-#  endif
-#  ifdef REEF_ECOSYS
-            BOUNDARY(ng)%t_east(j,k,iTIC_)=TIC_0(ng)
-            BOUNDARY(ng)%t_east(j,k,iTAlk)=TAlk0(ng)
-            BOUNDARY(ng)%t_east(j,k,iOxyg)=Oxyg0(ng)
-#   if defined ORGANIC_MATTER
-            BOUNDARY(ng)%t_east(j,k,iDOC_)=DOC_0(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_east(j,k,iPOC_)=POC_0(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_east(j,k,iPhy1)=Phy10(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_east(j,k,iPhy2)=Phy20(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_east(j,k,iZoop)=Zoop0(ng)     ! umolC L-1
-#   endif
-#   if defined CARBON_ISOTOPE
-            BOUNDARY(ng)%t_east(j,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng) ! umol kg-1  !!! R13C_fromd13C included geochem module
-#    if defined ORGANIC_MATTER
-            BOUNDARY(ng)%t_east(j,k,iDO13)=R13C_fromd13C( d13C_DOC0(ng) )*DOC_0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-            BOUNDARY(ng)%t_east(j,k,iPO13)=R13C_fromd13C( d13C_POC0(ng) )*POC_0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-            BOUNDARY(ng)%t_east(j,k,iPh13)=R13C_fromd13C( d13C_Phy0(ng) )*Phyt0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-            BOUNDARY(ng)%t_east(j,k,iZo13)=R13C_fromd13C( d13C_Zoo0(ng) )*Zoop0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-#    endif
-#   endif
-#   if defined NUTRIENTS
-            BOUNDARY(ng)%t_east(j,k,iNO3_)=NO3_0(ng)     ! umol L-1
-            BOUNDARY(ng)%t_east(j,k,iNO2_)=NO2_0(ng)     ! umol L-1
-            BOUNDARY(ng)%t_east(j,k,iNH4_)=NH4_0(ng)     ! umol L-1
-            BOUNDARY(ng)%t_east(j,k,iPO4_)=PO4_0(ng)     ! umol L-1
-#    if defined ORGANIC_MATTER
-            BOUNDARY(ng)%t_east(j,k,iDON_)=DON_0(ng)     ! umolN L-1
-            BOUNDARY(ng)%t_east(j,k,iPON_)=PON_0(ng)     ! umolN L-1
-            BOUNDARY(ng)%t_east(j,k,iDOP_)=DOP_0(ng)     ! umolP L-1
-            BOUNDARY(ng)%t_east(j,k,iPOP_)=POP_0(ng)     ! umolP L-1
-#    endif
-#   endif
-#   if defined COT_STARFISH
-            BOUNDARY(ng)%t_east(j,k,iCOTe)=COTe0(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_east(j,k,iCOTl)=COTl0(ng)     ! umolC L-1
-#   endif
-#  endif
-
-          END DO
-        END DO
-      END IF
-      IF (ANY(LBC(iwest,isTvar(:),ng)%acquire).and.                     &
-     &    DOMAIN(ng)%Western_Edge(tile)) THEN
-        DO k=1,N(ng)
-          DO j=JstrT,JendT
-#  ifdef SEDIMENT
-            BOUNDARY(ng)%t_west(j,k,idmud(1))=0.0_r8  !(kg/m3 = g/L)
-#  endif
-#  ifdef REEF_ECOSYS
-            BOUNDARY(ng)%t_west(j,k,iTIC_)=TIC_0(ng)
-            BOUNDARY(ng)%t_west(j,k,iTAlk)=TAlk0(ng)
-            BOUNDARY(ng)%t_west(j,k,iOxyg)=Oxyg0(ng)
-#   if defined ORGANIC_MATTER
-            BOUNDARY(ng)%t_west(j,k,iDOC_)=DOC_0(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_west(j,k,iPOC_)=POC_0(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_west(j,k,iPhy1)=Phy10(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_west(j,k,iPhy2)=Phy20(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_west(j,k,iZoop)=Zoop0(ng)     ! umolC L-1
-#   endif
-#   if defined CARBON_ISOTOPE
-            BOUNDARY(ng)%t_west(j,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng) ! umol kg-1  !!! R13C_fromd13C included geochem module
-#    if defined ORGANIC_MATTER
-            BOUNDARY(ng)%t_west(j,k,iDO13)=R13C_fromd13C( d13C_DOC0(ng) )*DOC_0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-            BOUNDARY(ng)%t_west(j,k,iPO13)=R13C_fromd13C( d13C_POC0(ng) )*POC_0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-            BOUNDARY(ng)%t_west(j,k,iPh13)=R13C_fromd13C( d13C_Phy0(ng) )*Phyt0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-            BOUNDARY(ng)%t_west(j,k,iZo13)=R13C_fromd13C( d13C_Zoo0(ng) )*Zoop0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-#    endif
-#   endif
-#   if defined NUTRIENTS
-            BOUNDARY(ng)%t_west(j,k,iNO3_)=NO3_0(ng)     ! umol L-1
-            BOUNDARY(ng)%t_west(j,k,iNO2_)=NO2_0(ng)     ! umol L-1
-            BOUNDARY(ng)%t_west(j,k,iNH4_)=NH4_0(ng)     ! umol L-1
-            BOUNDARY(ng)%t_west(j,k,iPO4_)=PO4_0(ng)     ! umol L-1
-#    if defined ORGANIC_MATTER
-            BOUNDARY(ng)%t_west(j,k,iDON_)=DON_0(ng)     ! umolN L-1
-            BOUNDARY(ng)%t_west(j,k,iPON_)=PON_0(ng)     ! umolN L-1
-            BOUNDARY(ng)%t_west(j,k,iDOP_)=DOP_0(ng)     ! umolP L-1
-            BOUNDARY(ng)%t_west(j,k,iPOP_)=POP_0(ng)     ! umolP L-1
-#    endif
-#   endif
-#   if defined COT_STARFISH
-            BOUNDARY(ng)%t_west(j,k,iCOTe)=COTe0(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_west(j,k,iCOTl)=COTl0(ng)     ! umolC L-1
-#   endif
-#  endif
-          END DO
-        END DO
-      END IF
-
-      IF (ANY(LBC(isouth,isTvar(:),ng)%acquire).and.                    &
-     &    DOMAIN(ng)%Southern_Edge(tile)) THEN
-        DO k=1,N(ng)
-          DO i=IstrT,IendT
-#  ifdef SEDIMENT
-            BOUNDARY(ng)%t_south(i,k,idmud(1))=0.0_r8  !(kg/m3 = g/L)
-#  endif
-#  ifdef REEF_ECOSYS
-            BOUNDARY(ng)%t_south(i,k,iTIC_)=TIC_0(ng)
-            BOUNDARY(ng)%t_south(i,k,iTAlk)=TAlk0(ng)
-            BOUNDARY(ng)%t_south(i,k,iOxyg)=Oxyg0(ng)
-#   if defined ORGANIC_MATTER
-            BOUNDARY(ng)%t_south(i,k,iDOC_)=DOC_0(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_south(i,k,iPOC_)=POC_0(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_south(i,k,iPhy1)=Phy10(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_south(i,k,iPhy2)=Phy20(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_south(i,k,iZoop)=Zoop0(ng)     ! umolC L-1
-#   endif
-#   if defined CARBON_ISOTOPE
-            BOUNDARY(ng)%t_south(i,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng) ! umol kg-1  !!! R13C_fromd13C included geochem module
-#    if defined ORGANIC_MATTER
-            BOUNDARY(ng)%t_south(i,k,iDO13)=R13C_fromd13C( d13C_DOC0(ng) )*DOC_0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-            BOUNDARY(ng)%t_south(i,k,iPO13)=R13C_fromd13C( d13C_POC0(ng) )*POC_0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-            BOUNDARY(ng)%t_south(i,k,iPh13)=R13C_fromd13C( d13C_Phy0(ng) )*Phyt0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-            BOUNDARY(ng)%t_south(i,k,iZo13)=R13C_fromd13C( d13C_Zoo0(ng) )*Zoop0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-#    endif
-#   endif
-#   if defined NUTRIENTS
-            BOUNDARY(ng)%t_south(i,k,iNO3_)=NO3_0(ng)     ! umol L-1
-            BOUNDARY(ng)%t_south(i,k,iNO2_)=NO2_0(ng)     ! umol L-1
-            BOUNDARY(ng)%t_south(i,k,iNH4_)=NH4_0(ng)     ! umol L-1
-            BOUNDARY(ng)%t_south(i,k,iPO4_)=PO4_0(ng)     ! umol L-1
-#    if defined ORGANIC_MATTER
-            BOUNDARY(ng)%t_south(i,k,iDON_)=DON_0(ng)     ! umolN L-1
-            BOUNDARY(ng)%t_south(i,k,iPON_)=PON_0(ng)     ! umolN L-1
-            BOUNDARY(ng)%t_south(i,k,iDOP_)=DOP_0(ng)     ! umolP L-1
-            BOUNDARY(ng)%t_south(i,k,iPOP_)=POP_0(ng)     ! umolP L-1
-#    endif
-#   endif
-#   if defined COT_STARFISH
-            BOUNDARY(ng)%t_south(i,k,iCOTe)=COTe0(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_south(i,k,iCOTl)=COTl0(ng)     ! umolC L-1
-#   endif
-#  endif
-          END DO
-        END DO
-      END IF
-
-      IF (ANY(LBC(inorth,isTvar(:),ng)%acquire).and.                    &
-     &    DOMAIN(ng)%Northern_Edge(tile)) THEN
-        DO k=1,N(ng)
-          DO i=IstrT,IendT
-#  ifdef SEDIMENT
-            BOUNDARY(ng)%t_north(i,k,idmud(1))=0.0_r8  !(kg/m3 = g/L)
-#  endif
-#  ifdef REEF_ECOSYS
-            BOUNDARY(ng)%t_north(i,k,iTIC_)=TIC_0(ng)
-            BOUNDARY(ng)%t_north(i,k,iTAlk)=TAlk0(ng)
-            BOUNDARY(ng)%t_north(i,k,iOxyg)=Oxyg0(ng)
-#   if defined ORGANIC_MATTER
-            BOUNDARY(ng)%t_north(i,k,iDOC_)=DOC_0(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_north(i,k,iPOC_)=POC_0(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_north(i,k,iPhy1)=Phy10(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_north(i,k,iPhy2)=Phy20(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_north(i,k,iZoop)=Zoop0(ng)     ! umolC L-1
-#   endif
-#   if defined CARBON_ISOTOPE
-            BOUNDARY(ng)%t_north(i,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng) ! umol kg-1  !!! R13C_fromd13C included geochem module
-#    if defined ORGANIC_MATTER
-            BOUNDARY(ng)%t_north(i,k,iDO13)=R13C_fromd13C( d13C_DOC0(ng) )*DOC_0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-            BOUNDARY(ng)%t_north(i,k,iPO13)=R13C_fromd13C( d13C_POC0(ng) )*POC_0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-            BOUNDARY(ng)%t_north(i,k,iPh13)=R13C_fromd13C( d13C_Phy0(ng) )*Phyt0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-            BOUNDARY(ng)%t_north(i,k,iZo13)=R13C_fromd13C( d13C_Zoo0(ng) )*Zoop0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-#    endif
-#   endif
-#   if defined NUTRIENTS
-            BOUNDARY(ng)%t_north(i,k,iNO3_)=NO3_0(ng)     ! umol L-1
-            BOUNDARY(ng)%t_north(i,k,iNO2_)=NO2_0(ng)     ! umol L-1
-            BOUNDARY(ng)%t_north(i,k,iNH4_)=NH4_0(ng)     ! umol L-1
-            BOUNDARY(ng)%t_north(i,k,iPO4_)=PO4_0(ng)     ! umol L-1
-#    if defined ORGANIC_MATTER
-            BOUNDARY(ng)%t_north(i,k,iDON_)=DON_0(ng)     ! umolN L-1
-            BOUNDARY(ng)%t_north(i,k,iPON_)=PON_0(ng)     ! umolN L-1
-            BOUNDARY(ng)%t_north(i,k,iDOP_)=DOP_0(ng)     ! umolP L-1
-            BOUNDARY(ng)%t_north(i,k,iPOP_)=POP_0(ng)     ! umolP L-1
-#    endif
-#   endif
-#   if defined COT_STARFISH
-            BOUNDARY(ng)%t_north(i,k,iCOTe)=COTe0(ng)     ! umolC L-1
-            BOUNDARY(ng)%t_north(i,k,iCOTl)=COTl0(ng)     ! umolC L-1
-#   endif
-#  endif
-          END DO
-        END DO
-      END IF
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 
 #else

@@ -5,58 +5,9 @@
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
+!================================================== Takashi Nakamura ===
 !                                                                      !
-!  Parameters for Fennel et al. (2006) model:                          !
-!                                                                      !
-!   AttSW    Light attenuation due to sea water [1/m].                 !
-!   AttChl   Light attenuation by Chlorophyll [1/(mg_Chl m2)].         !
-!   BioIter  Maximum number of iterations to achieve convergence       !
-!              of the nonlinear solution.                              !
-!   Chl2C_m  Maximum chlorophyll to carbon ratio [mg_Chl/mg_C].        !
-!   ChlMin   Chlorophill minimum threshold value [mg_Chl/m3].          !
-!   CoagR    Coagulation rate: agregation rate of SDeN + Phyt ==> LDeN !
-!              [1/day].                                                !
-!   D_p5NH4  Half-saturation radiation for nitrification inhibition    !
-!              [Watts/m2].                                             !
-!   I_thNH4  Radiation threshold for nitrification inhibition          !
-!              [Watts/m2].                                             !
-!   K_NH4    Inverse half-saturation for Phytoplankton NH4 uptake      !
-!              [m3/(mmol_N)].                                          !
-!   K_NO3    Inverse half-saturation for Phytoplankton NO3 uptake      !
-!              [m3/(mmol_N)].                                          !
-!   K_Phy    Zooplankton half-saturation, squared constant for         !
-!              ingestion [mmol_N/m3]^2.                                !
-!   LDeRR    Large Detrital re-mineralization rate [1/day].            !
-!   NitriR   Nitrification rate: oxidation of NH4 to NO3 [1/day].      !
-!   PARfrac  Fraction of shortwave radiation that is available for     !
-!              photosyntesis [nondimensional].                         !
-!   PhyCN    Phytoplankton Carbon:Nitrogen ratio [mol_C/mol_N].        !
-!   PhyIP    Phytoplankton NH4 inhibition parameter [1/(mmol_N)].      !
-!   PhyIS    Phytoplankton, initial slope of the P-I curve             !
-!              [mg_C/(mg_Chl W m-2 day)].                              !
-!   ZooMin   Phytoplankton minimum threshold value [mmol_N/m3].        !
-!   PhyMR    Phytoplankton mortality rate [1/day] to small detritus.   !
-!   SDeAR    Small detritus aggregation rate into Large detritus       !
-!              [1/day].                                                !
-!   SDeBR    Small Detrital breakdown to NH4 rate [1/day].             !
-!   SDeRR    Large Detrital re-mineralization rate [1/day].            !
-!   Vp0      Eppley temperature-limited and light-limited growth       !
-!              tuning parameter [nondimensional].                      !
-!   wLDet    Vertical sinking velocities for Large Detritus            !
-!              fraction [m/day].                                       !
-!   wPhy     Vertical sinking velocity for Phytoplankton               !
-!              fraction [m/day].                                       !
-!   wSDet    Vertical sinking velocities for Small Detritus            !
-!              fraction [m/day].                                       !
-!   ZooAE_N  Zooplankton nitrogen assimilation efficiency fraction     !
-!              [nondimensional].                                       !
-!   ZooBM    Zooplankton basal metabolism [1/day].                     !
-!   ZooCN    Zooplankton Carbon:Nitrogen ratio [mol_C/mol_N].          !
-!   ZooER    Zooplankton specific excretion rate [1/day].              !
-!   ZooGR    Zooplankton maximum growth rate [1/day].                  !
-!   ZooMin   Zooplankton minimum threshold value [mmol_N/m3].          !
-!   ZooMR    Zooplankton mortality to Detritus [1/day].                !
-!   pCO2air  CO2 partial pressure in the air [ppmv].                   !
+!  Parameters for Coral reef ecosystem model:                          !                                                                   !
 !                                                                      !
 !=======================================================================
 !
@@ -66,6 +17,19 @@
 !
 !  Set biological tracer identification indices.
 !
+#if defined ORGANIC_MATTER
+      integer, parameter :: N_phyt = 3  ! Number of functional groups of phytoplankton
+                                        !  1: dinoflagellate
+                                        !  2: diatom
+                                        !  3: coccolithophorids
+      integer, parameter :: N_zoop = 1  ! Number of functional groups of zooplankton
+      integer, parameter :: N_dom  = 2  ! Number of functional groups of Dissolved organoic matter
+                                        !  1: Labile DOM
+                                        !  2: Refractory DOM
+      integer, parameter :: N_pom  = 1  ! Number of functional groups of Particulate organoic matter
+      integer, parameter :: N_pim  = 1  ! Number of functional groups of Particulate inorganoic matter
+                                        !  1: coccolith (CaCO3)
+#endif
       integer :: idCrl1                 ! Coral coverage
       integer :: idCrl2                 ! Coral2 coverage
       integer :: idSgrs                 ! Seagrass coverage
@@ -79,20 +43,20 @@
       integer :: iTAlk                  ! Total alkalinity
       integer :: iOxyg                  ! Dissolved oxygen concentration
 #if defined ORGANIC_MATTER
-      integer :: iDOC_                  ! Dissolved organic C-concentration
-      integer :: iPOC_                  ! Particulate organic C-concentration
-      integer :: iPhy1                  ! Phytoplankton1 density
-      integer :: iPhy2                  ! Phytoplankton2 density
-      integer :: iZoop                  ! Zooplankton density
+      integer :: iDOC(N_dom)            ! Dissolved organic C-concentration
+      integer :: iPOC(N_pom)            ! Particulate organic C-concentration
+      integer :: iPhyt(N_phyt)          ! Phytoplankton1 density
+      integer :: iZoop(N_zoop)          ! Zooplankton density
+      integer :: iPIC(N_pim)            ! Particulate inorganic C-concentration
 #endif
 #if defined CARBON_ISOTOPE
       integer :: iT13C                  ! Corbon 13 of total inorganic carbon
 # if defined ORGANIC_MATTER
-      integer :: iDO13                  ! Dissolved organic 13C-concentration
-      integer :: iPO13                  ! Particulate organic 13C-concentration
-      integer :: iP113                  ! Phytoplankton1 13C-concentration
-      integer :: iP213                  ! Phytoplankton2 13C-concentration
-      integer :: iZo13                  ! Zooplankton 13C-concentration
+      integer :: iDO13C(N_dom)          ! Dissolved organic 13C-concentration
+      integer :: iPO13C(N_pom)          ! Particulate organic 13C-concentration
+      integer :: iPhyt13C(N_phyt)       ! Phytoplankton1 13C-concentration
+      integer :: iZoop13C(N_zoop)       ! Zooplankton 13C-concentration
+      integer :: iPI13C(N_pim)          ! Particulate inorganic 13C-concentration
 # endif
 #endif
 #if defined NUTRIENTS
@@ -101,10 +65,21 @@
       integer :: iNH4_                  ! Ammonium concentration
       integer :: iPO4_                  ! Ammonium concentration
 # if defined ORGANIC_MATTER
-      integer :: iDON_                  ! Dissolved organic N-concentration
-      integer :: iPON_                  ! Particulate organic N-concentration
-      integer :: iDOP_                  ! Dissolved organic P-concentration
-      integer :: iPOP_                  ! Particulate organic P-concentration
+      integer :: iDON(N_dom)            ! Dissolved organic N-concentration
+      integer :: iPON(N_pom)            ! Particulate organic N-concentration
+      integer :: iDOP(N_dom)            ! Dissolved organic P-concentration
+      integer :: iPOP(N_pom)            ! Particulate organic P-concentration
+# endif
+# if defined NITROGEN_ISOTOPE
+      integer :: i15NO3                  ! Nitrogen isotope concentration in Nitrate 
+      integer :: i15NO2                  ! Nitrogen isotope concentration in Nitrite
+      integer :: i15NH4                  ! Nitrogen isotope concentration in Ammonium
+#  if defined ORGANIC_MATTER
+      integer :: iDO15N(N_dom)          ! Dissolved organic 15N-concentration
+      integer :: iPO15N(N_pom)          ! Particulate organic 15N-concentration
+      integer :: iPhyt15N(N_phyt)       ! Phytoplankton 15N-concentration
+      integer :: iZoop15N(N_zoop)       ! Zooplankton 15N-concentration
+#  endif
 # endif
 #endif
 #if defined COT_STARFISH
@@ -169,12 +144,8 @@
 !  Biological 3D Histrory variable IDs.
 !
       integer, allocatable :: iHbio3(:)       ! 3D biological terms
-      integer  :: iPPro                       ! primary productivity
 #ifdef CARBON_ISOTOPE
-      integer  :: id13C                  ! d13C of total inorganic carbon
-#endif
-#ifdef NUTRIENTS
-      integer  :: iNO3u                       ! NO3 uptake
+      integer  :: id13C                       ! d13C of total inorganic carbon
 #endif
 
       integer, allocatable :: iDbio2(:)       ! 2D biological terms
@@ -188,58 +159,26 @@
 
       real(r8), allocatable :: AttSW(:)              ! 1/m
       real(r8), allocatable :: AttChl(:)             ! 1/(mg_Chl m2)
-      real(r8), allocatable :: Chl2C_m(:)            ! mg_Chl/mg_C
-      real(r8), allocatable :: ChlMin(:)             ! mg_Chl/m3
-      real(r8), allocatable :: CoagR(:)              ! 1/day
-      real(r8), allocatable :: D_p5NH4(:)            ! Watts/m2
-      real(r8), allocatable :: I_thNH4(:)            ! Watts/m2
-      real(r8), allocatable :: K_NH4(:)              ! m3/mmol_N
-      real(r8), allocatable :: K_NO3(:)              ! m3/mmol_N
-      real(r8), allocatable :: K_Phy(:)              ! (mmol_N/m3)^2
-      real(r8), allocatable :: LDeRRN(:)             ! 1/day
-      real(r8), allocatable :: LDeRRC(:)             ! 1/day
-      real(r8), allocatable :: NitriR(:)             ! 1/day
       real(r8), allocatable :: PARfrac(:)            ! nondimensional
-      real(r8), allocatable :: PhyCN(:)              ! mol_C/mol_N
-      real(r8), allocatable :: PhyIP(:)              ! 1/mmol_N
-      real(r8), allocatable :: PhyIS(:)              ! 1/(Watts m-2 day)
-      real(r8), allocatable :: PhyMin(:)             ! mmol_N/m3
-      real(r8), allocatable :: PhyMR(:)              ! 1/day
-      real(r8), allocatable :: SDeAR(:)              ! 1/day
-      real(r8), allocatable :: SDeBR(:)              ! 1/day
-      real(r8), allocatable :: SDeRRN(:)             ! 1/day
-      real(r8), allocatable :: SDeRRC(:)             ! 1/day
-      real(r8), allocatable :: Vp0(:)                ! nondimensional
-      real(r8), allocatable :: wLDet(:)              ! m/day
-      real(r8), allocatable :: wPhy(:)               ! m/day
-      real(r8), allocatable :: wSDet(:)              ! m/day
-      real(r8), allocatable :: ZooAE_N(:)            ! nondimensional
-      real(r8), allocatable :: ZooBM(:)              ! 1/day
-      real(r8), allocatable :: ZooCN(:)              ! mol_C/mol_N
-      real(r8), allocatable :: ZooER(:)              ! 1/day
-      real(r8), allocatable :: ZooGR(:)              ! 1/day
-      real(r8), allocatable :: ZooMin(:)             ! mmol_N/m3
-      real(r8), allocatable :: ZooMR(:)              ! 1/day
       real(r8), allocatable :: pCO2air(:)            ! ppmv
-!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
       real(r8), allocatable :: TAlk0(:)              ! umol/kg
       real(r8), allocatable :: TIC_0(:)              ! umol/kg
       real(r8), allocatable :: Oxyg0(:)              ! umol/L
 #if defined ORGANIC_MATTER
-      real(r8), allocatable :: DOC_0(:)              ! umol/L
-      real(r8), allocatable :: POC_0(:)              ! umol/L
-      real(r8), allocatable :: Phy10(:)              ! umol/L
-      real(r8), allocatable :: Phy20(:)              ! umol/L
-      real(r8), allocatable :: Zoop0(:)              ! umol/L
+      real(r8), allocatable :: DOC_0(:,:)            ! umol/L
+      real(r8), allocatable :: POC_0(:,:)            ! umol/L
+      real(r8), allocatable :: Phyt_0(:,:)           ! umol/L
+      real(r8), allocatable :: Zoop_0(:,:)           ! umol/L
+      real(r8), allocatable :: PIC_0(:,:)            ! umol/L
 #endif
 #if defined CARBON_ISOTOPE
       real(r8), allocatable :: d13C_TIC0(:)          ! permil (VPDB)
 # if defined ORGANIC_MATTER
-      real(r8), allocatable :: d13C_DOC0(:)          ! permil (VPDB)
-      real(r8), allocatable :: d13C_POC0(:)          ! permil (VPDB)
-      real(r8), allocatable :: d13C_Ph10(:)          ! permil (VPDB)
-      real(r8), allocatable :: d13C_Ph20(:)          ! permil (VPDB)
-      real(r8), allocatable :: d13C_Zoo0(:)          ! permil (VPDB)
+      real(r8), allocatable :: d13C_DOC_0(:,:)       ! permil (VPDB)
+      real(r8), allocatable :: d13C_POC_0(:,:)       ! permil (VPDB)
+      real(r8), allocatable :: d13C_Phyt_0(:,:)      ! permil (VPDB)
+      real(r8), allocatable :: d13C_Zoop_0(:,:)      ! permil (VPDB)
+      real(r8), allocatable :: d13C_PIC_0(:,:)       ! permil (VPDB)
 # endif
 #endif
 #if defined NUTRIENTS
@@ -248,17 +187,28 @@
       real(r8), allocatable :: NH4_0(:)              ! umol/L
       real(r8), allocatable :: PO4_0(:)              ! umol/L
 # if defined ORGANIC_MATTER
-      real(r8), allocatable :: DON_0(:)              ! umolN/L
-      real(r8), allocatable :: PON_0(:)              ! umolN/L
-      real(r8), allocatable :: DOP_0(:)              ! umolP/L
-      real(r8), allocatable :: POP_0(:)              ! umolP/L
+      real(r8), allocatable :: DON_0(:,:)            ! umolN/L
+      real(r8), allocatable :: PON_0(:,:)            ! umolN/L
+      real(r8), allocatable :: DOP_0(:,:)            ! umolP/L
+      real(r8), allocatable :: POP_0(:,:)            ! umolP/L
+# endif
+# if defined NITROGEN_ISOTOPE
+     real(r8), allocatable :: d15N_NO3_0(:)          ! permil
+     real(r8), allocatable :: d15N_NO2_0(:)          ! permil
+     real(r8), allocatable :: d15N_NH4_0(:)          ! permil
+#  if defined ORGANIC_MATTER
+      real(r8), allocatable :: d15N_DOC_0(:,:)       ! permil
+      real(r8), allocatable :: d15N_POC_0(:,:)       ! permil
+      real(r8), allocatable :: d15N_Phyt_0(:,:)      ! permil
+      real(r8), allocatable :: d15N_Zoop_0(:,:)      ! permil
+#  endif
 # endif
 #endif
 #if defined COT_STARFISH
       real(r8), allocatable :: COTe0(:)              ! umolC/L
       real(r8), allocatable :: COTl0(:)              ! umolC/L
 #endif
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
+
       CONTAINS
 
       SUBROUTINE initialize_biology
@@ -273,7 +223,7 @@
 !
 !  Local variable declarations
 !
-      integer :: i, ic
+      integer :: i, j, ic
 
 !
 !-----------------------------------------------------------------------
@@ -289,20 +239,44 @@
       i=i+1
       iOxyg=ic+i  !  4
 #if defined ORGANIC_MATTER
-      i=i+1
-      iDOC_=ic+i
-      i=i+1
-      iPOC_=ic+i
-      i=i+1
-      iPhy1=ic+i
-      i=i+1
-      iPhy2=ic+i
-      i=i+1
-      iZoop=ic+i
+      DO j=1,N_dom
+        i=i+1
+        iDOC(j)=ic+i
+      END DO
+      DO j=1,N_pom
+        i=i+1
+        iPOC(j)=ic+i
+      END DO
+      DO j=1,N_phyt
+        i=i+1
+        iPhyt(j)=ic+i
+      END DO
+      DO j=1,N_zoop
+        i=i+1
+        iZoop(j)=ic+i
+      END DO
+      DO j=1,N_zoop
+        i=i+1
+        iPIC(j)=ic+i
+      END DO
 #endif
 #if defined CARBON_ISOTOPE
       i=i+1
       iT13C=ic+i  ! +1
+# if defined ORGANIC_MATTER
+      DO j=1,N_phyt
+        i=i+1
+        iPhyt13C(j)=ic+i
+      END DO
+      DO j=1,N_zoop
+        i=i+1
+        iZoop13C(j)=ic+i
+      END DO
+      DO j=1,N_pic
+        i=i+1
+        iPI13C(j)=ic+i
+      END DO
+# endif
 #endif
 #if defined NUTRIENTS
       i=i+1
@@ -314,14 +288,48 @@
       i=i+1
       iPO4_=ic+i
 # if defined ORGANIC_MATTER
+      DO j=1,N_dom
+        i=i+1
+        iDON(j)=ic+i
+      END DO
+      DO j=1,N_pom
+        i=i+1
+        iPON(j)=ic+i
+      END DO
+      DO j=1,N_dom
+        i=i+1
+        iDOP(j)=ic+i
+      END DO
+      DO j=1,N_pom
+        i=i+1
+        iPOP(j)=ic+i
+      END DO
+# endif
+# if defined NITROGEN_ISOTOPE
       i=i+1
-      iDON_=ic+i
+      i15NO3=ic+i  ! +1
       i=i+1
-      iPON_=ic+i
+      i15NO2=ic+i  ! +1
       i=i+1
-      iDOP_=ic+i
-      i=i+1
-      iPOP_=ic+i
+      i15NH4=ic+i  ! +1
+#  if defined ORGANIC_MATTER
+      DO j=1,N_dom
+        i=i+1
+        iDO15N(j)=ic+i
+      END DO
+      DO j=1,N_pom
+        i=i+1
+        iPO15N(j)=ic+i
+      END DO
+      DO j=1,N_phyt
+        i=i+1
+        iPhyt15N(j)=ic+i
+      END DO
+      DO j=1,N_zoop
+        i=i+1
+        iZoop15N(j)=ic+i
+      END DO
+#  endif
 # endif
 #endif
 #if defined COT_STARFISH
@@ -356,7 +364,9 @@
 !
 !  Initialize 2D biology indices.
 !
-      ic=1     ! ic reset
+      ic=0     ! ic reset
+
+      ic=ic+1
       ipHt_=ic
       ic=ic+1
       iWarg=ic
@@ -458,15 +468,10 @@
 !----------------------------------------------------------------------
 !  Initialize 3D biology indices.
 !
-      ic=1     ! ic reset
-      iPPro=ic
+      ic=0     ! ic reset
 #ifdef CARBON_ISOTOPE
       ic=ic+1
       id13C=ic  ! +1
-#endif
-#ifdef NUTRIENTS
-      ic=ic+1
-      iNO3u=ic
 #endif
 !
 !  Set number of 3D history terms.
@@ -495,106 +500,12 @@
       IF (.not.allocated(AttChl)) THEN
         allocate ( AttChl(Ngrids) )
       END IF
-      IF (.not.allocated(Chl2C_m)) THEN
-        allocate ( Chl2C_m(Ngrids) )
-      END IF
-      IF (.not.allocated(ChlMin)) THEN
-        allocate ( ChlMin(Ngrids) )
-      END IF
-      IF (.not.allocated(CoagR)) THEN
-        allocate ( CoagR(Ngrids) )
-      END IF
-      IF (.not.allocated(D_p5NH4)) THEN
-        allocate ( D_p5NH4(Ngrids) )
-      END IF
-      IF (.not.allocated(I_thNH4)) THEN
-        allocate ( I_thNH4(Ngrids) )
-      END IF
-      IF (.not.allocated(K_NH4)) THEN
-        allocate ( K_NH4(Ngrids) )
-      END IF
-      IF (.not.allocated(K_NO3)) THEN
-        allocate ( K_NO3(Ngrids) )
-      END IF
-      IF (.not.allocated(K_Phy)) THEN
-        allocate ( K_Phy(Ngrids) )
-      END IF
-      IF (.not.allocated(LDeRRN)) THEN
-        allocate ( LDeRRN(Ngrids) )
-      END IF
-      IF (.not.allocated(LDeRRC)) THEN
-        allocate ( LDeRRC(Ngrids) )
-      END IF
-      IF (.not.allocated(NitriR)) THEN
-        allocate ( NitriR(Ngrids) )
-      END IF
       IF (.not.allocated(PARfrac)) THEN
         allocate ( PARfrac(Ngrids) )
-      END IF
-      IF (.not.allocated(PhyCN)) THEN
-        allocate ( PhyCN(Ngrids) )
-      END IF
-      IF (.not.allocated(PhyIP)) THEN
-        allocate ( PhyIP(Ngrids) )
-      END IF
-      IF (.not.allocated(PhyIS)) THEN
-        allocate ( PhyIS(Ngrids) )
-      END IF
-      IF (.not.allocated(PhyMin)) THEN
-        allocate ( PhyMin(Ngrids) )
-      END IF
-      IF (.not.allocated(PhyMR)) THEN
-        allocate ( PhyMR(Ngrids) )
-      END IF
-      IF (.not.allocated(SDeAR)) THEN
-        allocate ( SDeAR(Ngrids) )
-      END IF
-      IF (.not.allocated(SDeBR)) THEN
-        allocate ( SDeBR(Ngrids) )
-      END IF
-      IF (.not.allocated(SDeRRN)) THEN
-        allocate ( SDeRRN(Ngrids) )
-      END IF
-      IF (.not.allocated(SDeRRC)) THEN
-        allocate ( SDeRRC(Ngrids) )
-      END IF
-      IF (.not.allocated(Vp0)) THEN
-        allocate ( Vp0(Ngrids) )
-      END IF
-      IF (.not.allocated(wLDet)) THEN
-        allocate ( wLDet(Ngrids) )
-      END IF
-      IF (.not.allocated(wPhy)) THEN
-        allocate ( wPhy(Ngrids) )
-      END IF
-      IF (.not.allocated(wSDet)) THEN
-        allocate ( wSDet(Ngrids) )
-      END IF
-      IF (.not.allocated(ZooAE_N)) THEN
-        allocate ( ZooAE_N(Ngrids) )
-      END IF
-      IF (.not.allocated(ZooBM)) THEN
-        allocate ( ZooBM(Ngrids) )
-      END IF
-      IF (.not.allocated(ZooCN)) THEN
-        allocate ( ZooCN(Ngrids) )
-      END IF
-      IF (.not.allocated(ZooER)) THEN
-        allocate ( ZooER(Ngrids) )
-      END IF
-      IF (.not.allocated(ZooGR)) THEN
-        allocate ( ZooGR(Ngrids) )
-      END IF
-      IF (.not.allocated(ZooMin)) THEN
-        allocate ( ZooMin(Ngrids) )
-      END IF
-      IF (.not.allocated(ZooMR)) THEN
-        allocate ( ZooMR(Ngrids) )
       END IF
       IF (.not.allocated(pCO2air)) THEN
         allocate ( pCO2air(Ngrids) )
       END IF
-!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
       IF (.not.allocated(TAlk0)) THEN
         allocate ( TAlk0(Ngrids) )
       END IF
@@ -606,19 +517,19 @@
       END IF
 #if defined ORGANIC_MATTER
       IF (.not.allocated(DOC_0)) THEN
-        allocate ( DOC_0(Ngrids) )
+        allocate ( DOC_0(N_dom,Ngrids) )
       END IF
       IF (.not.allocated(POC_0)) THEN
-        allocate ( POC_0(Ngrids) )
+        allocate ( POC_0(N_pom,Ngrids) )
       END IF
-      IF (.not.allocated(Phy10)) THEN
-        allocate ( Phy10(Ngrids) )
+      IF (.not.allocated(Phyt_0)) THEN
+        allocate ( Phyt_0(N_phyt,Ngrids) )
       END IF
-      IF (.not.allocated(Phy20)) THEN
-        allocate ( Phy20(Ngrids) )
+      IF (.not.allocated(Zoop_0)) THEN
+        allocate ( Zoop_0(N_zoop,Ngrids) )
       END IF
-      IF (.not.allocated(Zoop0)) THEN
-        allocate ( Zoop0(Ngrids) )
+      IF (.not.allocated(PIC_0)) THEN
+        allocate ( PIC_0(N_pim,Ngrids) )
       END IF
 #endif
 #if defined CARBON_ISOTOPE
@@ -626,20 +537,20 @@
         allocate ( d13C_TIC0(Ngrids) )
       END IF
 # if defined ORGANIC_MATTER
-      IF (.not.allocated(d13C_DOC0)) THEN
-        allocate ( d13C_DOC0(Ngrids) )
+      IF (.not.allocated(d13C_DOC_0)) THEN
+        allocate ( d13C_DOC_0(N_dom,Ngrids) )
       END IF
-      IF (.not.allocated(d13C_POC0)) THEN
-        allocate ( d13C_POC0(Ngrids) )
+      IF (.not.allocated(d13C_POC_0)) THEN
+        allocate ( d13C_POC_0(N_pom,Ngrids) )
       END IF
-      IF (.not.allocated(d13C_Ph10)) THEN
-        allocate ( d13C_Ph10(Ngrids) )
+      IF (.not.allocated(d13C_Phyt_0)) THEN
+        allocate ( d13C_Phyt_0(N_phyt,Ngrids) )
       END IF
-      IF (.not.allocated(d13C_Ph20)) THEN
-        allocate ( d13C_Ph20(Ngrids) )
+      IF (.not.allocated(d13C_Zoop_0)) THEN
+        allocate ( d13C_Zoop_0(N_zoop,Ngrids) )
       END IF
-      IF (.not.allocated(d13C_Zoo0)) THEN
-        allocate ( d13C_Zoo0(Ngrids) )
+      IF (.not.allocated(d13C_PIC_0)) THEN
+        allocate ( d13C_PIC_0(N_pim,Ngrids) )
       END IF
 # endif
 #endif
@@ -658,17 +569,42 @@
       END IF
 # if defined ORGANIC_MATTER
       IF (.not.allocated(DON_0)) THEN
-        allocate ( DON_0(Ngrids) )
+        allocate ( DON_0(N_dom,Ngrids) )
       END IF
       IF (.not.allocated(PON_0)) THEN
-        allocate ( PON_0(Ngrids) )
+        allocate ( PON_0(N_pom,Ngrids) )
       END IF
       IF (.not.allocated(DOP_0)) THEN
-        allocate ( DOP_0(Ngrids) )
+        allocate ( DOP_0(N_dom,Ngrids) )
       END IF
       IF (.not.allocated(POP_0)) THEN
-        allocate ( POP_0(Ngrids) )
+        allocate ( POP_0(N_pom,Ngrids) )
       END IF
+# endif
+# if defined NITROGEN_ISOTOPE
+      IF (.not.allocated(d15N_NO3_0)) THEN
+        allocate ( d15N_NO3_0(Ngrids) )
+      END IF
+      IF (.not.allocated(d15N_NO2_0)) THEN
+        allocate ( d15N_NO2_0(Ngrids) )
+      END IF
+      IF (.not.allocated(d15N_NH4_0)) THEN
+        allocate ( d15N_NH4_0(Ngrids) )
+      END IF
+#  if defined ORGANIC_MATTER
+      IF (.not.allocated(d15N_DOC0)) THEN
+        allocate ( d15N_DOC_0(N_dom,Ngrids) )
+      END IF
+      IF (.not.allocated(d15N_POC0)) THEN
+        allocate ( d15N_POC_0(N_pom,Ngrids) )
+      END IF
+      IF (.not.allocated(d15N_Phyt_0)) THEN
+        allocate ( d15N_Phyt_0(N_phyt,Ngrids) )
+      END IF
+      IF (.not.allocated(d15N_Zoop_0)) THEN
+        allocate ( d15N_Zoop_0(N_zoop,Ngrids) )
+      END IF
+#  endif
 # endif
 #endif
 #if defined COT_STARFISH
@@ -679,7 +615,5 @@
         allocate ( COTl0(Ngrids) )
       END IF
 #endif
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
-!
       RETURN
       END SUBROUTINE initialize_biology
