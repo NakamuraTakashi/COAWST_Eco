@@ -825,7 +825,7 @@
           END DO
           t(i,j,k,1,iPhyt(1)) = PHY1_Profile2( z_r(i,j,k) )
           t(i,j,k,1,iPhyt(2)) = PHY2_Profile2( z_r(i,j,k) )
-          t(i,j,k,1,iPhyt(3)) = Phyt_0(3,ng)
+          t(i,j,k,1,iPhyt(3)) = PHY3_Profile2( z_r(i,j,k) )
 !          DO itrc=1,N_zoop
 !            t(i,j,k,1,iZoop(itrc))=Zoop_0(itrc,ng)     ! umolC L-1
 !          END DO

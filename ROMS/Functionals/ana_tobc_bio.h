@@ -648,7 +648,7 @@
         ! Phytoplankton        
             BOUNDARY(ng)%t_east(j,k,iPhyt(1)) = PHY1_Profile2( z_r(Iend+1,j,k) )
             BOUNDARY(ng)%t_east(j,k,iPhyt(2)) = PHY2_Profile2( z_r(Iend+1,j,k) )
-            BOUNDARY(ng)%t_east(j,k,iPhyt(3)) = Phyt_0(3,ng)
+            BOUNDARY(ng)%t_east(j,k,iPhyt(3)) = PHY3_Profile2( z_r(Iend+1,j,k) )
         ! Zooplankton
             BOUNDARY(ng)%t_east(j,k,iZoop(1)) = ZOO_Profile2 ( z_r(Iend+1,j,k) )
         ! POC
@@ -784,7 +784,7 @@
         ! Phytoplankton        
             BOUNDARY(ng)%t_west(j,k,iPhyt(1)) = PHY1_Profile2( z_r(Istr-1,j,k) )
             BOUNDARY(ng)%t_west(j,k,iPhyt(2)) = PHY2_Profile2( z_r(Istr-1,j,k) )
-            BOUNDARY(ng)%t_west(j,k,iPhyt(3)) = Phyt_0(3,ng)
+            BOUNDARY(ng)%t_west(j,k,iPhyt(3)) = PHY3_Profile2( z_r(Istr-1,j,k) )
         ! Zooplankton
             BOUNDARY(ng)%t_west(j,k,iZoop(1)) = ZOO_Profile2 ( z_r(Istr-1,j,k) )
         ! PIC
@@ -919,7 +919,7 @@
         ! Phytoplankton        
             BOUNDARY(ng)%t_south(i,k,iPhyt(1)) = PHY1_Profile2( z_r(i,Jstr-1,k) )
             BOUNDARY(ng)%t_south(i,k,iPhyt(2)) = PHY2_Profile2( z_r(i,Jstr-1,k) )
-            BOUNDARY(ng)%t_south(i,k,iPhyt(3)) = Phyt_0(3,ng)
+            BOUNDARY(ng)%t_south(i,k,iPhyt(3)) = PHY3_Profile2( z_r(i,Jstr-1,k) )
         ! Zooplankton
             BOUNDARY(ng)%t_south(i,k,iZoop(1)) = ZOO_Profile2 ( z_r(i,Jstr-1,k) )
         ! PIC
@@ -1054,7 +1054,7 @@
         ! Phytoplankton        
             BOUNDARY(ng)%t_north(i,k,iPhyt(1)) = PHY1_Profile2( z_r(i,Jend+1,k) )
             BOUNDARY(ng)%t_north(i,k,iPhyt(2)) = PHY2_Profile2( z_r(i,Jend+1,k) )
-            BOUNDARY(ng)%t_north(i,k,iPhyt(3)) = Phyt_0(3,ng)
+            BOUNDARY(ng)%t_north(i,k,iPhyt(3)) = PHY3_Profile2( z_r(i,Jend+1,k) )
         ! Zooplankton
             BOUNDARY(ng)%t_north(i,k,iZoop(1)) = ZOO_Profile2 ( z_r(i,Jend+1,k) )
         ! PIC

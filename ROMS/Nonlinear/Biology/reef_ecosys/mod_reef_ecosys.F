@@ -360,7 +360,7 @@ contains
     integer :: k, m, itrc          
     integer :: icl, itic
     real(8) :: TmpK
-    real(8) :: rho_sw
+    real(8) :: rho_sw(N)
     real(8) :: DOsatu    
     real(8) :: cCO2aq, cHCO3, cCO3, R13C
     real(8) :: PFD, Att, AttFac, ExpAtt, Itop
@@ -470,6 +470,9 @@ contains
     dtsed = dt/isplitsed              ! Internal time step for sediment ecosystem model (sec)
     
     DO k=1,N
+
+      rho_sw(k) = densSW( Tmp(k),Sal(k) )  ! Density of seawater [g/cm3]
+
       dDIC_dt(k) = 0.0d0
       dTA_dt(k)  = 0.0d0
       dDOx_dt(k) = 0.0d0
@@ -496,8 +499,7 @@ contains
 # if defined ORGANIC_MATTER
       dDON_dt(k,:) = 0.0d0
       dPON_dt(k,:) = 0.0d0
-      dDOP_dt(k,1) = 0.0d0
-      dDOP_dt(k,2) = 0.0d0
+      dDOP_dt(k,:) = 0.0d0
       dPOP_dt(k,:) = 0.0d0
 # endif
 # if defined NITROGEN_ISOTOPE
@@ -584,8 +586,6 @@ contains
 
     DO k=N,1,-1
     
-      rho_sw = densSW( Tmp(k),Sal(k) )  ! Density of seawater [g/cm3]
-
 !!
 !!  Compute average light attenuation for each grid cell. To include
 !!  other attenuation contributions like suspended sediment or CDOM
@@ -621,92 +621,146 @@ contains
         ( ng, 1, i, j    &   ! ng: nested grid number; n: coral compartment; i,j: position
         , dt             &   ! Time step (sec)
         , PFD            &   ! Photon flux density (umol m-2 s-1)
-        , rho_sw         &   ! Density of seawater (g cm-3)
+        , rho_sw(k)      &   ! Density of seawater (g cm-3)
         , Tmp(k)         &   ! Temperature (oC)
         , Sal(k)         &   ! Salinity (PSU)
         , DIC(k)         &   ! Total dissolved inorganic carbon (DIC: umol kg-1)
         , TA (k)         &   ! Total alkalinity (TA: umol kg-1)
         , DOx(k)         &   ! Dissolved oxygen (umol L-1)
-        , DOC(k,:)      &   ! Labile Dissolved organic carbon (DOC: umol L-1)
-        , POC(k,:)         &   ! Particulate organic carbon (POC: umol L-1)
-        , PHY(k,:)        &   ! phytoplankton1 (umol C L-1), dinoflagellate
-        , ZOO(k,:)         &   ! zooplankton (umol C L-1)
-        , PIC(k,:)         &   ! Particulate inorganic carbon (PIC: umol L-1), coccolith (CaCO3)
-#if defined CARBON_ISOTOPE
+        , DOC(k,:)       &   ! Labile Dissolved organic carbon (DOC: umol L-1)
+        , POC(k,:)       &   ! Particulate organic carbon (POC: umol L-1)
+        , PHY(k,:)       &   ! phytoplankton1 (umol C L-1), dinoflagellate
+        , ZOO(k,:)       &   ! zooplankton (umol C L-1)
+        , PIC(k,:)       &   ! Particulate inorganic carbon (PIC: umol L-1), coccolith (CaCO3)
+# if defined CARBON_ISOTOPE
         , DI13C(k)       &   ! 13C of DIC (umol kg-1)
-        , DO13C(k,:)      &   ! 13C of Labile Dissolved organic carbon (DOC: umol L-1)
-        , PO13C(k,:)       &   ! 13C of Particulate organic carbon (POC: umol L-1)
+        , DO13C(k,:)     &   ! 13C of Labile Dissolved organic carbon (DOC: umol L-1)
+        , PO13C(k,:)     &   ! 13C of Particulate organic carbon (POC: umol L-1)
         , PHY13C(k,:)    &   ! 13C of phytoplankton1 (umol C L-1), dinoflagellate
-        , ZOO13C(k,:)     &   ! 13C of zooplankton (umol C L-1)
-        , PI13C(k,:)       &   ! 13C of Particulate inorganic carbon (PIC: umol L-1), coccolith (CaCO3)
-#endif
-#if defined NUTRIENTS         
+        , ZOO13C(k,:)    &   ! 13C of zooplankton (umol C L-1)
+        , PI13C(k,:)     &   ! 13C of Particulate inorganic carbon (PIC: umol L-1), coccolith (CaCO3)
+# endif
+# if defined NUTRIENTS         
         , NO3(k)         &   ! NO3 (umol L-1)
         , NO2(k)         &   ! NO2 (umol L-1)
         , NH4(k)         &   ! NH4 (umol L-1)
         , PO4(k)         &   ! PO4 (umol L-1)
-        , DON(k,:)        &   ! Labile Dissolved organic nitrogen (DON: umol L-1)
-        , PON(k,:)         &   ! Particulate organic nitrogen (PON: umol L-1)
-        , DOP(k,:)        &   ! Labile Dissolved organic phosporius (DOP: umol L-1)
-        , POP(k,:)         &   ! Particulate organic phosporius (POP: umol L-1)
-# if defined NITROGEN_ISOTOPE
+        , DON(k,:)       &   ! Labile Dissolved organic nitrogen (DON: umol L-1)
+        , PON(k,:)       &   ! Particulate organic nitrogen (PON: umol L-1)
+        , DOP(k,:)       &   ! Labile Dissolved organic phosporius (DOP: umol L-1)
+        , POP(k,:)       &   ! Particulate organic phosporius (POP: umol L-1)
+#  if defined NITROGEN_ISOTOPE
         , NO3_15N(k)     &   ! 15N of NO3 (umol L-1)
         , NO2_15N(k)     &   ! 15N of NO2 (umol L-1)
         , NH4_15N(k)     &   ! 15N of NH4 (umol L-1)
-        , DO15N(k,:)      &   ! 15N of Labile Dissolved organic nitrogen (DON: umol L-1)
-        , PO15N(k,:)       &   ! 15N of Particulate organic nitrogen (PON: umol L-1)
+        , DO15N(k,:)     &   ! 15N of Labile Dissolved organic nitrogen (DON: umol L-1)
+        , PO15N(k,:)     &   ! 15N of Particulate organic nitrogen (PON: umol L-1)
         , PHY15N(k,:)    &   ! 15N of phytoplankton1 (umol C L-1), dinoflagellate
-        , ZOO15N(k,:)     &   ! 15N of zooplankton (umol C L-1)
+        , ZOO15N(k,:)    &   ! 15N of zooplankton (umol C L-1)
+#  endif
 # endif
-#endif
-#if defined COT_STARFISH      
+# if defined COT_STARFISH      
         , COTe(k)        &   ! COT starfish egg (umol L-1)
         , COTl(k)        &   ! COT starfish larvae (umol L-1)
-#endif
+# endif
     !   output parameters
         , dDIC           &   ! dDIC/dt  (umol kg-1 s-1)  1 mmol m-3 = 1 umol L-1 = 1/1.024 umol kg-1
         , dTA            &   ! dTA/dt   (umol kg-1 s-1) 
         , dDOx           &   ! dDOx/dt  (umol L-1 s-1) 
-        , dDOC(:)          &   ! dDOC/dt  (umol L-1 s-1) 
-        , dPOC(:)           &   ! dPOC/dt  (umol L-1 s-1) 
-        , dPHY(:)          &   ! dPHY1/dt  (umol L-1 s-1)  
-        , dZOO(:)           &   ! dZOO/dt  (umol L-1 s-1)  
-        , dPIC(:)           &   ! dPIC/dt  (umol L-1 s-1)  
-#if defined CARBON_ISOTOPE
-        , dDI13C(:)         &   ! dDI13C/dt (umol kg-1 s-1)
-        , dDO13C(:)        &   ! dLDO13C/dt  (umol L-1 s-1) 
-        , dPO13C(:)         &   ! dPO13C/dt  (umol L-1 s-1) 
-        , dPHY13C(:)      &   ! dPHY1_13C/dt  (umol L-1 s-1)  
-        , dZOO13C(:)       &   ! dZOO_13C/dt  (umol L-1 s-1)  
-        , dPI13C(:)         &   ! dPI13C/dt  (umol L-1 s-1)  
-#endif
-#if defined NUTRIENTS
+        , dDOC(:)        &   ! dDOC/dt  (umol L-1 s-1) 
+        , dPOC(:)        &   ! dPOC/dt  (umol L-1 s-1) 
+        , dPHY(:)        &   ! dPHY1/dt  (umol L-1 s-1)  
+        , dZOO(:)        &   ! dZOO/dt  (umol L-1 s-1)  
+        , dPIC(:)        &   ! dPIC/dt  (umol L-1 s-1)  
+# if defined CARBON_ISOTOPE
+        , dDI13C(:)      &   ! dDI13C/dt (umol kg-1 s-1)
+        , dDO13C(:)      &   ! dLDO13C/dt  (umol L-1 s-1) 
+        , dPO13C(:)      &   ! dPO13C/dt  (umol L-1 s-1) 
+        , dPHY13C(:)     &   ! dPHY1_13C/dt  (umol L-1 s-1)  
+        , dZOO13C(:)     &   ! dZOO_13C/dt  (umol L-1 s-1)  
+        , dPI13C(:)      &   ! dPI13C/dt  (umol L-1 s-1)  
+# endif
+# if defined NUTRIENTS
         , dNO3           &   ! dNO3/dt (umol L-1 s-1)
         , dNO2           &   ! dNO2/dt (umol L-1 s-1)
         , dNH4           &   ! dNH4/dt (umol L-1 s-1)
         , dPO4           &   ! dPO4/dt (umol L-1 s-1)
-        , dDON(:)          &   ! dDON/dt (umol L-1 s-1)
-        , dPON(:)           &   ! dPON/dt (umol L-1 s-1)
-        , dDOP(:)          &   ! dDOP/dt (umol L-1 s-1)
-        , dPOP(:)           &   ! dPOP/dt (umol L-1 s-1)
-# if defined NITROGEN_ISOTOPE
+        , dDON(:)        &   ! dDON/dt (umol L-1 s-1)
+        , dPON(:)        &   ! dPON/dt (umol L-1 s-1)
+        , dDOP(:)        &   ! dDOP/dt (umol L-1 s-1)
+        , dPOP(:)        &   ! dPOP/dt (umol L-1 s-1)
+#  if defined NITROGEN_ISOTOPE
         , dNO3_15N       &   ! dNO3_15N/dt (umol L-1 s-1)
         , dNO2_15N       &   ! dNO2_15N/dt (umol L-1 s-1)
         , dNH4_15N       &   ! dNH4_15N/dt (umol L-1 s-1)
-        , dDO15N(:)        &   ! dLDO15N/dt  (umol L-1 s-1) 
-        , dPO15N(:)         &   ! dPO15N/dt  (umol L-1 s-1) 
-        , dPHY15N(:)      &   ! dPHY1_15N/dt  (umol L-1 s-1)  
-        , dZOO15N(:)       &   ! dZOO_15N/dt  (umol L-1 s-1)  
-# endif
-#endif                                
-#if defined COT_STARFISH         
+        , dDO15N(:)      &   ! dLDO15N/dt  (umol L-1 s-1) 
+        , dPO15N(:)      &   ! dPO15N/dt  (umol L-1 s-1) 
+        , dPHY15N(:)     &   ! dPHY1_15N/dt  (umol L-1 s-1)  
+        , dZOO15N(:)     &   ! dZOO_15N/dt  (umol L-1 s-1)  
+#  endif
+# endif                                
+# if defined COT_STARFISH         
         , dCOTe          &   ! dCOTe/dt (umol L-1 s-1)
         , dCOTl          &   ! dCOTl/dt (umol L-1 s-1)
-#endif
+# endif
         )
     
+!----- Mass balance equation -----------------------------------------------------------
+
+      dDIC_dt(k) = dDIC_dt(k) + dDIC
+      dTA_dt (k) = dTA_dt (k) + dTA
+      dDOx_dt(k) = dDOx_dt(k) + dDOx
+      dDOC_dt(k,:) = dDOC_dt(k,:) + dDOC(:)
+      dPOC_dt(k,:) = dPOC_dt(k,:) + dPOC(:)
+      dPHY_dt(k,:) = dPHY_dt(k,:) + dPHY(:)
+      dZOO_dt(k,:) = dZOO_dt(k,:) + dZOO(:)
+      dPIC_dt(k,:) = dPIC_dt(k,:) + dPIC(:)
+# if defined CARBON_ISOTOPE
+      dDI13C_dt(k) = dDI13C_dt(k) + dDI13C
+      dDO13C_dt(k,:) = dDO13C_dt(k,:) + dDO13C(:)
+      dPO13C_dt(k,:) = dPO13C_dt(k,:) + dPO13C(:)
+      dPHY13C_dt(k,:) = dPHY13C_dt(k,:) + dPHY13C(:)
+      dZOO13C_dt(k,:) = dZOO13C_dt(k,:) + dZOO13C(:)
+      dPI13C_dt(k,:) = dPI13C_dt(k,:) + dPI13C(:)
+# endif
+# if defined NUTRIENTS
+      dNO3_dt(k) = dNO3_dt(k) + dNO3
+      dNO2_dt(k) = dNO2_dt(k) + dNO2
+      dNH4_dt(k) = dNH4_dt(k) + dNH4
+      dPO4_dt(k) = dPO4_dt(k) + dPO4
+      dDON_dt(k,:) = dDON_dt(k,:) + dDON(:)
+      dPON_dt(k,:) = dPON_dt(k,:) + dPON(:)
+      dDOP_dt(k,:) = dDOP_dt(k,:) + dDOP(:)
+      dPOP_dt(k,:) = dPOP_dt(k,:) + dPOP(:)
+#  if defined NITROGEN_ISOTOPE
+      dNO3_15N_dt(k) = dNO3_15N_dt(k) + dNO3_15N
+      dNO2_15N_dt(k) = dNO2_15N_dt(k) + dNO2_15N
+      dNH4_15N_dt(k) = dNH4_15N_dt(k) + dNH4_15N
+      dDO15N_dt(k,:) = dDO15N_dt(k,:) + dDO15N(:)
+      dPO15N_dt(k,:) = dPO15N_dt(k,:) + dPO15N(:)
+      dPHY15N_dt(k,:) = dPHY15N_dt(k,:) + dPHY15N(:)
+      dZOO15N_dt(k,:) = dZOO15N_dt(k,:) + dZOO15N(:)
+#  endif
+# endif
+# if defined COT_STARFISH
+      dCOTe_dt(k) = dCOTe_dt(k) + dCOTe
+      dCOTl_dt(k) = dCOTl_dt(k) + dCOTl
+# endif
+#endif
+                             
+
+!  Light attenuation at the bottom of the grid cell. It is the starting
+!  PFD value for the next (deeper) vertical grid cell.
+!
+      PFD=Itop*ExpAtt
+
+    END DO
+
+    PFDbott=PFD  !!! Photon flux density at sea bottom
+
+#if defined ORGANIC_MATTER
 !------------ Vertical fluxes calculation ------------------------------
-!                                                                       
+!
 !                      Fw_XXX(k)                                        
 !                   :_____A______ :_k                                   
 !                   /     |      /|                                     
@@ -722,145 +776,129 @@ contains
 !-----------------------------------------------------------------------
 
 !---- Surfact fluxes = 0 (mmol m-2 s-1) ----
-      IF (k==N) THEN
-        Fw_POC(N,:)=0.0d0
-        Fw_PHY(N,:)=0.0d0
-        Fw_ZOO(N,:)=0.0d0
-        Fw_PIC(N,:)=0.0d0
+    Fw_POC(N,:)=0.0d0
+    Fw_PIC(N,:)=0.0d0
 # if defined CARBON_ISOTOPE
-        Fw_PO13C(N,:)=0.0d0
-        Fw_PHY13C(N,:)=0.0d0
-        Fw_ZOO13C(N,:)=0.0d0
-        Fw_PI13C(N,:)=0.0d0
+    Fw_PO13C(N,:)=0.0d0
+    Fw_PI13C(N,:)=0.0d0
 # endif
 # if defined NUTRIENTS
-        Fw_PON(N,:)=0.0d0
-        Fw_POP(N,:)=0.0d0
+    Fw_PON(N,:)=0.0d0
+    Fw_POP(N,:)=0.0d0
 #  if defined NITROGEN_ISOTOPE
-        Fw_PO15N(N,:)=0.0d0
-        Fw_PHY15N(N,:)=0.0d0
-        Fw_ZOO15N(N,:)=0.0d0
+    Fw_PO15N(N,:)=0.0d0
 #  endif
 # endif
-# if defined COT_STARFISH
-        Fw_COTe(N)=0.0d0
-        Fw_COTl(N)=0.0d0
-# endif
-      END IF
-!
+
 !---- Water column flux (mmol m-2 s-1) ----
-      DO itrc=1, Npom
-        w_PM = (rho_POM(itrc)/rho_sw - 1.0d0)*grav*D_POM(itrc)*D_POM(itrc)*1.0d-6/18.0d0/vis_sw
-        Fw_POC(k-1,itrc)=-w_PM*POC(k,itrc)  ! umol L-1 m s-1 = mmol m-2 s-1
+
+    DO k=1,N-1
+
+       DO itrc=1, Npom
+        IF (itrc==iCPOM) then
+          w_PM = 0.001d0
+        ELSE
+          w_PM = -(rho_POM(itrc)/rho_sw(k) - 1.0d0)*grav*D_POM(itrc)*D_POM(itrc)*1.0d-6/18.0d0/vis_sw
+        END IF
+        Fw_POC(k,itrc) = 0.5d0*(abs(w_PM)+w_PM)*POC(k,itrc)  &
+                        -0.5d0*(abs(w_PM)-w_PM)*POC(k+1,itrc)    ! umol L-1 m s-1 = mmol m-2 s-1
 # if defined CARBON_ISOTOPE
-        Fw_PO13C(k-1,itrc)=-w_PM*PO13C(k,itrc)
+        Fw_PO13C(k,itrc) = 0.5d0*(abs(w_PM)+w_PM)*PO13C(k,itrc)  &
+                          -0.5d0*(abs(w_PM)-w_PM)*PO13C(k+1,itrc)
 # endif
 # if defined NUTRIENTS
-        Fw_PON(k-1,itrc)=-w_PM*PON(k,itrc)
-        Fw_POP(k-1,itrc)=-w_PM*POP(k,itrc)
+        Fw_PON(k,itrc) = 0.5d0*(abs(w_PM)+w_PM)*PON(k,itrc)  &
+                        -0.5d0*(abs(w_PM)-w_PM)*PON(k+1,itrc)
+        Fw_POP(k,itrc) = 0.5d0*(abs(w_PM)+w_PM)*POP(k,itrc)  &
+                        -0.5d0*(abs(w_PM)-w_PM)*POP(k+1,itrc)
 #  if defined NITROGEN_ISOTOPE
-        Fw_PO15N(k-1,itrc)=-w_PM*PO15N(k,itrc)
+        Fw_PO15N(k,itrc) = 0.5d0*(abs(w_PM)+w_PM)*PO15N(k,itrc)  &
+                          -0.5d0*(abs(w_PM)-w_PM)*PO15N(k+1,itrc)
 #  endif
 # endif
       END DO
-!      Fw_PHY(k-1,:)=0.0d0
-!      Fw_ZOO(k-1,:)=0.0d0
+
       DO itrc=1, Npim
-        w_PM = (rho_PIM(itrc)/rho_sw - 1.0d0)*grav*D_PIM(itrc)*D_PIM(itrc)*1.0d-6/18.0d0/vis_sw
-        Fw_PIC(k-1,itrc)=-w_PM*PIC(k,itrc)  ! umol L-1 m s-1 = mmol m-2 s-1
+        w_PM = -(rho_PIM(itrc)/rho_sw(k) - 1.0d0)*grav*D_PIM(itrc)*D_PIM(itrc)*1.0d-6/18.0d0/vis_sw
+        Fw_PIC(k,itrc) = 0.5d0*(abs(w_PM)+w_PM)*PIC(k,itrc)  &
+                        -0.5d0*(abs(w_PM)-w_PM)*PIC(k+1,itrc)  ! umol L-1 m s-1 = mmol m-2 s-1
       END DO
-# if defined COT_STARFISH
-      Fw_COTe(k-1)=0.0d0
-      Fw_COTl(k-1)=0.0d0
-# endif
-!
-!---- Bottom flux (mmol m-2 s-1) ----
-      IF (k==1) THEN
-
-        Fw_PHY(k-1,:)=0.0d0
-        Fw_ZOO(k-1,:)=0.0d0
-# if defined COT_STARFISH
-        Fw_COTe(k-1)=0.0d0
-        Fw_COTl(k-1)=0.0d0
-# endif
-
-        Fdep_POC(:) = -Fw_POC(0,:)
-!        Fdep_PHY(:) = -Fw_PHY(0,:)
-!        Fdep_ZOO(:) = -Fw_ZOO(0,:)
-        Fdep_PIC(:) = -Fw_PIC(0,:)
-# if defined CARBON_ISOTOPE
-        Fdep_PO13C(:) = -Fw_PO13C(0,:)
-!        Fdep_PHY(:) = -Fw_PHY(0,:)
-!        Fdep_ZOO(:) = -Fw_ZOO(0,:)
-        Fdep_PI13C(:) = -Fw_PI13C(0,:)
-# endif
-# if defined NUTRIENTS
-        Fdep_PON(:) = -Fw_PON(0,:)
-        Fdep_POP(:) = -Fw_POP(0,:)
-#  if defined NITROGEN_ISOTOPE
-        Fdep_PO15N(:) = -Fw_PO15N(0,:)
-#  endif
-# endif
-# if defined COT_STARFISH
-        Fdep_COTe = -Fw_COTe(0)
-        Fdep_COTl = -Fw_COTl(0)
-# endif
-      END IF
-
-!----- Mass balance equation -----------------------------------------------------------
-
-      dDIC_dt(k) = dDIC_dt(k) + dDIC
-      dTA_dt (k) = dTA_dt (k) + dTA
-      dDOx_dt(k) = dDOx_dt(k) + dDOx
-      dDOC_dt(k,itrc) = dDOC_dt(k,itrc) + dDOC(itrc)
-      dPOC_dt(k,:) = dPOC_dt(k,:) + dPOC(:) + (Fw_POC(k-1,:)-Fw_POC(k,:))/dz(k)
-!      dPHY_dt(k,:) = dPHY_dt(k,:) + dPHY(:) + (Fw_PHY(k-1,:)-Fw_PHY(k,:))/dz(k)
-!      dZOO_dt(k,:) = dZOO_dt(k,:) + dZOO(:) + (Fw_ZOO(k-1,:)-Fw_ZOO(k,:))/dz(k)
-      dPHY_dt(k,:) = dPHY_dt(k,:) + dPHY(:)
-      dZOO_dt(k,:) = dZOO_dt(k,:) + dZOO(:)
-      dPIC_dt(k,:) = dPIC_dt(k,:) + dPIC(:) + (Fw_PIC(k-1,:)-Fw_PIC(k,:))/dz(k)
-# if defined CARBON_ISOTOPE
-      dDI13C_dt(k) = dDI13C_dt(k) + dDI13C
-      dDO13C_dt(k,:) = dDO13C_dt(k,:) + dDO13C(:)
-      dPO13C_dt(k,:) = dPO13C_dt(k,:) + dPO13C(:) + (Fw_PO13C(k-1,:)-Fw_PO13C(k,:))/dz(k)
-      dPHY13C_dt(k,:) = dPHY13C_dt(k,:) + dPHY13C(:)
-      dZOO13C_dt(k,:) = dZOO13C_dt(k,:) + dZOO13C(:)
-      dPI13C_dt(k,:) = dPI13C_dt(k,:) + dPI13C(:) + (Fw_PI13C(k-1,:)-Fw_PI13C(k,:))/dz(k)
-# endif
-# if defined NUTRIENTS
-      dNO3_dt(k) = dNO3_dt(k) + dNO3
-      dNO2_dt(k) = dNO2_dt(k) + dNO2
-      dNH4_dt(k) = dNH4_dt(k) + dNH4
-      dPO4_dt(k) = dPO4_dt(k) + dPO4
-      dDON_dt(k,:) = dDON_dt(k,:) + dDON(:)
-      dPON_dt(k,:) = dPON_dt(k,:) + dPON(:) + (Fw_PON(k-1,:)-Fw_PON(k,:))/dz(k)
-      dDOP_dt(k,:) = dDOP_dt(k,:) + dDOP(:)
-      dPOP_dt(k,:) = dPOP_dt(k,:) + dPOP(:) + (Fw_POP(k-1,:)-Fw_POP(k,:))/dz(k)
-#  if defined NITROGEN_ISOTOPE
-      dNO3_15N_dt(k) = dNO3_15N_dt(k) + dNO3_15N
-      dNO2_15N_dt(k) = dNO2_15N_dt(k) + dNO2_15N
-      dNH4_15N_dt(k) = dNH4_15N_dt(k) + dNH4_15N
-      dDO15N_dt(k,:) = dDO15N_dt(k,:) + dDO15N(:)
-      dPO15N_dt(k,:) = dPO15N_dt(k,:) + dPO15N(:) + (Fw_PO15N(k-1,:)-Fw_PO15N(k,:))/dz(k)
-      dPHY15N_dt(k,:) = dPHY15N_dt(k,:) + dPHY15N(:)
-      dZOO15N_dt(k,:) = dZOO15N_dt(k,:) + dZOO15N(:)
-#  endif
-# endif
-# if defined COT_STARFISH
-      dCOTe_dt(k) = dCOTe_dt(k) + dCOTe+ (Fw_COTe(k-1)-Fw_COTe(k))/dz(k)
-      dCOTl_dt(k) = dCOTl_dt(k) + dCOTl+ (Fw_COTl(k-1)-Fw_COTl(k))/dz(k)
-# endif
-
-#endif                                
-
-!  Light attenuation at the bottom of the grid cell. It is the starting
-!  PFD value for the next (deeper) vertical grid cell.
-!
-      PFD=Itop*ExpAtt
-
     END DO
 
-    PFDbott=PFD
+!---- Bottom flux (mmol m-2 s-1) ----
+
+!    Fw_POC(0,:)=0.0d0
+!    Fw_PIC(0,:)=0.0d0
+!# if defined CARBON_ISOTOPE
+!    Fw_PO13C(0,:)=0.0d0
+!    Fw_PI13C(0,:)=0.0d0
+!# endif
+!# if defined NUTRIENTS
+!    Fw_PON(0,:)=0.0d0
+!    Fw_POP(0,:)=0.0d0
+!#  if defined NITROGEN_ISOTOPE
+!    Fw_PO15N(0,:)=0.0d0
+!#  endif
+!# endif
+
+    DO itrc=1, Npom
+      IF (itrc==iCPOM) then
+        w_PM = 0.001d0
+      ELSE
+        w_PM = -(rho_POM(itrc)/rho_sw(1) - 1.0d0)*grav*D_POM(itrc)*D_POM(itrc)*1.0d-6/18.0d0/vis_sw
+      END IF
+      Fw_POC(0,itrc) = -0.5d0*(abs(w_PM)-w_PM)*POC(1,itrc)
+# if defined CARBON_ISOTOPE
+      Fw_PO13C(0,itrc) = -0.5d0*(abs(w_PM)-w_PM)*PO13C(1,itrc)
+# endif
+# if defined NUTRIENTS
+      Fw_PON(0,itrc) = -0.5d0*(abs(w_PM)-w_PM)*PON(1,itrc)
+      Fw_POP(0,itrc) = -0.5d0*(abs(w_PM)-w_PM)*POP(1,itrc)
+#  if defined NITROGEN_ISOTOPE
+      Fw_PO15N(0,itrc) = -0.5d0*(abs(w_PM)-w_PM)*PO15N(1,itrc)
+#  endif
+# endif
+    END DO
+
+    DO itrc=1, Npim
+      w_PM = -(rho_PIM(itrc)/rho_sw(1) - 1.0d0)*grav*D_PIM(itrc)*D_PIM(itrc)*1.0d-6/18.0d0/vis_sw
+      Fw_PIC(0,itrc) = -0.5d0*(abs(w_PM)-w_PM)*PIC(1,itrc)
+    END DO
+
+    Fdep_POC(:) = -Fw_POC(0,:)
+    Fdep_PIC(:) = -Fw_PIC(0,:)
+# if defined CARBON_ISOTOPE
+    Fdep_PO13C(:) = -Fw_PO13C(0,:)
+    Fdep_PI13C(:) = -Fw_PI13C(0,:)
+# endif
+# if defined NUTRIENTS
+    Fdep_PON(:) = -Fw_PON(0,:)
+    Fdep_POP(:) = -Fw_POP(0,:)
+#  if defined NITROGEN_ISOTOPE
+    Fdep_PO15N(:) = -Fw_PO15N(0,:)
+#  endif
+# endif
+    
+!----- Mass balance equation -----------------------------------------------------------
+
+    DO k=1,N
+
+      dPOC_dt(k,:) = dPOC_dt(k,:) + (Fw_POC(k-1,:)-Fw_POC(k,:))/dz(k)
+      dPIC_dt(k,:) = dPIC_dt(k,:) + (Fw_PIC(k-1,:)-Fw_PIC(k,:))/dz(k)
+# if defined CARBON_ISOTOPE
+      dPO13C_dt(k,:) = dPO13C_dt(k,:) + (Fw_PO13C(k-1,:)-Fw_PO13C(k,:))/dz(k)
+      dPI13C_dt(k,:) = dPI13C_dt(k,:) + (Fw_PI13C(k-1,:)-Fw_PI13C(k,:))/dz(k)
+# endif
+# if defined NUTRIENTS
+      dPON_dt(k,:) = dPON_dt(k,:) + (Fw_PON(k-1,:)-Fw_PON(k,:))/dz(k)
+      dPOP_dt(k,:) = dPOP_dt(k,:) + (Fw_POP(k-1,:)-Fw_POP(k,:))/dz(k)
+#  if defined NITROGEN_ISOTOPE
+      dPO15N_dt(k,:) = dPO15N_dt(k,:) + (Fw_PO15N(k-1,:)-Fw_PO15N(k,:))/dz(k)
+#  endif
+# endif
+                                
+    END DO
+#endif
 
 !!!---------------------------------------------------------------------
 !!!  Benthic interactions.
@@ -923,7 +961,7 @@ contains
             ( ng, icl, i, j   &   ! ng: nested grid number; n: coral compartment; i,j: position
             , dtc             &   ! Time step (sec)
             , PFDbott         &   ! Photon flux density (umol m-2 s-1)
-            , rho_sw          &   ! Density of seawater (g cm-3)
+            , rho_sw(1)       &   ! Density of seawater (g cm-3)
             , Tmp(1)          &   ! Temperature (oC)
             , Sal(1)          &   ! Salinity (PSU)
             , DIC(1)          &   ! Total dissolved inorganic carbon (DIC: umol kg-1)
@@ -980,8 +1018,8 @@ contains
 
         cff=0.01d0 /dz(1) * p_coral(icl)*P2R(icl)
          
-        dDIC_dt(1) = dDIC_dt(1) - Flux_DIC * cff/rho_sw
-        dTA_dt (1) = dTA_dt (1) - Flux_TA  * cff/rho_sw
+        dDIC_dt(1) = dDIC_dt(1) - Flux_DIC * cff/rho_sw(1)
+        dTA_dt (1) = dTA_dt (1) - Flux_TA  * cff/rho_sw(1)
         dDOx_dt(1) = dDOx_dt(1) - Flux_DO  * cff
 # if defined ORGANIC_MATTER
         dDOC_dt(1,iLbl) = dDOC_dt(1,iLbl) - Flux_DOC(iLbl) * cff
@@ -992,7 +1030,7 @@ contains
         dZOO_dt(1,iGzoo) = dZOO_dt(1,iGzoo) - Flux_ZOO(iGzoo) * cff
 # endif
 # if defined CORAL_CARBON_ISOTOPE
-        dDI13C_dt(1) = dDI13C_dt(1) - Flux_DI13C * cff/rho_sw
+        dDI13C_dt(1) = dDI13C_dt(1) - Flux_DI13C * cff/rho_sw(1)
 # endif
 # if defined CORAL_NUTRIENTS
         dNO3_dt(1) = dNO3_dt(1) - Flux_NO3 * cff
@@ -1022,7 +1060,7 @@ contains
 !       input parameters
         ( ng, 1, i, j    &   ! ng: nested grid number; n: seagrass compartment; i,j: position
         , PFDbott        &   ! Photon flux density (umol m-2 s-1)
-        , rho_sw         &   ! Density of seawater (g cm-3)
+        , rho_sw(1)      &   ! Density of seawater (g cm-3)
         , DIC(1)         &   ! DIC (umol kg-1)
         , DOx(1)         &   ! DO  (umol L-1)
 # if defined NUTRIENTS         
@@ -1049,7 +1087,7 @@ contains
 
       cff = 1.0d0/dz(1) * p_sgrass
 
-      dDIC_dt(1) = dDIC_dt(1) - Flux_DIC * cff/rho_sw
+      dDIC_dt(1) = dDIC_dt(1) - Flux_DIC * cff/rho_sw(1)
       dDOx_dt(1) = dDOx_dt(1) - Flux_DO  * cff
 # if defined NUTRIENTS
       dNO3_dt(1) = dNO3_dt(1) - Flux_NO3 * cff
@@ -1057,7 +1095,7 @@ contains
       dPO4_dt(1) = dPO4_dt(1) - Flux_PO4 * cff
 # endif
 # if defined CARBON_ISOTOPE
-      dDI13C_dt(1) = dDI13C_dt(1) - Flux_DI13C * cff/rho_sw
+      dDI13C_dt(1) = dDI13C_dt(1) - Flux_DI13C * cff/rho_sw(1)
 # endif
 
     END IF
@@ -1073,7 +1111,7 @@ contains
 !       input parameters
         ( ng, 1, i, j    &   ! ng: nested grid number; n: seagrass compartment; i,j: position
         , PFDbott        &   ! Photon flux density (umol m-2 s-1)
-        , rho_sw         &   ! Density of seawater (g cm-3)
+        , rho_sw(1)      &   ! Density of seawater (g cm-3)
         , DIC(1)         &   ! DIC (umol kg-1)
         , DOx(1)         &   ! DO  (umol L-1)
 # if defined NUTRIENTS         
@@ -1100,7 +1138,7 @@ contains
 
       cff = 1.0d0/dz(1) * p_algae
 
-      dDIC_dt(1) = dDIC_dt(1) - Flux_DIC * cff/rho_sw
+      dDIC_dt(1) = dDIC_dt(1) - Flux_DIC * cff/rho_sw(1)
       dDOx_dt(1) = dDOx_dt(1) - Flux_DO  * cff
 # if defined NUTRIENTS
       dNO3_dt(1) = dNO3_dt(1) - Flux_NO3 * cff
@@ -1108,7 +1146,7 @@ contains
       dPO4_dt(1) = dPO4_dt(1) - Flux_PO4 * cff
 # endif
 # if defined CARBON_ISOTOPE
-      dDI13C_dt(1) = dDI13C_dt(1) - Flux_DI13C * cff/rho_sw
+      dDI13C_dt(1) = dDI13C_dt(1) - Flux_DI13C * cff/rho_sw(1)
 # endif
 
     END IF            
@@ -1126,7 +1164,7 @@ contains
 !       input parameters
         ( ng, i, j       &   ! ng: nested grid number; i,j: position
         , PFDbott        &   ! Photon flux density (umol m-2 s-1)
-        , rho_sw         &   ! Density of seawater (g cm-3)
+        , rho_sw(1)      &   ! Density of seawater (g cm-3)
         , DIC(1)         &   ! DIC (umol kg-1)
         , TA (1)         &   ! TA (umol kg-1)
         , DOx(1)         &   ! DO (umol L-1)
@@ -1155,11 +1193,11 @@ contains
 
       cff=1.0d0 /dz(1) * p_sand
 
-      dDIC_dt(1) = dDIC_dt(1) - Flux_DIC * cff/rho_sw
-      dTA_dt (1) = dTA_dt (1) - Flux_TA  * cff/rho_sw
+      dDIC_dt(1) = dDIC_dt(1) - Flux_DIC * cff/rho_sw(1)
+      dTA_dt (1) = dTA_dt (1) - Flux_TA  * cff/rho_sw(1)
       dDOx_dt(1) = dDOx_dt(1) - Flux_DO  * cff
 #  if defined CARBON_ISOTOPE
-      dDI13C_dt(1) = dDI13C_dt(1) - Flux_DI13C * cff/rho_sw
+      dDI13C_dt(1) = dDI13C_dt(1) - Flux_DI13C * cff/rho_sw(1)
 #  endif
 #  if defined NUTRIENTS
       dNO3_dt(1) = dNO3_dt(1) - Flux_NO3 * cff
@@ -1242,15 +1280,15 @@ contains
 
       cff=0.01d0 /dz(1) * p_sand
 
-      dDIC_dt(1) = dDIC_dt(1) - Flux_DIC * cff/rho_sw
-      dTA_dt (1) = dTA_dt (1) - Flux_TA  * cff/rho_sw
+      dDIC_dt(1) = dDIC_dt(1) - Flux_DIC * cff/rho_sw(1)
+      dTA_dt (1) = dTA_dt (1) - Flux_TA  * cff/rho_sw(1)
       dDOx_dt(1) = dDOx_dt(1) - Flux_DO  * cff
 #  if defined ORGANIC_MATTER
       dDOC_dt(1,:) = dDOC_dt(1,:) - Flux_DOC(:) * cff
       dPOC_dt(1,:) = dPOC_dt(1,:) - Flux_POC(:) * cff
 #  endif
 #  if defined CARBON_ISOTOPE
-      dDI13C_dt(1) = dDI13C_dt(1) - Flux_DI13C * cff/rho_sw
+      dDI13C_dt(1) = dDI13C_dt(1) - Flux_DI13C * cff/rho_sw(1)
 #  endif
 #  if defined NUTRIENTS
       dNO3_dt(1) = dNO3_dt(1) - Flux_NO3 * cff

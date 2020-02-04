@@ -418,7 +418,7 @@ contains
 
 
 ! ********************************************************************
-! alcite saturation state
+! Calcite saturation state
 ! ********************************************************************
 
   real(8)  function Wcal_fromcCO3(cCO3, T, S) ! Calcite saturation state
@@ -1673,6 +1673,21 @@ contains
     END IF
 
   end function PHY2_Profile2
+
+!--- Phytoplankton_03 -------------------------------------
+!     developed by Shinya AMANO
+
+  real(8) function PHY3_Profile2(d)
+    implicit none
+    real(8), intent(in) :: d   ! elevation (m) = -depth  
+ 
+    IF (d.gt.-155.0d0) THEN
+      PHY3_Profile2=(-0.00095d0*(d+50.0d0)**2 + 10.5d0)/24.0d0     ! umol L-1
+    ELSE IF (d.le.-155d0) THEN
+      PHY3_Profile2=0.0d0     ! umol L-1
+    END IF
+
+  end function PHY3_Profile2
 
 
 !--- Zooplankton -------------------------------------

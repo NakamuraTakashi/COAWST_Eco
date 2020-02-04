@@ -23,10 +23,13 @@
                                         !  2: diatom
                                         !  3: coccolithophorids
       integer, parameter :: N_zoop = 1  ! Number of functional groups of zooplankton
+                                        !  1: General Zooplankton 
       integer, parameter :: N_dom  = 2  ! Number of functional groups of Dissolved organoic matter
                                         !  1: Labile DOM
                                         !  2: Refractory DOM
-      integer, parameter :: N_pom  = 1  ! Number of functional groups of Particulate organoic matter
+      integer, parameter :: N_pom  = 2  ! Number of functional groups of Particulate organoic matter
+                                        !  1: Detritus
+                                        !  2: Coarse POM (leaf litter, etc.)
       integer, parameter :: N_pim  = 1  ! Number of functional groups of Particulate inorganoic matter
                                         !  1: coccolith (CaCO3)
 #endif
@@ -255,7 +258,7 @@
         i=i+1
         iZoop(j)=ic+i
       END DO
-      DO j=1,N_zoop
+      DO j=1,N_pim
         i=i+1
         iPIC(j)=ic+i
       END DO
@@ -264,6 +267,14 @@
       i=i+1
       iT13C=ic+i  ! +1
 # if defined ORGANIC_MATTER
+      DO j=1,N_dom
+        i=i+1
+        iDO13C(j)=ic+i
+      END DO
+      DO j=1,N_pom
+        i=i+1
+        iPO13C(j)=ic+i
+      END DO
       DO j=1,N_phyt
         i=i+1
         iPhyt13C(j)=ic+i
@@ -272,7 +283,7 @@
         i=i+1
         iZoop13C(j)=ic+i
       END DO
-      DO j=1,N_pic
+      DO j=1,N_pim
         i=i+1
         iPI13C(j)=ic+i
       END DO

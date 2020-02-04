@@ -44,12 +44,13 @@
       real(r8), dimension(NBT,Ngrids) :: Rbio
 
       real(r8), dimension(100) :: Rval
+#if defined ORGANIC_MATTER
       real(r8), dimension(N_phyt,Ngrids) :: Rphyt
       real(r8), dimension(N_zoop,Ngrids) :: Rzoop
       real(r8), dimension(N_dom,Ngrids) :: Rdom
       real(r8), dimension(N_pom,Ngrids) :: Rpom
       real(r8), dimension(N_pim,Ngrids) :: Rpim
-
+#endif
       character (len=40 ) :: KeyWord
       character (len=256) :: line
       character (len=256), dimension(200) :: Cval
