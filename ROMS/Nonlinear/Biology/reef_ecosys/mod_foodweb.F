@@ -309,7 +309,7 @@ CONTAINS
     real(8), parameter :: rNH4(Nphy) = 0.3d0            ! (no dim.)  PHY NH4:Nitrogen ratio 
 #endif                                
     real(8), parameter :: rCCp(Nphy) = (/ 0.0d0, 0.0d0, 0.5d0 /)  ! ***** (no dim.) CaCO3:OrgC ratio
-#if defined CORAL_CARBON_ISOTOPE
+#if defined CARBON_ISOTOPE
 !----- for carbon isotope ------------------------
 # if defined CARBON_TRACE
     real(8), parameter :: a_phot = 1.0d0

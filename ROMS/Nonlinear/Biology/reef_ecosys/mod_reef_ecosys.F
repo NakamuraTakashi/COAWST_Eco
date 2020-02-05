@@ -945,11 +945,13 @@ contains
 #endif
 #if defined CARBON_ISOTOPE
     Flux_DI13C    = 0.0d0
+# if defined ORGANIC_MATTER
     Flux_DO13C(:) = 0.0d0
     Flux_PO13C(:) = 0.0d0
     Flux_PHY13C(:) = 0.0d0
     Flux_ZOO13C(:) = 0.0d0
     Flux_PI13C(:) = 0.0d0
+# endif
 #endif
 #if defined NUTRIENTS            
     Flux_NO3 = 0.0d0
@@ -1385,7 +1387,7 @@ contains
 # endif
         , dDIC_dt(1),',',dTA_dt(1),',',dDOx_dt(1),','                &
 # if defined ORGANIC_MATTER
-        , dDOC_dt(1),',',dPOC_dt(1),','                              &
+        , dDOC_dt(1,1),',',dPOC_dt(1,1),','                              &
 # endif
 # if defined CARBON_ISOTOPE
         , dDI13C_dt(1),','                                           &
@@ -1394,8 +1396,8 @@ contains
         , dNO3_dt(1),',',dNO2_dt(1),',',dNH4_dt(1),','               &
         , dPO4_dt(1),','                                             &
 #  if defined ORGANIC_MATTER
-        , dDON_dt(1),',',dPON_dt(1),','                              &
-        , dDOP_dt(1),',',dPOP_dt(1),','                              &
+        , dDON_dt(1,1),',',dPON_dt(1,1),','                              &
+        , dDOP_dt(1,1),',',dPOP_dt(1,1),','                              &
 #  endif
 # endif
         , sspH,',', ssfCO2,',', ssWarg,','                           &
