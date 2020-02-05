@@ -87,11 +87,13 @@ contains
 #endif
 #if defined CARBON_ISOTOPE
     , DI13C          &   ! DI13C (N): 13C of DIC (umol kg-1)
+# if defined ORGANIC_MATTER
     , DO13C          &   ! DO13C (N): 13C of Labile Dissolved organic carbon (DOC: umol L-1)
     , PO13C          &   ! PO13C (N): 13C of Particulate organic carbon (POC: umol L-1)
     , PHY13C         &   ! PHY13C(N): 13C of phytoplankton1 (umol C L-1), dinoflagellate
     , ZOO13C         &   ! ZOO13C(N): 13C of zooplankton (umol C L-1)
     , PI13C          &   ! PI13C (N): 13C of Particulate inorganic carbon (PIC: umol L-1), coccolith (CaCO3)
+# endif
 #endif
 #if defined NUTRIENTS            
     , NO3            &   ! NO3(N): NO3 (umol L-1)
@@ -133,11 +135,13 @@ contains
 #endif
 #if defined CARBON_ISOTOPE
     , dDI13C_dt      &   ! dDI13C_dt   (N): dDI13C/dt (umol kg-1 s-1)
+# if defined ORGANIC_MATTER
     , dDO13C_dt      &   ! dLDO13C_dt  (N): dLDO13C/dt  (umol L-1 s-1) 
     , dPO13C_dt      &   ! dPO13C_dt   (N): dPO13C/dt  (umol L-1 s-1) 
     , dPHY13C_dt     &   ! dPHY1_13C_dt(N): dPHY1_13C/dt  (umol L-1 s-1)  
     , dZOO13C_dt     &   ! dZOO_13C_dt (N): dZOO_13C/dt  (umol L-1 s-1)  
     , dPI13C_dt      &   ! dPI13C_dt   (N): dPI13C/dt  (umol L-1 s-1)  
+# endif
 #endif
 #if defined NUTRIENTS          
     , dNO3_dt        &   ! dNO3_dt(N): dNO3/dt (umol L-1 s-1)
@@ -256,11 +260,13 @@ contains
 #endif
 #if defined CARBON_ISOTOPE
     real(8), intent(in) :: DI13C(N)          ! 13C of DIC (umol kg-1)
+# if defined ORGANIC_MATTER
     real(8), intent(in) :: DO13C(N,Ndom)         ! 13C of Labile Dissolved organic carbon (DOC: umol L-1)
     real(8), intent(in) :: PO13C(N,Npom)          ! 13C of Particulate organic carbon (POC: umol L-1)
     real(8), intent(in) :: PHY13C(N,Nphy)       ! 13C of phytoplankton1 (umol C L-1), dinoflagellate
     real(8), intent(in) :: ZOO13C(N,Nzoo)        ! 13C of zooplankton (umol C L-1)
     real(8), intent(in) :: PI13C(N,Npim)          ! 13C of Particulate inorganic carbon (PIC: umol L-1), coccolith (CaCO3)
+# endif
 #endif
 #if defined NUTRIENTS            
     real(8), intent(in) :: NO3(N)        
@@ -302,11 +308,13 @@ contains
 #endif
 #if defined CARBON_ISOTOPE
     real(8), intent(out) :: dDI13C_dt(N)     ! dDI13C/dt (umol kg-1 s-1)
+# if defined ORGANIC_MATTER
     real(8), intent(out) :: dDO13C_dt(N,Ndom)    ! dLDO13C/dt  (umol L-1 s-1) 
     real(8), intent(out) :: dPO13C_dt(N,Npom)     ! dPO13C/dt  (umol L-1 s-1) 
     real(8), intent(out) :: dPHY13C_dt(N,Nphy)  ! dPHY1_13C/dt  (umol L-1 s-1)  
     real(8), intent(out) :: dZOO13C_dt(N,Nzoo)   ! dZOO_13C/dt  (umol L-1 s-1)  
     real(8), intent(out) :: dPI13C_dt(N,Npim)     ! dPI13C/dt  (umol L-1 s-1)  
+# endif
 #endif
 #if defined NUTRIENTS           
     real(8), intent(out) :: dNO3_dt(N)     
@@ -375,9 +383,11 @@ contains
 #endif
 #if defined CARBON_ISOTOPE
     real(8) :: Flux_DI13C
+# if defined ORGANIC_MATTER
     real(8) :: Flux_DO13C(Ndom), Flux_PO13C(Npom)
     real(8) :: Flux_PHY13C(Nphy), Flux_ZOO13C(Nzoo)  
     real(8) :: Flux_PI13C(Npim) 
+# endif
 #endif
 #if defined NUTRIENTS           
     real(8) :: Flux_NO3, Flux_NO2, Flux_NH4, Flux_PO4  
@@ -402,9 +412,11 @@ contains
 #endif
 #if defined CARBON_ISOTOPE
     real(8) :: dDI13C
+# if defined ORGANIC_MATTER
     real(8) :: dDO13C(Ndom), dPO13C(Npom)
     real(8) :: dPHY13C(Nphy), dZOO13C(Nzoo)  
     real(8) :: dPI13C(Npim) 
+# endif
 #endif
 #if defined NUTRIENTS           
     real(8) :: dNO3, dNO2, dNH4, dPO4
@@ -485,11 +497,13 @@ contains
 #endif
 #if defined CARBON_ISOTOPE
       dDI13C_dt(k) = 0.0d0
+# if defined ORGANIC_MATTER
       dDO13C_dt(k,:) = 0.0d0
       dPO13C_dt(k,:) = 0.0d0
       dPHY13C_dt(k,:) = 0.0d0
       dZOO13C_dt(k,:) = 0.0d0
       dPI13C_dt(k,:) = 0.0d0
+# endif
 #endif
 #if defined NUTRIENTS            
       dNO3_dt(k) = 0.0d0
@@ -557,7 +571,11 @@ contains
     dDOx_dt(N) = dDOx_dt(N) - ssO2flux  /dz(N)  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     dDIC_dt(N) = dDIC_dt(N) - ssCO2flux  /dz(N)   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # if defined CARBON_ISOTOPE
+#  if defined CARBON_TRACE
+    R13C=R13C_fromd13C(0.d0)
+#  else
     R13C=R13C_fromd13C(-10.d0)
+#  endif
     dDI13C_dt(N) = dDI13C_dt(N)- ssCO2flux*R13C /dz(N) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # endif
 #endif

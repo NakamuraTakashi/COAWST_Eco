@@ -395,11 +395,13 @@
 #endif
 #if defined CARBON_ISOTOPE
      &            ,t(i,j,:,nstp,iT13C)         &   ! DI13C (N): 13C of DIC (umol kg-1)
+# if defined ORGANIC_MATTER
      &            ,t(i,j,:,nstp,iDO13C(:))     &   ! DO13C (N): 13C of Labile Dissolved organic carbon (LDOC: umol L-1)
      &            ,t(i,j,:,nstp,iPO13C(:))     &   ! PO13C (N): 13C of Particulate organic carbon (POC: umol L-1)
      &            ,t(i,j,:,nstp,iPhyt13C(:))   &   ! PHY13C(N): 13C of phytoplankton1 (umol C L-1), dinoflagellate
      &            ,t(i,j,:,nstp,iZoop13C(:))   &   ! ZOO13C(N): 13C of zooplankton (umol C L-1)
      &            ,t(i,j,:,nstp,iPI13C(:))     &   ! PI13C (N): 13C of Particulate inorganic carbon (PIC: umol L-1), coccolith (CaCO3)
+# endif
 #endif
 #if defined NUTRIENTS         
      &            ,t(i,j,:,nstp,iNO3_)     &   ! NO3(N): NO3 (umol L-1)
@@ -441,11 +443,13 @@
 #endif
 #if defined CARBON_ISOTOPE
      &            ,dtrc_dt(:,iT13C)        &   ! dDI13C_dt (N): dDI13C/dt (umol kg-1 s-1)
+# if defined ORGANIC_MATTER     
      &            ,dtrc_dt(:,iDO13C(1):iDO13C(N_dom))    &   ! dDO13C_dt (N): dDO13C/dt  (umol L-1 s-1) 
      &            ,dtrc_dt(:,iPO13C(1):iPO13C(N_pom))    &   ! dPO13C_dt (N): dPO13C/dt  (umol L-1 s-1) 
      &            ,dtrc_dt(:,iPhyt13C(1):iPhyt13C(N_phyt))  &   ! dPHY13C_dt(N): dPHY13C/dt  (umol L-1 s-1)  
      &            ,dtrc_dt(:,iZoop13C(1):iZoop13C(N_zoop))  &   ! dZOO13C_dt(N): dZOO13C/dt  (umol L-1 s-1)  
      &            ,dtrc_dt(:,iPI13C(1):iPI13C(N_pim))    &   ! dPI13C_dt (N): dPI13C/dt  (umol L-1 s-1)  
+# endif
 #endif     
 #if defined NUTRIENTS      
      &            ,dtrc_dt(:,iNO3_)        &   ! dNO3_dt(N): dNO3/dt (umol L-1 s-1)

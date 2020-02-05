@@ -653,7 +653,7 @@
           DO ibt=1,NBT
             IF (maxbio(ibt,ng).gt.max_bio(ibt)) THEN
               IF (Master) print *, 'BIO trouble in DIAG ', maxbio(:,ng)
-              exit_flag=1
+!              exit_flag=1  !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: rm
             END IF
           END DO
 # endif
