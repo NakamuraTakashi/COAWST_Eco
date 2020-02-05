@@ -149,8 +149,28 @@
 
 #  endif
 #  if defined CARBON_ISOTOPE
+#   if defined CARBON_TRACE
+            BOUNDARY(ng)%t_east(j,k,iT13C)=0.0d0 ! umol kg-1  !!! R13C_fromd13C included geochem module
+#    if defined ORGANIC_MATTER
+            DO itrc=1,N_dom
+              BOUNDARY(ng)%t_east(j,k,iDO13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_pom
+              BOUNDARY(ng)%t_east(j,k,iPO13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_phyt
+              BOUNDARY(ng)%t_east(j,k,iPhyt13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_zoop
+              BOUNDARY(ng)%t_east(j,k,iZoop13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_pim
+              BOUNDARY(ng)%t_east(j,k,iPI13C(itrc)) = 0.0d0
+            END DO
+#    endif
+#   else
             BOUNDARY(ng)%t_east(j,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng) ! umol kg-1  !!! R13C_fromd13C included geochem module
-#   if defined ORGANIC_MATTER
+#    if defined ORGANIC_MATTER
             DO itrc=1,N_dom
               BOUNDARY(ng)%t_east(j,k,iDO13C(itrc)) = R13C_fromd13C( d13C_DOC_0(itrc,ng) )   &
      &                                                *BOUNDARY(ng)%t_east(j,k,iDOC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
@@ -171,6 +191,7 @@
               BOUNDARY(ng)%t_east(j,k,iPI13C(itrc)) = R13C_fromd13C( d13C_PIC_0(itrc,ng) )    &
      &                                                  *BOUNDARY(ng)%t_east(j,k,iPIC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
             END DO
+#    endif
 #   endif
 #  endif
 #  if defined NUTRIENTS
@@ -273,8 +294,29 @@
 
 #  endif
 #  if defined CARBON_ISOTOPE
-            BOUNDARY(ng)%t_west(j,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng) ! umol kg-1  !!! R13C_fromd13C included geochem module
-#   if defined ORGANIC_MATTER
+#   if defined CARBON_TRACE
+            BOUNDARY(ng)%t_west(j,k,iT13C)=0.0d0
+#    if defined ORGANIC_MATTER
+            DO itrc=1,N_dom
+              BOUNDARY(ng)%t_west(j,k,iDO13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_pom
+              BOUNDARY(ng)%t_west(j,k,iPO13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_phyt
+              BOUNDARY(ng)%t_west(j,k,iPhyt13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_zoop
+              BOUNDARY(ng)%t_west(j,k,iZoop13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_pim
+              BOUNDARY(ng)%t_west(j,k,iPI13C(itrc)) = 0.0d0
+            END DO
+#    endif
+#   else
+            BOUNDARY(ng)%t_west(j,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng)   &
+     &                                                *BOUNDARY(ng)%t_west(j,k,iTIC_) ! umol kg-1  !!! R13C_fromd13C included geochem module
+#    if defined ORGANIC_MATTER
             DO itrc=1,N_dom
               BOUNDARY(ng)%t_west(j,k,iDO13C(itrc)) = R13C_fromd13C( d13C_DOC_0(itrc,ng) )   &
      &                                                *BOUNDARY(ng)%t_west(j,k,iDOC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
@@ -295,6 +337,7 @@
               BOUNDARY(ng)%t_west(j,k,iPI13C(itrc)) = R13C_fromd13C( d13C_PIC_0(itrc,ng) )    &
      &                                                  *BOUNDARY(ng)%t_west(j,k,iPIC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
             END DO
+#    endif
 #   endif
 #  endif
 #  if defined NUTRIENTS
@@ -396,8 +439,29 @@
 
 #  endif
 #  if defined CARBON_ISOTOPE
-            BOUNDARY(ng)%t_south(i,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng) ! umol kg-1  !!! R13C_fromd13C included geochem module
-#   if defined ORGANIC_MATTER
+#   if defined CARBON_TRACE
+            BOUNDARY(ng)%t_south(i,k,iT13C)=0.0d0
+#    if defined ORGANIC_MATTER
+            DO itrc=1,N_dom
+              BOUNDARY(ng)%t_south(i,k,iDO13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_pom
+              BOUNDARY(ng)%t_south(i,k,iPO13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_phyt
+              BOUNDARY(ng)%t_south(i,k,iPhyt13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_zoop
+              BOUNDARY(ng)%t_south(i,k,iZoop13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_pim
+              BOUNDARY(ng)%t_south(i,k,iPI13C(itrc)) = 0.0d0
+            END DO
+#    endif
+#   else
+            BOUNDARY(ng)%t_south(i,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng)   &
+     &                                                *BOUNDARY(ng)%t_south(i,k,iTIC_) ! umol kg-1  !!! R13C_fromd13C included geochem module
+#    if defined ORGANIC_MATTER
             DO itrc=1,N_dom
               BOUNDARY(ng)%t_south(i,k,iDO13C(itrc)) = R13C_fromd13C( d13C_DOC_0(itrc,ng) )   &
      &                                                *BOUNDARY(ng)%t_south(i,k,iDOC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
@@ -418,6 +482,7 @@
               BOUNDARY(ng)%t_south(i,k,iPI13C(itrc)) = R13C_fromd13C( d13C_PIC_0(itrc,ng) )    &
      &                                                  *BOUNDARY(ng)%t_south(i,k,iPIC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
             END DO
+#    endif
 #   endif
 #  endif
 #  if defined NUTRIENTS
@@ -519,8 +584,29 @@
 
 #  endif
 #  if defined CARBON_ISOTOPE
-            BOUNDARY(ng)%t_north(i,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng) ! umol kg-1  !!! R13C_fromd13C included geochem module
-#   if defined ORGANIC_MATTER
+#   if defined CARBON_TRACE
+            BOUNDARY(ng)%t_north(i,k,iT13C)=0.0d0
+#    if defined ORGANIC_MATTER
+            DO itrc=1,N_dom
+              BOUNDARY(ng)%t_north(i,k,iDO13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_pom
+              BOUNDARY(ng)%t_north(i,k,iPO13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_phyt
+              BOUNDARY(ng)%t_north(i,k,iPhyt13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_zoop
+              BOUNDARY(ng)%t_north(i,k,iZoop13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_pim
+              BOUNDARY(ng)%t_north(i,k,iPI13C(itrc)) = 0.0d0
+            END DO
+#    endif
+#   else
+            BOUNDARY(ng)%t_north(i,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng)   &
+     &                                                *BOUNDARY(ng)%t_north(i,k,iTIC_) ! umol kg-1  !!! R13C_fromd13C included geochem module
+#    if defined ORGANIC_MATTER
             DO itrc=1,N_dom
               BOUNDARY(ng)%t_north(i,k,iDO13C(itrc)) = R13C_fromd13C( d13C_DOC_0(itrc,ng) )   &
      &                                                *BOUNDARY(ng)%t_north(i,k,iDOC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
@@ -541,6 +627,7 @@
               BOUNDARY(ng)%t_north(i,k,iPI13C(itrc)) = R13C_fromd13C( d13C_PIC_0(itrc,ng) )    &
      &                                                  *BOUNDARY(ng)%t_north(i,k,iPIC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
             END DO
+#    endif
 #   endif
 #  endif
 #  if defined NUTRIENTS
@@ -658,8 +745,28 @@
  
 #  endif
 #  if defined CARBON_ISOTOPE
+#   if defined CARBON_TRACE
+            BOUNDARY(ng)%t_east(j,k,iT13C)=0.0d0 ! umol kg-1  !!! R13C_fromd13C included geochem module
+#    if defined ORGANIC_MATTER
+            DO itrc=1,N_dom
+              BOUNDARY(ng)%t_east(j,k,iDO13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_pom
+              BOUNDARY(ng)%t_east(j,k,iPO13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_phyt
+              BOUNDARY(ng)%t_east(j,k,iPhyt13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_zoop
+              BOUNDARY(ng)%t_east(j,k,iZoop13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_pim
+              BOUNDARY(ng)%t_east(j,k,iPI13C(itrc)) = 0.0d0
+            END DO
+#    endif
+#   else
             BOUNDARY(ng)%t_east(j,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng) ! umol kg-1  !!! R13C_fromd13C included geochem module
-#   if defined ORGANIC_MATTER
+#    if defined ORGANIC_MATTER
             DO itrc=1,N_dom
               BOUNDARY(ng)%t_east(j,k,iDO13C(itrc)) = R13C_fromd13C( d13C_DOC_0(itrc,ng) )   &
      &                                                *BOUNDARY(ng)%t_east(j,k,iDOC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
@@ -680,6 +787,7 @@
               BOUNDARY(ng)%t_east(j,k,iPI13C(itrc)) = R13C_fromd13C( d13C_PIC_0(itrc,ng) )    &
      &                                                  *BOUNDARY(ng)%t_east(j,k,iPIC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
             END DO
+#    endif
 #   endif
 #  endif
 #  if defined NUTRIENTS
@@ -794,8 +902,29 @@
 
 #  endif
 #  if defined CARBON_ISOTOPE
-            BOUNDARY(ng)%t_west(j,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng) ! umol kg-1  !!! R13C_fromd13C included geochem module
-#   if defined ORGANIC_MATTER
+#   if defined CARBON_TRACE
+            BOUNDARY(ng)%t_west(j,k,iT13C)=0.0d0
+#    if defined ORGANIC_MATTER
+            DO itrc=1,N_dom
+              BOUNDARY(ng)%t_west(j,k,iDO13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_pom
+              BOUNDARY(ng)%t_west(j,k,iPO13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_phyt
+              BOUNDARY(ng)%t_west(j,k,iPhyt13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_zoop
+              BOUNDARY(ng)%t_west(j,k,iZoop13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_pim
+              BOUNDARY(ng)%t_west(j,k,iPI13C(itrc)) = 0.0d0
+            END DO
+#    endif
+#   else
+            BOUNDARY(ng)%t_west(j,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng)   &
+     &                                                *BOUNDARY(ng)%t_west(j,k,iTIC_) ! umol kg-1  !!! R13C_fromd13C included geochem module
+#    if defined ORGANIC_MATTER
             DO itrc=1,N_dom
               BOUNDARY(ng)%t_west(j,k,iDO13C(itrc)) = R13C_fromd13C( d13C_DOC_0(itrc,ng) )   &
      &                                                *BOUNDARY(ng)%t_west(j,k,iDOC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
@@ -816,6 +945,7 @@
               BOUNDARY(ng)%t_west(j,k,iPI13C(itrc)) = R13C_fromd13C( d13C_PIC_0(itrc,ng) )    &
      &                                                  *BOUNDARY(ng)%t_west(j,k,iPIC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
             END DO
+#    endif
 #   endif
 #  endif
 #  if defined NUTRIENTS
@@ -929,8 +1059,29 @@
  
 #  endif
 #  if defined CARBON_ISOTOPE
-            BOUNDARY(ng)%t_south(i,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng) ! umol kg-1  !!! R13C_fromd13C included geochem module
-#   if defined ORGANIC_MATTER
+#   if defined CARBON_TRACE
+            BOUNDARY(ng)%t_south(i,k,iT13C)=0.0d0
+#    if defined ORGANIC_MATTER
+            DO itrc=1,N_dom
+              BOUNDARY(ng)%t_south(i,k,iDO13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_pom
+              BOUNDARY(ng)%t_south(i,k,iPO13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_phyt
+              BOUNDARY(ng)%t_south(i,k,iPhyt13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_zoop
+              BOUNDARY(ng)%t_south(i,k,iZoop13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_pim
+              BOUNDARY(ng)%t_south(i,k,iPI13C(itrc)) = 0.0d0
+            END DO
+#    endif
+#   else
+            BOUNDARY(ng)%t_south(i,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng)   &
+     &                                                *BOUNDARY(ng)%t_south(i,k,iTIC_) ! umol kg-1  !!! R13C_fromd13C included geochem module
+#    if defined ORGANIC_MATTER
             DO itrc=1,N_dom
               BOUNDARY(ng)%t_south(i,k,iDO13C(itrc)) = R13C_fromd13C( d13C_DOC_0(itrc,ng) )   &
      &                                                *BOUNDARY(ng)%t_south(i,k,iDOC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
@@ -951,6 +1102,7 @@
               BOUNDARY(ng)%t_south(i,k,iPI13C(itrc)) = R13C_fromd13C( d13C_PIC_0(itrc,ng) )    &
      &                                                  *BOUNDARY(ng)%t_south(i,k,iPIC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
             END DO
+#    endif
 #   endif
 #  endif
 #  if defined NUTRIENTS
@@ -1064,8 +1216,29 @@
 
 #  endif
 #  if defined CARBON_ISOTOPE
-            BOUNDARY(ng)%t_north(i,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng) ! umol kg-1  !!! R13C_fromd13C included geochem module
-#   if defined ORGANIC_MATTER
+#   if defined CARBON_TRACE
+            BOUNDARY(ng)%t_north(i,k,iT13C)=0.0d0
+#    if defined ORGANIC_MATTER
+            DO itrc=1,N_dom
+              BOUNDARY(ng)%t_north(i,k,iDO13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_pom
+              BOUNDARY(ng)%t_north(i,k,iPO13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_phyt
+              BOUNDARY(ng)%t_north(i,k,iPhyt13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_zoop
+              BOUNDARY(ng)%t_north(i,k,iZoop13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_pim
+              BOUNDARY(ng)%t_north(i,k,iPI13C(itrc)) = 0.0d0
+            END DO
+#    endif
+#   else
+            BOUNDARY(ng)%t_north(i,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng)   &
+     &                                                *BOUNDARY(ng)%t_north(i,k,iTIC_) ! umol kg-1  !!! R13C_fromd13C included geochem module
+#    if defined ORGANIC_MATTER
             DO itrc=1,N_dom
               BOUNDARY(ng)%t_north(i,k,iDO13C(itrc)) = R13C_fromd13C( d13C_DOC_0(itrc,ng) )   &
      &                                                *BOUNDARY(ng)%t_north(i,k,iDOC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
@@ -1086,6 +1259,7 @@
               BOUNDARY(ng)%t_north(i,k,iPI13C(itrc)) = R13C_fromd13C( d13C_PIC_0(itrc,ng) )    &
      &                                                  *BOUNDARY(ng)%t_north(i,k,iPIC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
             END DO
+#    endif
 #   endif
 #  endif
 #  if defined NUTRIENTS
@@ -1196,8 +1370,28 @@
             END DO
 #  endif
 #  if defined CARBON_ISOTOPE
+#   if defined CARBON_TRACE
+            BOUNDARY(ng)%t_east(j,k,iT13C)=0.0d0 ! umol kg-1  !!! R13C_fromd13C included geochem module
+#    if defined ORGANIC_MATTER
+            DO itrc=1,N_dom
+              BOUNDARY(ng)%t_east(j,k,iDO13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_pom
+              BOUNDARY(ng)%t_east(j,k,iPO13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_phyt
+              BOUNDARY(ng)%t_east(j,k,iPhyt13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_zoop
+              BOUNDARY(ng)%t_east(j,k,iZoop13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_pim
+              BOUNDARY(ng)%t_east(j,k,iPI13C(itrc)) = 0.0d0
+            END DO
+#    endif
+#   else
             BOUNDARY(ng)%t_east(j,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng) ! umol kg-1  !!! R13C_fromd13C included geochem module
-#   if defined ORGANIC_MATTER
+#    if defined ORGANIC_MATTER
             DO itrc=1,N_dom
               BOUNDARY(ng)%t_east(j,k,iDO13C(itrc)) = R13C_fromd13C( d13C_DOC_0(itrc,ng) )   &
      &                                                *BOUNDARY(ng)%t_east(j,k,iDOC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
@@ -1218,6 +1412,7 @@
               BOUNDARY(ng)%t_east(j,k,iPI13C(itrc)) = R13C_fromd13C( d13C_PIC_0(itrc,ng) )    &
      &                                                  *BOUNDARY(ng)%t_east(j,k,iPIC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
             END DO
+#    endif
 #   endif
 #  endif
 #  if defined NUTRIENTS
@@ -1313,9 +1508,29 @@
             END DO
 #  endif
 #  if defined CARBON_ISOTOPE
+#   if defined CARBON_TRACE
+            BOUNDARY(ng)%t_west(j,k,iT13C)=0.0d0
+#    if defined ORGANIC_MATTER
+            DO itrc=1,N_dom
+              BOUNDARY(ng)%t_west(j,k,iDO13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_pom
+              BOUNDARY(ng)%t_west(j,k,iPO13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_phyt
+              BOUNDARY(ng)%t_west(j,k,iPhyt13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_zoop
+              BOUNDARY(ng)%t_west(j,k,iZoop13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_pim
+              BOUNDARY(ng)%t_west(j,k,iPI13C(itrc)) = 0.0d0
+            END DO
+#    endif
+#   else
             BOUNDARY(ng)%t_west(j,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng)   &
      &                                                *BOUNDARY(ng)%t_west(j,k,iTIC_) ! umol kg-1  !!! R13C_fromd13C included geochem module
-#   if defined ORGANIC_MATTER
+#    if defined ORGANIC_MATTER
             DO itrc=1,N_dom
               BOUNDARY(ng)%t_west(j,k,iDO13C(itrc)) = R13C_fromd13C( d13C_DOC_0(itrc,ng) )   &
      &                                                *BOUNDARY(ng)%t_west(j,k,iDOC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
@@ -1336,6 +1551,7 @@
               BOUNDARY(ng)%t_west(j,k,iPI13C(itrc)) = R13C_fromd13C( d13C_PIC_0(itrc,ng) )    &
      &                                                  *BOUNDARY(ng)%t_west(j,k,iPIC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
             END DO
+#    endif
 #   endif
 #  endif
 #  if defined NUTRIENTS
@@ -1430,9 +1646,29 @@
             END DO
 #  endif
 #  if defined CARBON_ISOTOPE
+#   if defined CARBON_TRACE
+            BOUNDARY(ng)%t_south(i,k,iT13C)=0.0d0
+#    if defined ORGANIC_MATTER
+            DO itrc=1,N_dom
+              BOUNDARY(ng)%t_south(i,k,iDO13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_pom
+              BOUNDARY(ng)%t_south(i,k,iPO13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_phyt
+              BOUNDARY(ng)%t_south(i,k,iPhyt13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_zoop
+              BOUNDARY(ng)%t_south(i,k,iZoop13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_pim
+              BOUNDARY(ng)%t_south(i,k,iPI13C(itrc)) = 0.0d0
+            END DO
+#    endif
+#   else
             BOUNDARY(ng)%t_south(i,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng)   &
      &                                                *BOUNDARY(ng)%t_south(i,k,iTIC_) ! umol kg-1  !!! R13C_fromd13C included geochem module
-#   if defined ORGANIC_MATTER
+#    if defined ORGANIC_MATTER
             DO itrc=1,N_dom
               BOUNDARY(ng)%t_south(i,k,iDO13C(itrc)) = R13C_fromd13C( d13C_DOC_0(itrc,ng) )   &
      &                                                *BOUNDARY(ng)%t_south(i,k,iDOC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
@@ -1453,6 +1689,7 @@
               BOUNDARY(ng)%t_south(i,k,iPI13C(itrc)) = R13C_fromd13C( d13C_PIC_0(itrc,ng) )    &
      &                                                  *BOUNDARY(ng)%t_south(i,k,iPIC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
             END DO
+#    endif
 #   endif
 #  endif
 #  if defined NUTRIENTS
@@ -1547,9 +1784,29 @@
             END DO
 #  endif
 #  if defined CARBON_ISOTOPE
+#   if defined CARBON_TRACE
+            BOUNDARY(ng)%t_north(i,k,iT13C)=0.0d0
+#    if defined ORGANIC_MATTER
+            DO itrc=1,N_dom
+              BOUNDARY(ng)%t_north(i,k,iDO13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_pom
+              BOUNDARY(ng)%t_north(i,k,iPO13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_phyt
+              BOUNDARY(ng)%t_north(i,k,iPhyt13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_zoop
+              BOUNDARY(ng)%t_north(i,k,iZoop13C(itrc)) = 0.0d0
+            END DO
+            DO itrc=1,N_pim
+              BOUNDARY(ng)%t_north(i,k,iPI13C(itrc)) = 0.0d0
+            END DO
+#    endif
+#   else
             BOUNDARY(ng)%t_north(i,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng)   &
      &                                                *BOUNDARY(ng)%t_north(i,k,iTIC_) ! umol kg-1  !!! R13C_fromd13C included geochem module
-#   if defined ORGANIC_MATTER
+#    if defined ORGANIC_MATTER
             DO itrc=1,N_dom
               BOUNDARY(ng)%t_north(i,k,iDO13C(itrc)) = R13C_fromd13C( d13C_DOC_0(itrc,ng) )   &
      &                                                *BOUNDARY(ng)%t_north(i,k,iDOC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
@@ -1570,6 +1827,7 @@
               BOUNDARY(ng)%t_north(i,k,iPI13C(itrc)) = R13C_fromd13C( d13C_PIC_0(itrc,ng) )    &
      &                                                  *BOUNDARY(ng)%t_north(i,k,iPIC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
             END DO
+#    endif
 #   endif
 #  endif
 #  if defined NUTRIENTS

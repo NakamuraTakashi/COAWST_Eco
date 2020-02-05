@@ -1789,7 +1789,7 @@
    &                    TRIM(ADJUSTL(Vinfo(5)))
                 END DO
                 varid=varid+1
-              CASE ('idRtrc(iPhyt(i)')
+              CASE ('idRtrc(iPhyt(i))')
                 load=.FALSE.
                 varid=varid-1
                 DO i=1,N_phyt
@@ -1817,6 +1817,28 @@
                 DO i=1,N_zoop
                   varid=varid+1
                   idRtrc(iZoop(i))=varid
+                  DO ng=1,Ngrids
+                    Fscale(varid,ng)=scale
+                    Iinfo(1,varid,ng)=gtype
+                  END DO
+                  WRITE (Vname(1,varid),'(a,i2.2)')                   &
+   &                    TRIM(ADJUSTL(Vinfo(1))), i
+                  WRITE (Vname(2,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(2))), ', functional group ', i
+                  WRITE (Vname(3,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(3)))
+                  WRITE (Vname(4,varid),'(a,a)')                      &
+   &                    TRIM(Vname(1,varid)), ', scalar, series'
+                  WRITE (Vname(5,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(5)))
+                END DO
+                varid=varid+1
+              CASE ('idRtrc(iPIC(i))')
+                load=.FALSE.
+                varid=varid-1
+                DO i=1,N_pim
+                  varid=varid+1
+                  idRtrc(iPIC(i))=varid
                   DO ng=1,Ngrids
                     Fscale(varid,ng)=scale
                     Iinfo(1,varid,ng)=gtype
@@ -1882,7 +1904,7 @@
    &                    TRIM(ADJUSTL(Vinfo(5)))
                 END DO
                 varid=varid+1
-              CASE ('idRtrc(iPhyt13C(i)')
+              CASE ('idRtrc(iPhyt13C(i))')
                 load=.FALSE.
                 varid=varid-1
                 DO i=1,N_phyt
@@ -1910,6 +1932,28 @@
                 DO i=1,N_zoop
                   varid=varid+1
                   idRtrc(iZoop13C(i))=varid
+                  DO ng=1,Ngrids
+                    Fscale(varid,ng)=scale
+                    Iinfo(1,varid,ng)=gtype
+                  END DO
+                  WRITE (Vname(1,varid),'(a,i2.2)')                   &
+   &                    TRIM(ADJUSTL(Vinfo(1))), i
+                  WRITE (Vname(2,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(2))), ', functional group ', i
+                  WRITE (Vname(3,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(3)))
+                  WRITE (Vname(4,varid),'(a,a)')                      &
+   &                    TRIM(Vname(1,varid)), ', scalar, series'
+                  WRITE (Vname(5,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(5)))
+                END DO
+                varid=varid+1
+              CASE ('idRtrc(iPI13C(i))')
+                load=.FALSE.
+                varid=varid-1
+                DO i=1,N_pim
+                  varid=varid+1
+                  idRtrc(iPI13C(i))=varid
                   DO ng=1,Ngrids
                     Fscale(varid,ng)=scale
                     Iinfo(1,varid,ng)=gtype

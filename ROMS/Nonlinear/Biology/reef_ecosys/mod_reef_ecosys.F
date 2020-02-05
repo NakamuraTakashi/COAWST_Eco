@@ -673,7 +673,7 @@ contains
         , dZOO(:)        &   ! dZOO/dt  (umol L-1 s-1)  
         , dPIC(:)        &   ! dPIC/dt  (umol L-1 s-1)  
 # if defined CARBON_ISOTOPE
-        , dDI13C(:)      &   ! dDI13C/dt (umol kg-1 s-1)
+        , dDI13C         &   ! dDI13C/dt (umol kg-1 s-1)
         , dDO13C(:)      &   ! dLDO13C/dt  (umol L-1 s-1) 
         , dPO13C(:)      &   ! dPO13C/dt  (umol L-1 s-1) 
         , dPHY13C(:)     &   ! dPHY1_13C/dt  (umol L-1 s-1)  
@@ -822,62 +822,74 @@ contains
         w_PM = -(rho_PIM(itrc)/rho_sw(k) - 1.0d0)*grav*D_PIM(itrc)*D_PIM(itrc)*1.0d-6/18.0d0/vis_sw
         Fw_PIC(k,itrc) = 0.5d0*(abs(w_PM)+w_PM)*PIC(k,itrc)  &
                         -0.5d0*(abs(w_PM)-w_PM)*PIC(k+1,itrc)  ! umol L-1 m s-1 = mmol m-2 s-1
+# if defined CARBON_ISOTOPE
+        Fw_PI13C(k,itrc) = 0.5d0*(abs(w_PM)+w_PM)*PI13C(k,itrc)  &
+                          -0.5d0*(abs(w_PM)-w_PM)*PI13C(k+1,itrc)  ! umol L-1 m s-1 = mmol m-2 s-1
+# endif
       END DO
     END DO
 
 !---- Bottom flux (mmol m-2 s-1) ----
 
-!    Fw_POC(0,:)=0.0d0
-!    Fw_PIC(0,:)=0.0d0
-!# if defined CARBON_ISOTOPE
-!    Fw_PO13C(0,:)=0.0d0
-!    Fw_PI13C(0,:)=0.0d0
-!# endif
-!# if defined NUTRIENTS
-!    Fw_PON(0,:)=0.0d0
-!    Fw_POP(0,:)=0.0d0
-!#  if defined NITROGEN_ISOTOPE
-!    Fw_PO15N(0,:)=0.0d0
-!#  endif
-!# endif
+# if defined SEDIMENT_ECOSYS
 
     DO itrc=1, Npom
       IF (itrc==iCPOM) then
-        w_PM = 0.001d0
+        w_PM = 0.01d0
       ELSE
         w_PM = -(rho_POM(itrc)/rho_sw(1) - 1.0d0)*grav*D_POM(itrc)*D_POM(itrc)*1.0d-6/18.0d0/vis_sw
       END IF
       Fw_POC(0,itrc) = -0.5d0*(abs(w_PM)-w_PM)*POC(1,itrc)
-# if defined CARBON_ISOTOPE
+#  if defined CARBON_ISOTOPE
       Fw_PO13C(0,itrc) = -0.5d0*(abs(w_PM)-w_PM)*PO13C(1,itrc)
-# endif
-# if defined NUTRIENTS
+#  endif
+#  if defined NUTRIENTS
       Fw_PON(0,itrc) = -0.5d0*(abs(w_PM)-w_PM)*PON(1,itrc)
       Fw_POP(0,itrc) = -0.5d0*(abs(w_PM)-w_PM)*POP(1,itrc)
-#  if defined NITROGEN_ISOTOPE
+#   if defined NITROGEN_ISOTOPE
       Fw_PO15N(0,itrc) = -0.5d0*(abs(w_PM)-w_PM)*PO15N(1,itrc)
+#   endif
 #  endif
-# endif
     END DO
 
     DO itrc=1, Npim
       w_PM = -(rho_PIM(itrc)/rho_sw(1) - 1.0d0)*grav*D_PIM(itrc)*D_PIM(itrc)*1.0d-6/18.0d0/vis_sw
       Fw_PIC(0,itrc) = -0.5d0*(abs(w_PM)-w_PM)*PIC(1,itrc)
+# if defined CARBON_ISOTOPE
+      Fw_PI13C(0,itrc) = -0.5d0*(abs(w_PM)-w_PM)*PI13C(1,itrc)
+# endif
     END DO
 
     Fdep_POC(:) = -Fw_POC(0,:)
     Fdep_PIC(:) = -Fw_PIC(0,:)
-# if defined CARBON_ISOTOPE
+#  if defined CARBON_ISOTOPE
     Fdep_PO13C(:) = -Fw_PO13C(0,:)
     Fdep_PI13C(:) = -Fw_PI13C(0,:)
-# endif
-# if defined NUTRIENTS
+#  endif
+#  if defined NUTRIENTS
     Fdep_PON(:) = -Fw_PON(0,:)
     Fdep_POP(:) = -Fw_POP(0,:)
-#  if defined NITROGEN_ISOTOPE
+#   if defined NITROGEN_ISOTOPE
     Fdep_PO15N(:) = -Fw_PO15N(0,:)
+#   endif
+#  endif
+
+# else
+    Fw_POC(0,:)=0.0d0
+    Fw_PIC(0,:)=0.0d0
+#  if defined CARBON_ISOTOPE
+    Fw_PO13C(0,:)=0.0d0
+    Fw_PI13C(0,:)=0.0d0
+#  endif
+#  if defined NUTRIENTS
+    Fw_PON(0,:)=0.0d0
+    Fw_POP(0,:)=0.0d0
+#   if defined NITROGEN_ISOTOPE
+    Fw_PO15N(0,:)=0.0d0
+#   endif
 #  endif
 # endif
+
     
 !----- Mass balance equation -----------------------------------------------------------
 
@@ -914,11 +926,11 @@ contains
     Flux_PIC(:) = 0.0d0
 #endif
 #if defined CARBON_ISOTOPE
-    Flux_DI13C(:) = 0.0d0
+    Flux_DI13C    = 0.0d0
     Flux_DO13C(:) = 0.0d0
     Flux_PO13C(:) = 0.0d0
-    Flux_PHY13(:) = 0.0d0
-    Flux_ZOO13(:) = 0.0d0
+    Flux_PHY13C(:) = 0.0d0
+    Flux_ZOO13C(:) = 0.0d0
     Flux_PI13C(:) = 0.0d0
 #endif
 #if defined NUTRIENTS            

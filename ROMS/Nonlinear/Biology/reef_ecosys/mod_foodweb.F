@@ -31,7 +31,7 @@ MODULE mod_foodweb
 
 !---- POM sinking parameters
   real(8), parameter :: rho_POM(Npom) = (/ 1.1d0, 0.99d0 /)   ! ***** POM density [g/cm3] 
-  real(8), parameter :: D_POM(Npom)   = (/ 0.1d0, 10.0d0 /)   ! ***** POM diameter [mm] 
+  real(8), parameter :: D_POM(Npom)   = (/ 1.0d-2, 10.0d0 /)   ! ***** POM diameter [mm] 
 
 !---- PIM sinking parameters
   real(8), parameter :: rho_PIM(Npim) = (/ 1.4d0 /)   ! ***** PIM density [g/cm3] 
@@ -284,11 +284,11 @@ CONTAINS
     real(8), parameter :: k_Dpop(Npom) = (/ 0.1d0/86400.0d0, 0.01d0/86400.0d0 /)    ! (s-1)          Decomposition rate of POP at 0 oC 
     real(8), parameter :: b_Dpop(Npom) = 0.0693d0           ! (degC-1)       Temperature coefficient for decomposition of POP 
 !------- Decomposition parameters (CPOM -> Detritus) --------------------
-    real(8), parameter :: k_Dcpoc2dtr = 0.001d0/86400.0d0    ! (s-1)          Decomposition rate of DOC at 0 oC (0.3d0 d-1; Kishi et al., 2001)
+    real(8), parameter :: k_Dcpoc2dtr = 1.0d-4/86400.0d0    ! (s-1)          Decomposition rate of DOC at 0 oC (0.3d0 d-1; Kishi et al., 2001)
     real(8), parameter :: b_Dcpoc2dtr = 0.0693d0           ! (degC-1)       Temperature coefficient for decomposition of DOC (Kishi et al., 2001)
-    real(8), parameter :: k_Dcpon2dtr = 0.001d0/86400.0d0    ! (s-1)          Decomposition rate of DOC at 0 oC (0.3d0 d-1; Kishi et al., 2001)
+    real(8), parameter :: k_Dcpon2dtr = 1.0d-4/86400.0d0    ! (s-1)          Decomposition rate of DOC at 0 oC (0.3d0 d-1; Kishi et al., 2001)
     real(8), parameter :: b_Dcpon2dtr = 0.0693d0           ! (degC-1)       Temperature coefficient for decomposition of DOC (Kishi et al., 2001)
-    real(8), parameter :: k_Dcpop2dtr = 0.001d0/86400.0d0    ! (s-1)          Decomposition rate of DOC at 0 oC (0.3d0 d-1; Kishi et al., 2001)
+    real(8), parameter :: k_Dcpop2dtr = 1.0d-4/86400.0d0    ! (s-1)          Decomposition rate of DOC at 0 oC (0.3d0 d-1; Kishi et al., 2001)
     real(8), parameter :: b_Dcpop2dtr = 0.0693d0           ! (degC-1)       Temperature coefficient for decomposition of DOC (Kishi et al., 2001)
 !------- Physical parameters --------------------
 #if defined NUTRIENTS
@@ -311,9 +311,15 @@ CONTAINS
     real(8), parameter :: rCCp(Nphy) = (/ 0.0d0, 0.0d0, 0.5d0 /)  ! ***** (no dim.) CaCO3:OrgC ratio
 #if defined CORAL_CARBON_ISOTOPE
 !----- for carbon isotope ------------------------
-    real(8), parameter :: a_phot = 1.0d0 !-20.0d-3 + 1.0d0 !!!!! To Be Confirmed
-    real(8), parameter :: a_calc = 1.0d0 !  2.7d-3 + 1.0d0 
-    real(8), parameter :: a_grz  = 1.0d0 !  2.7d-3 + 1.0d0 
+# if defined CARBON_TRACE
+    real(8), parameter :: a_phot = 1.0d0
+    real(8), parameter :: a_calc = 1.0d0
+    real(8), parameter :: a_grz  = 1.0d0
+# else
+    real(8), parameter :: a_phot = -20.0d-3 + 1.0d0 !!!!! To Be Confirmed
+    real(8), parameter :: a_calc =   2.7d-3 + 1.0d0 !!!!! To Be Confirmed
+    real(8), parameter :: a_grz  =   1.0d-3 + 1.0d0 !!!!! To Be Confirmed
+# endif
 #endif
 
 !------- Local variables --------------------

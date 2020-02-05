@@ -1107,12 +1107,34 @@
         END DO
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:add
 #   ifdef REEF_ECOSYS
-#    ifdef CARBON_ISOTOPE
+#    if defined CARBON_ISOTOPE && !defined CARBON_TRACE
         DO k=1,N(ng)
           DO is=1,Nsrc(ng)
             SOURCES(ng)%Tsrc(is,k,iT13C)=R13C_fromd13C(                 &
      &                                 SOURCES(ng)%Tsrc(is,k,iT13C)     &
      &                               )*SOURCES(ng)%Tsrc(is,k,iTIC_)
+#     if defined ORGANIC_MATTER
+            DO itrc=1,N_dom
+              SOURCES(ng)%Tsrc(is,k,iDO13C(itrc)) = R13C_fromd13C(      &
+     &          SOURCES(ng)%Tsrc(is,k,iDO13C(itrc)) )*SOURCES(ng)%Tsrc(is,k,iDOC(itrc)) 
+            END DO
+            DO itrc=1,N_pom
+              SOURCES(ng)%Tsrc(is,k,iPO13C(itrc)) = R13C_fromd13C(      &
+     &                   SOURCES(ng)%Tsrc(is,k,iPO13C(itrc)) )*SOURCES(ng)%Tsrc(is,k,iPOC(itrc))
+            END DO
+!            DO itrc=1,N_phyt
+!              SOURCES(ng)%Tsrc(is,k,iPhyt13C(itrc)) = R13C_fromd13C(    &
+!     &                  SOURCES(ng)%Tsrc(is,k,iPhyt13C(itrc)) )*SOURCES(ng)%Tsrc(is,k,iPhyt(itrc))
+!            END DO
+!            DO itrc=1,N_zoop
+!              SOURCES(ng)%Tsrc(is,k,iZoop13C(itrc)) = R13C_fromd13C(     &
+!     &                  SOURCES(ng)%Tsrc(is,k,iZoop13C(itrc)) )*SOURCES(ng)%Tsrc(is,k,iZoop(itrc))
+!            END DO
+            DO itrc=1,N_pim
+              SOURCES(ng)%Tsrc(is,k,iPI13C(itrc)) = R13C_fromd13C(       &
+     &                  SOURCES(ng)%Tsrc(is,k,iPI13C(itrc)) )*SOURCES(ng)%Tsrc(is,k,iPIC(itrc))
+            END DO
+#     endif
           END DO
         END DO
 #    endif

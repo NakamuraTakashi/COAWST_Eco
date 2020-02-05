@@ -203,24 +203,29 @@ CONTAINS
 #endif
 
 #if defined CORAL_CARBON_ISOTOPE
+# if defined CARBON_TRACE
+          CORAL(ng)%Q13C (n,i,j) = 0.0d0
+          CORAL(ng)%DI13Ccoe (n,i,j) = 0.0d0
+          CORAL(ng)%DI13Ccal (n,i,j) = 0.0d0
+#  if defined CORAL_NONE_CO2_EQ
+          CORAL(ng)%c13CO2aqcal(n,i,j) = 0.0d0
+          CORAL(ng)%c13CO2aqcoe(n,i,j) = 0.0d0
+#  endif
+# else
           R13C=R13C_fromd13C(-17.d0)
-!        CORAL(ng)%Q13C (n,i,j)=R13C/(1.+R13C)*CORAL(ng)%QC(n,i,j)
           CORAL(ng)%Q13C (n,i,j)=R13C*CORAL(ng)%QC(n,i,j)
-
           R13C=R13C_fromd13C(0.d0)
-!          CORAL(ng)%DI13Ccoe (n,i,j)=R13C/(1.+R13C)*CORAL(ng)%DICcoe (n,i,j)
           CORAL(ng)%DI13Ccoe (n,i,j)=R13C*CORAL(ng)%DICcoe (n,i,j)
-
           R13C=R13C_fromd13C(0.d0)
-!          CORAL(ng)%DI13Ccal (n,i,j)=R13C/(1.+R13C)*CORAL(ng)%DICcal (n,i,j)
           CORAL(ng)%DI13Ccal (n,i,j)=R13C*CORAL(ng)%DICcal (n,i,j)
 
-# if defined CORAL_NONE_CO2_EQ
+#  if defined CORAL_NONE_CO2_EQ
           R13C=R13C_fromd13C(-8.d0)
           CORAL(ng)%c13CO2aqcal(n,i,j)=R13C*CORAL(ng)%cCO2aqcal(n,i,j)
 
           R13C=R13C_fromd13C(-8.d0)
           CORAL(ng)%c13CO2aqcoe(n,i,j)=R13C*CORAL(ng)%cCO2aqcoe(n,i,j)
+#  endif
 # endif
 #endif
 #if defined CORAL_ZOOXANTHELLAE
@@ -476,10 +481,17 @@ CONTAINS
 #endif
 #if defined CORAL_CARBON_ISOTOPE
 !----- for carbon isotope ------------------------
+# if defined CARBON_TRACE
+    real(8), parameter :: a_phot = 1.0d0
+    real(8), parameter :: a_resp = 1.0d0
+    real(8), parameter :: a_calc = 1.0d0 
+    real(8), parameter :: a_co2  = 1.0d0
+# else
     real(8), parameter :: a_phot = -20.0d-3 + 1.0d0 !!!!! To Be Confirmed
     real(8), parameter :: a_resp =   0.0d-3 + 1.0d0
     real(8), parameter :: a_calc =   2.7d-3 + 1.0d0 
     real(8), parameter :: a_co2  =  -7.0d-3 + 1.0d0 !!!!! To Be Confirmed. Maybe ~-8-4.4
+# endif
 #endif
 #if ( defined CORAL_ZOOXANTHELLAE || defined CORAL_SIZE_DYNAMICS )
 !----- Coral minimum quota ------------------------

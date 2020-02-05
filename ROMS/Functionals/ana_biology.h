@@ -835,8 +835,28 @@
           END DO
 #  endif
 #  if defined CARBON_ISOTOPE
+#   if defined CARBON_TRACE
+          t(i,j,k,1,iT13C) = 0.0d0 ! umol kg-1  !!! R13C_fromd13C included geochem module
+#    if defined ORGANIC_MATTER
+          DO itrc=1,N_dom
+            t(i,j,k,1,iDO13C(itrc)) = 0.0d0
+          END DO
+          DO itrc=1,N_pom
+            t(i,j,k,1,iPO13C(itrc)) = 0.0d0
+          END DO
+          DO itrc=1,N_phyt
+            t(i,j,k,1,iPhyt13C(itrc)) = 0.0d0
+          END DO
+          DO itrc=1,N_zoop
+            t(i,j,k,1,iZoop13C(itrc)) = 0.0d0
+          END DO
+          DO itrc=1,N_pim
+            t(i,j,k,1,iPI13C(itrc)) = 0.0d0
+          END DO
+#    endif
+#   else
           t(i,j,k,1,iT13C) = R13C_fromd13C( d13C_TIC0(ng) )*t(i,j,k,1,iTIC_) ! umol kg-1  !!! R13C_fromd13C included geochem module
-#   if defined ORGANIC_MATTER
+#    if defined ORGANIC_MATTER
           DO itrc=1,N_dom
             t(i,j,k,1,iDO13C(itrc)) = R13C_fromd13C( d13C_DOC_0(itrc,ng) )*t(i,j,k,1,iDOC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
           END DO
@@ -852,6 +872,7 @@
           DO itrc=1,N_pim
             t(i,j,k,1,iPI13C(itrc)) = R13C_fromd13C( d13C_PIC_0(itrc,ng) )*t(i,j,k,1,iPIC(itrc)) ! umol L-1  !!! R13C_fromd13C included geochem module
           END DO
+#    endif
 #   endif
 #  endif
 #  if defined NUTRIENTS
