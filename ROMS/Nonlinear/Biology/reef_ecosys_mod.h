@@ -64,7 +64,7 @@
 #endif
 #if defined NUTRIENTS
       integer :: iNO3_                  ! Nitrate concentration
-      integer :: iNO2_                  ! Nitrite concentration
+!      integer :: iNO2_                  ! Nitrite concentration
       integer :: iNH4_                  ! Ammonium concentration
       integer :: iPO4_                  ! Ammonium concentration
 # if defined ORGANIC_MATTER
@@ -75,7 +75,7 @@
 # endif
 # if defined NITROGEN_ISOTOPE
       integer :: i15NO3                  ! Nitrogen isotope concentration in Nitrate 
-      integer :: i15NO2                  ! Nitrogen isotope concentration in Nitrite
+!      integer :: i15NO2                  ! Nitrogen isotope concentration in Nitrite
       integer :: i15NH4                  ! Nitrogen isotope concentration in Ammonium
 #  if defined ORGANIC_MATTER
       integer :: iDO15N(N_dom)          ! Dissolved organic 15N-concentration
@@ -186,7 +186,7 @@
 #endif
 #if defined NUTRIENTS
       real(r8), allocatable :: NO3_0(:)              ! umol/L
-      real(r8), allocatable :: NO2_0(:)              ! umol/L
+!      real(r8), allocatable :: NO2_0(:)              ! umol/L
       real(r8), allocatable :: NH4_0(:)              ! umol/L
       real(r8), allocatable :: PO4_0(:)              ! umol/L
 # if defined ORGANIC_MATTER
@@ -197,7 +197,7 @@
 # endif
 # if defined NITROGEN_ISOTOPE
      real(r8), allocatable :: d15N_NO3_0(:)          ! permil
-     real(r8), allocatable :: d15N_NO2_0(:)          ! permil
+!     real(r8), allocatable :: d15N_NO2_0(:)          ! permil
      real(r8), allocatable :: d15N_NH4_0(:)          ! permil
 #  if defined ORGANIC_MATTER
       real(r8), allocatable :: d15N_DOC_0(:,:)       ! permil
@@ -292,8 +292,8 @@
 #if defined NUTRIENTS
       i=i+1
       iNO3_=ic+i
-      i=i+1
-      iNO2_=ic+i
+!      i=i+1
+!      iNO2_=ic+i
       i=i+1
       iNH4_=ic+i
       i=i+1
@@ -319,8 +319,8 @@
 # if defined NITROGEN_ISOTOPE
       i=i+1
       i15NO3=ic+i  ! +1
-      i=i+1
-      i15NO2=ic+i  ! +1
+!      i=i+1
+!      i15NO2=ic+i  ! +1
       i=i+1
       i15NH4=ic+i  ! +1
 #  if defined ORGANIC_MATTER
@@ -569,9 +569,9 @@
       IF (.not.allocated(NO3_0)) THEN
         allocate ( NO3_0(Ngrids) )
       END IF
-      IF (.not.allocated(NO2_0)) THEN
-        allocate ( NO2_0(Ngrids) )
-      END IF
+!      IF (.not.allocated(NO2_0)) THEN
+!        allocate ( NO2_0(Ngrids) )
+!      END IF
       IF (.not.allocated(NH4_0)) THEN
         allocate ( NH4_0(Ngrids) )
       END IF
@@ -596,9 +596,9 @@
       IF (.not.allocated(d15N_NO3_0)) THEN
         allocate ( d15N_NO3_0(Ngrids) )
       END IF
-      IF (.not.allocated(d15N_NO2_0)) THEN
-        allocate ( d15N_NO2_0(Ngrids) )
-      END IF
+!      IF (.not.allocated(d15N_NO2_0)) THEN
+!        allocate ( d15N_NO2_0(Ngrids) )
+!      END IF
       IF (.not.allocated(d15N_NH4_0)) THEN
         allocate ( d15N_NH4_0(Ngrids) )
       END IF

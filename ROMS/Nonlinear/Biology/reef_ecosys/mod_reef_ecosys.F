@@ -97,7 +97,7 @@ contains
 #endif
 #if defined NUTRIENTS            
     , NO3            &   ! NO3(N): NO3 (umol L-1)
-    , NO2            &   ! NO2(N): NO2 (umol L-1)
+!    , NO2            &   ! NO2(N): NO2 (umol L-1)
     , NH4            &   ! NH4(N): NH4 (umol L-1)
     , PO4            &   ! PO4(N): PO4 (umol L-1)
 # if defined ORGANIC_MATTER
@@ -108,7 +108,7 @@ contains
 # endif
 # if defined NITROGEN_ISOTOPE
     , NO3_15N        &   ! NO3_15N(N): 15N of NO3 (umol L-1)
-    , NO2_15N        &   ! NO2_15N(N): 15N of NO2 (umol L-1)
+!    , NO2_15N        &   ! NO2_15N(N): 15N of NO2 (umol L-1)
     , NH4_15N        &   ! NH4_15N(N): 15N of NH4 (umol L-1)
 #  if defined ORGANIC_MATTER
     , DO15N          &   ! LDO15N  (N): 15N of Labile Dissolved organic nitrogen (DON: umol L-1)
@@ -145,7 +145,7 @@ contains
 #endif
 #if defined NUTRIENTS          
     , dNO3_dt        &   ! dNO3_dt(N): dNO3/dt (umol L-1 s-1)
-    , dNO2_dt        &   ! dNO2_dt(N): dNO2/dt (umol L-1 s-1)
+!    , dNO2_dt        &   ! dNO2_dt(N): dNO2/dt (umol L-1 s-1)
     , dNH4_dt        &   ! dNH4_dt(N): dNH4/dt (umol L-1 s-1)
     , dPO4_dt        &   ! dPO4_dt(N): dPO4/dt (umol L-1 s-1)
 # if defined ORGANIC_MATTER
@@ -156,7 +156,7 @@ contains
 # endif
 # if defined NITROGEN_ISOTOPE
     , dNO3_15N_dt    &   ! dNO3_15N_dt(N): dNO3_15N/dt (umol L-1 s-1)
-    , dNO2_15N_dt    &   ! dNO2_15N_dt(N): dNO2_15N/dt (umol L-1 s-1)
+!    , dNO2_15N_dt    &   ! dNO2_15N_dt(N): dNO2_15N/dt (umol L-1 s-1)
     , dNH4_15N_dt    &   ! dNH4_15N_dt(N): dNH4_15N/dt (umol L-1 s-1)
 #  if defined ORGANIC_MATTER
     , dDO15N_dt      &   ! dLDO15N_dt  (N): dLDO15N/dt  (umol L-1 s-1) 
@@ -270,7 +270,7 @@ contains
 #endif
 #if defined NUTRIENTS            
     real(8), intent(in) :: NO3(N)        
-    real(8), intent(in) :: NO2(N)        
+!    real(8), intent(in) :: NO2(N)        
     real(8), intent(in) :: NH4(N)        
     real(8), intent(in) :: PO4(N)        
 # if defined ORGANIC_MATTER
@@ -281,7 +281,7 @@ contains
 # endif
 # if defined NITROGEN_ISOTOPE
     real(8), intent(in) :: NO3_15N(N)        ! 15N of NO3 (umol L-1)
-    real(8), intent(in) :: NO2_15N(N)        ! 15N of NO2 (umol L-1)
+!    real(8), intent(in) :: NO2_15N(N)        ! 15N of NO2 (umol L-1)
     real(8), intent(in) :: NH4_15N(N)        ! 15N of NH4 (umol L-1)
 #  if defined ORGANIC_MATTER
     real(8), intent(in) :: DO15N(N,Ndom)         ! 15N of Labile Dissolved organic nitrogen (DON: umol L-1)
@@ -318,7 +318,7 @@ contains
 #endif
 #if defined NUTRIENTS           
     real(8), intent(out) :: dNO3_dt(N)     
-    real(8), intent(out) :: dNO2_dt(N)     
+!    real(8), intent(out) :: dNO2_dt(N)     
     real(8), intent(out) :: dNH4_dt(N)     
     real(8), intent(out) :: dPO4_dt(N)     
 # if defined ORGANIC_MATTER
@@ -329,7 +329,7 @@ contains
 # endif
 # if defined NITROGEN_ISOTOPE
     real(8), intent(out) :: dNO3_15N_dt(N)   ! dNO3_15N/dt (umol L-1 s-1)
-    real(8), intent(out) :: dNO2_15N_dt(N)   ! dNO2_15N/dt (umol L-1 s-1)
+!    real(8), intent(out) :: dNO2_15N_dt(N)   ! dNO2_15N/dt (umol L-1 s-1)
     real(8), intent(out) :: dNH4_15N_dt(N)   ! dNH4_15N/dt (umol L-1 s-1)
 #  if defined ORGANIC_MATTER
     real(8), intent(out) :: dDO15N_dt(N,Ndom)    ! dLDO15N/dt  (umol L-1 s-1) 
@@ -390,13 +390,13 @@ contains
 # endif
 #endif
 #if defined NUTRIENTS           
-    real(8) :: Flux_NO3, Flux_NO2, Flux_NH4, Flux_PO4  
+    real(8) :: Flux_NO3, Flux_NH4, Flux_PO4  !, Flux_NO2
 # if defined ORGANIC_MATTER
     real(8) :: Flux_DON(Ndom), Flux_PON(Npom)    
     real(8) :: Flux_DOP(Ndom), Flux_POP(Npom)    
 # endif
 # if defined NITROGEN_ISOTOPE
-    real(8) :: Flux_NO3_15N, Flux_NO2_15N, Flux_NH4_15N  
+    real(8) :: Flux_NO3_15N, Flux_NH4_15N  !, Flux_NO2_15N
 #  if defined ORGANIC_MATTER
     real(8) :: Flux_DO15N(Ndom), Flux_PO15N(Npom)
     real(8) :: Flux_PHY15N(Nphy), Flux_ZOO15N(Nzoo)  
@@ -419,13 +419,13 @@ contains
 # endif
 #endif
 #if defined NUTRIENTS           
-    real(8) :: dNO3, dNO2, dNH4, dPO4
+    real(8) :: dNO3, dNH4, dPO4 !, dNO2
 # if defined ORGANIC_MATTER
     real(8) :: dDON(Ndom), dPON(Npom)
     real(8) :: dDOP(Ndom), dPOP(Npom)
 # endif
 # if defined NITROGEN_ISOTOPE
-    real(8) :: dNO3_15N, dNO2_15N, dNH4_15N  
+    real(8) :: dNO3_15N, dNH4_15N !, dNO2_15N 
 #  if defined ORGANIC_MATTER
     real(8) :: dDO15N(Ndom), dPO15N(Npom)
     real(8) :: dPHY15N(Nphy), dZOO15N(Nzoo)  
@@ -507,7 +507,7 @@ contains
 #endif
 #if defined NUTRIENTS            
       dNO3_dt(k) = 0.0d0
-      dNO2_dt(k) = 0.0d0
+!      dNO2_dt(k) = 0.0d0
       dNH4_dt(k) = 0.0d0
       dPO4_dt(k) = 0.0d0
 # if defined ORGANIC_MATTER
@@ -518,7 +518,7 @@ contains
 # endif
 # if defined NITROGEN_ISOTOPE
       dNO3_15N_dt(k) = 0.0d0
-      dNO2_15N_dt(k) = 0.0d0
+!      dNO2_15N_dt(k) = 0.0d0
       dNH4_15N_dt(k) = 0.0d0
 #  if defined ORGANIC_MATTER
       dDO15N_dt(k,:) = 0.0d0
@@ -572,7 +572,7 @@ contains
     dDIC_dt(N) = dDIC_dt(N) - ssCO2flux  /dz(N)   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # if defined CARBON_ISOTOPE
 #  if defined CARBON_TRACE
-    R13C=R13C_fromd13C(0.d0)
+    R13C=0.d0
 #  else
     R13C=R13C_fromd13C(-10.d0)
 #  endif
@@ -660,7 +660,7 @@ contains
 # endif
 # if defined NUTRIENTS         
         , NO3(k)         &   ! NO3 (umol L-1)
-        , NO2(k)         &   ! NO2 (umol L-1)
+!        , NO2(k)         &   ! NO2 (umol L-1)
         , NH4(k)         &   ! NH4 (umol L-1)
         , PO4(k)         &   ! PO4 (umol L-1)
         , DON(k,:)       &   ! Labile Dissolved organic nitrogen (DON: umol L-1)
@@ -669,7 +669,7 @@ contains
         , POP(k,:)       &   ! Particulate organic phosporius (POP: umol L-1)
 #  if defined NITROGEN_ISOTOPE
         , NO3_15N(k)     &   ! 15N of NO3 (umol L-1)
-        , NO2_15N(k)     &   ! 15N of NO2 (umol L-1)
+!        , NO2_15N(k)     &   ! 15N of NO2 (umol L-1)
         , NH4_15N(k)     &   ! 15N of NH4 (umol L-1)
         , DO15N(k,:)     &   ! 15N of Labile Dissolved organic nitrogen (DON: umol L-1)
         , PO15N(k,:)     &   ! 15N of Particulate organic nitrogen (PON: umol L-1)
@@ -700,7 +700,7 @@ contains
 # endif
 # if defined NUTRIENTS
         , dNO3           &   ! dNO3/dt (umol L-1 s-1)
-        , dNO2           &   ! dNO2/dt (umol L-1 s-1)
+!        , dNO2           &   ! dNO2/dt (umol L-1 s-1)
         , dNH4           &   ! dNH4/dt (umol L-1 s-1)
         , dPO4           &   ! dPO4/dt (umol L-1 s-1)
         , dDON(:)        &   ! dDON/dt (umol L-1 s-1)
@@ -709,7 +709,7 @@ contains
         , dPOP(:)        &   ! dPOP/dt (umol L-1 s-1)
 #  if defined NITROGEN_ISOTOPE
         , dNO3_15N       &   ! dNO3_15N/dt (umol L-1 s-1)
-        , dNO2_15N       &   ! dNO2_15N/dt (umol L-1 s-1)
+!        , dNO2_15N       &   ! dNO2_15N/dt (umol L-1 s-1)
         , dNH4_15N       &   ! dNH4_15N/dt (umol L-1 s-1)
         , dDO15N(:)      &   ! dLDO15N/dt  (umol L-1 s-1) 
         , dPO15N(:)      &   ! dPO15N/dt  (umol L-1 s-1) 
@@ -743,7 +743,7 @@ contains
 # endif
 # if defined NUTRIENTS
       dNO3_dt(k) = dNO3_dt(k) + dNO3
-      dNO2_dt(k) = dNO2_dt(k) + dNO2
+!      dNO2_dt(k) = dNO2_dt(k) + dNO2
       dNH4_dt(k) = dNH4_dt(k) + dNH4
       dPO4_dt(k) = dPO4_dt(k) + dPO4
       dDON_dt(k,:) = dDON_dt(k,:) + dDON(:)
@@ -752,7 +752,7 @@ contains
       dPOP_dt(k,:) = dPOP_dt(k,:) + dPOP(:)
 #  if defined NITROGEN_ISOTOPE
       dNO3_15N_dt(k) = dNO3_15N_dt(k) + dNO3_15N
-      dNO2_15N_dt(k) = dNO2_15N_dt(k) + dNO2_15N
+!      dNO2_15N_dt(k) = dNO2_15N_dt(k) + dNO2_15N
       dNH4_15N_dt(k) = dNH4_15N_dt(k) + dNH4_15N
       dDO15N_dt(k,:) = dDO15N_dt(k,:) + dDO15N(:)
       dPO15N_dt(k,:) = dPO15N_dt(k,:) + dPO15N(:)
@@ -955,7 +955,7 @@ contains
 #endif
 #if defined NUTRIENTS            
     Flux_NO3 = 0.0d0
-    Flux_NO2 = 0.0d0
+!    Flux_NO2 = 0.0d0
     Flux_NH4 = 0.0d0
     Flux_PO4 = 0.0d0
 # if defined ORGANIC_MATTER
@@ -966,7 +966,7 @@ contains
 # endif
 # if defined NITROGEN_ISOTOPE
     Flux_NO3_15N = 0.0d0
-    Flux_NO2_15N = 0.0d0
+!    Flux_NO2_15N = 0.0d0
     Flux_NH4_15N = 0.0d0
 #  if defined ORGANIC_MATTER
     Flux_DO15N(:) = 0.0d0
@@ -1008,7 +1008,7 @@ contains
 # endif
 # if defined CORAL_NUTRIENTS
             , NO3(1)          &   ! NO3 (umol L-1)
-            , NO2(1)          &   ! NO2 (umol L-1)
+!            , NO2(1)          &   ! NO2 (umol L-1)
             , NH4(1)          &   ! NH4 (umol L-1)
             , PO4(1)          &   ! PO4 (umol L-1)
 # endif
@@ -1031,7 +1031,7 @@ contains
 # endif
 # if defined CORAL_NUTRIENTS
             , Flux_NO3       &   ! NO3 uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
-            , Flux_NO2       &   ! NO2 uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
+!            , Flux_NO2       &   ! NO2 uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
             , Flux_NH4       &   ! NH4 uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
             , Flux_PO4       &   ! PO4 uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
 #  if defined ORGANIC_MATTER
@@ -1066,7 +1066,7 @@ contains
 # endif
 # if defined CORAL_NUTRIENTS
         dNO3_dt(1) = dNO3_dt(1) - Flux_NO3 * cff
-        dNO2_dt(1) = dNO2_dt(1) - Flux_NO2 * cff
+!        dNO2_dt(1) = dNO2_dt(1) - Flux_NO2 * cff
         dNH4_dt(1) = dNH4_dt(1) - Flux_NH4 * cff
         dPO4_dt(1) = dPO4_dt(1) - Flux_PO4 * cff
 #  if defined ORGANIC_MATTER
@@ -1212,7 +1212,7 @@ contains
         , Flux_DO        &   ! DO  uptake rate (mmol m-2 s-1)  * direction of water column to coral is positive
 #  if defined NUTRIENTS         
         , Flux_NO3       &   ! NO3 uptake rate (mmol m-2 s-1)  * direction of water column to coral is positive
-        , Flux_NO2       &   ! NH4 uptake rate (mmol m-2 s-1)  * direction of water column to coral is positive
+!        , Flux_NO2       &   ! NH4 uptake rate (mmol m-2 s-1)  * direction of water column to coral is positive
         , Flux_PO4       &   ! PO4 uptake rate (mmol m-2 s-1)  * direction of water column to coral is positive
 #  endif
 #  if defined CARBON_ISOTOPE
@@ -1233,7 +1233,7 @@ contains
 #  endif
 #  if defined NUTRIENTS
       dNO3_dt(1) = dNO3_dt(1) - Flux_NO3 * cff
-      dNO2_dt(1) = dNO2_dt(1) - Flux_NO2 * cff
+!      dNO2_dt(1) = dNO2_dt(1) - Flux_NO2 * cff
       dNH4_dt(1) = dNH4_dt(1) - Flux_NH4 * cff
       dPO4_dt(1) = dPO4_dt(1) - Flux_PO4 * cff
 #  endif
@@ -1261,7 +1261,7 @@ contains
 #  endif
 #  if defined NUTRIENTS            
           , NO3(1)         &   ! NO3: NO3 (umol L-1)
-          , NO2(1)         &   ! NO2: NO2 (umol L-1)
+!          , NO2(1)         &   ! NO2: NO2 (umol L-1)
           , NH4(1)         &   ! NH4: NH4 (umol L-1)
           , PO4(1)         &   ! PO4: PO4 (umol L-1)
 #   if defined ORGANIC_MATTER
@@ -1295,7 +1295,7 @@ contains
 #  endif
 #  if defined NUTRIENTS
           , Flux_NO3       &   ! NO3 flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
-          , Flux_NO2       &   ! NO2 flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
+!          , Flux_NO2       &   ! NO2 flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
           , Flux_NH4       &   ! NH4 flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
           , Flux_PO4       &   ! PO4 flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
 #   if defined ORGANIC_MATTER
@@ -1324,7 +1324,7 @@ contains
 #  endif
 #  if defined NUTRIENTS
       dNO3_dt(1) = dNO3_dt(1) - Flux_NO3 * cff
-      dNO2_dt(1) = dNO2_dt(1) - Flux_NO2 * cff
+!      dNO2_dt(1) = dNO2_dt(1) - Flux_NO2 * cff
       dNH4_dt(1) = dNH4_dt(1) - Flux_NH4 * cff
       dPO4_dt(1) = dPO4_dt(1) - Flux_PO4 * cff
 #   if defined ORGANIC_MATTER
@@ -1393,7 +1393,7 @@ contains
         , dDI13C_dt(1),','                                           &
 # endif
 # if defined NUTRIENTS
-        , dNO3_dt(1),',',dNO2_dt(1),',',dNH4_dt(1),','               &
+        , dNO3_dt(1),',',dNH4_dt(1),','               &
         , dPO4_dt(1),','                                             &
 #  if defined ORGANIC_MATTER
         , dDON_dt(1,1),',',dPON_dt(1,1),','                              &

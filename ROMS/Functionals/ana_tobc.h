@@ -293,7 +293,7 @@
 #  endif
 #  if defined NUTRIENTS
             BOUNDARY(ng)%t_east(j,k,iNO3_)=NO3_0(ng)     ! umol L-1
-            BOUNDARY(ng)%t_east(j,k,iNO2_)=NO2_0(ng)     ! umol L-1
+!            BOUNDARY(ng)%t_east(j,k,iNO2_)=NO2_0(ng)     ! umol L-1
             BOUNDARY(ng)%t_east(j,k,iNH4_)=NH4_0(ng)     ! umol L-1
             BOUNDARY(ng)%t_east(j,k,iPO4_)=PO4_0(ng)     ! umol L-1
 #   if defined ORGANIC_MATTER
@@ -313,8 +313,8 @@
 #   if defined NITROGEN_ISOTOPE
             BOUNDARY(ng)%t_east(j,k,i15NO3) = R15N_fromd15N( d13C_TIC0(ng) )  &
      &                                        *BOUNDARY(ng)%t_east(j,k,iNO3_) ! umol kg-1  !!! R15N_fromd15N included geochem module
-            BOUNDARY(ng)%t_east(j,k,i15NO2) = R15N_fromd15N( d13C_TIC0(ng) )  &
-     &                                        *BOUNDARY(ng)%t_east(j,k,iNO2_) ! umol kg-1  !!! R15N_fromd15N included geochem module
+!            BOUNDARY(ng)%t_east(j,k,i15NO2) = R15N_fromd15N( d13C_TIC0(ng) )  &
+!     &                                        *BOUNDARY(ng)%t_east(j,k,iNO2_) ! umol kg-1  !!! R15N_fromd15N included geochem module
             BOUNDARY(ng)%t_east(j,k,i15NH4) = R15N_fromd15N( d13C_TIC0(ng) )  &
      &                                        *BOUNDARY(ng)%t_east(j,k,iNH4_) ! umol kg-1  !!! R15N_fromd15N included geochem module
 #    if defined ORGANIC_MATTER
@@ -411,7 +411,7 @@
 #  endif
 #  if defined NUTRIENTS
             BOUNDARY(ng)%t_west(j,k,iNO3_)=NO3_0(ng)     ! umol L-1
-            BOUNDARY(ng)%t_west(j,k,iNO2_)=NO2_0(ng)     ! umol L-1
+!            BOUNDARY(ng)%t_west(j,k,iNO2_)=NO2_0(ng)     ! umol L-1
             BOUNDARY(ng)%t_west(j,k,iNH4_)=NH4_0(ng)     ! umol L-1
             BOUNDARY(ng)%t_west(j,k,iPO4_)=PO4_0(ng)     ! umol L-1
 #   if defined ORGANIC_MATTER
@@ -431,8 +431,8 @@
 #   if defined NITROGEN_ISOTOPE
             BOUNDARY(ng)%t_west(j,k,i15NO3) = R15N_fromd15N( d13C_TIC0(ng) )  &
      &                                        *BOUNDARY(ng)%t_west(j,k,iNO3_) ! umol kg-1  !!! R15N_fromd15N included geochem module
-            BOUNDARY(ng)%t_west(j,k,i15NO2) = R15N_fromd15N( d13C_TIC0(ng) )  &
-     &                                        *BOUNDARY(ng)%t_west(j,k,iNO2_) ! umol kg-1  !!! R15N_fromd15N included geochem module
+!            BOUNDARY(ng)%t_west(j,k,i15NO2) = R15N_fromd15N( d13C_TIC0(ng) )  &
+!     &                                        *BOUNDARY(ng)%t_west(j,k,iNO2_) ! umol kg-1  !!! R15N_fromd15N included geochem module
             BOUNDARY(ng)%t_west(j,k,i15NH4) = R15N_fromd15N( d13C_TIC0(ng) )  &
      &                                        *BOUNDARY(ng)%t_west(j,k,iNH4_) ! umol kg-1  !!! R15N_fromd15N included geochem module
 #    if defined ORGANIC_MATTER
@@ -528,7 +528,7 @@
 #  endif
 #  if defined NUTRIENTS
             BOUNDARY(ng)%t_south(i,k,iNO3_)=NO3_0(ng)     ! umol L-1
-            BOUNDARY(ng)%t_south(i,k,iNO2_)=NO2_0(ng)     ! umol L-1
+!            BOUNDARY(ng)%t_south(i,k,iNO2_)=NO2_0(ng)     ! umol L-1
             BOUNDARY(ng)%t_south(i,k,iNH4_)=NH4_0(ng)     ! umol L-1
             BOUNDARY(ng)%t_south(i,k,iPO4_)=PO4_0(ng)     ! umol L-1
 #   if defined ORGANIC_MATTER
@@ -548,8 +548,8 @@
 #   if defined NITROGEN_ISOTOPE
             BOUNDARY(ng)%t_south(i,k,i15NO3) = R15N_fromd15N( d13C_TIC0(ng) )  &
      &                                        *BOUNDARY(ng)%t_south(i,k,iNO3_) ! umol kg-1  !!! R15N_fromd15N included geochem module
-            BOUNDARY(ng)%t_south(i,k,i15NO2) = R15N_fromd15N( d13C_TIC0(ng) )  &
-     &                                        *BOUNDARY(ng)%t_south(i,k,iNO2_) ! umol kg-1  !!! R15N_fromd15N included geochem module
+!            BOUNDARY(ng)%t_south(i,k,i15NO2) = R15N_fromd15N( d13C_TIC0(ng) )  &
+!     &                                        *BOUNDARY(ng)%t_south(i,k,iNO2_) ! umol kg-1  !!! R15N_fromd15N included geochem module
             BOUNDARY(ng)%t_south(i,k,i15NH4) = R15N_fromd15N( d13C_TIC0(ng) )  &
      &                                        *BOUNDARY(ng)%t_south(i,k,iNH4_) ! umol kg-1  !!! R15N_fromd15N included geochem module
 #    if defined ORGANIC_MATTER
@@ -645,7 +645,7 @@
 #  endif
 #  if defined NUTRIENTS
             BOUNDARY(ng)%t_north(i,k,iNO3_)=NO3_0(ng)     ! umol L-1
-            BOUNDARY(ng)%t_north(i,k,iNO2_)=NO2_0(ng)     ! umol L-1
+!            BOUNDARY(ng)%t_north(i,k,iNO2_)=NO2_0(ng)     ! umol L-1
             BOUNDARY(ng)%t_north(i,k,iNH4_)=NH4_0(ng)     ! umol L-1
             BOUNDARY(ng)%t_north(i,k,iPO4_)=PO4_0(ng)     ! umol L-1
 #   if defined ORGANIC_MATTER
@@ -665,8 +665,8 @@
 #   if defined NITROGEN_ISOTOPE
             BOUNDARY(ng)%t_north(i,k,i15NO3) = R15N_fromd15N( d13C_TIC0(ng) )  &
      &                                        *BOUNDARY(ng)%t_north(i,k,iNO3_) ! umol kg-1  !!! R15N_fromd15N included geochem module
-            BOUNDARY(ng)%t_north(i,k,i15NO2) = R15N_fromd15N( d13C_TIC0(ng) )  &
-     &                                        *BOUNDARY(ng)%t_north(i,k,iNO2_) ! umol kg-1  !!! R15N_fromd15N included geochem module
+!            BOUNDARY(ng)%t_north(i,k,i15NO2) = R15N_fromd15N( d13C_TIC0(ng) )  &
+!     &                                        *BOUNDARY(ng)%t_north(i,k,iNO2_) ! umol kg-1  !!! R15N_fromd15N included geochem module
             BOUNDARY(ng)%t_north(i,k,i15NH4) = R15N_fromd15N( d13C_TIC0(ng) )  &
      &                                        *BOUNDARY(ng)%t_north(i,k,iNH4_) ! umol kg-1  !!! R15N_fromd15N included geochem module
 #    if defined ORGANIC_MATTER

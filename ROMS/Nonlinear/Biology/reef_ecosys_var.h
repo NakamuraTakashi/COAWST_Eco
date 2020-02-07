@@ -268,8 +268,8 @@
 #if defined NUTRIENTS
               CASE ('idTvar(iNO3_)')
                 idTvar(iNO3_)=varid
-              CASE ('idTvar(iNO2_)')
-                idTvar(iNO2_)=varid
+!              CASE ('idTvar(iNO2_)')
+!                idTvar(iNO2_)=varid
               CASE ('idTvar(iNH4_)')
                 idTvar(iNH4_)=varid
               CASE ('idTvar(iPO4_)')
@@ -367,8 +367,8 @@
 # if defined NITROGEN_ISOTOPE
               CASE ('idTvar(i15NO3)')
                 idTvar(i15NO3)=varid
-              CASE ('idTvar(i15NO2)')
-                idTvar(i15NO2)=varid
+!              CASE ('idTvar(i15NO2)')
+!                idTvar(i15NO2)=varid
               CASE ('idTvar(i15NH4)')
                 idTvar(i15NH4)=varid
 #  if defined ORGANIC_MATTER
@@ -1329,14 +1329,14 @@
               CASE ('idTbry(inorth,iNO3_)')
                 idTbry(inorth,iNO3_)=varid
 
-              CASE ('idTbry(iwest,iNO2_)')
-                idTbry(iwest,iNO2_)=varid
-              CASE ('idTbry(ieast,iNO2_)')
-                idTbry(ieast,iNO2_)=varid
-              CASE ('idTbry(isouth,iNO2_)')
-                idTbry(isouth,iNO2_)=varid
-              CASE ('idTbry(inorth,iNO2_)')
-                idTbry(inorth,iNO2_)=varid
+!              CASE ('idTbry(iwest,iNO2_)')
+!                idTbry(iwest,iNO2_)=varid
+!              CASE ('idTbry(ieast,iNO2_)')
+!                idTbry(ieast,iNO2_)=varid
+!              CASE ('idTbry(isouth,iNO2_)')
+!                idTbry(isouth,iNO2_)=varid
+!              CASE ('idTbry(inorth,iNO2_)')
+!                idTbry(inorth,iNO2_)=varid
 
               CASE ('idTbry(iwest,iNH4_)')
                 idTbry(iwest,iNH4_)=varid
@@ -1975,8 +1975,8 @@
 #if defined NUTRIENTS
               CASE ('idRtrc(iNO3_)')
                 idRtrc(iNO3_)=varid
-              CASE ('idRtrc(iNO2_)')
-                idRtrc(iNO2_)=varid
+!              CASE ('idRtrc(iNO2_)')
+!                idRtrc(iNO2_)=varid
               CASE ('idRtrc(iNH4_)')
                 idRtrc(iNH4_)=varid
               CASE ('idRtrc(iPO4_)')

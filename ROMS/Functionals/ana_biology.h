@@ -753,7 +753,7 @@
 #  endif
 #  if defined NUTRIENTS
             t(i,j,k,1,iNO3_) = NO3_Profile( t(i,j,k,1,iTIC_) )   ! umolN L-1
-            t(i,j,k,1,iNO2_) = NO2_0(ng)  ! umolN L-1
+!            t(i,j,k,1,iNO2_) = NO2_0(ng)  ! umolN L-1
             t(i,j,k,1,iNH4_) = NH4_0(ng)  ! umolN L-1
             t(i,j,k,1,iPO4_) = PO4_Profile( t(i,j,k,1,iNO3_) )  ! umolP L-1
 
@@ -773,7 +773,7 @@
 #   endif
 #   if defined NITROGEN_ISOTOPE
             t(i,j,k,1,i15NO3) = R15N_fromd15N( d13C_TIC0(ng) )*t(i,j,k,1,iNO3_) ! umol kg-1  !!! R15N_fromd15N included geochem module
-            t(i,j,k,1,i15NO2) = R15N_fromd15N( d13C_TIC0(ng) )*t(i,j,k,1,iNO2_) ! umol kg-1  !!! R15N_fromd15N included geochem module
+!            t(i,j,k,1,i15NO2) = R15N_fromd15N( d13C_TIC0(ng) )*t(i,j,k,1,iNO2_) ! umol kg-1  !!! R15N_fromd15N included geochem module
             t(i,j,k,1,i15NH4) = R15N_fromd15N( d13C_TIC0(ng) )*t(i,j,k,1,iNH4_) ! umol kg-1  !!! R15N_fromd15N included geochem module
 #    if defined ORGANIC_MATTER
             DO itrc=1,N_dom
@@ -879,7 +879,7 @@
 !          t(i,j,k,1,iNO3_) = NO3_Profile2( z_r(i,j,k) )           &
           t(i,j,k,1,iNO3_) = NO3_Profile3( NO3_0(ng)           &
      &            , TIC_0(ng), t(i,j,k,1,iTIC_) )   ! umolN L-1
-          t(i,j,k,1,iNO2_) = NO2_0(ng)  ! umolN L-1
+!          t(i,j,k,1,iNO2_) = NO2_0(ng)  ! umolN L-1
           t(i,j,k,1,iNH4_) = NH4_0(ng)  ! umolN L-1
 !          t(i,j,k,1,iPO4_) = PO4_Profile2( z_r(i,j,k) )  ! umolP L-1
           t(i,j,k,1,iPO4_) = PO4_Profile3( PO4_0(ng)           &
@@ -901,7 +901,7 @@
 #   endif
 #   if defined NITROGEN_ISOTOPE
           t(i,j,k,1,i15NO3) = R15N_fromd15N( d13C_TIC0(ng) )*t(i,j,k,1,iNO3_) ! umol kg-1  !!! R15N_fromd15N included geochem module
-          t(i,j,k,1,i15NO2) = R15N_fromd15N( d13C_TIC0(ng) )*t(i,j,k,1,iNO2_) ! umol kg-1  !!! R15N_fromd15N included geochem module
+!          t(i,j,k,1,i15NO2) = R15N_fromd15N( d13C_TIC0(ng) )*t(i,j,k,1,iNO2_) ! umol kg-1  !!! R15N_fromd15N included geochem module
           t(i,j,k,1,i15NH4) = R15N_fromd15N( d13C_TIC0(ng) )*t(i,j,k,1,iNH4_) ! umol kg-1  !!! R15N_fromd15N included geochem module
 #    if defined ORGANIC_MATTER
           DO itrc=1,N_dom
@@ -982,7 +982,7 @@
 #  endif
 #  if defined NUTRIENTS         
           t(i,j,k,1,iNO3_) = NO3_0(ng)     ! umol L-1  !exclude
-          t(i,j,k,1,iNO2_) = NO2_0(ng)     ! umol L-1
+!          t(i,j,k,1,iNO2_) = NO2_0(ng)     ! umol L-1
           t(i,j,k,1,iNH4_) = NH4_0(ng)     ! umol L-1
           t(i,j,k,1,iPO4_) = PO4_0(ng)     ! umol L-1  !exclude
           
@@ -1002,7 +1002,7 @@
 #   endif
 #   if defined NITROGEN_ISOTOPE
           t(i,j,k,1,i15NO3) = R15N_fromd15N( d13C_TIC0(ng) )*t(i,j,k,1,iNO3_) ! umol kg-1  !!! R15N_fromd15N included geochem module
-          t(i,j,k,1,i15NO2) = R15N_fromd15N( d13C_TIC0(ng) )*t(i,j,k,1,iNO2_) ! umol kg-1  !!! R15N_fromd15N included geochem module
+!          t(i,j,k,1,i15NO2) = R15N_fromd15N( d13C_TIC0(ng) )*t(i,j,k,1,iNO2_) ! umol kg-1  !!! R15N_fromd15N included geochem module
           t(i,j,k,1,i15NH4) = R15N_fromd15N( d13C_TIC0(ng) )*t(i,j,k,1,iNH4_) ! umol kg-1  !!! R15N_fromd15N included geochem module
 #    if defined ORGANIC_MATTER
           DO itrc=1,N_dom

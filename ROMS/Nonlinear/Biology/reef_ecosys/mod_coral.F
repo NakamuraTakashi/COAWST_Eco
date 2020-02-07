@@ -36,7 +36,7 @@ MODULE mod_coral
 #if defined CORAL_NUTRIENTS
 !  Nutrients dynamics
     real(8), pointer :: NO3(:,:,:)
-    real(8), pointer :: NO2(:,:,:)
+!    real(8), pointer :: NO2(:,:,:)
     real(8), pointer :: NH4(:,:,:)
     real(8), pointer :: PO4(:,:,:)
     real(8), pointer :: QN(:,:,:)
@@ -83,7 +83,7 @@ MODULE mod_coral
     real(8), pointer :: QN(:,:,:)
     real(8), pointer :: QP(:,:,:)
     real(8), pointer :: NO3(:,:,:)
-    real(8), pointer :: NO2(:,:,:)
+!    real(8), pointer :: NO2(:,:,:)
     real(8), pointer :: NH4(:,:,:)
     real(8), pointer :: PO4(:,:,:)
 # endif
@@ -137,7 +137,7 @@ CONTAINS
 #endif
 #if defined CORAL_NUTRIENTS
     allocate( CORAL(ng)%NO3(Ncl,LBi:UBi,LBj:UBj)  )
-    allocate( CORAL(ng)%NO2(Ncl,LBi:UBi,LBj:UBj)  )
+!    allocate( CORAL(ng)%NO2(Ncl,LBi:UBi,LBj:UBj)  )
     allocate( CORAL(ng)%NH4(Ncl,LBi:UBi,LBj:UBj)  )
     allocate( CORAL(ng)%PO4(Ncl,LBi:UBi,LBj:UBj)  )
     allocate( CORAL(ng)%QN(Ncl,LBi:UBi,LBj:UBj)   )
@@ -164,7 +164,7 @@ CONTAINS
 # endif
 # if defined CORAL_NUTRIENTS
     allocate( ZOOX(ng)%NO3(Ncl,LBi:UBi,LBj:UBj)  )
-    allocate( ZOOX(ng)%NO2(Ncl,LBi:UBi,LBj:UBj)  )
+!    allocate( ZOOX(ng)%NO2(Ncl,LBi:UBi,LBj:UBj)  )
     allocate( ZOOX(ng)%NH4(Ncl,LBi:UBi,LBj:UBj)  )
     allocate( ZOOX(ng)%PO4(Ncl,LBi:UBi,LBj:UBj)  )
     allocate( ZOOX(ng)%QN(Ncl,LBi:UBi,LBj:UBj)   )
@@ -248,7 +248,7 @@ CONTAINS
 # endif
 # if defined CORAL_NUTRIENTS
           ZOOX(ng)%NO3(n,i,j) = 0.0d0  !!!!!!!!!!!!!!!!!!!!!!!!!!
-          ZOOX(ng)%NO2(n,i,j) = 0.0d0  !!!!!!!!!!!!!!!!!!!!!!!!!!
+!          ZOOX(ng)%NO2(n,i,j) = 0.0d0  !!!!!!!!!!!!!!!!!!!!!!!!!!
           ZOOX(ng)%NH4(n,i,j) = 0.0d0  !!!!!!!!!!!!!!!!!!!!!!!!!!
           ZOOX(ng)%PO4(n,i,j) = 0.0d0  !!!!!!!!!!!!!!!!!!!!!!!!!!
           ZOOX(ng)%QN(n,i,j)  = 1.1d0  ! (pmolN/cell)  calculated from C:N:P = 116:16:1
@@ -294,7 +294,7 @@ CONTAINS
 #endif
 #if defined CORAL_NUTRIENTS         
     , NO3amb         &   ! NO3 (umol L-1)
-    , NO2amb         &   ! NO2 (umol L-1)
+!    , NO2amb         &   ! NO2 (umol L-1)
     , NH4amb         &   ! NH4 (umol L-1)
     , PO4amb         &   ! PO4 (umol L-1)
 #endif
@@ -317,7 +317,7 @@ CONTAINS
 #endif
 #if defined CORAL_NUTRIENTS
     , NO3uptake      &   ! NO3 uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
-    , NO2uptake      &   ! NO2 uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
+!    , NO2uptake      &   ! NO2 uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
     , NH4uptake      &   ! NH4 uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
     , PO4uptake      &   ! PO4 uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
 # if defined ORGANIC_MATTER
@@ -354,7 +354,7 @@ CONTAINS
 #endif
 #if defined CORAL_NUTRIENTS
     real(8), intent(in) :: NO3amb   
-    real(8), intent(in) :: NO2amb   
+!    real(8), intent(in) :: NO2amb   
     real(8), intent(in) :: NH4amb   
     real(8), intent(in) :: PO4amb   
 #endif
@@ -377,7 +377,7 @@ CONTAINS
 #endif
 #if defined CORAL_NUTRIENTS
     real(8), intent(out) :: NO3uptake
-    real(8), intent(out) :: NO2uptake
+!    real(8), intent(out) :: NO2uptake
     real(8), intent(out) :: NH4uptake
     real(8), intent(out) :: PO4uptake
 # if defined ORGANIC_MATTER
@@ -829,7 +829,7 @@ CONTAINS
       , F_Nsec                     & ! Organic N excretion controled by host coral (pmol cell-1 s-1)
       , F_Psec                     & ! Organic P excretion controled by host coral (pmol cell-1 s-1)
       , NO3_trans                  & ! NO3 transport rate from host to Zooxanthellae (pmol cell-1 s-1)
-      , NO2_trans                  & ! NO2 transport rate from host to Zooxanthellae (pmol cell-1 s-1)
+!      , NO2_trans                  & ! NO2 transport rate from host to Zooxanthellae (pmol cell-1 s-1)
       , NH4_trans                  & ! NH4 transport rate from host to Zooxanthellae (pmol cell-1 s-1)
       , PO4_trans                  & ! PO4 transport rate from host to Zooxanthellae (pmol cell-1 s-1)
       , F_ONOO                     & ! Flux of peroxynitrite  (pmol cell-1 s-1)
@@ -848,7 +848,7 @@ CONTAINS
     F_Nsec = F_Nsec*ZOOX(ng)%dens(n,i,j)*1.0d-3  !=(pmol cell-1 s-1)*(cell cm-1)*1.e-3=(nmol cm-2 s-1)
     F_Psec = F_Psec*ZOOX(ng)%dens(n,i,j)*1.0d-3  !=(pmol cell-1 s-1)*(cell cm-1)*1.e-3=(nmol cm-2 s-1)
     NO3_trans=NO3_trans*ZOOX(ng)%dens(n,i,j)*1.0d-3  !=(pmol cell-1 s-1)*(cell cm-1)*1.e-3=(nmol cm-2 s-1)
-    NO2_trans=NO2_trans*ZOOX(ng)%dens(n,i,j)*1.0d-3  !=(pmol cell-1 s-1)*(cell cm-1)*1.e-3=(nmol cm-2 s-1)
+!    NO2_trans=NO2_trans*ZOOX(ng)%dens(n,i,j)*1.0d-3  !=(pmol cell-1 s-1)*(cell cm-1)*1.e-3=(nmol cm-2 s-1)
     NH4_trans=NH4_trans*ZOOX(ng)%dens(n,i,j)*1.0d-3  !=(pmol cell-1 s-1)*(cell cm-1)*1.e-3=(nmol cm-2 s-1)
     PO4_trans=PO4_trans*ZOOX(ng)%dens(n,i,j)*1.0d-3  !=(pmol cell-1 s-1)*(cell cm-1)*1.e-3=(nmol cm-2 s-1)
     F_Nwaste = F_Zmort*ZOOX(ng)%QN(n,i,j)*1.0d-3  !=(cell cm-2 s-1)*(pmol cell-1)*1.e-3=(nmol cm-2 s-1)
@@ -1532,7 +1532,7 @@ CONTAINS
     , F_Nsec       & ! Organic N excretion controled by host coral (pmol cell-1 s-1)
     , F_Psec       & ! Organic P excretion controled by host coral (pmol cell-1 s-1)
     , NO3_trans    & ! NO3 transport rate from host to Zooxanthellae (pmol cell-1 s-1)
-    , NO2_trans    & ! NO2 transport rate from host to Zooxanthellae (pmol cell-1 s-1)
+!    , NO2_trans    & ! NO2 transport rate from host to Zooxanthellae (pmol cell-1 s-1)
     , NH4_trans    & ! NH4 transport rate from host to Zooxanthellae (pmol cell-1 s-1)
     , PO4_trans    & ! PO4 transport rate from host to Zooxanthellae (pmol cell-1 s-1)
     , F_ONOO       & ! Flux of peroxynitrite  (pmol cell-1 s-1)
@@ -1558,7 +1558,7 @@ CONTAINS
 # if defined CORAL_NUTRIENTS
     real(8), intent(out) :: F_Nsec
     real(8), intent(out) :: F_Psec
-    real(8), intent(out) :: NO3_trans, NO2_trans, NH4_trans
+    real(8), intent(out) :: NO3_trans, NH4_trans  !, NO2_trans
     real(8), intent(out) :: PO4_trans
     real(8), intent(out) :: F_ONOO
 # endif
@@ -1614,25 +1614,25 @@ CONTAINS
 # if defined CORAL_NUTRIENTS
 !----- Nutrients related parameters -------------------
     real(8), parameter :: Vmax_NO3tra = 1.67d-6 ! (pmol cell-1 s-1) !!!!!!!!!!!!!!!!!!!!!!!!!!�Ă��Ƃ� 
-    real(8), parameter :: Vmax_NO2tra = 1.5d-7  ! (pmol cell-1 s-1) !!!!!!!!!!!!!!!!!!!!!!!!!!�Ă��Ƃ�
+!    real(8), parameter :: Vmax_NO2tra = 1.5d-7  ! (pmol cell-1 s-1) !!!!!!!!!!!!!!!!!!!!!!!!!!�Ă��Ƃ�
     real(8), parameter :: Vmax_NH4tra = 1.0d-5  ! (pmol cell-1 s-1) !!!!!!!!!!!!!!!!!!!!!!!!!!�Ă��Ƃ�
     real(8), parameter :: Vmax_PO4tra = 3.0d-7  ! (pmol cell-1 s-1) !!!!!!!!!!!!!!!!!!!!!!!!!!�Ă��Ƃ�
 
     real(8), parameter :: K_NO3tra = 50.d0  ! (umol kg-1)  !!!!!!!!!!!!!!!!!!!!!!!!!!�Ă��Ƃ�
-    real(8), parameter :: K_NO2tra = 10.d0  ! (umol kg-1)  !!!!!!!!!!!!!!!!!!!!!!!!!!�Ă��Ƃ�
+!    real(8), parameter :: K_NO2tra = 10.d0  ! (umol kg-1)  !!!!!!!!!!!!!!!!!!!!!!!!!!�Ă��Ƃ�
     real(8), parameter :: K_NH4tra = 300.d0 ! (umol kg-1)  !!!!!!!!!!!!!!!!!!!!!!!!!!�Ă��Ƃ�      
     real(8), parameter :: K_PO4tra = 300.d0 ! (umol kg-1)  !!!!!!!!!!!!!!!!!!!!!!!!!!�Ă��Ƃ�      
 
     real(8), parameter :: k_NH4rel = 1.0d-5  !(s-1) !!!!!!!!!!!!!!!!!!!!!!!!!!�Ă��Ƃ�
     real(8), parameter :: k_NO3rel = 1.9d-8  !(s-1) !!!!!!!!!!!!!!!!!!!!!!!!!!�Ă��Ƃ�
-    real(8), parameter :: k_NO2rel = 1.0d-5  !(s-1) !!!!!!!!!!!!!!!!!!!!!!!!!!�Ă��Ƃ�
+!    real(8), parameter :: k_NO2rel = 1.0d-5  !(s-1) !!!!!!!!!!!!!!!!!!!!!!!!!!�Ă��Ƃ�
     real(8), parameter :: k_PO4rel = 1.0d-5  !(s-1) !!!!!!!!!!!!!!!!!!!!!!!!!!�Ă��Ƃ�
 
     real(8), parameter :: Vmax_NO3red = 1.3d-6  ! (pmol cell-1 s-1) !!!!!!!!!!!!!!!!!!!!!!!!!!�Ă��Ƃ� 
-    real(8), parameter :: Vmax_NO2red = 1.3d-6  ! (pmol cell-1 s-1) !!!!!!!!!!!!!!!!!!!!!!!!!!�Ă��Ƃ�
+!    real(8), parameter :: Vmax_NO2red = 1.3d-6  ! (pmol cell-1 s-1) !!!!!!!!!!!!!!!!!!!!!!!!!!�Ă��Ƃ�
 
     real(8), parameter :: K_NO3red = 0.014d0  !(pmol cell-1)  !!!!!!!!!!!!!!!!!!!!!!!!!!�Ă��Ƃ�
-    real(8), parameter :: K_NO2red = 0.0015d0 !(pmol cell-1)  !!!!!!!!!!!!!!!!!!!!!!!!!!�Ă��Ƃ�
+!    real(8), parameter :: K_NO2red = 0.0015d0 !(pmol cell-1)  !!!!!!!!!!!!!!!!!!!!!!!!!!�Ă��Ƃ�
 
     real(8), parameter :: Vmax_Nass = 2.d-5  ! (pmol cell-1 s-1) !!!!!!!!!!!!!!!!!!!!!!!!!!�Ă��Ƃ� 
     real(8), parameter :: K_Nass = 1.d-1  !(pmol cell-1)  !!!!!!!!!!!!!!!!!!!!!!!!!!�Ă��Ƃ�
@@ -1669,7 +1669,7 @@ CONTAINS
 !    real(8) :: P_dissim       ! P dissimilation rate (pmol cell-1 s-1)
     real(8) :: P_assim        ! P assimilation rate (pmol cell-1 s-1)
     real(8) :: NO3_reduc      ! NO3 reductance rate (pmol cell-1 s-1)
-    real(8) :: NO2_reduc      ! NO2 reductance rate (pmol cell-1 s-1)
+!    real(8) :: NO2_reduc      ! NO2 reductance rate (pmol cell-1 s-1)
 # endif
                                          
 !----- Metabolic parameters -------------------
@@ -1754,14 +1754,14 @@ CONTAINS
     NO3_trans =Vmax_NO3tra*CORAL(ng)%NO3(n,i,j)/(K_NO3tra+CORAL(ng)%NO3(n,i,j)) &
                    *(1.-ZOOX(ng)%NH4(n,i,j)/0.1)                           &
               -k_NO3rel * ZOOX(ng)%NO3(n,j,i)
-    NO2_trans =Vmax_NO2tra*CORAL(ng)%NO2(n,i,j)/(K_NO2tra+CORAL(ng)%NO2(n,i,j)) &
-                   *(1.-ZOOX(ng)%NH4(n,i,j)/0.1)                           &
-              -k_NO2rel * ZOOX(ng)%NO2(n,j,i)
+!    NO2_trans =Vmax_NO2tra*CORAL(ng)%NO2(n,i,j)/(K_NO2tra+CORAL(ng)%NO2(n,i,j)) &
+!                   *(1.-ZOOX(ng)%NH4(n,i,j)/0.1)                           &
+!              -k_NO2rel * ZOOX(ng)%NO2(n,j,i)
     PO4_trans =Vmax_PO4tra*PO4(n,i,j)/(K_PO4tra+CORAL(ng)%PO4(n,i,j))
 
 !----- Nutrients reductance rate (pmol cell-1 s-1) ---------------------
     NO3_reduc = Vmax_NO3red*ZOOX(ng)%NO3(n,i,j)/(K_NO3red+ZOOX(ng)%NO3(n,i,j))
-    NO2_reduc = Vmax_NO2red*ZOOX(ng)%NO2(n,i,j)/(K_NO2red+ZOOX(ng)%NO2(n,i,j))
+!    NO2_reduc = Vmax_NO2red*ZOOX(ng)%NO2(n,i,j)/(K_NO2red+ZOOX(ng)%NO2(n,i,j))
 
 !----- Nitrogen assimilation rate (pmol cell-1 s-1) ---------------------
     N_assim = Vmax_Nass* ZOOX(ng)%NH4(n,i,j)/(K_Nass+ZOOX(ng)%NH4(n,i,j)) 
@@ -1849,18 +1849,18 @@ CONTAINS
                    )*dt
     ZOOX(ng)%NO3(n,i,j)=max(ZOOX(ng)%NO3(n,i,j),0.d0) !Error handring
 
-    ZOOX(ng)%NO2(n,i,j)=ZOOX(ng)%NO2(n,i,j)  &
-                  +(               &
-                     NO2_trans     &
-                    +NO3_reduc     &
-                    -NO2_reduc     &
-                   )*dt
-    ZOOX(ng)%NO2(n,i,j)=max(ZOOX(ng)%NO2(n,i,j),0.d0) !Error handring
+!    ZOOX(ng)%NO2(n,i,j)=ZOOX(ng)%NO2(n,i,j)  &
+!                  +(               &
+!                     NO2_trans     &
+!                    +NO3_reduc     &
+!                    -NO2_reduc     &
+!                   )*dt
+!    ZOOX(ng)%NO2(n,i,j)=max(ZOOX(ng)%NO2(n,i,j),0.d0) !Error handring
 
     ZOOX(ng)%NH4(n,i,j)=ZOOX(ng)%NH4(n,i,j)  &
                   +(               &
                      NH4_trans     &
-                    +NO2_reduc     &
+!                    +NO2_reduc     &
                     -N_assim       &
                     +N_dissim      &
                    )*dt
@@ -1952,10 +1952,10 @@ CONTAINS
 #  if defined CORAL_NUTRIENTS
        ,ZOOX(ng)%QN(n,i,j),',',ZOOX(ng)%QP(n,i,j),','      &
        ,N_repro,',',P_repro,','                            &
-       ,ZOOX(ng)%NO3(n,i,j),',',ZOOX(ng)%NO2(n,i,j),','    &
+       ,ZOOX(ng)%NO3(n,i,j),','    &
        ,ZOOX(ng)%NH4(n,i,j),',',F_ONOO,','                 &
-       ,NO3_trans,',',NO2_trans,',',NH4_trans,','          &
-       ,NO3_reduc,',',NO2_reduc,','                        &
+       ,NO3_trans,',',NH4_trans,','          &
+       ,NO3_reduc,','                       &
        ,N_assim,',',N_dissim,','                           &
        ,ZOOX(ng)%PO4(n,i,j),',',PO4_trans,',',P_assim,','  &
 #  endif

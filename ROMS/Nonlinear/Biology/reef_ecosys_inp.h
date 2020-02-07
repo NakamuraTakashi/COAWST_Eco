@@ -176,8 +176,8 @@
 #if defined NUTRIENTS
             CASE ('NO3_0')
               Npts=load_r(Nval, Rval, Ngrids, NO3_0)
-            CASE ('NO2_0')
-              Npts=load_r(Nval, Rval, Ngrids, NO2_0)
+!            CASE ('NO2_0')
+!              Npts=load_r(Nval, Rval, Ngrids, NO2_0)
             CASE ('NH4_0')
               Npts=load_r(Nval, Rval, Ngrids, NH4_0)
             CASE ('PO4_0')
@@ -215,8 +215,8 @@
 # if defined NITROGEN_ISOTOPE
             CASE ('d15N_NO3_0')
               Npts=load_r(Nval, Rval, Ngrids, d15N_NO3_0)
-            CASE ('d15N_NO2_0')
-              Npts=load_r(Nval, Rval, Ngrids, d15N_NO2_0)
+!            CASE ('d15N_NO2_0')
+!              Npts=load_r(Nval, Rval, Ngrids, d15N_NO2_0)
             CASE ('d15N_NH4_0')
               Npts=load_r(Nval, Rval, Ngrids, d15N_NH4_0)
 #  if defined ORGANIC_MATTER
@@ -630,8 +630,8 @@
 #if defined NUTRIENTS
             WRITE (out,80) NO3_0(ng), 'NO3_0',                          &
      &            'NO3 (umol/L).'
-            WRITE (out,80) NO2_0(ng), 'NO2_0',                          &
-     &            'NO2 (umol/L).'
+!            WRITE (out,80) NO2_0(ng), 'NO2_0',                          &
+!     &            'NO2 (umol/L).'
             WRITE (out,80) NH4_0(ng), 'NH4_0',                          &
      &            'NH4 (umol/L).'
             WRITE (out,80) PO4_0(ng), 'PO4_0',                          &
@@ -657,8 +657,8 @@
 # if defined NITROGEN_ISOTOPE
             WRITE (out,80) d15N_NO3_0(ng), 'd15N_NO3_0',                      &
      &            'd15N of NO3 (permil).'
-            WRITE (out,80) d15N_NO2_0(ng), 'd15N_NO2_0',                      &
-     &            'd15N of NO2 (permil).'
+!            WRITE (out,80) d15N_NO2_0(ng), 'd15N_NO2_0',                      &
+!     &            'd15N of NO2 (permil).'
             WRITE (out,80) d15N_NH4_0(ng), 'd15N_NH4_0',                      &
      &            'd15N of NH4 (permil).'
 #  if defined ORGANIC_MATTER

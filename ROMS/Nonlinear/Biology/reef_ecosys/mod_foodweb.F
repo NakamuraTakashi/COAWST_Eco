@@ -69,7 +69,7 @@ CONTAINS
 #endif
 #if defined NUTRIENTS         
     , NO3            &   ! NO3 (umol L-1)
-    , NO2            &   ! NO2 (umol L-1)
+!    , NO2            &   ! NO2 (umol L-1)
     , NH4            &   ! NH4 (umol L-1)
     , PO4            &   ! PO4 (umol L-1)
     , DON            &   ! Dissolved organic nitrogen (DON: umol L-1)
@@ -78,7 +78,7 @@ CONTAINS
     , POP            &   ! Particulate organic phosporius (POP: umol L-1)
 # if defined NITROGEN_ISOTOPE
     , NO3_15N        &   ! 15N of NO3 (umol L-1)
-    , NO2_15N        &   ! 15N of NO2 (umol L-1)
+!    , NO2_15N        &   ! 15N of NO2 (umol L-1)
     , NH4_15N        &   ! 15N of NH4 (umol L-1)
     , DO15N          &   ! 15N of Labile Dissolved organic nitrogen (DON: umol L-1)
     , PO15N          &   ! 15N of Particulate organic nitrogen (PON: umol L-1)
@@ -109,7 +109,7 @@ CONTAINS
 #endif
 #if defined NUTRIENTS
     , dNO3_dt        &   ! dNO3/dt (umol L-1 s-1)
-    , dNO2_dt        &   ! dNO2/dt (umol L-1 s-1)
+!    , dNO2_dt        &   ! dNO2/dt (umol L-1 s-1)
     , dNH4_dt        &   ! dNH4/dt (umol L-1 s-1)
     , dPO4_dt        &   ! dPO4/dt (umol L-1 s-1)
     , dDON_dt        &   ! dDON/dt (umol L-1 s-1)
@@ -118,7 +118,7 @@ CONTAINS
     , dPOP_dt        &   ! dPOP/dt (umol L-1 s-1)
 # if defined NITROGEN_ISOTOPE
     , dNO3_15N_dt    &   ! dNO3_15N/dt (umol L-1 s-1)
-    , dNO2_15N_dt    &   ! dNO2_15N/dt (umol L-1 s-1)
+!    , dNO2_15N_dt    &   ! dNO2_15N/dt (umol L-1 s-1)
     , dNH4_15N_dt    &   ! dNH4_15N/dt (umol L-1 s-1)
     , dDO15N_dt      &   ! dDO15N/dt  (umol L-1 s-1) 
     , dPO15N_dt      &   ! dPO15N/dt  (umol L-1 s-1) 
@@ -163,7 +163,7 @@ CONTAINS
 #endif
 #if defined NUTRIENTS         
     real(8), intent(in) :: NO3            ! NO3 (umol L-1)
-    real(8), intent(in) :: NO2            ! NO2 (umol L-1)
+!    real(8), intent(in) :: NO2            ! NO2 (umol L-1)
     real(8), intent(in) :: NH4            ! NH4 (umol L-1)
     real(8), intent(in) :: PO4            ! PO4 (umol L-1)
     real(8), intent(in) :: DON(Ndom)           ! Labile Dissolved organic nitrogen (DON: umol L-1)
@@ -172,7 +172,7 @@ CONTAINS
     real(8), intent(in) :: POP(Npom)            ! Particulate organic phosporius (POP: umol L-1)
 # if defined NITROGEN_ISOTOPE
     real(8), intent(in) :: NO3_15N        ! 15N of NO3 (umol L-1)
-    real(8), intent(in) :: NO2_15N        ! 15N of NO2 (umol L-1)
+!    real(8), intent(in) :: NO2_15N        ! 15N of NO2 (umol L-1)
     real(8), intent(in) :: NH4_15N        ! 15N of NH4 (umol L-1)
     real(8), intent(in) :: DO15N(Ndom)         ! 15N of Labile Dissolved organic nitrogen (DON: umol L-1)
     real(8), intent(in) :: PO15N(Npom)          ! 15N of Particulate organic nitrogen (PON: umol L-1)
@@ -203,7 +203,7 @@ CONTAINS
 #endif
 #if defined NUTRIENTS
     real(8), intent(out) :: dNO3_dt       ! dNO3/dt (umol L-1 s-1)
-    real(8), intent(out) :: dNO2_dt       ! dNO2/dt (umol L-1 s-1)
+!    real(8), intent(out) :: dNO2_dt       ! dNO2/dt (umol L-1 s-1)
     real(8), intent(out) :: dNH4_dt       ! dNH4/dt (umol L-1 s-1)
     real(8), intent(out) :: dPO4_dt       ! dPO4/dt (umol L-1 s-1)
     real(8), intent(out) :: dDON_dt(Ndom)      ! dDON/dt (umol L-1 s-1)
@@ -212,7 +212,7 @@ CONTAINS
     real(8), intent(out) :: dPOP_dt(Npom)       ! dPOP/dt (umol L-1 s-1)
 # if defined NITROGEN_ISOTOPE
     real(8), intent(out) :: dNO3_15N_dt   ! dNO3_15N/dt (umol L-1 s-1)
-    real(8), intent(out) :: dNO2_15N_dt   ! dNO2_15N/dt (umol L-1 s-1)
+!    real(8), intent(out) :: dNO2_15N_dt   ! dNO2_15N/dt (umol L-1 s-1)
     real(8), intent(out) :: dNH4_15N_dt   ! dNH4_15N/dt (umol L-1 s-1)
     real(8), intent(out) :: dDO15N_dt(Ndom)    ! dDO15N/dt  (umol L-1 s-1) 
     real(8), intent(out) :: dPO15N_dt(Npom)     ! dPO15N/dt  (umol L-1 s-1) 
@@ -264,12 +264,12 @@ CONTAINS
     real(8), parameter :: lam(Nzoo) = 0.211d0                 ! ((umol C L-1)-1)       zooplankton Ivlev constant for PHY1 (1.4L/umolN.0.211; Kishi et al., 2007)
     real(8), parameter :: t_Gp2z(Nphy,Nzoo) = 0.265d0          ! (umol C L-1)       PHY1 threshold value for grazing by ZOO (0.04umolN/L0.265; Kishi et al., 2007)
 !------- Microbial loop parameters  -------
-    real(8), parameter :: k_Gdoc2z(Ndom,Nzoo) = 0.0d0          ! (s-1)          Maximum grazing rate of DOC by ZOO at 0 oC (0.3d0 d-1; Kawamiya et al., 1995)
-    real(8), parameter :: b_Gdoc2z(Ndom,Nzoo) = 0.0d0          ! (degC-1)       Temperature coefficient of DOC grazing by ZOO (Kawamiya et al., 1995)
-    real(8), parameter :: k_Gpoc2z(Ndom,Nzoo) = 0.0d0          ! (s-1)          Maximum grazing rate of POC by ZOO at 0 oC (0.3d0 d-1; Kawamiya et al., 1995)
-    real(8), parameter :: b_Gpoc2z(Ndom,Nzoo) = 0.0d0          ! (degC-1)       Temperature coefficient of DOC grazing by ZOO (Kawamiya et al., 1995)
+    real(8), parameter :: k_Gdoc2z(Ndom,Nzoo) = 0.1d0/86400.0d0   ! (s-1)          Maximum grazing rate of DOC by ZOO at 0 oC (0.3d0 d-1; Kawamiya et al., 1995)
+    real(8), parameter :: b_Gdoc2z(Ndom,Nzoo) = 0.0693d0          ! (degC-1)       Temperature coefficient of DOC grazing by ZOO (Kawamiya et al., 1995)
+    real(8), parameter :: k_Gpoc2z(Ndom,Nzoo) = 0.10d0/86400.0d0 ! (s-1)          Maximum grazing rate of POC by ZOO at 0 oC (0.3d0 d-1; Kawamiya et al., 1995)
+    real(8), parameter :: b_Gpoc2z(Ndom,Nzoo) = 0.0693d0  ! (degC-1)       Temperature coefficient of DOC grazing by ZOO (Kawamiya et al., 1995)
     real(8), parameter :: e_Gdoc2z(Ndom,Nzoo) = 0.010d0  
-    real(8), parameter :: e_Gpoc2z(Npom,Nzoo) = 0.010d0           ! (no dim.)      Assimilation efficiency of ZOO (0.7:Kawamiya et al., 1995)
+    real(8), parameter :: e_Gpoc2z(Npom,Nzoo) = 0.10d0           ! (no dim.)      Assimilation efficiency of ZOO (0.7:Kawamiya et al., 1995)
 !------- Decomposition parameters --------------------
     real(8), parameter :: k_Ddoc(Ndom) = (/ 0.3d0/86400.0d0, 0.003d0/86400.0d0 /)    ! (s-1)          Decomposition rate of DOC at 0 oC (0.3d0 d-1; Kishi et al., 2001)
     real(8), parameter :: b_Ddoc(Ndom) = 0.0693d0           ! (degC-1)       Temperature coefficient for decomposition of DOC (Kishi et al., 2001)
@@ -387,7 +387,7 @@ CONTAINS
 #endif
 #if defined NUTRIENTS
     dNO3_dt = 0.0d0
-    dNO2_dt = 0.0d0
+!    dNO2_dt = 0.0d0
     dNH4_dt = 0.0d0
     dPO4_dt = 0.0d0
     dDON_dt(:) = 0.0d0
@@ -396,7 +396,7 @@ CONTAINS
     dPOP_dt(:) = 0.0d0
 # if defined NITROGEN_ISOTOPE
     dNO3_15N_dt = 0.0d0
-    dNO2_15N_dt = 0.0d0
+!    dNO2_15N_dt = 0.0d0
     dNH4_15N_dt = 0.0d0
     dDO15N_dt(:)  = 0.0d0
     dPO15N_dt(:)  = 0.0d0
@@ -471,7 +471,7 @@ CONTAINS
 #endif
 #if defined NUTRIENTS
       dNO3_dt = dNO3_dt + Ap(k)*Vp_NO3(k)*(Vp_NH4(k)+Vp_NO3(k))/rCNp(k)
-      dNO2_dt = dNO2_dt + 0.0d0  !!!!!!**************
+!      dNO2_dt = dNO2_dt + 0.0d0  !!!!!!**************
       dNH4_dt = dNH4_dt + Ap(k)*Vp_NH4(k)*(Vp_NH4(k)+Vp_NO3(k))/rCNp(k)
       dPO4_dt = dPO4_dt + Ap(k)/rCPp(k)
 
@@ -534,7 +534,7 @@ CONTAINS
       dPIC_dt(iCaCO3) = dPIC_dt(iCaCO3) + Mp(k)*rCCp(k)
 #if defined CARBON_ISOTOPE
       dPHY13C_dt(k) = dPHY13C_dt(k) - Mp(k)*rPHY13C(k)
-      dPOC_dt(iDtr) = dPOC_dt(iDtr) + Mp(k)*rPHY13C(k)
+      dPO13C_dt(iDtr) = dPO13C_dt(iDtr) + Mp(k)*rPHY13C(k)
       dPI13C_dt = dPI13C_dt + Mp(k)*rCCp(k)*a_calc/a_phot*rPHY13C(k)  !!!!!!********** Need check
 #endif
 #if defined NUTRIENTS
@@ -563,8 +563,8 @@ CONTAINS
         dPOC_dt(iDtr) = dPOC_dt(iDtr) + Gp2z(m,k)*(1.0d0-e_Gp2z(m,k))
 #if defined CARBON_ISOTOPE
         dPHY13C_dt(m) = dPHY13C_dt(m) - Gp2z(m,k)*rPHY13C(m)
-        dZOO13C_dt(k) = dZOO_dt(k) + Gp2z(m,k)*e_Gp2z(m,k)*a_grz*rPHY13C(m)
-        dPOC_dt(iDtr) = dPOC_dt(iDtr) + Gp2z(m,k)*(1.0d0-e_Gp2z(m,k)*a_grz)*rPHY13C(m)  !!!!****Need check
+        dZOO13C_dt(k) = dZOO13C_dt(k) + Gp2z(m,k)*e_Gp2z(m,k)*a_grz*rPHY13C(m)
+        dPO13C_dt(iDtr) = dPO13C_dt(iDtr) + Gp2z(m,k)*(1.0d0-e_Gp2z(m,k)*a_grz)*rPHY13C(m)  !!!!****Need check
 #endif
 #if defined NUTRIENTS
         dPON_dt(iDtr) = dPON_dt(iDtr) + Gp2z(m,k)*(1.0d0-e_Gp2z(m,k))/rCNz(k)

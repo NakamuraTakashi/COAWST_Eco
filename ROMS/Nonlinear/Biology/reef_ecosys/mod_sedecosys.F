@@ -257,7 +257,7 @@ MODULE mod_sedecosys
 # if defined NUTRIENTS
 !  Nutrients dynamics
     real(8), pointer :: NO3(:,:,:)
-    real(8), pointer :: NO2(:,:,:)
+!    real(8), pointer :: NO2(:,:,:)
     real(8), pointer :: NH4(:,:,:)
     real(8), pointer :: PO4(:,:,:)
 #  if defined ORGANIC_MATTER
@@ -315,7 +315,7 @@ CONTAINS
 
 # if defined NUTRIENTS
     allocate( SEDECO(ng)%NO3(LBi:UBi,LBj:UBj,Nsed) )
-    allocate( SEDECO(ng)%NO2(LBi:UBi,LBj:UBj,Nsed) )
+!    allocate( SEDECO(ng)%NO2(LBi:UBi,LBj:UBj,Nsed) )
     allocate( SEDECO(ng)%NH4(LBi:UBi,LBj:UBj,Nsed) )
     allocate( SEDECO(ng)%PO4(LBi:UBi,LBj:UBj,Nsed) )
 #  if defined ORGANIC_MATTER
@@ -360,7 +360,7 @@ CONTAINS
 
 # if defined NUTRIENTS
           SEDECO(ng)%NO3(i,j,k) = 0.5d0   !NO3  (umol L-1) 
-          SEDECO(ng)%NO2(i,j,k) = 0.02d0  !NO2  (umol L-1) 
+!          SEDECO(ng)%NO2(i,j,k) = 0.02d0  !NO2  (umol L-1) 
           SEDECO(ng)%NH4(i,j,k) = 0.5d0   !NH4  (umol L-1) 
           SEDECO(ng)%PO4(i,j,k) = 0.03d0  !PO4  (umol L-1) 
 #  if defined ORGANIC_MATTER                 
@@ -402,7 +402,7 @@ CONTAINS
 # endif
 # if defined NUTRIENTS
     , NO3amb         &   ! NO3: NO3 (umol L-1)
-    , NO2amb         &   ! NO2: NO2 (umol L-1)
+!    , NO2amb         &   ! NO2: NO2 (umol L-1)
     , NH4amb         &   ! NH4: NH4 (umol L-1)
     , PO4amb         &   ! PO4: PO4 (umol L-1)
 #  if defined ORGANIC_MATTER
@@ -436,7 +436,7 @@ CONTAINS
 # endif
 # if defined NUTRIENTS
     , Flux_NO3       &   ! NO3 flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
-    , Flux_NO2       &   ! NO2 flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
+!    , Flux_NO2       &   ! NO2 flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
     , Flux_NH4       &   ! NH4 flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
     , Flux_PO4       &   ! PO4 flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
 #  if defined ORGANIC_MATTER
@@ -497,7 +497,7 @@ CONTAINS
 # endif
 # if defined NUTRIENTS
     real(8), intent(in) :: NO3amb   
-    real(8), intent(in) :: NO2amb   
+!    real(8), intent(in) :: NO2amb   
     real(8), intent(in) :: NH4amb   
     real(8), intent(in) :: PO4amb   
 #  if defined ORGANIC_MATTER
@@ -531,7 +531,7 @@ CONTAINS
 # endif
 # if defined NUTRIENTS
     real(8), intent(out) :: Flux_NO3
-    real(8), intent(out) :: Flux_NO2
+!    real(8), intent(out) :: Flux_NO2
     real(8), intent(out) :: Flux_NH4
     real(8), intent(out) :: Flux_PO4
 #  if defined ORGANIC_MATTER
@@ -573,14 +573,18 @@ CONTAINS
     real(8), parameter :: Kp2d_POC = 10.0d0     !(umol L-1)  !!!�Ă��Ƃ�
 # if defined NUTRIENTS
 !---- Nitrification --------------------------
-!    NH4+ + (3/2)O2 -> NO2- + 2H2O + 2H+
-    real(8), parameter :: Nit1_max =  10.0d0 !!!10.0d0  !(nmol cm-3 s-1)  !!!�Ă��Ƃ�
-    real(8), parameter :: Kn1_NH4 =  250.0d0   !(umol L-1)  !!!�Ă��Ƃ�
-    real(8), parameter :: Kn1_DO =  5.0d0   !(umol L-1)  !!!�Ă��Ƃ�
-!    NO2- + (1/2)O2 -> NO3-
-    real(8), parameter :: Nit2_max =  10.0d0 !!!10.0d0  !(nmol cm-3 s-1)  !!!�Ă��Ƃ�
-    real(8), parameter :: Kn2_NO2 =  250.0d0   !(umol L-1)  !!!�Ă��Ƃ�
-    real(8), parameter :: Kn2_DO =  5.0d0   !(umol L-1)  !!!�Ă��Ƃ�
+!    NH4+ + 2 O2 -> NO3- + H2O + 2H+
+    real(8), parameter :: Nit_max =  10.0d0 !!!10.0d0  !(nmol cm-3 s-1)  !!!�Ă��Ƃ�
+    real(8), parameter :: Kn_NH4 =  250.0d0   !(umol L-1)  !!!�Ă��Ƃ�
+    real(8), parameter :: Kn_DO =  5.0d0   !(umol L-1)  !!!�Ă��Ƃ�
+!!    NH4+ + (3/2)O2 -> NO2- + H2O + 2H+
+!    real(8), parameter :: Nit1_max =  10.0d0 !!!10.0d0  !(nmol cm-3 s-1)  !!!�Ă��Ƃ�
+!    real(8), parameter :: Kn1_NH4 =  250.0d0   !(umol L-1)  !!!�Ă��Ƃ�
+!    real(8), parameter :: Kn1_DO =  5.0d0   !(umol L-1)  !!!�Ă��Ƃ�
+!!    NO2- + (1/2)O2 -> NO3-
+!    real(8), parameter :: Nit2_max =  10.0d0 !!!10.0d0  !(nmol cm-3 s-1)  !!!�Ă��Ƃ�
+!    real(8), parameter :: Kn2_NO2 =  250.0d0   !(umol L-1)  !!!�Ă��Ƃ�
+!    real(8), parameter :: Kn2_DO =  5.0d0   !(umol L-1)  !!!�Ă��Ƃ�
 !---- Denitrification --------------------------
 !    NO3- + H+ +(5/4)CH2O -> (1/2)N2 + (5/4)CO2 + (7/4)H2O
     real(8), parameter :: DNd_max =  1.0d-2 !!!10.0d0  !(nmol cm-3 s-1)  !!!�Ă��Ƃ�
@@ -611,10 +615,10 @@ CONTAINS
     real(8) :: cCO3, TK
     real(8) :: Diff, t_dbl
 # if defined NUTRIENTS
-    real(8) :: NH4ass(Nsed), NO2ass(Nsed), NO3ass(Nsed)
+    real(8) :: NH4ass(Nsed), NO3ass(Nsed)!, NO2ass(Nsed)
     real(8) :: PO4ass(Nsed)
     real(8) :: V_NH4, V_NO3, V_PO4
-    real(8) :: Nit1(Nsed), Nit2(Nsed)
+    real(8) :: Nit(Nsed) !, Nit1(Nsed), Nit2(Nsed)
     real(8) :: DNd(Nsed), DNp(Nsed)
     real(8) :: DNdoc(Nsed), DNpoc(Nsed)
     real(8) :: DNdon(Nsed), DNpon(Nsed)
@@ -634,7 +638,7 @@ CONTAINS
 # endif
 # if defined NUTRIENTS
     real(8) :: F_NO3(0:Nsed)
-    real(8) :: F_NO2(0:Nsed)
+!    real(8) :: F_NO2(0:Nsed)
     real(8) :: F_NH4(0:Nsed)
     real(8) :: F_PO4(0:Nsed)
 #  if defined ORGANIC_MATTER
@@ -658,7 +662,7 @@ CONTAINS
 # endif
 # if defined NUTRIENTS
     real(8) :: NO3_bot
-    real(8) :: NO2_bot
+!    real(8) :: NO2_bot
     real(8) :: NH4_bot
     real(8) :: PO4_bot
 #  if defined ORGANIC_MATTER
@@ -704,7 +708,7 @@ CONTAINS
 # endif
 # if defined NUTRIENTS
     F_NO3(0) = Diff*( NO3amb - SEDECO(ng)%NO3(i,j,1) )/t_dbl
-    F_NO2(0) = Diff*( NO2amb - SEDECO(ng)%NO2(i,j,1) )/t_dbl
+!    F_NO2(0) = Diff*( NO2amb - SEDECO(ng)%NO2(i,j,1) )/t_dbl
     F_NH4(0) = Diff*( NH4amb - SEDECO(ng)%NH4(i,j,1) )/t_dbl
     F_PO4(0) = Diff*( PO4amb - SEDECO(ng)%PO4(i,j,1) )/t_dbl
 #  if defined ORGANIC_MATTER
@@ -735,7 +739,7 @@ CONTAINS
 # endif
 # if defined NUTRIENTS
       F_NO3(k) = Diff*( SEDECO(ng)%NO3(i,j,k) - SEDECO(ng)%NO3(i,j,k+1) )/dz
-      F_NO2(k) = Diff*( SEDECO(ng)%NO2(i,j,k) - SEDECO(ng)%NO2(i,j,k+1) )/dz
+!      F_NO2(k) = Diff*( SEDECO(ng)%NO2(i,j,k) - SEDECO(ng)%NO2(i,j,k+1) )/dz
       F_NH4(k) = Diff*( SEDECO(ng)%NH4(i,j,k) - SEDECO(ng)%NH4(i,j,k+1) )/dz
       F_PO4(k) = Diff*( SEDECO(ng)%PO4(i,j,k) - SEDECO(ng)%PO4(i,j,k+1) )/dz
 #  if defined ORGANIC_MATTER
@@ -767,7 +771,7 @@ CONTAINS
 # endif
 # if defined NUTRIENTS
     NO3_bot = SEDECO(ng)%NO3(i,j,Nsed)
-    NO2_bot = SEDECO(ng)%NO2(i,j,Nsed)
+!    NO2_bot = SEDECO(ng)%NO2(i,j,Nsed)
     NH4_bot = SEDECO(ng)%NH4(i,j,Nsed)
     PO4_bot = SEDECO(ng)%PO4(i,j,Nsed)
 #  if defined ORGANIC_MATTER
@@ -792,7 +796,7 @@ CONTAINS
 # endif
 # if defined NUTRIENTS
     F_NO3(Nsed) = Diff*( SEDECO(ng)%NO3(i,j,Nsed) - NO3_bot )/dz
-    F_NO2(Nsed) = Diff*( SEDECO(ng)%NO2(i,j,Nsed) - NO2_bot )/dz
+!    F_NO2(Nsed) = Diff*( SEDECO(ng)%NO2(i,j,Nsed) - NO2_bot )/dz
     F_NH4(Nsed) = Diff*( SEDECO(ng)%NH4(i,j,Nsed) - NH4_bot )/dz
     F_PO4(Nsed) = Diff*( SEDECO(ng)%PO4(i,j,Nsed) - PO4_bot )/dz
 #  if defined ORGANIC_MATTER
@@ -830,7 +834,7 @@ CONTAINS
 !      Nutrients assimilation rates
       NH4ass(k) = Pg(k)/rCNph * V_NH4/(V_NH4+V_NO3)
       NO3ass(k) = Pg(k)/rCNph * V_NO3/(V_NH4+V_NO3)
-      NO2ass(k) = 0.0d0!!!
+!      NO2ass(k) = 0.0d0!!!
       PO4ass(k) = Pg(k)/rCPph
 # endif
 
@@ -926,15 +930,20 @@ CONTAINS
 
 # if defined NUTRIENTS
 !---- Nitrification rate (nmolN cm-3 s-1) --------------------------
-!    NH4+ + (3/2)O2 -> NO2- + 2H2O + 2H+
-      Nit1(k) = Nit1_max                                           &
-         *SEDECO(ng)%DOx(i,j,k)/(Kn1_DO+SEDECO(ng)%DOx(i,j,k))     &
-         *SEDECO(ng)%NH4(i,j,k)/(Kn1_NH4+SEDECO(ng)%NH4(i,j,k))
+!    NH4+ + 2 O2 -> NO3- + H2O + 2H+
+      Nit(k) = Nit_max                                            &
+         *SEDECO(ng)%DOx(i,j,k)/(Kn_DO+SEDECO(ng)%DOx(i,j,k))     &
+         *SEDECO(ng)%NH4(i,j,k)/(Kn_NH4+SEDECO(ng)%NH4(i,j,k))
 
+!    NH4+ + (3/2)O2 -> NO2- + H2O + 2H+
+!      Nit1(k) = Nit1_max                                           &
+!         *SEDECO(ng)%DOx(i,j,k)/(Kn1_DO+SEDECO(ng)%DOx(i,j,k))     &
+!         *SEDECO(ng)%NH4(i,j,k)/(Kn1_NH4+SEDECO(ng)%NH4(i,j,k))
+!
 !    NO2- + (1/2)O2 -> NO3-
-      Nit2(k) = Nit2_max                                           &
-         *SEDECO(ng)%DOx(i,j,k)/(Kn2_DO+SEDECO(ng)%DOx(i,j,k))     &
-         *SEDECO(ng)%NO2(i,j,k)/(Kn2_NO2+SEDECO(ng)%NO2(i,j,k))
+!      Nit2(k) = Nit2_max                                           &
+!         *SEDECO(ng)%DOx(i,j,k)/(Kn2_DO+SEDECO(ng)%DOx(i,j,k))     &
+!         *SEDECO(ng)%NO2(i,j,k)/(Kn2_NO2+SEDECO(ng)%NO2(i,j,k))
 
 !---- Denitrification rate (nmolN cm-3 s-1) --------------------------
 #  if defined ORGANIC_MATTER
@@ -1021,10 +1030,10 @@ CONTAINS
               +Rdon(k)+Rpon(k)                                        &
               -Rdop(k)-Rpop(k)                                        &
               -NH4ass(k)                                              &
-              +NO2ass(k)                                              &
+!              +NO2ass(k)                                              &
               +NO3ass(k)                                              &
               +PO4ass(k)                                              &
-              -Nit1(k)*2.0d0                                          &
+              -Nit(k)*2.0d0                                           &
               +DNd(k)                                                 &
               +DNp(k)                                                 &
               +DNdon(k)+DNpon(k)                                      &
@@ -1040,8 +1049,9 @@ CONTAINS
             +( Pg(k)                                                  &
               -Rdoc(k)-Rpoc(k)                                        &
 # if defined NUTRIENTS
-              -Nit1(k) * 1.5d0                                        & ! NH4+ + (3/2)O2 -> NO2- +H2O + 2H+
-              -Nit2(k) * 0.5d0                                        & ! NO2- + (1/2)O2 -> NO3-
+              -Nit(k) * 2.0d0                                        & ! NH4+ + 2 O2 -> NO3- + H2O + 2H+
+!              -Nit1(k) * 1.5d0                                        & ! NH4+ + (3/2)O2 -> NO2- +H2O + 2H+
+!              -Nit2(k) * 0.5d0                                        & ! NO2- + (1/2)O2 -> NO3-
 # endif
               +( F_DO(k-1)-F_DO(k) )/dz                               &
              )/SEDECO(ng)%poro(i,j,k) *dt    !nmol cm-3 s-1 = umol L-1 s-1
@@ -1077,7 +1087,7 @@ CONTAINS
       SEDECO(ng)%NH4(i,j,k)=SEDECO(ng)%NH4(i,j,k)                     &
             +(-NH4ass(k)                                              &
               +Rdon(k)+Rpon(k)                                        &
-              -Nit1(k)                                                &
+              -Nit(k)                                                 &
               +DNdon(k)+DNpon(k)                                      &
               +( F_NH4(k-1)-F_NH4(k) )/dz                             &
              )/SEDECO(ng)%poro(i,j,k) *dt    !nmol cm-3 s-1 = umol L-1 s-1
@@ -1085,19 +1095,19 @@ CONTAINS
       SEDECO(ng)%NH4(i,j,k)=min(SEDECO(ng)%NH4(i,j,k),1.0d4) !Error handring
 
 !    NO2 (umol L-1)
-      SEDECO(ng)%NO2(i,j,k)=SEDECO(ng)%NO2(i,j,k)                     &
-            +(-NO2ass(k)                                              &
-              +Nit1(k)                                                &
-              -Nit2(k)                                                &
-              +( F_NO2(k-1)-F_NO2(k) )/dz                             &
-             )/SEDECO(ng)%poro(i,j,k) *dt    !nmol cm-3 s-1 = umol L-1 s-1
-      SEDECO(ng)%NO2(i,j,k)=max(SEDECO(ng)%NO2(i,j,k),0.0d0) !Error handring
-      SEDECO(ng)%NO2(i,j,k)=min(SEDECO(ng)%NO2(i,j,k),1.0d4) !Error handring
+!      SEDECO(ng)%NO2(i,j,k)=SEDECO(ng)%NO2(i,j,k)                     &
+!            +(-NO2ass(k)                                              &
+!              +Nit1(k)                                                &
+!              -Nit2(k)                                                &
+!              +( F_NO2(k-1)-F_NO2(k) )/dz                             &
+!             )/SEDECO(ng)%poro(i,j,k) *dt    !nmol cm-3 s-1 = umol L-1 s-1
+!      SEDECO(ng)%NO2(i,j,k)=max(SEDECO(ng)%NO2(i,j,k),0.0d0) !Error handring
+!      SEDECO(ng)%NO2(i,j,k)=min(SEDECO(ng)%NO2(i,j,k),1.0d4) !Error handring
 
 !    NO3 (umol L-1)
       SEDECO(ng)%NO3(i,j,k)=SEDECO(ng)%NO3(i,j,k)                     &
             +(-NO3ass(k)                                              &
-              +Nit2(k)                                                &
+              +Nit(k)                                                 &
               -DNd(k)                                                 &
               -DNp(k)                                                 &
               +( F_NO3(k-1)-F_NO3(k) )/dz                             &
@@ -1118,7 +1128,7 @@ CONTAINS
 #  if defined ORGANIC_MATTER
 !    DON (umol L-1)
       SEDECO(ng)%DON(i,j,k)=SEDECO(ng)%DON(i,j,k)                     &
-            +((NH4ass(k)+NO2ass(k)+NO3ass(k))*(1.0d0 - r_assim)       &
+            +((NH4ass(k)+NO3ass(k))*(1.0d0 - r_assim)       &
               +Dp2don(k)                                              &
               -Rdon(k)                                                &
               -DNdon(k)                                                &
@@ -1129,7 +1139,7 @@ CONTAINS
 
 !    PON (umol L-1)
       SEDECO(ng)%PON(i,j,k)=SEDECO(ng)%PON(i,j,k)                     &
-            +((NH4ass(k)+NO2ass(k)+NO3ass(k)) * r_assim               &
+            +((NH4ass(k)+NO3ass(k)) * r_assim               &
               -Dp2don(k)                                              &
               -Rpon(k)                                                &
               -DNpon(k)                                                &
@@ -1190,7 +1200,7 @@ CONTAINS
 # endif
 # if defined NUTRIENTS
     Flux_NO3 = F_NO3(0)
-    Flux_NO2 = F_NO2(0)
+!    Flux_NO2 = F_NO2(0)
     Flux_NH4 = F_NH4(0)
     Flux_PO4 = F_PO4(0)
 #  if defined ORGANIC_MATTER
@@ -1224,7 +1234,7 @@ CONTAINS
 #  endif
 #  if defined NUTRIENTS
       write(61,*) time/86400.d0, NH4amb, SEDECO(ng)%NH4(i,j,:)
-      write(62,*) time/86400.d0, NO2amb, SEDECO(ng)%NO2(i,j,:)
+!      write(62,*) time/86400.d0, NO2amb, SEDECO(ng)%NO2(i,j,:)
       write(63,*) time/86400.d0, NO3amb, SEDECO(ng)%NO3(i,j,:)
       write(64,*) time/86400.d0, PO4amb, SEDECO(ng)%PO4(i,j,:)
 #   if defined ORGANIC_MATTER
@@ -1239,8 +1249,8 @@ CONTAINS
       write(73,*) time/86400.d0, 0.0d0, Rpoc
       write(74,*) time/86400.d0, 0.0d0, SEDECO(ng)%G (i,j)
 #  if defined NUTRIENTS
-      write(75,*) time/86400.d0, 0.0d0, Nit1
-      write(76,*) time/86400.d0, 0.0d0, Nit2
+      write(75,*) time/86400.d0, 0.0d0, Nit
+!      write(76,*) time/86400.d0, 0.0d0, Nit2
       write(78,*) time/86400.d0, 0.0d0, DNd
       write(79,*) time/86400.d0, 0.0d0, DNp
 #  endif
