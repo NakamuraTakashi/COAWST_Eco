@@ -1212,7 +1212,7 @@ contains
         , Flux_DO        &   ! DO  uptake rate (mmol m-2 s-1)  * direction of water column to coral is positive
 #  if defined NUTRIENTS         
         , Flux_NO3       &   ! NO3 uptake rate (mmol m-2 s-1)  * direction of water column to coral is positive
-!        , Flux_NO2       &   ! NH4 uptake rate (mmol m-2 s-1)  * direction of water column to coral is positive
+        , Flux_NH4       &   ! NH4 uptake rate (mmol m-2 s-1)  * direction of water column to coral is positive
         , Flux_PO4       &   ! PO4 uptake rate (mmol m-2 s-1)  * direction of water column to coral is positive
 #  endif
 #  if defined CARBON_ISOTOPE

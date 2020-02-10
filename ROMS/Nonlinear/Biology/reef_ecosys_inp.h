@@ -80,10 +80,6 @@
               Npts=load_i(Nval, Rval, Ngrids, CrlIter)
             CASE ('SedIter')
               Npts=load_i(Nval, Rval, Ngrids, SedIter)
-            CASE ('AttSW')
-              Npts=load_r(Nval, Rval, Ngrids, AttSW)
-            CASE ('AttChl')
-              Npts=load_r(Nval, Rval, Ngrids, AttChl)
             CASE ('PARfrac')
               Npts=load_r(Nval, Rval, Ngrids, PARfrac)
             CASE ('pCO2air')
@@ -567,10 +563,6 @@
      &            'Number of iterations for nonlinear convergence.'
             WRITE (out,70) SedIter(ng), 'SedIter',                      &
      &            'Number of iterations for nonlinear convergence.'
-            WRITE (out,80) AttSW(ng), 'AttSW',                          &
-     &            'Light attenuation of seawater (m-1).'
-            WRITE (out,80) AttChl(ng), 'AttChl',                        &
-     &            'Light attenuation by chlorophyll (1/(mg_Chl m-2)).'
             WRITE (out,90) PARfrac(ng), 'PARfrac',                      &
      &            'Fraction of shortwave radiation that is',            &
      &            'photosynthetically active (nondimensional).'

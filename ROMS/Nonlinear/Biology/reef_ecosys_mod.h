@@ -160,8 +160,6 @@
       integer, allocatable :: CrlIter(:)
       integer, allocatable :: SedIter(:)
 
-      real(r8), allocatable :: AttSW(:)              ! 1/m
-      real(r8), allocatable :: AttChl(:)             ! 1/(mg_Chl m2)
       real(r8), allocatable :: PARfrac(:)            ! nondimensional
       real(r8), allocatable :: pCO2air(:)            ! ppmv
       real(r8), allocatable :: TAlk0(:)              ! umol/kg
@@ -504,12 +502,6 @@
       END IF
       IF (.not.allocated(SedIter)) THEN
         allocate ( SedIter(Ngrids) )
-      END IF
-      IF (.not.allocated(AttSW)) THEN
-        allocate ( AttSW(Ngrids) )
-      END IF
-      IF (.not.allocated(AttChl)) THEN
-        allocate ( AttChl(Ngrids) )
       END IF
       IF (.not.allocated(PARfrac)) THEN
         allocate ( PARfrac(Ngrids) )

@@ -1037,7 +1037,7 @@ contains
       x0=x
       i=i+1
       if(i.eq.200) then
-        write(6,*) 'pH calculation error: pH = ', -Log10(x)
+        write(6,*) 'pH error: pH = ', -Log10(x),', AT = ', AT,', CT = ',CT
         !x=10.**(-8.)
         exit
       endif

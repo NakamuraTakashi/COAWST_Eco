@@ -25,16 +25,6 @@
 !     &                      ncid = ncid)
 !      IF (exit_flag.ne.NoError) RETURN
 
-      CALL netcdf_put_fvar (ng, model, ncname, 'AttSW',                 &
-     &                      AttSW(ng), (/0/), (/0/),                    &
-     &                      ncid = ncid)
-      IF (exit_flag.ne.NoError) RETURN
-
-      CALL netcdf_put_fvar (ng, model, ncname, 'AttChl',                &
-     &                      AttChl(ng), (/0/), (/0/),                   &
-     &                      ncid = ncid)
-      IF (exit_flag.ne.NoError) RETURN
-
       CALL netcdf_put_fvar (ng, model, ncname, 'PARfrac',               &
      &                      PARfrac(ng), (/0/), (/0/),                  &
      &                      ncid = ncid)
