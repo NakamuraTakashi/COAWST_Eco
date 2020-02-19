@@ -264,9 +264,9 @@ CONTAINS
     real(8), parameter :: lam(Nzoo) = 0.211d0                 ! ((umol C L-1)-1)       zooplankton Ivlev constant for PHY1 (1.4L/umolN.0.211; Kishi et al., 2007)
     real(8), parameter :: t_Gp2z(Nphy,Nzoo) = 0.265d0          ! (umol C L-1)       PHY1 threshold value for grazing by ZOO (0.04umolN/L0.265; Kishi et al., 2007)
 !------- Microbial loop parameters  -------
-    real(8), parameter :: k_Gdoc2z(Ndom,Nzoo) = 0.1d0/86400.0d0   ! (s-1)          Maximum grazing rate of DOC by ZOO at 0 oC (0.3d0 d-1; Kawamiya et al., 1995)
+    real(8), parameter :: k_Gdoc2z(Ndom,Nzoo) = 0.001d0/86400.0d0   ! (s-1)          Maximum grazing rate of DOC by ZOO at 0 oC (0.3d0 d-1; Kawamiya et al., 1995)
     real(8), parameter :: b_Gdoc2z(Ndom,Nzoo) = 0.0693d0          ! (degC-1)       Temperature coefficient of DOC grazing by ZOO (Kawamiya et al., 1995)
-    real(8), parameter :: k_Gpoc2z(Ndom,Nzoo) = 0.10d0/86400.0d0 ! (s-1)          Maximum grazing rate of POC by ZOO at 0 oC (0.3d0 d-1; Kawamiya et al., 1995)
+    real(8), parameter :: k_Gpoc2z(Ndom,Nzoo) = 0.010d0/86400.0d0 ! (s-1)          Maximum grazing rate of POC by ZOO at 0 oC (0.3d0 d-1; Kawamiya et al., 1995)
     real(8), parameter :: b_Gpoc2z(Ndom,Nzoo) = 0.0693d0  ! (degC-1)       Temperature coefficient of DOC grazing by ZOO (Kawamiya et al., 1995)
     real(8), parameter :: e_Gdoc2z(Ndom,Nzoo) = 0.010d0  
     real(8), parameter :: e_Gpoc2z(Npom,Nzoo) = 0.10d0           ! (no dim.)      Assimilation efficiency of ZOO (0.7:Kawamiya et al., 1995)
@@ -320,6 +320,7 @@ CONTAINS
     real(8), parameter :: a_calc =   2.7d-3 + 1.0d0 !!!!! To Be Confirmed
     real(8), parameter :: a_grz  =   1.0d-3 + 1.0d0 !!!!! To Be Confirmed
 # endif
+    real(8), parameter :: sn =   1.0d-20 ! A small number for avoiding a number divided by 0
 #endif
 
 !------- Local variables --------------------
@@ -350,6 +351,7 @@ CONTAINS
     real(8) :: Ap2z_sum, Adoc2z_sum, Apoc2z_sum
     real(8) :: Gdoc2z_sum, Gpoc2z_sum
 
+    real(8) :: cf, cf2, cf3
 
 !===== Initiallize tracer parameters =================================
     dDIC_dt = 0.0d0
@@ -367,22 +369,58 @@ CONTAINS
     dPHY13C_dt(:) = 0.0d0
     dZOO13C_dt(:) = 0.0d0
     dPI13C_dt(:)  = 0.0d0
-
-    rDI13C = DI13C/(DIC-DI13C)
+    
+    cf = MAX(DIC,0.0d0)
+    cf2= MAX(DI13C,0.0d0)
+    if(cf<sn .or. cf2<sn ) then
+      rDI13C = 0.0d0
+    else
+      rDI13C = cf2/MAX(cf-cf2,sn)
+    endif
     DO k=1, Ndom
-        rDO13C(k) = DO13C(k)/(DOC(k)-DO13C(k))
+      cf = MAX(DOC(k),0.0d0)
+      cf2= MAX(DO13C(k),0.0d0)
+      if(cf<sn .or. cf2<sn ) then
+        rDO13C(k) = 0.0d0
+      else
+        rDO13C(k) = cf2/MAX(cf-cf2,sn)
+      endif
     END DO
     DO k=1, Npom
-      rPO13C(k) = PO13C(k)/(POC(k)-PO13C(k))
+      cf = MAX(POC(k),0.0d0)
+      cf2= MAX(PO13C(k),0.0d0)
+      if(cf<sn .or. cf2<sn ) then
+        rPO13C(k) = 0.0d0
+      else
+        rPO13C(k) = cf2/MAX(cf-cf2,sn)
+      endif
     END DO
     DO k=1, Nphy
-        rPHY13C(k) = PHY13C(k)/(PHY(k)-PHY13C(k))
+      cf = MAX(PHY(k),0.0d0)
+      cf2= MAX(PHY13C(k),0.0d0)
+      if(cf<sn .or. cf2<sn ) then
+        rPHY13C(k) = 0.0d0
+      else
+        rPHY13C(k) = cf2/MAX(cf-cf2,sn)
+      endif
     END DO
     DO k=1, Nzoo
-        rZOO13C(k) = ZOO13C(k)/(ZOO(k)-ZOO13C(k))
+      cf = MAX(ZOO(k),0.0d0)
+      cf2= MAX(ZOO13C(k),0.0d0)
+      if(cf<sn .or. cf2<sn ) then
+        rZOO13C(k) = 0.0d0
+      else
+        rZOO13C(k) = cf2/MAX(cf-cf2,sn)
+      endif
     END DO
     DO k=1, Npim
-        rPI13C(k) = PI13C(k)/(PIC(k)-PI13C(k))
+      cf = MAX(PIC(k),0.0d0)
+      cf2= MAX(PI13C(k),0.0d0)
+      if(cf<sn .or. cf2<sn ) then
+        rPI13C(k) = 0.0d0
+      else
+        rPI13C(k) = cf2/MAX(cf-cf2,sn)
+      endif
     END DO
 #endif
 #if defined NUTRIENTS
@@ -416,9 +454,10 @@ CONTAINS
 
 !      Pphy = k_Pphy * exp(b_Pphy*Tmp) * PFD/Iphy*exp(1.0d0-PFD/Iphy) * PHY
       Pp(k) = k_Pp(k) * exp(b_Pp(k)*Tmp) * tanh(PFD/Ip(k)) * PHY(k)
-      IF(DIC <= 0.d0) THEN !-----For Error handling
-        Pp(k) = 0.d0
+      IF(DIC <= 0.0d0) THEN !-----For Error handling
+        Pp(k) = 0.0d0
       ENDIF
+      Pp(k) = MAX( Pp(k), 0.0d0 )  !!! Error handling
 
 !     === Mass barance ===
 
@@ -449,11 +488,12 @@ CONTAINS
         Vp_NO3(k) = NO3/(NO3+Kp_NO3(k)) * exp(-psi(k) * NH4) *(1.0d0 - rNH4(k))      
         Vp_PO4(k) = PO4/(PO4+Kp_PO4(k))        
       END IF
+      Vp_NH4(k) = MAX( Vp_NH4(k), 0.0d0 )  !!! Error handling
+      Vp_NO3(k) = MAX( Vp_NO3(k), 0.0d0 )  !!! Error handling
+      Vp_PO4(k) = MAX( Vp_PO4(k), 0.0d0 )  !!! Error handling
       
       Ap(k) = MIN( Vp_NH4(k)+Vp_NO3(k), Vp_PO4(k) ) ! Assimilation rate
-!      Aphy1 = Vphy1_NH4+Vphy1_NO3										! Assimilation rate
-!      Aphy2 = Vphy2_NH4+Vphy2_NO3 									! Assimilation rate
-  
+
       Ap(k) = Ap(k) * Pp(k)
 
 #else
@@ -503,9 +543,10 @@ CONTAINS
 !----- Respiration rate (umolC L-1 s-1) -----------------
 
       Rp(k) = k_Rp(k) * exp(b_Rp(k)*Tmp) * PHY(k)
-      IF(DOx <= 0.d0) THEN !-----For Error handling
-        Rp(k) = 0.d0
+      IF(DOx <= 0.0d0) THEN !-----For Error handling
+        Rp(k) = 0.0d0
       ENDIF
+      Rp(k) = MAX( Rp(k), 0.0d0 )  !!! Error handling
 
 !     === Mass barance ===
 
@@ -526,6 +567,7 @@ CONTAINS
 
       Mp(k) = k_Mp(k) * exp(b_Mp(k)*Tmp) * PHY(k)*PHY(k)
 !      Mphy = k_Mphy * exp(b_Mphy*Tmp) * PHY
+      Mp(k) = MAX( Mp(k), 0.0d0 )  !!! Error handling
 
 !     === Mass barance ===
 
@@ -552,9 +594,10 @@ CONTAINS
       DO m=1, Nphy
         Gp2z(m,k) = k_Gp2z(m,k) * exp(b_Gp2z(m,k)*Tmp)    &
           * (1-exp(lam(k)*(t_Gp2z(m,k) - PHY(m)))) * ZOO(k)			!!!!!!!!!!!!!!!!!!!
-        IF(Gp2z(m,k) <= 0.d0) THEN !-----For Error handling
-        	Gp2z(m,k) = 0
+        IF(Gp2z(m,k) <= 0.0d0) THEN !-----For Error handling
+        	Gp2z(m,k) = 0.0d0
         ENDIF
+        Gp2z(m,k) = MAX( Gp2z(m,k), 0.0d0 )  !!! Error handling
 
 !     === Mass barance ===
 
@@ -577,45 +620,56 @@ CONTAINS
 !----- Grazing rate of DOC(iLbl) by ZOO (umolC L-1 s-1) -----------------
 
       DO m=1, Ndom
-        Gdoc2z(m,k) = k_Gdoc2z(m,k) * exp(b_Gdoc2z(m,k)*Tmp) * DOC(m) * ZOO(k)
+        cf = DOC(m)
+#if defined NUTRIENTS
+        cf =  MIN( MIN(DOC(m),DON(m)*rCNz(k)) , DOP(m)*rCPz(k) )
+#endif
+        Gdoc2z(m,k) = k_Gdoc2z(m,k) * exp(b_Gdoc2z(m,k)*Tmp) * cf * ZOO(k)
+        Gdoc2z(m,k) = MAX( Gdoc2z(m,k), 0.0d0 )  !!! Error handling
 
 !     === Mass barance ===
         dZOO_dt(k) = dZOO_dt(k) + Gdoc2z(m,k)*e_Gdoc2z(m,k)
-        dDOC_dt(m) = dDOC_dt(m) + Gdoc2z(m,k)*(1.0d0-e_Gdoc2z(m,k))
+        dDOC_dt(m) = dDOC_dt(m) - Gdoc2z(m,k)*(1.0d0-e_Gdoc2z(m,k))
 #if defined CARBON_ISOTOPE
         dZOO13C_dt(k) = dZOO13C_dt(k) + Gdoc2z(m,k)*e_Gdoc2z(m,k)*a_grz*rDO13C(m)
-        dDO13C_dt(m) = dDO13C_dt(m) + Gdoc2z(m,k)*(1.0d0-e_Gdoc2z(m,k)*a_grz)*rDO13C(m)
+        dDO13C_dt(m) = dDO13C_dt(m) - Gdoc2z(m,k)*(1.0d0-e_Gdoc2z(m,k)*a_grz)*rDO13C(m)
 #endif
 #if defined NUTRIENTS
-        dDON_dt(m) = dDON_dt(m) + Gdoc2z(m,k)*(1.0d0-e_Gdoc2z(m,k))/rCNz(k)
-        dDOP_dt(m) = dDOP_dt(m) + Gdoc2z(m,k)*(1.0d0-e_Gdoc2z(m,k))/rCPz(k)
+        dDON_dt(m) = dDON_dt(m) - Gdoc2z(m,k)*(1.0d0-e_Gdoc2z(m,k))/rCNz(k)
+        dDOP_dt(m) = dDOP_dt(m) - Gdoc2z(m,k)*(1.0d0-e_Gdoc2z(m,k))/rCPz(k)
 #endif
       END DO
 
 !----- Grazing rate of POC by ZOO (umolC L-1 s-1) -----------------
 
       DO m=1, Npom
-        Gpoc2z(m,k) = k_Gdoc2z(m,k) * exp(b_Gpoc2z(m,k)*Tmp) * POC(m) * ZOO(k)
+        cf = POC(m)
+#if defined NUTRIENTS
+        cf =  MIN( MIN(POC(m),PON(m)*rCNz(k)) , POP(m)*rCPz(k) )
+#endif
+        Gpoc2z(m,k) = k_Gpoc2z(m,k) * exp(b_Gpoc2z(m,k)*Tmp) * cf * ZOO(k)
+        Gpoc2z(m,k) = MAX( Gpoc2z(m,k), 0.0d0 )  !!! Error handling
 
 !     === Mass barance ===
         dZOO_dt(k) = dZOO_dt(k) + Gpoc2z(m,k)*e_Gpoc2z(m,k)
-        dPOC_dt(m) = dPOC_dt(m) + Gpoc2z(m,k)*(1.0d0-e_Gpoc2z(m,k))
+        dPOC_dt(m) = dPOC_dt(m) - Gpoc2z(m,k)*(1.0d0-e_Gpoc2z(m,k))
 #if defined CARBON_ISOTOPE
         dZOO13C_dt(k) = dZOO13C_dt(k) + Gpoc2z(m,k)*e_Gpoc2z(m,k)*a_grz*rPO13C(m)
-        dPO13C_dt(m) = dPO13C_dt(m) + Gpoc2z(m,k)*(1.0d0-e_Gpoc2z(m,k)*a_grz)*rPO13C(m)  !!!!****Need check
+        dPO13C_dt(m) = dPO13C_dt(m) - Gpoc2z(m,k)*(1.0d0-e_Gpoc2z(m,k)*a_grz)*rPO13C(m)  !!!!****Need check
 #endif
 #if defined NUTRIENTS
-        dPON_dt(m) = dPON_dt(m) + Gpoc2z(m,k)*(1.0d0-e_Gpoc2z(m,k))/rCNz(k)
-        dPOP_dt(m) = dPOP_dt(m) + Gpoc2z(m,k)*(1.0d0-e_Gpoc2z(m,k))/rCPz(k)
+        dPON_dt(m) = dPON_dt(m) - Gpoc2z(m,k)*(1.0d0-e_Gpoc2z(m,k))/rCNz(k)
+        dPOP_dt(m) = dPOP_dt(m) - Gpoc2z(m,k)*(1.0d0-e_Gpoc2z(m,k))/rCPz(k)
 #endif
       END DO
   
 !----- Respiration rate (umolC L-1 s-1) -----------------
 
       Rz(k) = k_Rz(k) * exp(b_Rz(k)*Tmp) * ZOO(k)
-      IF(DOx <= 0.d0) THEN !-----For Error handling
-        Rz(k) = 0.d0
+      IF(DOx <= 0.0d0) THEN !-----For Error handling
+        Rz(k) = 0.0d0
       ENDIF
+      Rz(k) = MAX( Rz(k), 0.0d0 )  !!! Error handling
 
 !     === Mass barance ===
 
@@ -635,8 +689,7 @@ CONTAINS
 !----- Mortality (umolC L-1 s-1) -----------------
 
       Mz(k) = k_Mz(k) * exp(b_Mz(k)*Tmp) * ZOO(k)*ZOO(k)
-!      Mzoo = k_Mzoo * exp(b_Mzoo*Tmp) * ZOO
-!      Mzoo = k_Mzoo * exp(b_Mzoo*Tmp) * (Gp2z(iDnfl,iGzoo) + Gphy22zoo)
+      Mz(k) = MAX( Mz(k), 0.0d0 )  !!! Error handling
 
 !     === Mass barance ===
 
@@ -656,12 +709,12 @@ CONTAINS
 
 !----- Decomposition rate of DOM (umol L-1 s-1) -----------------
 
-!    Ddoc = k_Ddoc * exp(b_Ddoc*Tmp) * DOC
     DO k=1, Ndom
-      Ddoc(k) = k_Ddoc(k) * exp(b_Ddoc(k)*Tmp) * DOC(k)**2.0d0/(DOC(k)**2.0d0)
+      Ddoc(k) = k_Ddoc(k) * exp(b_Ddoc(k)*Tmp) * DOC(k)
       IF(DOx <= 0.0d0) THEN !-----For Error handling
         Ddoc(k) = 0.0d0
       ENDIF
+      Ddoc(k) = MAX( Ddoc(k), 0.0d0 )  !!! Error handling
 
 !     === Mass barance ===
 
@@ -673,16 +726,17 @@ CONTAINS
       dDI13C_dt = dDI13C_dt + Ddoc(k)*rDO13C(k)
 #endif
 #if defined NUTRIENTS
-!      Ddon = k_Ddon * exp(b_Ddon*Tmp) * DON
-      Ddon(k) = k_Ddon(k) * exp(b_Ddon(k)*Tmp) * DON(k)**2.0d0/(DON(k)**2.0d0)
+      Ddon(k) = k_Ddon(k) * exp(b_Ddon(k)*Tmp) * DON(k)
       IF(DOx <= 0.0d0) THEN !-----For Error handling
         Ddon(k) = 0.0d0
       ENDIF
-!      Ddop = k_Ddop * exp(b_Ddop*Tmp) * DOP
-      Ddop(k) = k_Ddop(k) * exp(b_Ddop(k)*Tmp) * DOP(k)**2.0d0/(DOP(k)**2.0d0)
+      Ddon(k) = MAX( Ddon(k), 0.0d0 )  !!! Error handling
+
+      Ddop(k) = k_Ddop(k) * exp(b_Ddop(k)*Tmp) * DOP(k)
       IF(DOx <= 0.0d0) THEN !-----For Error handling
         Ddop(k) = 0.0d0
       ENDIF
+      Ddop(k) = MAX( Ddop(k), 0.0d0 )  !!! Error handling
 
 !     === Mass barance ===
 
@@ -697,26 +751,34 @@ CONTAINS
 !----- Decomposition rate of POM (umol L-1 s-1) -----------------
 
     DO k=1, Npom
-      Dpoc = k_Dpoc * exp(b_Dpoc*Tmp) * POC(iDtr)**2.0d0/(POC(iDtr)**2.0d0)
+      Dpoc(k) = k_Dpoc(k) * exp(b_Dpoc(k)*Tmp) * POC(k)
       IF(DOx <= 0.0d0) THEN !-----For Error handling
-        Dpoc = 0.0d0
+        Dpoc(k) = 0.0d0
       ENDIF
+      Dpoc(k) = MAX( Dpoc(k), 0.0d0 )  !!! Error handling
 
 !     === Mass barance ===
 
       dPOC_dt(k) = dPOC_dt(k) - Dpoc(k)
       dDIC_dt = dDIC_dt + Dpoc(k)
       dDOx_dt = dDOx_dt - Dpoc(k)
+#if defined CARBON_ISOTOPE
+      dPO13C_dt(k) = dPO13C_dt(k) - Dpoc(k)*rPO13C(k)
+      dDI13C_dt = dDI13C_dt + Dpoc(k)*rPO13C(k)
+#endif     
 
 #if defined NUTRIENTS
-      Dpon = k_Dpon * exp(b_Dpon*Tmp) * PON(iDtr)**2.0d0/(PON(iDtr)**2.0d0)
+      Dpon(k) = k_Dpon(k) * exp(b_Dpon(k)*Tmp) * PON(k)
       IF(DOx <= 0.0d0) THEN !-----For Error handling
-        Dpon = 0.0d0
+        Dpon(k) = 0.0d0
       ENDIF
-      Dpop = k_Dpop * exp(b_Dpop*Tmp) * POP(iDtr)**2.0d0/(POP(iDtr)**2.0d0)
+      Dpon(k) = MAX( Dpon(k), 0.0d0 )  !!! Error handling
+
+      Dpop(k) = k_Dpop(k) * exp(b_Dpop(k)*Tmp) * POP(k)
       IF(DOx <= 0.0d0) THEN !-----For Error handling
-        Dpop = 0.0d0
+        Dpop(k) = 0.0d0
       ENDIF
+      Dpop(k) = MAX( Dpop(k), 0.0d0 )  !!! Error handling
 
 !     === Mass barance ===
 
@@ -760,6 +822,7 @@ CONTAINS
 !----- Decomposition rate from CPOM to Detritus (umol L-1 s-1) -----------------
 
     Dcpoc2dtr = k_Dcpoc2dtr * exp(b_Dcpoc2dtr*Tmp) * POC(iCPOM)
+    Dcpoc2dtr = MAX( Dcpoc2dtr, 0.0d0 )  !!! Error handling
   
   !     === Mass barance ===
   
@@ -788,6 +851,7 @@ CONTAINS
     IF(DOx <= 0.0d0) THEN !-----For Error handling
         Nit = 0.0d0
     ENDIF
+    Nit = MAX( Nit, 0.0d0 )  !!! Error handling
 
 !     === Mass barance ===
 
@@ -808,6 +872,7 @@ CONTAINS
     ELSE
       Dissol = 0.0d0
     END IF
+    Dissol = MAX( Dissol, 0.0d0 )  !!! Error handling
 
 !     === Mass barance ===
 

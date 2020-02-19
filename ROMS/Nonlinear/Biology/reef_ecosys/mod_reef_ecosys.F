@@ -565,8 +565,13 @@ contains
     ssWarg = Warg_fromcCO3( cCO3, TmpK, Sal(N) )
 
 !----------- CO2 gas exchange rate (mmol m-2 s-1). -------------------
-    ssCO2flux = Flux_CO2(ssfCO2, pCO2air, U10, TmpK, Sal(N) )  ! sea to air is positive 
+    ssCO2flux = Flux_CO2(ssfCO2, pCO2air, U10, TmpK, Sal(N) )  ! sea to air is positive
 
+    IF(ssCO2flux*0.0d0 /= 0.0d0) THEN  !!!---------Error Handling: Check NAN
+      write(50,*) ssCO2flux, TA(N), DIC(N),TmpK, Sal(N), sspH, cCO3, ssWarg
+      ssCO2flux = 0.0d0
+    END IF
+    
 #if defined AIR_SEA_GAS_EXCHANGE
     dDOx_dt(N) = dDOx_dt(N) - ssO2flux  /dz(N)  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     dDIC_dt(N) = dDIC_dt(N) - ssCO2flux  /dz(N)   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
