@@ -517,7 +517,7 @@ CONTAINS
       dDI13C_dt = dDI13C_dt - Ap(k)*rCCp(k)*a_calc*rDI13C
 #endif
 #if defined NUTRIENTS
-      dNO3_dt = dNO3_dt + Ap(k)*Vp_NO3(k)*(Vp_NH4(k)+Vp_NO3(k))/rCNp(k)
+      dNO3_dt = dNO3_dt - Ap(k)*Vp_NO3(k)*(Vp_NH4(k)+Vp_NO3(k))/rCNp(k)
       dNH4_dt = dNH4_dt - Ap(k)*Vp_NH4(k)*(Vp_NH4(k)+Vp_NO3(k))/rCNp(k)
       dPO4_dt = dPO4_dt - Ap(k)/rCPp(k)
 
