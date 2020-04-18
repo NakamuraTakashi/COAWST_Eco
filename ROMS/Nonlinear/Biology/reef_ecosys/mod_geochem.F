@@ -1037,8 +1037,8 @@ contains
       x0=x
       i=i+1
       if(i.eq.200) then
-        write(50,*) 'pH error: pH = ', -Log10(x),', AT = ', AT,', CT = ',CT
-        !x=10.**(-8.)
+        !write(50,*) 'pH error: pH = ', -Log10(x),', AT = ', AT,', CT = ',CT
+        x=10.**(-8.)
         exit
       endif
     enddo
@@ -1137,8 +1137,8 @@ contains
       x0=x
       i=i+1
       if(i.eq.200) then
-        write(6,*) 'pH calculation error: pH = ', -Log10(x)
-        !x=10.**(-8.)
+        !write(6,*) 'pH calculation error: pH = ', -Log10(x)
+        x=10.**(-8.)
         exit
       endif
     enddo

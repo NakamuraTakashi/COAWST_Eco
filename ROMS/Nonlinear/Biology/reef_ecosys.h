@@ -563,9 +563,9 @@
               ibio=idbio(itrc)
               
               IF(dtrc_dt(k,ibio)*0.0_r8 /= 0.0_r8) THEN  !!!---------Error Handling: Check NAN
-                write(50,*) i,j,k,itrc,dtrc_dt(k,ibio),ssO2flux, ssCO2flux,rmask(i,j) 
-                write(50,*) t(i,j,k,nnew,:)
-                write(50,*) t(i,j,k,nstp,:)
+!                write(50,*) i,j,k,itrc,dtrc_dt(k,ibio),ssO2flux, ssCO2flux,rmask(i,j) 
+!                write(50,*) t(i,j,k,nnew,:)
+!                write(50,*) t(i,j,k,nstp,:)
                 dtrc_dt(k,ibio)=0.0_r8
               END IF
               

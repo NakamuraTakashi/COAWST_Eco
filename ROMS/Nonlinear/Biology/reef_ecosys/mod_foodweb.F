@@ -31,7 +31,7 @@ MODULE mod_foodweb
 
 !---- POM sinking parameters
   real(8), parameter :: rho_POM(Npom) = (/ 1.1d0, 0.99d0 /)   ! ***** POM density [g/cm3] 
-  real(8), parameter :: D_POM(Npom)   = (/ 1.0d-2, 10.0d0 /)   ! ***** POM diameter [mm] 
+  real(8), parameter :: D_POM(Npom)   = (/ 1.0d-1, 10.0d0 /)   ! ***** POM diameter [mm] 
 
 !---- PIM sinking parameters
   real(8), parameter :: rho_PIM(Npim) = (/ 1.4d0 /)   ! ***** PIM density [g/cm3] 
@@ -375,7 +375,8 @@ CONTAINS
     if(cf<sn .or. cf2<sn ) then
       rDI13C = 0.0d0
     else
-      rDI13C = cf2/MAX(cf-cf2,sn)
+!      rDI13C = cf2/MAX(cf-cf2,sn)
+      rDI13C = cf2/MAX(cf,sn)
     endif
     DO k=1, Ndom
       cf = MAX(DOC(k),0.0d0)
@@ -383,7 +384,8 @@ CONTAINS
       if(cf<sn .or. cf2<sn ) then
         rDO13C(k) = 0.0d0
       else
-        rDO13C(k) = cf2/MAX(cf-cf2,sn)
+!        rDO13C(k) = cf2/MAX(cf-cf2,sn)
+        rDO13C(k) = cf2/MAX(cf,sn)
       endif
     END DO
     DO k=1, Npom
@@ -392,7 +394,8 @@ CONTAINS
       if(cf<sn .or. cf2<sn ) then
         rPO13C(k) = 0.0d0
       else
-        rPO13C(k) = cf2/MAX(cf-cf2,sn)
+!        rPO13C(k) = cf2/MAX(cf-cf2,sn)
+        rPO13C(k) = cf2/MAX(cf,sn)
       endif
     END DO
     DO k=1, Nphy
@@ -401,7 +404,8 @@ CONTAINS
       if(cf<sn .or. cf2<sn ) then
         rPHY13C(k) = 0.0d0
       else
-        rPHY13C(k) = cf2/MAX(cf-cf2,sn)
+!        rPHY13C(k) = cf2/MAX(cf-cf2,sn)
+        rPHY13C(k) = cf2/MAX(cf,sn)
       endif
     END DO
     DO k=1, Nzoo
@@ -410,7 +414,8 @@ CONTAINS
       if(cf<sn .or. cf2<sn ) then
         rZOO13C(k) = 0.0d0
       else
-        rZOO13C(k) = cf2/MAX(cf-cf2,sn)
+!        rZOO13C(k) = cf2/MAX(cf-cf2,sn)
+        rZOO13C(k) = cf2/MAX(cf,sn)
       endif
     END DO
     DO k=1, Npim
@@ -419,7 +424,8 @@ CONTAINS
       if(cf<sn .or. cf2<sn ) then
         rPI13C(k) = 0.0d0
       else
-        rPI13C(k) = cf2/MAX(cf-cf2,sn)
+!        rPI13C(k) = cf2/MAX(cf-cf2,sn)
+        rPI13C(k) = cf2/MAX(cf,sn)
       endif
     END DO
 #endif
@@ -507,13 +513,13 @@ CONTAINS
       dTA_dt = dTA_dt - Ap(k)*rCCp(k)*2.0d0  ! calcification
       dDIC_dt = dDIC_dt - Ap(k)*rCCp(k)      ! calcification
 #if defined CARBON_ISOTOPE
+      dPHY13C_dt(k) = dPHY13C_dt(k) + Ap(k)*a_phot*rDI13C
       dDI13C_dt = dDI13C_dt - Ap(k)*rCCp(k)*a_calc*rDI13C
 #endif
 #if defined NUTRIENTS
       dNO3_dt = dNO3_dt + Ap(k)*Vp_NO3(k)*(Vp_NH4(k)+Vp_NO3(k))/rCNp(k)
-!      dNO2_dt = dNO2_dt + 0.0d0  !!!!!!**************
-      dNH4_dt = dNH4_dt + Ap(k)*Vp_NH4(k)*(Vp_NH4(k)+Vp_NO3(k))/rCNp(k)
-      dPO4_dt = dPO4_dt + Ap(k)/rCPp(k)
+      dNH4_dt = dNH4_dt - Ap(k)*Vp_NH4(k)*(Vp_NH4(k)+Vp_NO3(k))/rCNp(k)
+      dPO4_dt = dPO4_dt - Ap(k)/rCPp(k)
 
       dDOx_dt = dDOx_dt + 2.0d0 * Ap(k)*Vp_NO3(k)*(Vp_NH4(k)+Vp_NO3(k))/rCNp(k)   !!!*********************
       dTA_dt = dTA_dt + 1.0d0 * Ap(k)*Vp_NO3(k)*(Vp_NH4(k)+Vp_NO3(k))/rCNp(k)  &  ! increase of alkalinity by 1 mole when nitrate or nitrite is the N source
@@ -533,7 +539,8 @@ CONTAINS
 
       dDOC_dt(iLbl) = dDOC_dt(iLbl) + Ep(k)  !!!!!!**************
 #if defined CARBON_ISOTOPE
-      dDO13C_dt(iLbl) = dDO13C_dt(iLbl) + Ep(k)*rPHY13C(k)
+!      dDO13C_dt(iLbl) = dDO13C_dt(iLbl) + Ep(k)*rPHY13C(k)
+      dDO13C_dt(iLbl) = dDO13C_dt(iLbl) + Ep(k)*a_phot*rDI13C
 #endif
 #if defined NUTRIENTS
       dDON_dt(iLbl) = dDON_dt(iLbl) + Ep(k)/rCNp(k)  !!!!!!**************
