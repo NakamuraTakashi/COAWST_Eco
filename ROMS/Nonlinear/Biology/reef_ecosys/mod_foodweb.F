@@ -247,7 +247,7 @@ CONTAINS
 #if defined NUTRIENTS
 ! PHY1 Nutrient Assimilation Parameter         
     real(8), parameter :: Kp_NH4(Nphy) = (/ 0.2d0,  0.2d0,  0.2d0  /) ! (s-1)1.5         
-    real(8), parameter :: Kp_NO3(Nphy) = (/ 0.1d0,  0.1d0,  0.1d0  /) ! (s-1)0.1         
+    real(8), parameter :: Kp_NO3(Nphy) = (/ 0.1d0,  1.0d0,  0.1d0  /) ! (s-1)0.1         
     real(8), parameter :: Kp_PO4(Nphy) = (/ 0.01d0, 0.01d0, 0.01d0 /)  ! (s-1)0.01 
     ! (1.5L umolN-1; Kishi et al., 2007)  0.01  0.226  0.5
     real(8), parameter :: psi(Nphy) =  (/ 0.01d0, 0.01d0, 0.01d0 /)    !(L umolC-1)   
@@ -271,25 +271,25 @@ CONTAINS
     real(8), parameter :: e_Gdoc2z(Ndom,Nzoo) = 0.010d0  
     real(8), parameter :: e_Gpoc2z(Npom,Nzoo) = 0.10d0           ! (no dim.)      Assimilation efficiency of ZOO (0.7:Kawamiya et al., 1995)
 !------- Decomposition parameters --------------------
-    real(8), parameter :: k_Ddoc(Ndom) = (/ 0.3d0/86400.0d0, 0.003d0/86400.0d0 /)    ! (s-1)          Decomposition rate of DOC at 0 oC (0.3d0 d-1; Kishi et al., 2001)
+    real(8), parameter :: k_Ddoc(Ndom) = (/ 0.3d0/86400.0d0, 1.0d-5/86400.0d0 /)    ! (s-1)          Decomposition rate of DOC at 0 oC (0.3d0 d-1; Kishi et al., 2001)
     real(8), parameter :: b_Ddoc(Ndom) = 0.0693d0           ! (degC-1)       Temperature coefficient for decomposition of DOC (Kishi et al., 2001)
-    real(8), parameter :: k_Dpoc(Npom) = (/ 0.3d0/86400.0d0, 0.03d0/86400.0d0 /)    ! (s-1)          Decomposition rate of POC at 0 oC (0.3d0 d-1; Kishi et al., 2001)
+    real(8), parameter :: k_Dpoc(Npom) = (/ 0.3d0/86400.0d0, 1.0d-5/86400.0d0 /)    ! (s-1)          Decomposition rate of POC at 0 oC (0.3d0 d-1; Kishi et al., 2001)
     real(8), parameter :: b_Dpoc(Npom) = 0.0693d0           ! (degC-1)       Temperature coefficient for decomposition of POC (Kishi et al., 2001)
-    real(8), parameter :: k_Ddon(Ndom) = (/ 0.02d0/86400.0d0, 0.0002d0/86400.0d0 /)   ! (s-1)          Decomposition rate of DON at 0 oC (0.02d0 d-1; Kishi et al., 2007)
+    real(8), parameter :: k_Ddon(Ndom) = (/ 0.02d0/86400.0d0, 1.0d-5/86400.0d0 /)   ! (s-1)          Decomposition rate of DON at 0 oC (0.02d0 d-1; Kishi et al., 2007)
     real(8), parameter :: b_Ddon(Ndom) = 0.0693d0           ! (degC-1)       Temperature coefficient for decomposition of DON (Kishi et al., 2007)
-    real(8), parameter :: k_Dpon(Npom) = (/ 0.1d0/86400.0d0, 0.01d0/86400.0d0 /)    ! (s-1)          Decomposition rate of PON at 0 oC (0.1d0 d-1; Kishi et al., 2007)
+    real(8), parameter :: k_Dpon(Npom) = (/ 0.1d0/86400.0d0, 1.0d-5/86400.0d0 /)    ! (s-1)          Decomposition rate of PON at 0 oC (0.1d0 d-1; Kishi et al., 2007)
     real(8), parameter :: b_Dpon(Npom) = 0.0693d0           ! (degC-1)       Temperature coefficient for decomposition of POC (Kishi et al., 2007)
-    real(8), parameter :: k_Ddop(Ndom) = (/ 0.02d0/86400.0d0, 0.0002d0/86400.0d0 /)   ! (s-1)          Decomposition rate of DOP at 0 oC 
+    real(8), parameter :: k_Ddop(Ndom) = (/ 0.02d0/86400.0d0, 1.0d-5/86400.0d0 /)   ! (s-1)          Decomposition rate of DOP at 0 oC 
     real(8), parameter :: b_Ddop(Ndom) = 0.0693d0           ! (degC-1)       Temperature coefficient for decomposition of DOP 
-    real(8), parameter :: k_Dpop(Npom) = (/ 0.1d0/86400.0d0, 0.01d0/86400.0d0 /)    ! (s-1)          Decomposition rate of POP at 0 oC 
+    real(8), parameter :: k_Dpop(Npom) = (/ 0.1d0/86400.0d0, 1.0d-5/86400.0d0 /)    ! (s-1)          Decomposition rate of POP at 0 oC 
     real(8), parameter :: b_Dpop(Npom) = 0.0693d0           ! (degC-1)       Temperature coefficient for decomposition of POP 
 !------- Decomposition parameters (CPOM -> Detritus) --------------------
-    real(8), parameter :: k_Dcpoc2dtr = 1.0d-4/86400.0d0    ! (s-1)          Decomposition rate of DOC at 0 oC (0.3d0 d-1; Kishi et al., 2001)
-    real(8), parameter :: b_Dcpoc2dtr = 0.0693d0           ! (degC-1)       Temperature coefficient for decomposition of DOC (Kishi et al., 2001)
-    real(8), parameter :: k_Dcpon2dtr = 1.0d-4/86400.0d0    ! (s-1)          Decomposition rate of DOC at 0 oC (0.3d0 d-1; Kishi et al., 2001)
-    real(8), parameter :: b_Dcpon2dtr = 0.0693d0           ! (degC-1)       Temperature coefficient for decomposition of DOC (Kishi et al., 2001)
-    real(8), parameter :: k_Dcpop2dtr = 1.0d-4/86400.0d0    ! (s-1)          Decomposition rate of DOC at 0 oC (0.3d0 d-1; Kishi et al., 2001)
-    real(8), parameter :: b_Dcpop2dtr = 0.0693d0           ! (degC-1)       Temperature coefficient for decomposition of DOC (Kishi et al., 2001)
+    real(8), parameter :: k_Dcpoc2dtr = 1.0d-5/86400.0d0    ! (s-1)          Decomposition rate of DOC at 0 oC (0.3d0 d-1; Kishi et al., 2001)
+    real(8), parameter :: b_Dcpoc2dtr = 0.0693d0            ! (degC-1)       Temperature coefficient for decomposition of DOC (Kishi et al., 2001)
+    real(8), parameter :: k_Dcpon2dtr = 1.0d-5/86400.0d0    ! (s-1)          Decomposition rate of DOC at 0 oC (0.3d0 d-1; Kishi et al., 2001)
+    real(8), parameter :: b_Dcpon2dtr = 0.0693d0            ! (degC-1)       Temperature coefficient for decomposition of DOC (Kishi et al., 2001)
+    real(8), parameter :: k_Dcpop2dtr = 1.0d-5/86400.0d0    ! (s-1)          Decomposition rate of DOC at 0 oC (0.3d0 d-1; Kishi et al., 2001)
+    real(8), parameter :: b_Dcpop2dtr = 0.0693d0            ! (degC-1)       Temperature coefficient for decomposition of DOC (Kishi et al., 2001)
 !------- Physical parameters --------------------
 #if defined NUTRIENTS
     real(8), parameter :: k_Nit = 0.03/86400.0d0   	 ! (s-1)          Nitrification rate at 0 oC (0.03d0 d-1; Kishi et al., 2007)
@@ -544,7 +544,7 @@ CONTAINS
 #endif
 #if defined NUTRIENTS
       dDON_dt(iLbl) = dDON_dt(iLbl) + Ep(k)/rCNp(k)  !!!!!!**************
-      dDOP_dt(iLbl) = dDOP_dt(iLbl) + Ep(k)/rCNp(k)  !!!!!!**************
+      dDOP_dt(iLbl) = dDOP_dt(iLbl) + Ep(k)/rCPp(k)  !!!!!!**************
 #endif
 
 !----- Respiration rate (umolC L-1 s-1) -----------------
@@ -588,7 +588,7 @@ CONTAINS
 #endif
 #if defined NUTRIENTS
       dPON_dt(iDtr) = dPON_dt(iDtr) + Mp(k)/rCNp(k)  !!!!!!**************
-      dPOP_dt(iDtr) = dPOP_dt(iDtr) + Mp(k)/rCNp(k)  !!!!!!**************
+      dPOP_dt(iDtr) = dPOP_dt(iDtr) + Mp(k)/rCPp(k)  !!!!!!**************
 #endif
     END DO
 

@@ -783,24 +783,24 @@ contains
       ELSE
         w_PM = -(rho_POM(itrc)/1.024d0 - 1.0d0)*grav*D_POM(itrc)*D_POM(itrc)*1.0d-6/18.0d0/vis_sw
       END IF
-      CALL bio_vadv(N, dt, dz, z_r, z_w, w_PM, POC(:,itrc), dPOC(:,itrc), Fdep_POC(itrc))
+      CALL bio_vadv2(N, dt, dz, z_r, z_w, w_PM, POC(:,itrc), dPOC(:,itrc), Fdep_POC(itrc))
 # if defined CARBON_ISOTOPE
-      CALL bio_vadv(N, dt, dz, z_r, z_w, w_PM, PO13C(:,itrc), dPO13C(:,itrc), Fdep_PO13C(itrc))
+      CALL bio_vadv2(N, dt, dz, z_r, z_w, w_PM, PO13C(:,itrc), dPO13C(:,itrc), Fdep_PO13C(itrc))
 # endif
 # if defined NUTRIENTS
-      CALL bio_vadv(N, dt, dz, z_r, z_w, w_PM, PON(:,itrc), dPON(:,itrc), Fdep_PON(itrc))
-      CALL bio_vadv(N, dt, dz, z_r, z_w, w_PM, POP(:,itrc), dPOP(:,itrc), Fdep_POP(itrc))
+      CALL bio_vadv2(N, dt, dz, z_r, z_w, w_PM, PON(:,itrc), dPON(:,itrc), Fdep_PON(itrc))
+      CALL bio_vadv2(N, dt, dz, z_r, z_w, w_PM, POP(:,itrc), dPOP(:,itrc), Fdep_POP(itrc))
 #  if defined NITROGEN_ISOTOPE
-      CALL bio_vadv(N, dt, dz, z_r, z_w, w_PM, PO15N(:,itrc), dPO15N(:,itrc), Fdep_PO15N(itrc))
+      CALL bio_vadv2(N, dt, dz, z_r, z_w, w_PM, PO15N(:,itrc), dPO15N(:,itrc), Fdep_PO15N(itrc))
 #  endif
 # endif
     END DO
 
     DO itrc=1, Npim
       w_PM = -(rho_PIM(itrc)/1.024d0 - 1.0d0)*grav*D_PIM(itrc)*D_PIM(itrc)*1.0d-6/18.0d0/vis_sw
-      CALL bio_vadv(N, dt, dz, z_r, z_w, w_PM, PIC(:,itrc), dPIC(:,itrc), Fdep_PIC(itrc))
+      CALL bio_vadv2(N, dt, dz, z_r, z_w, w_PM, PIC(:,itrc), dPIC(:,itrc), Fdep_PIC(itrc))
 # if defined CARBON_ISOTOPE
-      CALL bio_vadv(N, dt, dz, z_r, z_w, w_PM, PI13C(:,itrc), dPI13C(:,itrc), Fdep_PI13C(itrc))
+      CALL bio_vadv2(N, dt, dz, z_r, z_w, w_PM, PI13C(:,itrc), dPI13C(:,itrc), Fdep_PI13C(itrc))
 # endif
     END DO
 
@@ -1395,6 +1395,63 @@ contains
 
     RETURN
   END SUBROUTINE bio_vadv
+
+
+  SUBROUTINE bio_vadv2(N, dt, dz, z_r, z_w, w, trc, dtrc_dt, Fb_trc)
+      
+    implicit none
+    integer, intent(in ) :: N              ! Number of vertical layer
+    real(8), intent(in ) :: dt             ! (s) Time step
+    real(8), intent(in ) :: dz(N)          ! (m) vertical layer tickness
+    real(8), intent(in ) :: z_r(N)         ! (m) distance between bottom and RHO point
+    real(8), intent(in ) :: z_w(0:N)       ! (m) distance between bottom and W point 
+    real(8), intent(in ) :: w              ! (m s-1) vertical advection verocity (upper-ward is positive)
+    real(8), intent(in ) :: trc(N)         ! (umol L-1) Concentration of tracer   
+    real(8), intent(out) :: dtrc_dt(N)     ! (umol L-1 s-1) Time derivative of concentration
+    real(8), intent(out) :: Fb_trc         ! (mmol m-2 s-1) Bottom flux from sediment to water column (upper-ward is positive)    
+
+    real(8) :: dz_r(N-1)    
+    real(8) :: F(0:N),v(0:N-1)
+    integer :: k, ks
+    integer :: kup
+    real(8) :: dtrc_s, trct, tnewt, Courant
+
+!
+!   Upstream advective scheme
+!
+    DO k=1,N-1
+      dz_r(k) = z_r(k+1) - z_r(k)
+    END DO
+
+    DO k=1,N-1
+      Courant = abs( w*dt/dz_r(k) )
+      if(Courant > 1 ) then
+        v(k) = sign( dz_r(k)/dt, w )
+      else
+        v(k) = w
+      endif
+    END DO
+    v(0) = v(1)
+
+    if(w>0) then
+      kup = 0
+      F(0) = 0.0d0
+    else
+      kup = 1
+      F(0) = trc(1)*v(0)
+    endif
+    DO k=1,N-1
+      F(k) = v(k) * trc(K+kup)
+    END DO
+    F(N) = 0.0d0
+
+    DO k=1,N
+      dtrc_dt(k) = (F(k-1)-F(k))/dz(k)
+    END DO    
+    Fb_trc = F(0)
+
+    RETURN
+  END SUBROUTINE bio_vadv2
 
 END MODULE mod_reef_ecosys
 
