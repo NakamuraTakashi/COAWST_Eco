@@ -247,9 +247,9 @@ CONTAINS
     real(8), parameter :: rLDOMphy = 0.95d0  ! (Labile DOM)/(Total DOM) of phytoplankton excreted DOM (no dim.) 
 #if defined NUTRIENTS
 ! PHY1 Nutrient Assimilation Parameter         
-    real(8), parameter :: Kp_NH4(Nphy) = [ 0.1d0,  0.6d0,  0.1d0  ] ! (umol L-1)1.5         
-    real(8), parameter :: Kp_NO3(Nphy) = [ 0.1d0,  0.6d0,  0.1d0  ] ! (umol L-1)0.1         
-    real(8), parameter :: Kp_PO4(Nphy) = [ 0.01d0, 0.06d0, 0.01d0 ] ! (umol L-1)0.01 
+    real(8), parameter :: Kp_NH4(Nphy) = [ 0.2d0,  0.2d0,  0.2d0  ] ! (umol L-1)1.5         
+    real(8), parameter :: Kp_NO3(Nphy) = [ 0.1d0,  1.0d0,  0.1d0  ] ! (umol L-1)0.1         
+    real(8), parameter :: Kp_PO4(Nphy) = [ 0.01d0, 0.01d0, 0.01d0 ] ! (umol L-1)0.01 
     ! (1.5L umolN-1; Kishi et al., 2007)  0.01  0.226  0.5
     real(8), parameter :: psi(Nphy) =  [ 0.01d0, 0.01d0, 0.01d0 ]    !(L umolC-1)   
 #endif
@@ -308,12 +308,12 @@ CONTAINS
                                                           , 0.0693d0,          0.0693d0            ], [Npom,Ndom] )    ! (degC-1)       Temperature coefficient for decomposition of POP 
 !    real(8), parameter :: rLDOMpom = 0.95d0  ! (Labile DOM)/(Total DOM) of DOM decomposed from POM (no dim.) 
 !------- Decomposition parameters (CPOM -> Detritus) --------------------
-    real(8), parameter :: k_Dcpoc2dtr = 1.0d-4/86400.0d0    ! (s-1)          Decomposition rate of DOC at 0 oC (0.3d0 d-1; Kishi et al., 2001)
-    real(8), parameter :: b_Dcpoc2dtr = 0.0693d0           ! (degC-1)       Temperature coefficient for decomposition of DOC (Kishi et al., 2001)
-    real(8), parameter :: k_Dcpon2dtr = 1.0d-4/86400.0d0    ! (s-1)          Decomposition rate of DOC at 0 oC (0.3d0 d-1; Kishi et al., 2001)
-    real(8), parameter :: b_Dcpon2dtr = 0.0693d0           ! (degC-1)       Temperature coefficient for decomposition of DOC (Kishi et al., 2001)
-    real(8), parameter :: k_Dcpop2dtr = 1.0d-4/86400.0d0    ! (s-1)          Decomposition rate of DOC at 0 oC (0.3d0 d-1; Kishi et al., 2001)
-    real(8), parameter :: b_Dcpop2dtr = 0.0693d0           ! (degC-1)       Temperature coefficient for decomposition of DOC (Kishi et al., 2001)
+    real(8), parameter :: k_Dcpoc2dtr = 1.0d-5/86400.0d0    ! (s-1)          Decomposition rate of DOC at 0 oC (0.3d0 d-1; Kishi et al., 2001)
+    real(8), parameter :: b_Dcpoc2dtr = 0.0693d0            ! (degC-1)       Temperature coefficient for decomposition of DOC (Kishi et al., 2001)
+    real(8), parameter :: k_Dcpon2dtr = 1.0d-5/86400.0d0    ! (s-1)          Decomposition rate of DOC at 0 oC (0.3d0 d-1; Kishi et al., 2001)
+    real(8), parameter :: b_Dcpon2dtr = 0.0693d0            ! (degC-1)       Temperature coefficient for decomposition of DOC (Kishi et al., 2001)
+    real(8), parameter :: k_Dcpop2dtr = 1.0d-5/86400.0d0    ! (s-1)          Decomposition rate of DOC at 0 oC (0.3d0 d-1; Kishi et al., 2001)
+    real(8), parameter :: b_Dcpop2dtr = 0.0693d0            ! (degC-1)       Temperature coefficient for decomposition of DOC (Kishi et al., 2001)
 !------- Physical parameters --------------------
 #if defined NUTRIENTS
     real(8), parameter :: k_Nit = 0.03/86400.0d0   	 ! (s-1)          Nitrification rate at 0 oC (0.03d0 d-1; Kishi et al., 2007)
