@@ -548,6 +548,8 @@
 #ifdef BIOLOGY
         real(r8), allocatable :: maxbio(:,:)
         real(r8), allocatable :: max_bio(:)
+        real(r8), allocatable :: minbio(:,:)  !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN: add
+        real(r8), allocatable :: min_bio(:)   !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN: add
 #endif
 !
 !  Interpolation scheme.
@@ -2328,6 +2330,8 @@
 #ifdef BIOLOGY
       allocate ( maxbio(NBT, Ngrids) )
       allocate ( max_bio(NBT) )
+      allocate ( minbio(NBT, Ngrids) )  !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN: add
+      allocate ( min_bio(NBT) )         !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN: add
 #endif
 
       allocate ( gls_m(Ngrids) )
@@ -2856,10 +2860,12 @@
       DO ng=1,Ngrids
         DO itrc=1,NBT
           maxbio(itrc, ng) = IniVal
+          minbio(itrc, ng) = 10000.0_r8 !!! <<<<<<<<<<<<<<<<<<<<<<<<<TN: add
         END DO
       END DO
       DO itrc=1,NBT
         max_bio(itrc) = 10000.0_r8   ! bio units
+        min_bio(itrc) = 0.0_r8   ! bio units  !!! <<<<<<<<<<<<<<<<<<<<<<<<<TN: add
       END DO
 #endif
 

@@ -1359,30 +1359,30 @@ contains
     IF (w>=0.0d0) THEN
 !     If the matter has upper-ward vertical velocity (positive buoyancy),
 !     the matter is accumulated at surface layer
-!      z_b = z_w(N)-w*dt
-!      DO k=N,1,-1
-!        IF (z_b > z_w(k-1)) THEN
-!          dtrc_s = dtrc_s + trc(k)*(z_w(k) - z_b)
-!          EXIT
-!        END IF
-!        dtrc_s = dtrc_s + trc(k)*dz(k)
-!      END DO
-!      tnew(N) = tnew(N) + dtrc_s/dz(N)
+      z_b = z_w(N)-w*dt
+      DO k=N,1,-1
+        IF (z_b > z_w(k-1)) THEN
+          dtrc_s = dtrc_s + trc(k)*(z_w(k) - z_b)
+          EXIT
+        END IF
+        dtrc_s = dtrc_s + trc(k)*dz(k)
+      END DO
+      tnew(N) = tnew(N) + dtrc_s/dz(N)
 
       tnew(N) = tnew(N) + (trct - tnewt)/dz(N)
     ELSE
 !     If the matter has down-ward vertical velocity (sinking velocity),
 !     the matter deposits on the seafloor.
-!      z_b = z_w(0)-w*dt
-!      DO k=1,N
-!        IF (z_b < z_w(k)) THEN
-!          dtrc_s = dtrc_s + trc(k)*(z_b - z_w(k-1))
-!          EXIT
-!        END IF
-!        dtrc_s = dtrc_s + trc(k)*dz(k)
-!      END DO
-!      tnew(1) = tnew(1) + dtrc_s/dz(1)
-!      Fb_trc = dtrc_s/dt
+      z_b = z_w(0)-w*dt
+      DO k=1,N
+        IF (z_b < z_w(k)) THEN
+          dtrc_s = dtrc_s + trc(k)*(z_b - z_w(k-1))
+          EXIT
+        END IF
+        dtrc_s = dtrc_s + trc(k)*dz(k)
+      END DO
+      tnew(1) = tnew(1) + dtrc_s/dz(1)
+      Fb_trc = dtrc_s/dt
 
       tnew(1) = tnew(1) + (trct - tnewt)/dz(1)
 !      Fb_trc = (trct - tnewt)/dt
