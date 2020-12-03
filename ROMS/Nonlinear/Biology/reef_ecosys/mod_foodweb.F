@@ -316,7 +316,7 @@ CONTAINS
     real(8), parameter :: b_Dcpop2dtr = 0.0693d0            ! (degC-1)       Temperature coefficient for decomposition of DOC (Kishi et al., 2001)
 !------- Physical parameters --------------------
 #if defined NUTRIENTS
-    real(8), parameter :: k_Nit = 0.03/86400.0d0   	 ! (s-1)          Nitrification rate at 0 oC (0.03d0 d-1; Kishi et al., 2007)
+    real(8), parameter :: k_Nit = 0.03/86400.0d0     ! (s-1)          Nitrification rate at 0 oC (0.03d0 d-1; Kishi et al., 2007)
     real(8), parameter :: b_Nit = 0.0693d0           ! (degC-1)       Temperature coefficient for nitrification (Kishi et al., 2007)
 #endif
 !------- Physical parameters --------------------
@@ -359,8 +359,6 @@ CONTAINS
     real(8) :: rPHY13C(Nphy), rZOO13C(Nzoo), rPI13C(Npim)
 #endif
 #if defined NUTRIENTS
-    real(8) :: Gdon2z(Ndom,Nzoo), Gpon2z(Npom,Nzoo)
-    real(8) :: Gdop2z(Ndom,Nzoo), Gpop2z(Npom,Nzoo)
     real(8) :: Ddon(Ndom), Dpon(Npom), Dp2don(Npom,Ndom)
     real(8) :: Ddop(Ndom), Dpop(Npom), Dp2dop(Npom,Ndom)
     real(8) :: Vp_NH4(Nphy), Vp_NO3(Nphy)
@@ -369,12 +367,7 @@ CONTAINS
     real(8) :: Nit
 #endif
     
-    integer :: k,m,p
-
-    real(8) :: Gp2z_sum
-    real(8) :: Ap2z_sum, Adoc2z_sum, Apoc2z_sum
-    real(8) :: Gdoc2z_sum, Gpoc2z_sum
-
+    integer :: k,m
     real(8) :: cf1, cf2, cf3
 
 !===== Initiallize tracer parameters =================================
@@ -513,9 +506,8 @@ CONTAINS
       ELSE IF(k == iDtm) THEN   
 !        Vphy2_NH4 = NH4 * NH4/(NH4 * NH4+Kphy2_NH4 * Kphy2_NH4) * rNH4												!
 !        Vphy2_NO3 = NO3 * NO3/(NO3 * NO3+Kphy2_NO3 * Kphy2_NO3) * exp(-psi2 * NH4)	*(1.0d0 - rNH4)			!
-        Vp_NH4(k) = cf1*cf1/(cf1*cf1+Kp_NH4(k)*Kp_NH4(k)) * rNH4(k)													!
-        Vp_NO3(k) = cf2*cf2/(cf2*cf2+Kp_NO3(k)*Kp_NO3(k)) * exp(-psi(k) * cf1) * (1.0d0 - rNH4(k))				!
-        
+        Vp_NH4(k) = cf1*cf1/(cf1*cf1+Kp_NH4(k)*Kp_NH4(k)) * rNH4(k)
+        Vp_NO3(k) = cf2*cf2/(cf2*cf2+Kp_NO3(k)*Kp_NO3(k)) * exp(-psi(k) * cf1) * (1.0d0 - rNH4(k))    
         Vp_PO4(k) = cf3*cf3/(cf3*cf3+Kp_PO4(k)*Kp_PO4(k))
       ELSE
         Vp_NH4(k) = cf1/(cf1+Kp_NH4(k)) * rNH4(k)
@@ -548,13 +540,13 @@ CONTAINS
       dDI13C_dt = dDI13C_dt - Ap(k)*rCCp(k)*a_calc*rDI13C
 #endif
 #if defined NUTRIENTS
-      dNO3_dt = dNO3_dt - Ap(k)*Vp_NO3(k)*(Vp_NH4(k)+Vp_NO3(k))/rCNp(k)
-      dNH4_dt = dNH4_dt - Ap(k)*Vp_NH4(k)*(Vp_NH4(k)+Vp_NO3(k))/rCNp(k)
+      dNO3_dt = dNO3_dt - Ap(k)*Vp_NO3(k)/(Vp_NH4(k)+Vp_NO3(k))/rCNp(k)
+      dNH4_dt = dNH4_dt - Ap(k)*Vp_NH4(k)/(Vp_NH4(k)+Vp_NO3(k))/rCNp(k)
       dPO4_dt = dPO4_dt - Ap(k)/rCPp(k)
 
-      dDOx_dt = dDOx_dt + 2.0d0 * Ap(k)*Vp_NO3(k)*(Vp_NH4(k)+Vp_NO3(k))/rCNp(k)   !!!*********************
-      dTA_dt = dTA_dt + 1.0d0 * Ap(k)*Vp_NO3(k)*(Vp_NH4(k)+Vp_NO3(k))/rCNp(k)  &  ! increase of alkalinity by 1 mole when nitrate or nitrite is the N source
-                      - 1.0d0 * Ap(k)*Vp_NH4(k)*(Vp_NH4(k)+Vp_NO3(k))/rCNp(k)  &  ! decrease of alkalinity by 1 mole when ammonia is used
+      dDOx_dt = dDOx_dt + 2.0d0 * Ap(k)*Vp_NO3(k)/(Vp_NH4(k)+Vp_NO3(k))/rCNp(k)   !!!*********************
+      dTA_dt = dTA_dt + 1.0d0 * Ap(k)*Vp_NO3(k)/(Vp_NH4(k)+Vp_NO3(k))/rCNp(k)  &  ! increase of alkalinity by 1 mole when nitrate or nitrite is the N source
+                      - 1.0d0 * Ap(k)*Vp_NH4(k)/(Vp_NH4(k)+Vp_NO3(k))/rCNp(k)  &  ! decrease of alkalinity by 1 mole when ammonia is used
                       + 2.0d0 * Ap(k)/rCPp(k)  ! increases alkalinity by 2 mole per mole HPO42-
 #endif
 
@@ -635,9 +627,9 @@ CONTAINS
 
       DO m=1, Nphy
         Gp2z(m,k) = k_Gp2z(m,k) * exp(b_Gp2z(m,k)*Tmp)    &
-          * (1-exp(lam(k)*(t_Gp2z(m,k) - PHY(m)))) * ZOO(k)			!!!!!!!!!!!!!!!!!!!
+          * (1-exp(lam(k)*(t_Gp2z(m,k) - PHY(m)))) * ZOO(k)  !!!!!!!!!!!!!!!!!!!
         IF(Gp2z(m,k) <= 0.0d0) THEN !-----For Error handling
-        	Gp2z(m,k) = 0.0d0
+          Gp2z(m,k) = 0.0d0
         ENDIF
         Gp2z(m,k) = MAX( Gp2z(m,k), 0.0d0 )  !!! Error handling
 
