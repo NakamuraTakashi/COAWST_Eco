@@ -1652,7 +1652,7 @@ contains
     real(8), intent(in) :: d   ! elevation (m) = -depth
 
     IF (d.gt.-155.0d0) THEN
-      PHY1_Profile2=(-0.00095d0*(d+50.0d0)**2 + 10.5d0)/24.0d0     ! umol L-1
+      PHY1_Profile2=(-0.00095d0*(d+50.0d0)**2 + 10.5d0)/24.0d0 *0.2d0    ! umol L-1
     ELSE IF (d.le.-155.0d0) THEN
       PHY1_Profile2=0.0d0     ! umol L-1
     END IF
@@ -1682,7 +1682,7 @@ contains
     real(8), intent(in) :: d   ! elevation (m) = -depth  
  
     IF (d.gt.-155.0d0) THEN
-      PHY3_Profile2=(-0.00095d0*(d+50.0d0)**2 + 10.5d0)/24.0d0     ! umol L-1
+      PHY3_Profile2=(-0.00095d0*(d+50.0d0)**2 + 10.5d0)/24.0d0 * 0.8d0    ! umol L-1
     ELSE IF (d.le.-155d0) THEN
       PHY3_Profile2=0.0d0     ! umol L-1
     END IF
@@ -1697,9 +1697,9 @@ contains
     implicit none
     real(8), intent(in) :: d   ! elevation (m) = -depth  
  
-    IF(( d .GE. -400.0d0) .AND. ( d .LE. 0.0d0 )) THEN
+    IF(( d .GE. -400.0d0) .AND. ( d .LE. 10.0d0 )) THEN
       ZOO_Profile = 2.5d0+(d/200.0d0)    ! umolC L-1
-    ELSE IF( d .LT. -400.0d0) THEN
+    ELSE
       ZOO_Profile = 0.0d0                            ! umolC L-1
     END IF
 
@@ -1710,13 +1710,9 @@ contains
 
   real(8) function ZOO_Profile2(d)
     implicit none
-    real(8), intent(in) :: d   ! elevation (m) = -depth  
- 
-    IF(( d .GE. -200.0d0) .AND. ( d .LE. 0.0d0 )) THEN
-      ZOO_Profile2 = max( 0.25d0+(d/200.0d0), 0.0d0 )    ! umolC L-1
-    ELSE IF( d .LT. -200.0d0) THEN
-      ZOO_Profile2 = 0.0d0               ! umolC L-1
-    END IF
+    real(8), intent(in) :: d   ! elevation (m) = -depth
+
+    ZOO_Profile2 = max( 0.25d0+(d/2000.0d0), 0.0d0 )    ! umolC L-1
 
   end function ZOO_Profile2
 
