@@ -5611,8 +5611,11 @@
         IF (DOMAIN(ng)%Western_Edge(tile)) THEN
           DO j=Jstr,Jend
             m=BRY_CONTACT(iwest,cr)%C2Bindex(j)
-            Idg=Ucontact(cr)%Idg(m)                 ! for debugging
-            Jdg=Ucontact(cr)%Jdg(m)                 ! purposes
+!            write(*,*) 'DEBUG 2: ',m,i,inorth,cr  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! for Debug
+            if (m==-999) cycle !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
+
+!            Idg=Ucontact(cr)%Idg(m)                 ! for debugging
+!            Jdg=Ucontact(cr)%Jdg(m)                 ! purposes
             cff=0.5_r8*GRID(ng)%on_u(Istr,j)*                           &
                 (GRID(ng)%h(Istr-1,j)+                                  &
      &           OCEAN(ng)%zeta(Istr-1,j,indx1(ng))+                    &
@@ -5644,8 +5647,12 @@
         IF (DOMAIN(ng)%Eastern_Edge(tile)) THEN
           DO j=Jstr,Jend
             m=BRY_CONTACT(ieast,cr)%C2Bindex(j)
-            Idg=Ucontact(cr)%Idg(m)                 ! for debugging
-            Jdg=Ucontact(cr)%Jdg(m)                 ! purposes
+!            write(*,*) 'DEBUG 2: ',m,i,inorth,cr  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! for Debug
+            if (m==-999) cycle !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
+            if (m>191) cycle !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
+
+!            Idg=Ucontact(cr)%Idg(m)                 ! for debugging
+!            Jdg=Ucontact(cr)%Jdg(m)                 ! purposes
             cff=0.5_r8*GRID(ng)%on_u(Iend+1,j)*                         &
      &          (GRID(ng)%h(Iend+1,j)+                                  &
      &           OCEAN(ng)%zeta(Iend+1,j,indx1(ng))+                    &
@@ -5677,8 +5684,10 @@
         IF (DOMAIN(ng)%Southern_Edge(tile)) THEN
           DO i=Istr,Iend
             m=BRY_CONTACT(isouth,cr)%C2Bindex(i)
-            Idg=Vcontact(cr)%Idg(m)                 ! for debugging
-            Jdg=Vcontact(cr)%Jdg(m)                 ! purposes
+!            write(*,*) 'DEBUG 2: ',m,i,inorth,cr  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! for Debug
+            if (m==-999) cycle !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
+!            Idg=Vcontact(cr)%Idg(m)                 ! for debugging
+!            Jdg=Vcontact(cr)%Jdg(m)                 ! purposes
             cff=0.5_r8*GRID(ng)%om_v(i,Jstr)*                           &
      &          (GRID(ng)%h(i,Jstr-1)+                                  &
      &           OCEAN(ng)%zeta(i,Jstr-1,indx1(ng))+                    &
@@ -5710,8 +5719,11 @@
         IF (DOMAIN(ng)%Northern_Edge(tile)) THEN
           DO i=Istr,Iend
             m=BRY_CONTACT(inorth,cr)%C2Bindex(i)
-            Idg=Vcontact(cr)%Idg(m)                 ! for debugging
-            Jdg=Vcontact(cr)%Jdg(m)                 ! purposes
+!            write(*,*) 'DEBUG 2: ',m,i,inorth,cr  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! for Debug
+            if (m==-999) cycle !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
+
+!            Idg=Vcontact(cr)%Idg(m)                 ! for debugging
+!            Jdg=Vcontact(cr)%Jdg(m)                 ! purposes
             cff=0.5_r8*GRID(ng)%om_v(i,Jend+1)*                         &
      &          (GRID(ng)%h(i,Jend+1)+                                  &
      &           OCEAN(ng)%zeta(i,Jend+1,indx1(ng))+                    &

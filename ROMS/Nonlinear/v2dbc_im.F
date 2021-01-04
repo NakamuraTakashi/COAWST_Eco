@@ -476,8 +476,9 @@
               tnew=RollingIndex(cr)
               DO i=Istr,Iend
                 m=BRY_CONTACT(isouth,cr)%C2Bindex(i)
-                Idg=Vcontact(cr)%Idg(m)             ! for debugging
-                Jdg=Vcontact(cr)%Jdg(m)             ! purposes
+                if (m==-999) cycle !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
+!                Idg=Vcontact(cr)%Idg(m)             ! for debugging
+!                Jdg=Vcontact(cr)%Jdg(m)             ! purposes
                 cff=0.5_r8*GRID(ng)%om_v(i,Jstr)*                       &
      &              (GRID(ng)%h(i,Jstr-1)+zeta(i,Jstr-1,kout)+          &
      &               GRID(ng)%h(i,Jstr  )+zeta(i,Jstr  ,kout))
@@ -840,8 +841,10 @@
               tnew=RollingIndex(cr)
               DO i=Istr,Iend
                 m=BRY_CONTACT(inorth,cr)%C2Bindex(i)
-                Idg=Vcontact(cr)%Idg(m)             ! for debugging
-                Jdg=Vcontact(cr)%Jdg(m)             ! purposes
+!                write(*,*) 'DEBUG 1: ',m,i,inorth,cr  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! for Debug
+                if (m==-999) cycle !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
+!                Idg=Vcontact(cr)%Idg(m)             ! for debugging
+!                Jdg=Vcontact(cr)%Jdg(m)             ! purposes
                 cff=0.5_r8*GRID(ng)%om_v(i,Jend+1)*                     &
      &              (GRID(ng)%h(i,Jend+1)+zeta(i,Jend+1,kout)+          &
      &               GRID(ng)%h(i,Jend  )+zeta(i,Jend  ,kout))
