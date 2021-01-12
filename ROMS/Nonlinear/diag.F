@@ -209,6 +209,7 @@
       real(r8) :: my_maxrho
 # ifdef BIOLOGY
       real(r8) :: my_maxbio(NBT)
+      real(r8) :: my_minbio(NBT)  !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add 
 # endif
 #endif
       real(r8), dimension(IminS:ImaxS,JminS:JmaxS) :: ke2d
@@ -228,7 +229,8 @@
 !
 #ifdef DISTRIBUTE
 # ifdef BIOLOGY
-      Nreduce = 5 + NBT
+!      Nreduce = 5 + NBT       !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: rm
+      Nreduce = 5 + NBT + NBT  !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add      
 /*# endif*/  /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!TN:rm*/
       IF (.not. allocated(buffer))    allocate (buffer(Nreduce))   !!! TN: activate again
       IF (.not. allocated(op_handle)) allocate (op_handle(Nreduce))   !!! TN: activate again
@@ -252,6 +254,7 @@
 # ifdef BIOLOGY
         DO ibt=1,NBT
           my_maxbio(ibt)=-spval
+          my_minbio(ibt)= max_bio(ibt)   !!!<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
         END DO
 # endif
 #endif
@@ -299,6 +302,7 @@
               itrc=idbio(ibt)
               DO i=Istr,Iend
                 my_maxbio(ibt)=MAX(my_maxbio(ibt),t(i,j,k,nstp,itrc))
+                my_minbio(ibt)=MIN(my_minbio(ibt),t(i,j,k,nstp,itrc)) !!!<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
               END DO
             END DO
           END DO
@@ -402,6 +406,7 @@
 # ifdef BIOLOGY
           DO ibt=1,NBT
             maxbio(ibt,ng)=0.0_r8
+            minbio(ibt,ng)=max_bio(ibt) !!!<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
           END DO
 # endif
 #endif
@@ -426,6 +431,7 @@
 # ifdef BIOLOGY
           DO ibt=1,NBT
             maxbio(ibt,ng)=MAX(maxbio(ibt,ng),my_maxbio(ibt))
+            minbio(ibt,ng)=MIN(minbio(ibt,ng),my_minbio(ibt)) !!!<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
           END DO
 # endif
 #endif
@@ -462,6 +468,7 @@
 #  ifdef BIOLOGY
           DO ibt=1,NBT
             buffer(5+ibt)=maxbio(ibt,ng)
+            buffer(5+NBT+ibt)=minbio(ibt,ng)  !!!<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
           END DO
 #  endif
 # endif
@@ -474,6 +481,7 @@
 #  ifdef BIOLOGY
           DO ibt=1,NBT
             op_handle(5+ibt)='MAX'
+            op_handle(5+NBT+ibt)='MIN'  !!!<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
           END DO
 #  endif
 # endif
@@ -487,6 +495,7 @@
 #  ifdef BIOLOGY
           DO ibt=1,NBT
             maxbio(ibt,ng)=buffer(5+ibt)
+            minbio(ibt,ng)=buffer(5+NBT+ibt)  !!!<<<<<<<<<<<<<<<<<<<<< TN: add
           END DO
 #  endif
 # endif
@@ -654,8 +663,17 @@
             IF (maxbio(ibt,ng).gt.max_bio(ibt)) THEN
               IF (Master) print *, 'BIO trouble in DIAG ', maxbio(:,ng)
 !              exit_flag=1  !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: rm
+              EXIT   !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
             END IF
           END DO
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: add
+          DO ibt=1,NBT
+            IF (minbio(ibt,ng) < min_bio(ibt)) THEN
+              IF (Master) print *, 'BIO trouble in DIAG ', minbio(:,ng)
+              EXIT
+            END IF
+          END DO
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
 # endif
 #endif
 !

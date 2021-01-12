@@ -321,7 +321,7 @@
               END IF
               ifield=isTvar(idbio(itracer))
               Npts=load_lbc(Nval, Cval, line, nline, ifield, igrid,     &
-     &                      iTrcStr, iTrcEnd,                           &
+     &                      idbio(iTrcStr), idbio(iTrcEnd),             &
      &                      Vname(1,idTvar(idbio(itracer))), LBC)
 #if defined ADJOINT || defined TANGENT || defined TL_IOMS
             CASE ('ad_LBC(isTvar)')
@@ -332,10 +332,17 @@
               END IF
               ifield=isTvar(idbio(itracer))
               Npts=load_lbc(Nval, Cval, line, nline, ifield, igrid,     &
-     &                      iTrcStr, iTrcEnd,                           &
+     &                      idbio(iTrcStr), idbio(iTrcEnd),             &
      &                      Vname(1,idTvar(idbio(itracer))), ad_LBC)
 #endif
-#ifdef TCLIMATOLOGY
+            CASE ('LtracerSrc')
+              Npts=load_l(Nval, Cval, NBT*Ngrids, Ltrc)
+              DO ng=1,Ngrids
+                DO itrc=1,NBT
+                  i=idbio(itrc)
+                  LtracerSrc(i,ng)=Ltrc(itrc,ng)
+                END DO
+              END DO
             CASE ('LtracerCLM')
               Npts=load_l(Nval, Cval, NBT*Ngrids, Ltrc)
               DO ng=1,Ngrids
@@ -344,13 +351,12 @@
                   LtracerCLM(i,ng)=Ltrc(itrc,ng)
                 END DO
               END DO
-#endif
-            CASE ('LtracerSrc')
+            CASE ('LnudgeTCLM')
               Npts=load_l(Nval, Cval, NBT*Ngrids, Ltrc)
               DO ng=1,Ngrids
                 DO itrc=1,NBT
                   i=idbio(itrc)
-                  LtracerSrc(i,ng)=Ltrc(itrc,ng)
+                  LnudgeTCLM(i,ng)=Ltrc(itrc,ng)
                 END DO
               END DO
             CASE ('Hout(idTvar)')
@@ -381,8 +387,8 @@
                   Hout(i,ng)=Ltrc(itrc,ng)
                 END DO
               END DO
-!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
 
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
             CASE ('Hout(idCrl1)')
               IF (idCrl1.eq.0) THEN
                 IF (Master) WRITE (out,30) 'idCrl1'
@@ -444,6 +450,36 @@
               END DO
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 
+            CASE ('Qout(idTvar)')
+              Npts=load_l(Nval, Cval, NBT*Ngrids, Ltrc)
+              DO ng=1,Ngrids
+                DO itrc=1,NBT
+                  i=idTvar(idbio(itrc))
+                  Qout(i,ng)=Ltrc(itrc,ng)
+                END DO
+              END DO
+            CASE ('Qout(idsurT)')
+              Npts=load_l(Nval, Cval, NBT*Ngrids, Ltrc)
+              DO ng=1,Ngrids
+                DO itrc=1,NBT
+                  i=idsurT(idbio(itrc))
+                  IF (i.eq.0) THEN
+                    IF (Master) WRITE (out,30)                          &
+     &                                'idsurT(idbio(', itrc, '))'
+                    exit_flag=5
+                    RETURN
+                  END IF
+                  Qout(i,ng)=Ltrc(itrc,ng)
+                END DO
+              END DO
+            CASE ('Qout(idTsur)')
+              Npts=load_l(Nval, Cval, NBT*Ngrids, Ltrc)
+              DO ng=1,Ngrids
+                DO itrc=1,NBT
+                  i=idTsur(idbio(itrc))
+                  Qout(i,ng)=Ltrc(itrc,ng)
+                END DO
+              END DO
 #if defined AVERAGES    || \
    (defined AD_AVERAGES && defined ADJOINT) || \
    (defined RP_AVERAGES && defined TL_IOMS) || \
@@ -453,6 +489,46 @@
               DO ng=1,Ngrids
                 DO itrc=1,NBT
                   i=idTvar(idbio(itrc))
+                  Aout(i,ng)=Ltrc(itrc,ng)
+                END DO
+              END DO
+            CASE ('Aout(idTTav)')
+              Npts=load_l(Nval, Cval, NBT*Ngrids, Ltrc)
+              DO ng=1,Ngrids
+                DO itrc=1,NBT
+                  i=idTTav(idbio(itrc))
+                  Aout(i,ng)=Ltrc(itrc,ng)
+                END DO
+              END DO
+            CASE ('Aout(idUTav)')
+              Npts=load_l(Nval, Cval, NBT*Ngrids, Ltrc)
+              DO ng=1,Ngrids
+                DO itrc=1,NBT
+                  i=idUTav(idbio(itrc))
+                  Aout(i,ng)=Ltrc(itrc,ng)
+                END DO
+              END DO
+            CASE ('Aout(idVTav)')
+              Npts=load_l(Nval, Cval, NBT*Ngrids, Ltrc)
+              DO ng=1,Ngrids
+                DO itrc=1,NBT
+                  i=idVTav(idbio(itrc))
+                  Aout(i,ng)=Ltrc(itrc,ng)
+                END DO
+              END DO
+            CASE ('Aout(iHUTav)')
+              Npts=load_l(Nval, Cval, NBT*Ngrids, Ltrc)
+              DO ng=1,Ngrids
+                DO itrc=1,NBT
+                  i=iHUTav(idbio(itrc))
+                  Aout(i,ng)=Ltrc(itrc,ng)
+                END DO
+              END DO
+            CASE ('Aout(iHVTav)')
+              Npts=load_l(Nval, Cval, NBT*Ngrids, Ltrc)
+              DO ng=1,Ngrids
+                DO itrc=1,NBT
+                  i=iHVTav(idbio(itrc))
                   Aout(i,ng)=Ltrc(itrc,ng)
                 END DO
               END DO

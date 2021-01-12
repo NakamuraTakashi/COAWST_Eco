@@ -169,7 +169,8 @@
             END DO
 #    endif
 #   else
-            BOUNDARY(ng)%t_east(j,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng) ! umol kg-1  !!! R13C_fromd13C included geochem module
+            BOUNDARY(ng)%t_east(j,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )                    &
+     &                                                *BOUNDARY(ng)%t_east(j,k,iTIC_) ! umol kg-1  !!! R13C_fromd13C included geochem module
 #    if defined ORGANIC_MATTER
             DO itrc=1,N_dom
               BOUNDARY(ng)%t_east(j,k,iDO13C(itrc)) = R13C_fromd13C( d13C_DOC_0(itrc,ng) )   &
@@ -314,7 +315,7 @@
             END DO
 #    endif
 #   else
-            BOUNDARY(ng)%t_west(j,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng)   &
+            BOUNDARY(ng)%t_west(j,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )                    &
      &                                                *BOUNDARY(ng)%t_west(j,k,iTIC_) ! umol kg-1  !!! R13C_fromd13C included geochem module
 #    if defined ORGANIC_MATTER
             DO itrc=1,N_dom
@@ -459,7 +460,7 @@
             END DO
 #    endif
 #   else
-            BOUNDARY(ng)%t_south(i,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng)   &
+            BOUNDARY(ng)%t_south(i,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )                    &
      &                                                *BOUNDARY(ng)%t_south(i,k,iTIC_) ! umol kg-1  !!! R13C_fromd13C included geochem module
 #    if defined ORGANIC_MATTER
             DO itrc=1,N_dom
@@ -604,7 +605,7 @@
             END DO
 #    endif
 #   else
-            BOUNDARY(ng)%t_north(i,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng)   &
+            BOUNDARY(ng)%t_north(i,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )                    &
      &                                                *BOUNDARY(ng)%t_north(i,k,iTIC_) ! umol kg-1  !!! R13C_fromd13C included geochem module
 #    if defined ORGANIC_MATTER
             DO itrc=1,N_dom
@@ -765,7 +766,8 @@
             END DO
 #    endif
 #   else
-            BOUNDARY(ng)%t_east(j,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng) ! umol kg-1  !!! R13C_fromd13C included geochem module
+            BOUNDARY(ng)%t_east(j,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )                    &
+     &                                                *BOUNDARY(ng)%t_east(j,k,iTIC_) ! umol kg-1  !!! R13C_fromd13C included geochem module
 #    if defined ORGANIC_MATTER
             DO itrc=1,N_dom
               BOUNDARY(ng)%t_east(j,k,iDO13C(itrc)) = R13C_fromd13C( d13C_DOC_0(itrc,ng) )   &
@@ -922,7 +924,7 @@
             END DO
 #    endif
 #   else
-            BOUNDARY(ng)%t_west(j,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng)   &
+            BOUNDARY(ng)%t_west(j,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )                    &
      &                                                *BOUNDARY(ng)%t_west(j,k,iTIC_) ! umol kg-1  !!! R13C_fromd13C included geochem module
 #    if defined ORGANIC_MATTER
             DO itrc=1,N_dom
@@ -1079,7 +1081,7 @@
             END DO
 #    endif
 #   else
-            BOUNDARY(ng)%t_south(i,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng)   &
+            BOUNDARY(ng)%t_south(i,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )                    &
      &                                                *BOUNDARY(ng)%t_south(i,k,iTIC_) ! umol kg-1  !!! R13C_fromd13C included geochem module
 #    if defined ORGANIC_MATTER
             DO itrc=1,N_dom
@@ -1236,7 +1238,7 @@
             END DO
 #    endif
 #   else
-            BOUNDARY(ng)%t_north(i,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng)   &
+            BOUNDARY(ng)%t_north(i,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )                    &
      &                                                *BOUNDARY(ng)%t_north(i,k,iTIC_) ! umol kg-1  !!! R13C_fromd13C included geochem module
 #    if defined ORGANIC_MATTER
             DO itrc=1,N_dom
@@ -1390,7 +1392,8 @@
             END DO
 #    endif
 #   else
-            BOUNDARY(ng)%t_east(j,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng) ! umol kg-1  !!! R13C_fromd13C included geochem module
+            BOUNDARY(ng)%t_east(j,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )                    &
+     &                                                *BOUNDARY(ng)%t_east(j,k,iTIC_) ! umol kg-1  !!! R13C_fromd13C included geochem module
 #    if defined ORGANIC_MATTER
             DO itrc=1,N_dom
               BOUNDARY(ng)%t_east(j,k,iDO13C(itrc)) = R13C_fromd13C( d13C_DOC_0(itrc,ng) )   &
@@ -1528,7 +1531,7 @@
             END DO
 #    endif
 #   else
-            BOUNDARY(ng)%t_west(j,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng)   &
+            BOUNDARY(ng)%t_west(j,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )                    &
      &                                                *BOUNDARY(ng)%t_west(j,k,iTIC_) ! umol kg-1  !!! R13C_fromd13C included geochem module
 #    if defined ORGANIC_MATTER
             DO itrc=1,N_dom
@@ -1666,7 +1669,7 @@
             END DO
 #    endif
 #   else
-            BOUNDARY(ng)%t_south(i,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng)   &
+            BOUNDARY(ng)%t_south(i,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )                    &
      &                                                *BOUNDARY(ng)%t_south(i,k,iTIC_) ! umol kg-1  !!! R13C_fromd13C included geochem module
 #    if defined ORGANIC_MATTER
             DO itrc=1,N_dom
@@ -1804,7 +1807,7 @@
             END DO
 #    endif
 #   else
-            BOUNDARY(ng)%t_north(i,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng)   &
+            BOUNDARY(ng)%t_north(i,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )                    &
      &                                                *BOUNDARY(ng)%t_north(i,k,iTIC_) ! umol kg-1  !!! R13C_fromd13C included geochem module
 #    if defined ORGANIC_MATTER
             DO itrc=1,N_dom

@@ -26,12 +26,12 @@
               BIN := $(BIN).exe
 
                FC := gfortran
-           FFLAGS := -frepack-arrays
+           FFLAGS := -frepack-arrays -w -fallow-argument-mismatch
               CPP := /usr/bin/cpp
          CPPFLAGS := -P -traditional
                CC := gcc
               CXX := g++
-           CFLAGS :=
+           CFLAGS := -w -fallow-argument-mismatch
          CXXFLAGS :=
           LDFLAGS :=
                AR := ar
