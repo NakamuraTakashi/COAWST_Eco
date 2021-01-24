@@ -5649,7 +5649,7 @@
             m=BRY_CONTACT(ieast,cr)%C2Bindex(j)
 !            write(*,*) 'DEBUG 2: ',m,i,inorth,cr  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! for Debug
             if (m==-999) cycle !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
-            if (m>191) cycle !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
+!            if (m>191) cycle !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
 
 !            Idg=Ucontact(cr)%Idg(m)                 ! for debugging
 !            Jdg=Ucontact(cr)%Jdg(m)                 ! purposes
