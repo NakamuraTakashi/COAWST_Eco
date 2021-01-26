@@ -1213,26 +1213,46 @@
      &            ((IstrR.le.Isrc).and.(Isrc.le.IendR)).and.            &
 #  endif
      &            (j.eq.Jsrc)) THEN
-                DO k=1,N(ng)-1
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:rm
+!                DO k=1,N(ng)-1
+!#  ifdef ONE_TRACER_SOURCE
+!                    FC(Isrc,k)=FC(Isrc,k)+0.5_r8*                       &
+!     &                      (SOURCES(ng)%Qsrc(is,k  )*                  &
+!     &                       SOURCES(ng)%Tsrc(itrc)+                    &
+!     &                       SOURCES(ng)%Qsrc(is,k+1)*                  &
+!     &                       SOURCES(ng)%Tsrc(itrc) )
+!#  elif defined TWO_D_TRACER_SOURCE
+!                    FC(Isrc,k)=FC(Isrc,k)+0.5_r8*                       &
+!     &                      (SOURCES(ng)%Qsrc(is,k  )*                  &
+!     &                       SOURCES(ng)%Tsrc(is,itrc)+                 &
+!     &                       SOURCES(ng)%Qsrc(is,k+1)*                  &
+!     &                       SOURCES(ng)%Tsrc(is,itrc) )
+!#  else
+!                  FC(Isrc,k)=FC(Isrc,k)+0.5_r8*                         &
+!     &                       (SOURCES(ng)%Qsrc(is,k  )*                 &
+!     &                        SOURCES(ng)%Tsrc(is,k  ,itrc)+            &
+!     &                        SOURCES(ng)%Qsrc(is,k+1)*                 &
+!     &                        SOURCES(ng)%Tsrc(is,k+1,itrc))
+!#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:rm
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+                DO k=1,N(ng)
+                  cff=dt(ng)*pm(Isrc,Jsrc)*pn(Isrc,Jsrc)
+                  IF (LtracerSrc(itrc,ng)) THEN
 #  ifdef ONE_TRACER_SOURCE
-                    FC(Isrc,k)=FC(Isrc,k)+0.5_r8*                       &
-     &                      (SOURCES(ng)%Qsrc(is,k  )*                  &
-     &                       SOURCES(ng)%Tsrc(itrc)+                    &
-     &                       SOURCES(ng)%Qsrc(is,k+1)*                  &
-     &                       SOURCES(ng)%Tsrc(itrc) )
+                    cff3=SOURCES(ng)%Tsrc(itrc)
 #  elif defined TWO_D_TRACER_SOURCE
-                    FC(Isrc,k)=FC(Isrc,k)+0.5_r8*                       &
-     &                      (SOURCES(ng)%Qsrc(is,k  )*                  &
-     &                       SOURCES(ng)%Tsrc(is,itrc)+                 &
-     &                       SOURCES(ng)%Qsrc(is,k+1)*                  &
-     &                       SOURCES(ng)%Tsrc(is,itrc) )
+                    cff3=SOURCES(ng)%Tsrc(is,itrc)
 #  else
-                  FC(Isrc,k)=FC(Isrc,k)+0.5_r8*                         &
-     &                       (SOURCES(ng)%Qsrc(is,k  )*                 &
-     &                        SOURCES(ng)%Tsrc(is,k  ,itrc)+            &
-     &                        SOURCES(ng)%Qsrc(is,k+1)*                 &
-     &                        SOURCES(ng)%Tsrc(is,k+1,itrc))
+                    cff3=SOURCES(ng)%Tsrc(is,k,itrc)
 #  endif
+                  ELSE
+                    cff3=t(Isrc,Jsrc,k,3,itrc)
+                  END IF
+                  t(Isrc,Jsrc,k,nnew,itrc)=t(Isrc,Jsrc,k,nnew,itrc)+    &
+     &                                     cff*SOURCES(ng)%Qsrc(is,k)*  &
+     &                                     cff3
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
                 END DO
               END IF
             END DO
@@ -1243,8 +1263,18 @@
 !  Apply mass point sources - Volume influx.
 !
           DO i=I_RANGE
-            FC(i,0)=FC(i,0)+SOURCES(ng)%Qsgd*                           &
-     &                      SOURCES(ng)%Tsgd(itrc)*sgd_src(i,j)
+            cff=dt(ng)*pm(i,j)*pn(i,j)
+            IF (LtracerSrc(itrc,ng)) THEN
+              cff3=SOURCES(ng)%Tsgd(itrc)
+            ELSE
+              cff3=t(i,j,1,3,itrc)
+            END IF
+            t(i,j,1,nnew,itrc)=t(i,j,1,nnew,itrc)+                 &
+     &                         cff*SOURCES(ng)%Qsgd*sgd_src(i,j)*  &
+     &                         cff3
+!  Old version
+!            FC(i,0)=FC(i,0)+SOURCES(ng)%Qsgd*                           &
+!     &                      SOURCES(ng)%Tsgd(itrc)*sgd_src(i,j)
           END DO
 # endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
