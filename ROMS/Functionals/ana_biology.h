@@ -703,7 +703,7 @@
 !  Coral reef ecosystem model.
 !-----------------------------------------------------------------------
 !
-# if defined CORAL_TRIANGLE
+# if defined CORAL_TRIANGLE || defined BIO_VPROFILE_CT
 !------------------------------------------------------------------------
 !   CORAL_TRIANGLE CASE
 !------------------------------------------------------------------------
@@ -804,7 +804,7 @@
         END DO
       END DO
 
-# elif defined YAEYAMA2
+# elif defined YAEYAMA2 || defined BIO_VPROFILE_YAEYAMA
 !------------------------------------------------------------------------
 !   YAEYAMA2 CASE
 !------------------------------------------------------------------------
@@ -813,8 +813,23 @@
         DO i=IstrT,IendT
           t(i,j,k,1,iTIC_) = DIC_Profile( t(i,j,k,1,iTemp) )        
           t(i,j,k,1,iTAlk) = TA_Profile ( t(i,j,k,1,iTemp) )
+        END DO
+      END DO
+    END DO
+    DO k=1,N(ng)
+      DO j=JstrT,JendT
+        DO i=IstrT,IendT
           t(i,j,k,1,iOxyg) = DO_Profile2( t(i,j,N(ng),1,iTemp)              &
-   &        , t(i,j,N(ng),1,iSalt), TIC_0(ng), t(i,j,k,1,iTIC_) )
+   &                           , t(i,j,N(ng),1,iSalt)                       &
+   &                           , t(i,j,N(ng),1,iTIC_), t(i,j,k,1,iTIC_)     &
+   &                           , t(i,j,N(ng),1,iTAlk), t(i,j,k,1,iTAlk) )
+        END DO
+      END DO
+    END DO
+
+    DO k=1,N(ng)
+      DO j=JstrT,JendT
+        DO i=IstrT,IendT
 
 #  if defined ORGANIC_MATTER
           DO itrc=1,N_dom
@@ -878,12 +893,12 @@
 #  if defined NUTRIENTS
 !          t(i,j,k,1,iNO3_) = NO3_Profile2( z_r(i,j,k) )           &
           t(i,j,k,1,iNO3_) = NO3_Profile3( NO3_0(ng)           &
-     &            , TIC_0(ng), t(i,j,k,1,iTIC_) )   ! umolN L-1
+     &            , t(i,j,N(ng),1,iOxyg), t(i,j,k,1,iOxyg) )   ! umolN L-1
 !          t(i,j,k,1,iNO2_) = NO2_0(ng)  ! umolN L-1
           t(i,j,k,1,iNH4_) = NH4_0(ng)  ! umolN L-1
 !          t(i,j,k,1,iPO4_) = PO4_Profile2( z_r(i,j,k) )  ! umolP L-1
           t(i,j,k,1,iPO4_) = PO4_Profile3( PO4_0(ng)           &
-     &            , TIC_0(ng), t(i,j,k,1,iTIC_) )   ! umolN L-1
+     &            , t(i,j,N(ng),1,iOxyg), t(i,j,k,1,iOxyg) )   ! umolP L-1
 
 #   if defined ORGANIC_MATTER
           DO itrc=1,N_dom

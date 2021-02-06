@@ -225,7 +225,7 @@
         END DO
       END IF
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
-#elif defined SHIRAHO_REEF || defined FUKIDO
+#elif defined SHIRAHO_REEF || defined FUKIDO || defined BIO_VPROFILE_CONST
 !-----------------------------------------------------------------------
 !  SHIRAHO_REEF & FUKIDO CASES
 !-----------------------------------------------------------------------

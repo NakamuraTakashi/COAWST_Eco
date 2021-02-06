@@ -3557,7 +3557,8 @@
      &                          GRID(rg)%pn,                            &
 #  ifdef MASKING
      &                          GRID(dg)%rmask_full,                    &
-     &                          GRID(rg)%rmask_full,                    &
+!     &                          GRID(rg)%rmask_full,                    &  !!!>>>>>>>>>>>>>>>>>>>>>>>> TN: rm
+     &                          GRID(rg)%rmask,                         &   !!!<<<<<<<<<<<<<<<<<<<<<<<< TN: add
 #  endif
      &                          COUPLING(dg)%Zt_avg1,                   &
      &                          COUPLING(rg)%Zt_avg1)
@@ -3574,7 +3575,8 @@
      &                          GRID(rg)%pn,                            &
 #  ifdef MASKING
      &                          GRID(dg)%rmask_full,                    &
-     &                          GRID(rg)%rmask_full,                    &
+!     &                          GRID(rg)%rmask_full,                    &  !!!>>>>>>>>>>>>>>>>>>>>>>>> TN: rm
+     &                          GRID(rg)%rmask,                         &   !!!<<<<<<<<<<<<<<<<<<<<<<<< TN: add
 #  endif
      &                          OCEAN(dg)%zeta(:,:,Dindex2d),           &
      &                          OCEAN(rg)%zeta(:,:,Rindex2d))
@@ -3657,7 +3659,8 @@
      &                            GRID(rg)%pn,                          &
 #  ifdef MASKING
      &                            GRID(dg)%rmask_full,                  &
-     &                            GRID(rg)%rmask_full,                  &
+     &                            GRID(rg)%rmask_full,                  &  !!!>>>>>>>>>>>>>>>>>>>>>>>>> TN: rm
+!     &                            GRID(rg)%rmask,                       &   !!!<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
 #  endif
      &                            OCEAN(dg)%t(:,:,:,Dindex3d,itrc),     &
      &                            OCEAN(rg)%t(:,:,:,Rindex3d,itrc))

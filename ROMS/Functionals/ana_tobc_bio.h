@@ -103,7 +103,7 @@
 !  Tracers open boundary conditions.
 !-----------------------------------------------------------------------
 !
-#if defined CORAL_TRIANGLE
+#if defined CORAL_TRIANGLE || defined BIO_VPROFILE_CT
 !-----------------------------------------------------------------------
 !               CORAL TRIANGLE REGIONAL ECOSYSTEM MODEL
 !                       OPEN BOUNDARY -START-
@@ -694,7 +694,7 @@
 !                         OPEN BOUNDARY -END-
 !-----------------------------------------------------------------------
 
-#elif defined YAEYAMA2
+#elif defined YAEYAMA2 || defined BIO_VPROFILE_YAEYAMA
 !-----------------------------------------------------------------------
 !               YAEYAMA 2 CASE
 !-----------------------------------------------------------------------
@@ -702,27 +702,40 @@
 ! ---- Eastern boundary -----------------------------------------------
       IF (ANY(LBC(ieast,isTvar(:),ng)%acquire).and.                     &
      &    DOMAIN(ng)%Eastern_Edge(tile)) THEN
+# ifdef SEDIMENT
         DO k=1,N(ng)
           DO j=JstrT,JendT
-# ifdef SEDIMENT
             DO ised=1,NST
               BOUNDARY(ng)%t_east(j,k,idsed(ised))=0.0_r8
             END DO
+          END DO
+        END DO
 # endif
+
 # ifdef REEF_ECOSYS
+        DO k=1,N(ng)
+          DO j=JstrT,JendT
         ! DIC, TA, DO
             BOUNDARY(ng)%t_east(j,k,iTIC_) =                          &
      &        DIC_Profile( BOUNDARY(ng)%t_east(j,k,iTemp))
             BOUNDARY(ng)%t_east(j,k,iTAlk) =                          &
      &        TA_Profile ( BOUNDARY(ng)%t_east(j,k,iTemp))
-!            BOUNDARY(ng)%t_east(j,k,iOxyg) = Oxyg0(ng)
-!            BOUNDARY(ng)%t_east(j,k,iOxyg) =                          &
-!     &        DO_Profile ( BOUNDARY(ng)%t_east(j,k,iTemp))
+          END DO
+        END DO
+        DO k=1,N(ng)
+          DO j=JstrT,JendT
             BOUNDARY(ng)%t_east(j,k,iOxyg) =                          &
      &        DO_Profile2( BOUNDARY(ng)%t_east(j,N(ng),iTemp)         &
      &                   , BOUNDARY(ng)%t_east(j,N(ng),iSalt)         &
-     &                   , TIC_0(ng)                                  &
-     &                   , BOUNDARY(ng)%t_east(j,k,iTIC_) )
+     &                   , BOUNDARY(ng)%t_east(j,N(ng),iTIC_)         &
+     &                   , BOUNDARY(ng)%t_east(j,k,iTIC_)             &
+     &                   , BOUNDARY(ng)%t_east(j,N(ng),iTAlk)         &
+     &                   , BOUNDARY(ng)%t_east(j,k,iTAlk)     )
+          END DO
+        END DO
+
+        DO k=1,N(ng)
+          DO j=JstrT,JendT
 
 #  if defined ORGANIC_MATTER
         ! DOC
@@ -794,17 +807,17 @@
 #  endif
 #  if defined NUTRIENTS
 !            BOUNDARY(ng)%t_east(j,k,iNO3_) = NO3_Profile2( z_r(Iend+1,j,k) )
-            BOUNDARY(ng)%t_east(j,k,iNO3_) = NO3_Profile3( NO3_0(ng)         &
-     &                   , TIC_0(ng)                                         &
-     &                   , BOUNDARY(ng)%t_east(j,k,iTIC_) )
+            BOUNDARY(ng)%t_east(j,k,iNO3_) = NO3_Profile3( NO3_0(ng)       &
+     &                   , BOUNDARY(ng)%t_east(j,N(ng),iOxyg)              &
+     &                   , BOUNDARY(ng)%t_east(j,k,iOxyg)             )
        
 !            BOUNDARY(ng)%t_east(j,k,iNO2_)=NO2_0(ng)     ! umol L-1
             BOUNDARY(ng)%t_east(j,k,iNH4_)=NH4_0(ng)     ! umol L-1
 
 !            BOUNDARY(ng)%t_east(j,k,iPO4_) = PO4_Profile2( z_r(Iend+1,j,k) )
-            BOUNDARY(ng)%t_east(j,k,iPO4_) = PO4_Profile3( PO4_0(ng)         &
-     &                   , TIC_0(ng)                                         &
-     &                   , BOUNDARY(ng)%t_east(j,k,iTIC_) )
+            BOUNDARY(ng)%t_east(j,k,iPO4_) = PO4_Profile3( PO4_0(ng)       &
+     &                   , BOUNDARY(ng)%t_east(j,N(ng),iOxyg)              &
+     &                   , BOUNDARY(ng)%t_east(j,k,iOxyg)             )
 
 #   if defined ORGANIC_MATTER
             DO itrc=1,N_dom
@@ -851,36 +864,47 @@
             BOUNDARY(ng)%t_east(j,k,iCOTe)=COTe0(ng)     ! umolC L-1
             BOUNDARY(ng)%t_east(j,k,iCOTl)=COTl0(ng)     ! umolC L-1
 #  endif
-# endif
-
           END DO
         END DO
+# endif
       END IF
 
 ! ---- Western boundary -----------------------------------------------
       IF (ANY(LBC(iwest,isTvar(:),ng)%acquire).and.                     &
      &    DOMAIN(ng)%Western_Edge(tile)) THEN
+# ifdef SEDIMENT
         DO k=1,N(ng)
           DO j=JstrT,JendT
-# ifdef SEDIMENT
             DO ised=1,NST
               BOUNDARY(ng)%t_west(j,k,idsed(ised))=0.0_r8
             END DO
+          END DO
+        END DO
 # endif
 # ifdef REEF_ECOSYS
+        DO k=1,N(ng)
+          DO j=JstrT,JendT
         ! DIC, TA, DO
             BOUNDARY(ng)%t_west(j,k,iTIC_) =                          &
      &        DIC_Profile( BOUNDARY(ng)%t_west(j,k,iTemp))
             BOUNDARY(ng)%t_west(j,k,iTAlk) =                          &
      &        TA_Profile ( BOUNDARY(ng)%t_west(j,k,iTemp))
-!            BOUNDARY(ng)%t_west(j,k,iOxyg) = Oxyg0(ng)
-!            BOUNDARY(ng)%t_west(j,k,iOxyg) =                          &
-!     &        DO_Profile ( BOUNDARY(ng)%t_west(j,k,iTemp))
+          END DO
+        END DO
+        DO k=1,N(ng)
+          DO j=JstrT,JendT
             BOUNDARY(ng)%t_west(j,k,iOxyg) =                          &
      &        DO_Profile2( BOUNDARY(ng)%t_west(j,N(ng),iTemp)         &
      &                   , BOUNDARY(ng)%t_west(j,N(ng),iSalt)         &
-     &                   , TIC_0(ng)                                  &
-     &                   , BOUNDARY(ng)%t_west(j,k,iTIC_) )
+     &                   , BOUNDARY(ng)%t_west(j,N(ng),iTIC_)         &
+     &                   , BOUNDARY(ng)%t_west(j,k,iTIC_)             &
+     &                   , BOUNDARY(ng)%t_west(j,N(ng),iTAlk)         &
+     &                   , BOUNDARY(ng)%t_west(j,k,iTAlk)      )
+          END DO
+        END DO
+
+        DO k=1,N(ng)
+          DO j=JstrT,JendT
 
 #  if defined ORGANIC_MATTER
         ! DOC
@@ -953,16 +977,16 @@
 #  if defined NUTRIENTS
 !            BOUNDARY(ng)%t_west(j,k,iNO3_) = NO3_Profile2( z_r(Istr-1,j,k) )
             BOUNDARY(ng)%t_west(j,k,iNO3_) = NO3_Profile3( NO3_0(ng)         &
-     &                   , TIC_0(ng)                                         &
-     &                   , BOUNDARY(ng)%t_west(j,k,iTIC_) )
+     &                   , BOUNDARY(ng)%t_west(j,N(ng),iOxyg)                &
+     &                   , BOUNDARY(ng)%t_west(j,k,iOxyg)              )
        
 !            BOUNDARY(ng)%t_west(j,k,iNO2_)=NO2_0(ng)     ! umol L-1
             BOUNDARY(ng)%t_west(j,k,iNH4_)=NH4_0(ng)     ! umol L-1
 
 !            BOUNDARY(ng)%t_west(j,k,iPO4_) = PO4_Profile2( z_r(Istr-1,j,k) )
             BOUNDARY(ng)%t_west(j,k,iPO4_) = PO4_Profile3( PO4_0(ng)         &
-     &                   , TIC_0(ng)                                         &
-     &                   , BOUNDARY(ng)%t_west(j,k,iTIC_) )
+     &                   , BOUNDARY(ng)%t_west(j,N(ng),iOxyg)                &
+     &                   , BOUNDARY(ng)%t_west(j,k,iOxyg)              )
 
 #   if defined ORGANIC_MATTER
             DO itrc=1,N_dom
@@ -1009,35 +1033,47 @@
             BOUNDARY(ng)%t_west(j,k,iCOTe)=COTe0(ng)     ! umolC L-1
             BOUNDARY(ng)%t_west(j,k,iCOTl)=COTl0(ng)     ! umolC L-1
 #  endif
-# endif
           END DO
         END DO
+# endif
       END IF
 
 ! ---- Southern boundary -----------------------------------------------
       IF (ANY(LBC(isouth,isTvar(:),ng)%acquire).and.                    &
      &    DOMAIN(ng)%Southern_Edge(tile)) THEN
+# ifdef SEDIMENT
         DO k=1,N(ng)
           DO i=IstrT,IendT
-# ifdef SEDIMENT
             DO ised=1,NST
               BOUNDARY(ng)%t_south(i,k,idsed(ised))=0.0_r8
             END DO
+          END DO
+        END DO
 # endif
 # ifdef REEF_ECOSYS
+        DO k=1,N(ng)
+          DO i=IstrT,IendT
         ! DIC, TA, DO
             BOUNDARY(ng)%t_south(i,k,iTIC_) =                          &
      &        DIC_Profile( BOUNDARY(ng)%t_south(i,k,iTemp))
             BOUNDARY(ng)%t_south(i,k,iTAlk) =                          &
      &        TA_Profile ( BOUNDARY(ng)%t_south(i,k,iTemp))
-!            BOUNDARY(ng)%t_south(i,k,iOxyg) = Oxyg0(ng)
-!            BOUNDARY(ng)%t_south(i,k,iOxyg) =                          &
-!     &        DO_Profile ( BOUNDARY(ng)%t_south(i,k,iTemp))
+          END DO
+        END DO
+        DO k=1,N(ng)
+          DO i=IstrT,IendT
             BOUNDARY(ng)%t_south(i,k,iOxyg) =                          &
      &        DO_Profile2( BOUNDARY(ng)%t_south(i,N(ng),iTemp)         &
      &                   , BOUNDARY(ng)%t_south(i,N(ng),iSalt)         &
-     &                   , TIC_0(ng)                                   &
-     &                   , BOUNDARY(ng)%t_south(i,k,iTIC_) )
+     &                   , BOUNDARY(ng)%t_south(i,N(ng),iTIC_)         &
+     &                   , BOUNDARY(ng)%t_south(i,k,iTIC_)             &
+     &                   , BOUNDARY(ng)%t_south(i,N(ng),iTAlk)         &
+     &                   , BOUNDARY(ng)%t_south(i,k,iTAlk)     )
+          END DO
+        END DO
+
+        DO k=1,N(ng)
+          DO i=IstrT,IendT
 
 #  if defined ORGANIC_MATTER
         ! DOC
@@ -1110,16 +1146,16 @@
 #  if defined NUTRIENTS
 !            BOUNDARY(ng)%t_south(i,k,iNO3_) = NO3_Profile2( z_r(i,Jstr-1,k) )
             BOUNDARY(ng)%t_south(i,k,iNO3_) = NO3_Profile3( NO3_0(ng)         &
-     &                   , TIC_0(ng)                                          &
-     &                   , BOUNDARY(ng)%t_south(i,k,iTIC_) )
+     &                   , BOUNDARY(ng)%t_south(i,N(ng),iOxyg)                &
+     &                   , BOUNDARY(ng)%t_south(i,k,iOxyg)            )
        
 !            BOUNDARY(ng)%t_south(i,k,iNO2_)=NO2_0(ng)     ! umol L-1
             BOUNDARY(ng)%t_south(i,k,iNH4_)=NH4_0(ng)     ! umol L-1
 
 !            BOUNDARY(ng)%t_south(i,k,iPO4_) = PO4_Profile2( z_r(i,Jstr-1,k) )
             BOUNDARY(ng)%t_south(i,k,iPO4_) = PO4_Profile3( PO4_0(ng)         &
-     &                   , TIC_0(ng)                                          &
-     &                   , BOUNDARY(ng)%t_south(i,k,iTIC_) )
+     &                   , BOUNDARY(ng)%t_south(i,N(ng),iOxyg)                &
+     &                   , BOUNDARY(ng)%t_south(i,k,iOxyg)            )
 
 #   if defined ORGANIC_MATTER
             DO itrc=1,N_dom
@@ -1166,35 +1202,47 @@
             BOUNDARY(ng)%t_south(i,k,iCOTe)=COTe0(ng)     ! umolC L-1
             BOUNDARY(ng)%t_south(i,k,iCOTl)=COTl0(ng)     ! umolC L-1
 #  endif
-# endif
           END DO
         END DO
+# endif
       END IF
 
 ! ---- Northern boundary -----------------------------------------------
       IF (ANY(LBC(inorth,isTvar(:),ng)%acquire).and.                    &
      &    DOMAIN(ng)%Northern_Edge(tile)) THEN
+# ifdef SEDIMENT
         DO k=1,N(ng)
           DO i=IstrT,IendT
-# ifdef SEDIMENT
             DO ised=1,NST
               BOUNDARY(ng)%t_north(i,k,idsed(ised))=0.0_r8
             END DO
+          END DO
+        END DO
 # endif
 # ifdef REEF_ECOSYS
+        DO k=1,N(ng)
+          DO i=IstrT,IendT
         ! DIC, TA, DO
             BOUNDARY(ng)%t_north(i,k,iTIC_) =                          &
      &        DIC_Profile( BOUNDARY(ng)%t_north(i,k,iTemp))
             BOUNDARY(ng)%t_north(i,k,iTAlk) =                          &
      &        TA_Profile ( BOUNDARY(ng)%t_north(i,k,iTemp))
-!            BOUNDARY(ng)%t_north(i,k,iOxyg) = Oxyg0(ng)
-!            BOUNDARY(ng)%t_north(i,k,iOxyg) =                          &
-!          &   DO_Profile ( BOUNDARY(ng)%t_north(i,k,iTemp))
+          END DO
+        END DO
+        DO k=1,N(ng)
+          DO i=IstrT,IendT
             BOUNDARY(ng)%t_north(i,k,iOxyg) =                          &
      &        DO_Profile2( BOUNDARY(ng)%t_north(i,N(ng),iTemp)         &
      &                   , BOUNDARY(ng)%t_north(i,N(ng),iSalt)         &
-     &                   , TIC_0(ng)                                   &
-     &                   , BOUNDARY(ng)%t_north(i,k,iTIC_) )
+     &                   , BOUNDARY(ng)%t_north(i,N(ng),iTIC_)         &
+     &                   , BOUNDARY(ng)%t_north(i,k,iTIC_)             &
+     &                   , BOUNDARY(ng)%t_north(i,N(ng),iTAlk)         &
+     &                   , BOUNDARY(ng)%t_north(i,k,iTAlk)     )
+          END DO
+        END DO
+
+        DO k=1,N(ng)
+          DO i=IstrT,IendT
 
 #  if defined ORGANIC_MATTER
         ! DOC
@@ -1267,17 +1315,17 @@
 #  if defined NUTRIENTS
 !            BOUNDARY(ng)%t_north(i,k,iNO3_) = NO3_Profile2( z_r(i,Jend+1,k) )
             BOUNDARY(ng)%t_north(i,k,iNO3_) = NO3_Profile3( NO3_0(ng)         &
-     &                   , TIC_0(ng)                                          &
-     &                   , BOUNDARY(ng)%t_north(i,k,iTIC_) )
+     &                   , BOUNDARY(ng)%t_north(i,N(ng),iOxyg)                &
+     &                   , BOUNDARY(ng)%t_north(i,k,iOxyg)            )
        
 !            BOUNDARY(ng)%t_north(i,k,iNO2_)=NO2_0(ng)     ! umol L-1
             BOUNDARY(ng)%t_north(i,k,iNH4_)=NH4_0(ng)     ! umol L-1
 
 !            BOUNDARY(ng)%t_north(i,k,iPO4_) = PO4_Profile2( z_r(i,Jend+1,k) )
             BOUNDARY(ng)%t_north(i,k,iPO4_) = PO4_Profile3( PO4_0(ng)         &
-     &                   , TIC_0(ng)                                          &
-     &                   , BOUNDARY(ng)%t_north(i,k,iTIC_) )
-
+            &                   , BOUNDARY(ng)%t_north(i,N(ng),iOxyg)                &
+            &                   , BOUNDARY(ng)%t_north(i,k,iOxyg)            )
+       
 #   if defined ORGANIC_MATTER
             DO itrc=1,N_dom
               BOUNDARY(ng)%t_north(i,k,iDON(itrc)) = DON_0(itrc,ng)     ! umolC L-1
@@ -1323,10 +1371,10 @@
             BOUNDARY(ng)%t_north(i,k,iCOTe)=COTe0(ng)     ! umolC L-1
             BOUNDARY(ng)%t_north(i,k,iCOTl)=COTl0(ng)     ! umolC L-1
 #  endif
-# endif
-          END DO
+         END DO
         END DO
-      END IF
+# endif
+       END IF
 !-----------------------------------------------------------------------
 !               YAEYAMA 2 CASE -END-
 !-----------------------------------------------------------------------
