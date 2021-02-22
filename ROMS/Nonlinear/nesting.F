@@ -1322,7 +1322,8 @@
                   Lweight(3)=cff*Lweight(3)    ! of contact points
                   Lweight(4)=cff*Lweight(4)
                 ELSE
-                  Lweight=0.0_r8               ! all the donor grid
+!                  Lweight=0.0_r8               ! all the donor grid   !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: rm
+                  Lweight(:)=Rcontact(cr)%LweightUnmasked(:,m)   ! all the donor grid !!!<<<<<<<<<<<<<<<<<< TN: add
                 END IF                         ! corners are on land
                 LWsum_check=SUM(Lweight)
 #  ifdef DISTRIBUTE
@@ -1409,7 +1410,8 @@
                   Qweight(8)=cff*Qweight(8)
                   Qweight(9)=cff*Qweight(9)
                 ELSE
-                  Qweight=0.0_r8               ! all the donor grid
+                  Qweight=0.0_r8               ! all the donor grid   !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: rm
+!                  Qweight(:)=Rcontact(cr)%QweightUnmasked(:,m)   ! all the donor grid !!!<<<<<<<<<<<<<<<<<< TN: add
                 END IF                         ! corners are on land
                 QWsum_check=SUM(Qweight)
 #   ifdef DISTRIBUTE
@@ -1553,7 +1555,8 @@
                   Lweight(3)=cff*Lweight(3)    ! of contact points
                   Lweight(4)=cff*Lweight(4)
                 ELSE
-                  Lweight=0.0_r8               ! All the donor grid
+!                  Lweight=0.0_r8               ! All the donor grid
+                  Lweight(:)=Ucontact(cr)%LweightUnmasked(:,m)   ! all the donor grid !!!<<<<<<<<<<<<<<<<<< TN: add
                 END IF                         ! corners are on land
                 LWsum_check=SUM(Lweight)
 #  ifdef DISTRIBUTE
@@ -1784,7 +1787,8 @@
                   Lweight(3)=cff*Lweight(3)    ! of contact points
                   Lweight(4)=cff*Lweight(4)
                 ELSE
-                  Lweight=0.0_r8               ! All the donor grid
+!                  Lweight=0.0_r8               ! All the donor grid
+                  Lweight(:)=Vcontact(cr)%LweightUnmasked(:,m)   ! all the donor grid !!!<<<<<<<<<<<<<<<<<< TN: add
                 END IF                         ! corners are on land
                 LWsum_check=SUM(Lweight)
 #  ifdef DISTRIBUTE
@@ -1873,7 +1877,7 @@
                 ELSE
                   Qweight=0.0_r8               ! All the donor grid
                 END IF                         ! corners are on land
-                END IF
+!                END IF  !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: rm
                 QWsum_check=SUM(Qweight)
 #   ifdef DISTRIBUTE
                 QW(1,m)=Qweight(1)
@@ -3556,9 +3560,8 @@
      &                          GRID(rg)%pm,                            &
      &                          GRID(rg)%pn,                            &
 #  ifdef MASKING
-     &                          GRID(dg)%rmask_full,                    &
-!     &                          GRID(rg)%rmask_full,                    &  !!!>>>>>>>>>>>>>>>>>>>>>>>> TN: rm
-     &                          GRID(rg)%rmask,                         &   !!!<<<<<<<<<<<<<<<<<<<<<<<< TN: add
+     &                          GRID(dg)%rmask,                         &  !!!>>>>> TN: rmask_full -> rmask
+     &                          GRID(rg)%rmask,                         &  !!!>>>>> TN: rmask_full -> rmask
 #  endif
      &                          COUPLING(dg)%Zt_avg1,                   &
      &                          COUPLING(rg)%Zt_avg1)
@@ -3574,9 +3577,8 @@
      &                          GRID(rg)%pm,                            &
      &                          GRID(rg)%pn,                            &
 #  ifdef MASKING
-     &                          GRID(dg)%rmask_full,                    &
-!     &                          GRID(rg)%rmask_full,                    &  !!!>>>>>>>>>>>>>>>>>>>>>>>> TN: rm
-     &                          GRID(rg)%rmask,                         &   !!!<<<<<<<<<<<<<<<<<<<<<<<< TN: add
+     &                          GRID(dg)%rmask,                         &  !!!>>>>> TN: rmask_full -> rmask
+     &                          GRID(rg)%rmask,                         &  !!!>>>>> TN: rmask_full -> rmask
 #  endif
      &                          OCEAN(dg)%zeta(:,:,Dindex2d),           &
      &                          OCEAN(rg)%zeta(:,:,Rindex2d))
@@ -3598,8 +3600,8 @@
      &                          GRID(rg)%pm,                            &
      &                          GRID(rg)%pn,                            &
 # ifdef MASKING
-     &                          GRID(dg)%umask_full,                    &
-     &                          GRID(rg)%umask_full,                    &
+     &                          GRID(dg)%umask,                         &  !!!>>>>> TN: umask_full -> umask
+     &                          GRID(rg)%umask,                         &  !!!>>>>> TN: umask_full -> umask
 # endif
      &                          OCEAN(dg)%ubar(:,:,Dindex2d),           &
 # ifdef SOLVE3D
@@ -3622,8 +3624,8 @@
      &                          GRID(rg)%pm,                            &
      &                          GRID(rg)%pn,                            &
 # ifdef MASKING
-     &                          GRID(dg)%vmask_full,                    &
-     &                          GRID(rg)%vmask_full,                    &
+     &                          GRID(dg)%vmask,                         &  !!!>>>>> TN: vmask_full -> vmask
+     &                          GRID(rg)%vmask,                         &  !!!>>>>> TN: vmask_full -> vmask
 # endif
      &                          OCEAN(dg)%vbar(:,:,Dindex2d),           &
 # ifdef SOLVE3D
@@ -3658,9 +3660,8 @@
      &                            GRID(rg)%pm,                          &
      &                            GRID(rg)%pn,                          &
 #  ifdef MASKING
-     &                            GRID(dg)%rmask_full,                  &
-     &                            GRID(rg)%rmask_full,                  &  !!!>>>>>>>>>>>>>>>>>>>>>>>>> TN: rm
-!     &                            GRID(rg)%rmask,                       &   !!!<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
+     &                            GRID(dg)%rmask,                       &  !!!>>>>> TN: rmask_full -> rmask
+     &                            GRID(rg)%rmask,                       &  !!!>>>>> TN: rmask_full -> rmask
 #  endif
      &                            OCEAN(dg)%t(:,:,:,Dindex3d,itrc),     &
      &                            OCEAN(rg)%t(:,:,:,Rindex3d,itrc))

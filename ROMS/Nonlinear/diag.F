@@ -659,20 +659,20 @@
             IF (Master) print *, 'DIAG rho trouble ', maxrho(ng), ng
           END IF
 # ifdef BIOLOGY
-          DO ibt=1,NBT
-            IF (maxbio(ibt,ng).gt.max_bio(ibt)) THEN
-              IF (Master) print *, 'BIO trouble in DIAG ', maxbio(:,ng)
-!              exit_flag=1  !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: rm
-              EXIT   !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
-            END IF
-          END DO
+!          DO ibt=1,NBT
+!            IF (maxbio(ibt,ng).gt.max_bio(ibt)) THEN
+!              IF (Master) print *, 'BIO trouble in DIAG ', maxbio(:,ng)
+!!              exit_flag=1  !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: rm
+!              EXIT   !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
+!            END IF
+!          END DO
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: add
-          DO ibt=1,NBT
-            IF (minbio(ibt,ng) < min_bio(ibt)) THEN
-              IF (Master) print *, 'BIO trouble in DIAG ', minbio(:,ng)
-              EXIT
-            END IF
-          END DO
+!          DO ibt=1,NBT
+!            IF (minbio(ibt,ng) < min_bio(ibt)) THEN
+!              IF (Master) print *, 'BIO trouble in DIAG ', minbio(:,ng)
+!              EXIT
+!            END IF
+!          END DO
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
 # endif
 #endif
