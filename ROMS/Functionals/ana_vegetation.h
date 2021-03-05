@@ -162,7 +162,7 @@
         DO iveg=1,NVEG
           DO j=JstrT,JendT
             DO i=IstrT,IendT
-              IF(h(i,j)>0.1_r8 .or. rmask(i,j)==0.0_r8 ) THEN
+              IF(h(i,j)>-0.1_r8 .or. rmask(i,j)==0.0_r8 ) THEN
                 plant(i,j,iveg,pdiam)=0.0_r8         !Diameter
                 plant(i,j,iveg,phght)=0.0_r8         !Height
                 plant(i,j,iveg,pdens)=0.0_r8         !Density

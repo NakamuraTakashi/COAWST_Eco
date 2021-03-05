@@ -1322,8 +1322,7 @@
                   Lweight(3)=cff*Lweight(3)    ! of contact points
                   Lweight(4)=cff*Lweight(4)
                 ELSE
-!                  Lweight=0.0_r8               ! all the donor grid   !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: rm
-                  Lweight(:)=Rcontact(cr)%LweightUnmasked(:,m)   ! all the donor grid !!!<<<<<<<<<<<<<<<<<< TN: add
+                  Lweight=0.0_r8               ! all the donor grid
                 END IF                         ! corners are on land
                 LWsum_check=SUM(Lweight)
 #  ifdef DISTRIBUTE
@@ -1410,8 +1409,7 @@
                   Qweight(8)=cff*Qweight(8)
                   Qweight(9)=cff*Qweight(9)
                 ELSE
-                  Qweight=0.0_r8               ! all the donor grid   !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: rm
-!                  Qweight(:)=Rcontact(cr)%QweightUnmasked(:,m)   ! all the donor grid !!!<<<<<<<<<<<<<<<<<< TN: add
+                  Qweight=0.0_r8               ! all the donor grid
                 END IF                         ! corners are on land
                 QWsum_check=SUM(Qweight)
 #   ifdef DISTRIBUTE
@@ -1549,14 +1547,14 @@
 #  endif
                 LWsum=SUM(Lweight)
                 IF (LWsum.gt.0) THEN
-                  cff=1.0_r8/LWsum
+!                  cff=1.0_r8/LWsum   !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: rm
+                  cff=1.0_r8    !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
                   Lweight(1)=cff*Lweight(1)    ! using only water points
                   Lweight(2)=cff*Lweight(2)    ! in the interpolation of
                   Lweight(3)=cff*Lweight(3)    ! of contact points
                   Lweight(4)=cff*Lweight(4)
                 ELSE
-!                  Lweight=0.0_r8               ! All the donor grid
-                  Lweight(:)=Ucontact(cr)%LweightUnmasked(:,m)   ! all the donor grid !!!<<<<<<<<<<<<<<<<<< TN: add
+                  Lweight=0.0_r8               ! All the donor grid
                 END IF                         ! corners are on land
                 LWsum_check=SUM(Lweight)
 #  ifdef DISTRIBUTE
@@ -1781,14 +1779,14 @@
 #  endif
                 LWsum=SUM(Lweight)
                 IF (LWsum.gt.0) THEN
-                  cff=1.0_r8/LWsum
+!                  cff=1.0_r8/LWsum   !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: rm
+                  cff=1.0_r8    !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
                   Lweight(1)=cff*Lweight(1)    ! using only water points
                   Lweight(2)=cff*Lweight(2)    ! in the interpolation of
                   Lweight(3)=cff*Lweight(3)    ! of contact points
                   Lweight(4)=cff*Lweight(4)
                 ELSE
-!                  Lweight=0.0_r8               ! All the donor grid
-                  Lweight(:)=Vcontact(cr)%LweightUnmasked(:,m)   ! all the donor grid !!!<<<<<<<<<<<<<<<<<< TN: add
+                  Lweight=0.0_r8               ! All the donor grid
                 END IF                         ! corners are on land
                 LWsum_check=SUM(Lweight)
 #  ifdef DISTRIBUTE
@@ -3683,8 +3681,8 @@
      &                          GRID(rg)%pm,                            &
      &                          GRID(rg)%pn,                            &
 #  ifdef MASKING
-     &                          GRID(dg)%umask_full,                    &
-     &                          GRID(rg)%umask_full,                    &
+     &                          GRID(dg)%umask,                         &  !!!>>>>> TN: umask_full -> vmask
+     &                          GRID(rg)%umask,                         &  !!!>>>>> TN: umask_full -> vmask
 #  endif
      &                          OCEAN(dg)%u(:,:,:,Dindex3d),            &
      &                          OCEAN(rg)%u(:,:,:,Rindex3d))
@@ -3702,8 +3700,8 @@
      &                          GRID(rg)%pm,                            &
      &                          GRID(rg)%pn,                            &
 #  ifdef MASKING
-     &                          GRID(dg)%vmask_full,                    &
-     &                          GRID(rg)%vmask_full,                    &
+     &                          GRID(dg)%vmask,                         &  !!!>>>>> TN: vmask_full -> vmask
+     &                          GRID(rg)%vmask,                         &  !!!>>>>> TN: vmask_full -> vmask
 #  endif
      &                          OCEAN(dg)%v(:,:,:,Dindex3d),            &
      &                          OCEAN(rg)%v(:,:,:,Rindex3d))
@@ -5006,20 +5004,48 @@
           IF (on_boundary(m+m_add).gt.0) THEN
             IF ((on_boundary(m+m_add).eq.1).or.                         &
      &          (on_boundary(m+m_add).eq.3)) THEN       ! western and
+!!! >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: add
+# if defined REFINE_LINIEAR_DUV_AVE2_BOUNDS
+              Ac(1,m) = contact(cr)%Lweight(1,m)*Ad(Idg,Jdg) +          &
+     &                  contact(cr)%Lweight(2,m)*Ad(Ip1,Jdg) +          &
+     &                  contact(cr)%Lweight(3,m)*Ad(Ip1,Jp1) +          &
+     &                  contact(cr)%Lweight(4,m)*Ad(Idg,Jp1)
+              Ac(2,m) = Ac(1,m)  ! not used?
+              Ac(3,m) = Ac(1,m)  ! not used? 
+              Ac(4,m) = Ac(1,m)  ! not used? 
+# else
+!!! <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
               j_add=INT(REAL(Jrg-1,r8)*Rscale)          ! eastern edges
               j=J_bottom(rg)+j_add
               Ac(1,m)=Ad(Idg,j)
               Ac(2,m)=Ad(Idg,j)
               Ac(3,m)=Ad(Idg,j)
               Ac(4,m)=Ad(Idg,j)
+!!! >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: add
+# endif
+!!! <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
             ELSE IF ((on_boundary(m+m_add).eq.2).or.                    &
      &               (on_boundary(m+m_add).eq.4)) THEN  ! southern and
+!!! >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: add
+# if defined REFINE_LINIEAR_DUV_AVE2_BOUNDS
+              Ac(1,m) = contact(cr)%Lweight(1,m)*Ad(Idg,Jdg) +          &
+     &                  contact(cr)%Lweight(2,m)*Ad(Ip1,Jdg) +          &
+     &                  contact(cr)%Lweight(3,m)*Ad(Ip1,Jp1) +          &
+     &                  contact(cr)%Lweight(4,m)*Ad(Idg,Jp1)
+              Ac(2,m) = Ac(1,m)  ! not used?
+              Ac(3,m) = Ac(1,m)  ! not used? 
+              Ac(4,m) = Ac(1,m)  ! not used? 
+# else
+!!! <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
               i_add=INT(REAL(Irg-1,r8)*Rscale)          ! northern edges
               i=I_left(rg)+i_add
               Ac(1,m)=Ad(i,Jdg)
               Ac(2,m)=Ad(i,Jdg)
               Ac(3,m)=Ad(i,Jdg)
               Ac(4,m)=Ad(i,Jdg)
+!!! >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: add
+# endif
+!!! <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
             END IF
           ELSE
             Ac(1,m)=Ad(Idg,Jdg)               ! contact point is not at
@@ -5615,9 +5641,6 @@
         IF (DOMAIN(ng)%Western_Edge(tile)) THEN
           DO j=Jstr,Jend
             m=BRY_CONTACT(iwest,cr)%C2Bindex(j)
-!            write(*,*) 'DEBUG 2: ',m,i,inorth,cr  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! for Debug
-            if (m==-999) cycle !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
-
 !            Idg=Ucontact(cr)%Idg(m)                 ! for debugging
 !            Jdg=Ucontact(cr)%Jdg(m)                 ! purposes
             cff=0.5_r8*GRID(ng)%on_u(Istr,j)*                           &
@@ -5651,10 +5674,6 @@
         IF (DOMAIN(ng)%Eastern_Edge(tile)) THEN
           DO j=Jstr,Jend
             m=BRY_CONTACT(ieast,cr)%C2Bindex(j)
-!            write(*,*) 'DEBUG 2: ',m,i,inorth,cr  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! for Debug
-            if (m==-999) cycle !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
-!            if (m>191) cycle !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
-
 !            Idg=Ucontact(cr)%Idg(m)                 ! for debugging
 !            Jdg=Ucontact(cr)%Jdg(m)                 ! purposes
             cff=0.5_r8*GRID(ng)%on_u(Iend+1,j)*                         &
@@ -5688,8 +5707,6 @@
         IF (DOMAIN(ng)%Southern_Edge(tile)) THEN
           DO i=Istr,Iend
             m=BRY_CONTACT(isouth,cr)%C2Bindex(i)
-!            write(*,*) 'DEBUG 2: ',m,i,inorth,cr  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! for Debug
-            if (m==-999) cycle !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
 !            Idg=Vcontact(cr)%Idg(m)                 ! for debugging
 !            Jdg=Vcontact(cr)%Jdg(m)                 ! purposes
             cff=0.5_r8*GRID(ng)%om_v(i,Jstr)*                           &
@@ -5723,9 +5740,6 @@
         IF (DOMAIN(ng)%Northern_Edge(tile)) THEN
           DO i=Istr,Iend
             m=BRY_CONTACT(inorth,cr)%C2Bindex(i)
-!            write(*,*) 'DEBUG 2: ',m,i,inorth,cr  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! for Debug
-            if (m==-999) cycle !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
-
 !            Idg=Vcontact(cr)%Idg(m)                 ! for debugging
 !            Jdg=Vcontact(cr)%Jdg(m)                 ! purposes
             cff=0.5_r8*GRID(ng)%om_v(i,Jend+1)*                         &
