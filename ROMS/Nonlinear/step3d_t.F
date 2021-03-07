@@ -1206,14 +1206,14 @@
             DO is=1,Nsrc(ng)
               Isrc=SOURCES(ng)%Isrc(is)
               Jsrc=SOURCES(ng)%Jsrc(is)
-              IF (LtracerSrc(itrc,ng).and.                              &
-#  if defined TS_MPDATA || defined TS_HSIMT
-     &            ((IstrUm2.le.Isrc).and.(Isrc.le.Iendp2i)).and.        &
-#  else
-     &            ((IstrR.le.Isrc).and.(Isrc.le.IendR)).and.            &
-#  endif
-     &            (j.eq.Jsrc)) THEN
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:rm
+!              IF (LtracerSrc(itrc,ng).and.                              &
+!#  if defined TS_MPDATA || defined TS_HSIMT
+!     &            ((IstrUm2.le.Isrc).and.(Isrc.le.Iendp2i)).and.        &
+!#  else
+!     &            ((IstrR.le.Isrc).and.(Isrc.le.IendR)).and.            &
+!#  endif
+!     &            (j.eq.Jsrc)) THEN
 !                DO k=1,N(ng)-1
 !#  ifdef ONE_TRACER_SOURCE
 !                    FC(Isrc,k)=FC(Isrc,k)+0.5_r8*                       &
@@ -1236,6 +1236,12 @@
 !#  endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:rm
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#  if defined TS_MPDATA || defined TS_HSIMT
+              IF (((IstrUm2.le.Isrc).and.(Isrc.le.Iendp2i)).and.        &
+#  else
+              IF (((IstrR.le.Isrc).and.(Isrc.le.IendR)).and.            &
+#  endif
+     &            (j.eq.Jsrc)) THEN
                 DO k=1,N(ng)
                   cff=dt(ng)*pm(Isrc,Jsrc)*pn(Isrc,Jsrc)
                   IF (LtracerSrc(itrc,ng)) THEN
