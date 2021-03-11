@@ -99,8 +99,8 @@
       IF (model.eq.iADM) THEN
         Tfinal=time(ng)-ntimes(ng)*dt(ng)
       ELSE
-!       Tfinal=time(ng)+ntimes(ng)*dt(ng)
-        Tfinal=dstart*day2sec+ntimes(ng)*dt(ng)
+        Tfinal=time(ng)+ntimes(ng)*dt(ng)          !!!<<<<<<<<<<<<<<<<<<<<< TN: activate
+!        Tfinal=dstart*day2sec+ntimes(ng)*dt(ng)   !!!>>>>>>>>>>>>>>>>>>>>> TN: deactivate
       END IF
       CALL time_string (tfinal, F_code)
 !
@@ -193,7 +193,7 @@
                 IF (Master) THEN
                   WRITE (stdout,30) 'Lateral Boundary',                 &
      &                              TRIM(BRY(i,ng)%files(Nfiles)),      &
-     &                              Tmax_code, F_code
+     &                              'last  ', Tmax_code, F_code
                 END IF
                 exit_flag=4
               END IF

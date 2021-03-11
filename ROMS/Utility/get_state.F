@@ -293,7 +293,8 @@
 !  initialization record, assign input time.
 !
       IF (LastRec(ng)) THEN
-        Tmax=-1.0_r8
+!        Tmax=-1.0_r8         !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: rm
+        Tmax=-1.0E+10_r8      !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
         DO i=1,mySize
           IF (TimeVar(i).gt.Tmax) THEN
             Tmax=TimeVar(i)
