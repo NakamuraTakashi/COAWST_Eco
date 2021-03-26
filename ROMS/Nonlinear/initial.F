@@ -157,7 +157,8 @@
         tdays(ng)=dstart
         time(ng)=tdays(ng)*day2sec
 !$OMP MASTER
-        ntstart(ng)=INT((time(ng)-dstart*day2sec)/dt(ng))+1
+!        ntstart(ng)=INT((time(ng)-dstart*day2sec)/dt(ng))+1 !!! >>>>>> TN: rm
+        ntstart(ng)=1                      !!!<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
         ntend(ng)=ntstart(ng)+ntimes(ng)-1
         ntfirst(ng)=ntstart(ng)
 !$OMP END MASTER
