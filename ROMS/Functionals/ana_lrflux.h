@@ -160,7 +160,7 @@
 # if defined JMAMSM_FLUXES
           lrflx(i,j)=(lrflx(i,j)-150.0_r8)/0.6_r8  ! bias correction for JMAMSM
 # elif defined JMAOBS_FLUXES
-          lrflx(i,j)=(lrflx(i,j)-75.0_r8)/0.78_r8  ! bias correction for JMAMSM
+          lrflx(i,j)=(lrflx(i,j)-75.0_r8)/0.78_r8  ! bias correction for JMA weather station data
 # endif
           lrflx(i,j)=cff*lrflx(i,j)
         END DO

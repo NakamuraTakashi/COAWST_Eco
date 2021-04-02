@@ -680,11 +680,11 @@
 # endif
 # if defined ALBEDO && defined SHORTWAVE
 #   if defined ALBEDO_CLOUD && !defined BENCHMARK
-          SRad(i,j) = SRad(i,j)*cawdir(i,j) !>>> LB: Remove
-!          SRad(i,j) = SRad(i,j)*1.0_r8  !<<< LB: Add
+!          SRad(i,j) = SRad(i,j)*cawdir(i,j) !>>> LB: Remove
+          SRad(i,j) = SRad(i,j)*1.0_r8  !<<< LB: Add
 #  else
-          SRad(i,j) = SRad(i,j)*(1.0_r8-albedo(i,j)) !>>> LB: Remove
-!          SRad(i,j) = SRad(i,j)*1.0_r8 !<<< LB: Add
+!          SRad(i,j) = SRad(i,j)*(1.0_r8-albedo(i,j)) !>>> LB: Remove
+          SRad(i,j) = SRad(i,j)*1.0_r8 !<<< LB: Add
 #  endif
 # endif
           Tcff(i)=alpha(i,j)
@@ -1246,13 +1246,13 @@
 # endif
 # if defined ALBEDO && defined SHORTWAVE
 #   if defined ALBEDO_CLOUD && !defined BENCHMARK
-          cawdif = 1._r8-albw_d                                  ! >>>LB: Remove
-          srflx(i,j) = srflx(i,j)*(cawdir(i,j)*                         &
-     &                 (1._r8-cloud(i,j))+cawdif*cloud(i,j))     ! >>>LB: Remove 
-!          srflx(i,j) = srflx(i,j)*1.0_r8    !<<< LB: Add   
+!          cawdif = 1._r8-albw_d                                  ! >>>LB: Remove
+!          srflx(i,j) = srflx(i,j)*(cawdir(i,j)*                         &
+!     &                 (1._r8-cloud(i,j))+cawdif*cloud(i,j))     ! >>>LB: Remove 
+          srflx(i,j) = srflx(i,j)*1.0_r8    !<<< LB: Add   
 #  else
-          srflx(i,j) = srflx(i,j)*(1._r8-albedo(i,j))   !>>>LB: Remove
-!          srflx(i,j) = srflx(i,j)*1.0_r8   !<<< LB: Add
+!          srflx(i,j) = srflx(i,j)*(1._r8-albedo(i,j))   !>>>LB: Remove
+          srflx(i,j) = srflx(i,j)*1.0_r8   !<<< LB: Add
 #  endif
 # endif
           lrflx(i,j) = LRad(i,j)*Hscale2
