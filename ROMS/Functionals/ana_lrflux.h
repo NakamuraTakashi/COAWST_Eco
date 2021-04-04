@@ -137,30 +137,14 @@
 #elif defined ANA_LONGWAVE_DOWN
       DO j=JstrT,JendT
         DO i=IstrT,IendT
-          if(cloud(i,j)==0.0_r8) then
-!            cff1 = 0.2235_r8
-            cff1 = 0.243_r8
-          else
-!            cff1 = 0.826_r8*cloud(i,j)**3 - 1.234_r8*cloud(i,j)**2     &
-!     &           + 1.135_r8*cloud(i,j) + 0.298_r8
-            cff1 = 0.655_r8*cloud(i,j) + 0.351_r8
-          endif
-          cff2=(0.7859_r8+0.03477_r8*Tair(i,j))/                       &
-     &         (1.0_r8+0.00412_r8*Tair(i,j))
-          e_sat=10.0_r8**cff2    ! saturation vapor pressure (hPa=mbar)
-          vap_p=e_sat*Hair(i,j)  ! water vapor pressure (hPa=mbar)
-     
-          Td = (0.7859_r8-log10(vap_p))/(0.00412_r8*log10(vap_p)-0.03477_r8)
           TaK = Tair(i,j) + 273.15_r8
-          cff3=0.0315_r8*Td - 0.1836_r8
-!          cff4=0.74_r8 + 0.19_r8*cff3 + 0.07_r8*cff3**2
-          cff4=0.759_r8 + 0.162_r8*cff3 + 0.059_r8*cff3**2
-
-          lrflx(i,j)=StefBo*TaK*TaK*TaK*TaK*(1.0_r8-(1.0_r8-cff4)*cff1)
+          cff1 = 0.00000936_r8 * TaK*TaK              ! Swinbank (1963)
+          cff2 = cff1*(1.0_r8+0.22_r8*cloud(i,j))     ! Ångström (1915)
+          lrflx(i,j) = cff2 * StefBo*TaK*TaK*TaK*TaK
 # if defined JMAMSM_FLUXES
-          lrflx(i,j)=(lrflx(i,j)-150.0_r8)/0.6_r8  ! bias correction for JMAMSM
+          lrflx(i,j)=(lrflx(i,j)-16.7_r8)/0.977_r8  ! bias correction for JMAMSM
 # elif defined JMAOBS_FLUXES
-          lrflx(i,j)=(lrflx(i,j)-75.0_r8)/0.78_r8  ! bias correction for JMA weather station data
+          lrflx(i,j)=(lrflx(i,j)+39.0_r8)/1.16_r8   ! bias correction for JMA weather station data
 # endif
           lrflx(i,j)=cff*lrflx(i,j)
         END DO
