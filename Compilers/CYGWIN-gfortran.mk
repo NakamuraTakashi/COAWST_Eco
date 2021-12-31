@@ -26,7 +26,8 @@
               BIN := $(BIN).exe
 
                FC := gfortran
-           FFLAGS := -frepack-arrays -w -fallow-argument-mismatch
+           FFLAGS := -frepack-arrays -w -fallow-argument-mismatch -mcmodel=large
+#           FFLAGS := -frepack-arrays -w -fallow-argument-mismatch
               CPP := /usr/bin/cpp
          CPPFLAGS := -P -traditional
                CC := gcc

@@ -616,12 +616,12 @@
 !  Analytical initial conditions for biology tracers.
 !
       DO ng=1,Ngrids
-        IF (nrrec(ng).eq.0) THEN
+!        IF (nrrec(ng).eq.0) THEN   !!!>>>>>>>>>>>>>>>>>>> TN:rm
           DO tile=first_tile(ng),last_tile(ng),+1
             CALL ana_biology (ng, tile, iNLM)
           END DO
 !$OMP BARRIER
-        END IF
+!        END IF  !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: rm
       END DO
 #endif
 !<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< FA: MOVED

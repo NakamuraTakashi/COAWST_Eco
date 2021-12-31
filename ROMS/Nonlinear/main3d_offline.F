@@ -51,6 +51,7 @@
 # ifdef BVF_MIXING
       USE bvf_mix_mod, ONLY : bvf_mix
 # endif
+      USE dateclock_mod,  ONLY : time_string   !!!<<<<<<<<<<<<<<<<<<<<TN: add
       USE diag_mod, ONLY : diag
 # ifdef TLM_CHECK
       USE dotproduct_mod, ONLY : nl_dotproduct
@@ -208,9 +209,9 @@
 !
         DO ng=1,Ngrids
           DO tile=first_tile(ng),last_tile(ng),+1
-            CALL set_massflux (ng, tile)
+            CALL set_massflux (ng, tile, iNLM)  !!!<<<<<<<<<<<<<<<<<<<< TN add: , iNLM
 # ifndef TS_FIXED
-            CALL rho_eos (ng, tile)
+            CALL rho_eos (ng, tile, iNLM)  !!!<<<<<<<<<<,,,,,<<<<<<<<<< TN add: , iNLM
 # endif
             CALL diag (ng, tile)
           END DO
@@ -221,7 +222,7 @@
         CALL nesting (5)
 # endif
 
-# ifndef OFFLINE_FLOATS
+# if defined OFFLINE_BIOLOGY
 !-----------------------------------------------------------------------
 !  Set fields for vertical boundary conditions. Process tidal forcing,
 !  if any.
@@ -279,7 +280,7 @@
 !
         DO ng=1,Ngrids
           DO tile=first_tile(ng),last_tile(ng),+1
-# ifndef OFFLINE_FLOATS
+# if defined OFFLINE_BIOLOGY
 #  if defined ANA_VMIX
             CALL ana_vmix (ng, tile, iNLM)
 #  elif defined LMD_MIXING
@@ -292,10 +293,10 @@
             CALL hmixing (ng, tile)
 # endif
 # if !defined OCLIMATOLOGY
-            CALL omega (ng, tile)
+            CALL omega (ng, tile, iNLM)  !!!<<<<<<<<<<<<<<<<<<<< TN add: , iNLM
 # endif
             CALL wvelocity (ng, tile, nstp(ng))
-            END DO
+!            END DO  !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: rm
           END DO
 !$OMP BARRIER
         END DO
@@ -311,7 +312,7 @@
 !
         DO ng=1,Ngrids
           DO tile=first_tile(ng),last_tile(ng),+1
-            CALL set_zeta (ng, tile)
+!            CALL set_zeta (ng, tile)
 # ifdef DIAGNOSTICS
             CALL set_diags (ng, tile)
 # endif
@@ -344,7 +345,7 @@
 !  Compute right-hand-side terms for 3D equations.
 !-----------------------------------------------------------------------
 !
-# ifndef OFFLINE_FLOATS
+# if defined OFFLINE_BIOLOGY
         DO ng=1,Ngrids
           DO tile=first_tile(ng),last_tile(ng),+1
             CALL rhs3d (ng, tile)
@@ -361,7 +362,7 @@
 # endif
 # endif
 
-# ifndef OFFLINE_FLOATS
+# if defined OFFLINE_BIOLOGY
 !
 !-----------------------------------------------------------------------
 !  Time-step vertical mixing turbulent equations and passive tracer
@@ -370,7 +371,7 @@
 !
         DO ng=1,Ngrids
           DO tile=first_tile(ng),last_tile(ng),+1
-            CALL omega (ng, tile)
+            CALL omega (ng, tile, iNLM)  !!!<<<<<<<<<<<<<<<<<<<< TN add: , iNLM
 # ifdef MY25_MIXING
             CALL my25_corstep (ng, tile)
 # elif defined GLS_MIXING
@@ -396,7 +397,7 @@
 !  Time-step tracer equations.
 !-----------------------------------------------------------------------
 !
-# if !defined OFFLINE_FLOATS
+# if defined OFFLINE_BIOLOGY
         DO ng=1,Ngrids
           DO tile=first_tile(ng),last_tile(ng),+1
             CALL step3d_t (ng, tile)

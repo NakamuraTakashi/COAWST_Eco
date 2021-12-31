@@ -2042,13 +2042,13 @@
       is=LEN_TRIM(Coptions)+1
       Coptions(is:is+14)=' OCLIMATOLOGY,'
 #endif
-#if defined OFFLINE_FLOATS && defined CLIMATOLOGY
+#if defined OFFLINE_FLOATS
       IF (Master) WRITE (stdout,20) 'OFFLINE_FLOATS',                   &
      &   'Offline run (use model fields from history files).'
       is=LEN_TRIM(Coptions)+1
       Coptions(is:is+16)=' OFFLINE_FLOATS,'
 #endif
-#if defined OFFLINE_BIOLOGY && defined CLIMATOLOGY
+#if defined OFFLINE_BIOLOGY
       IF (Master) WRITE (stdout,20) 'OFFLINE_BIOLOGY',                  &
      &   'Offline run (use model fields from history files).'
       is=LEN_TRIM(Coptions)+1
@@ -3484,7 +3484,7 @@
       is=LEN_TRIM(Coptions)+1
       Coptions(is:is+9)=' WET_DRY,'
 #endif
-#ifdef WIND_MINUS_CURRENT && defined BULK_FLUXES && defined SOLVE3D
+#if defined WIND_MINUS_CURRENT && defined BULK_FLUXES && defined SOLVE3D
 !
       IF (Master) WRITE (stdout,20) 'WIND_MINUS_CURRENT',               &
      &   'Compute effective wind by removing surface ocean current.'

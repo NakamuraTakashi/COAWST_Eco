@@ -91,6 +91,7 @@
       USE strings_mod,     ONLY : FoundError
 # if defined OFFLINE
       USE mod_stepping
+      USE mod_coupling
       USE exchange_2d_mod
 #  ifdef SOLVE3D
       USE exchange_3d_mod
@@ -2105,10 +2106,11 @@
      &                 __FILE__)) RETURN
 # endif
 # if defined OFFLINE
-        DO j=Jstr,Jend
-          DO i=Istr,Iend
-            OCEAN(ng)%zeta(i,j,1) = CLIMA(ng)%ssh(i,j)
-            OCEAN(ng)%zeta(i,j,2) = CLIMA(ng)%ssh(i,j)
+        DO j=Jstr-1,Jend+1
+          DO i=Istr-1,Iend+1
+!            OCEAN(ng)%zeta(i,j,1) = CLIMA(ng)%ssh(i,j)
+!            OCEAN(ng)%zeta(i,j,2) = CLIMA(ng)%ssh(i,j)
+            COUPLING(ng)%Zt_avg1(i,j) = CLIMA(ng)%ssh(i,j)
           END DO
         END DO
         IF (EWperiodic(ng).or.NSperiodic(ng)) THEN
@@ -2118,11 +2120,16 @@
           END DO
         END IF
 #  ifdef DISTRIBUTE
-        CALL mp_exchange3d (ng, tile, iNLM, 1,                          &
-     &                      LBi, UBi, LBj, UBj, 1, 2,                   &
+!        CALL mp_exchange3d (ng, tile, iNLM, 1,                          &
+!     &                      LBi, UBi, LBj, UBj, 1, 2,                   &
+!     &                      NghostPoints,                               &
+!     &                      EWperiodic(ng), NSperiodic(ng),             &
+!     &                      OCEAN(ng)%zeta)
+        CALL mp_exchange2d (ng, tile, iNLM, 1,                          &
+     &                      LBi, UBi, LBj, UBj,                         &
      &                      NghostPoints,                               &
      &                      EWperiodic(ng), NSperiodic(ng),             &
-     &                      OCEAN(ng)%zeta)
+     &                      COUPLING(ng)%Zt_avg1 )
 #  endif
 # endif
       END IF
@@ -2152,10 +2159,14 @@
      &                 __FILE__)) RETURN
 # endif
 # if defined OFFLINE
-        DO j=Jstr,Jend
-          DO i=Istr,Iend
+        DO j=Jstr-1,Jend+1
+          DO i=IstrU-1,Iend+1
             OCEAN(ng)%ubar(i,j,1) = CLIMA(ng)%ubarclm(i,j)
             OCEAN(ng)%ubar(i,j,2) = CLIMA(ng)%ubarclm(i,j)
+          ENDDO
+        ENDDO
+        DO j=JstrV-1,Jend+1
+          DO i=Istr-1,Iend+1
             OCEAN(ng)%vbar(i,j,1) = CLIMA(ng)%vbarclm(i,j)
             OCEAN(ng)%vbar(i,j,2) = CLIMA(ng)%vbarclm(i,j)
           ENDDO
@@ -2206,10 +2217,16 @@
 #  endif
 #  if defined OFFLINE
         DO k=1,N(ng)
-          DO j=Jstr,Jend
-            DO i=Istr,Iend
+          DO j=Jstr-1,Jend+1
+            DO i=IstrU-1,Iend+1
               OCEAN(ng)%u(i,j,k,nnew(ng)) = CLIMA(ng)%uclm(i,j,k)
-              OCEAN(ng)%v(i,j,k,nnew(ng)) = CLIMA(ng)%vclm(i,j,k)
+            END DO
+          END DO
+        END DO
+        DO k=1,N(ng)
+          DO j=JstrV-1,Jend+1
+            DO i=Istr-1,Iend+1
+             OCEAN(ng)%v(i,j,k,nnew(ng)) = CLIMA(ng)%vclm(i,j,k)
             END DO
           END DO
         END DO
@@ -2226,7 +2243,7 @@
 #   ifdef DISTRIBUTE
         DO i=1,2
           CALL mp_exchange3d (ng, tile, iNLM, 2,                        &
-     &                        LBi, UBi, LBj, UBj, 0, N(ng),             &
+     &                        LBi, UBi, LBj, UBj, 1, N(ng),             &
      &                        NghostPoints,                             &
      &                        EWperiodic(ng), NSperiodic(ng),           &
      &                        OCEAN(ng)%u(:,:,:,i),OCEAN(ng)%v(:,:,:,i))

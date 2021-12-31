@@ -1,5 +1,5 @@
 #include "cppdefs.h"
-#if defined NONLINEAR && defined SOLVE3D && (!defined OFFLINE)
+#if defined NONLINEAR && defined SOLVE3D /*&& (!defined OFFLINE)*/ /*>>>>>>>> TN: rm */
       SUBROUTINE main3d (RunInterval)
 !
 !svn $Id: main3d.F 830 2017-01-24 21:21:11Z arango $
@@ -685,6 +685,7 @@
               END IF
             END DO
 # endif
+# if !defined OFFLINE /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add */
 !
 !-----------------------------------------------------------------------
 !  Solve the vertically integrated primitive equations for the
@@ -796,6 +797,7 @@
               END DO
 # endif
             END DO LOOP_2D
+# endif  /*END if !defined OFFLINE*/ /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add */
 
 # ifdef NESTING
 #  if defined MASKING && defined WET_DRY
@@ -846,6 +848,7 @@
               CALL nesting (ng, iNLM, nzwgt)
             END DO
 # endif
+# if !defined OFFLINE /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add */
 !
 !-----------------------------------------------------------------------
 !  Time-step 3D momentum equations.
@@ -861,6 +864,7 @@
               END DO
 !$OMP BARRIER
             END DO
+# endif  /*if !defined OFFLINE*/
 
 # ifdef NESTING
 !

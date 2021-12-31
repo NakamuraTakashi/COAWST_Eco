@@ -320,7 +320,6 @@
                 itracer=1                      ! next nested grid
               END IF
               ifield=isTvar(idbio(itracer))
-              write(*,*) "DEBUG :", itracer,ifield,igrid, idbio(itracer)
               Npts=load_lbc(Nval, Cval, line, nline, ifield, igrid,     &
      &                      idbio(iTrcStr), idbio(iTrcEnd),             &
      &                      Vname(1,idTvar(idbio(itracer))), LBC)
