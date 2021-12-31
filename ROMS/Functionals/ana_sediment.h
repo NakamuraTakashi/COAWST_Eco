@@ -408,7 +408,7 @@
         END DO
       END DO
 !!!>>>>>>> Shiraho reef case >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN:Add
-# elif defined SHIRAHO_REEF
+# elif defined SHIRAHO_REEF || defined BERAU2 || defined BERAU2RIVER
       DO j=JstrT,JendT
         DO i=IstrT,IendT
 !
