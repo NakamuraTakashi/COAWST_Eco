@@ -49,6 +49,12 @@
       USE mod_grid
       USE mod_ncparam
       USE mod_scalars
+!!! >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: add
+#if defined OFFLINE
+      USE mod_clima
+      USE mod_coupling
+#endif
+!!! <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
 !
 !  Imported variable declarations.
 !
@@ -180,10 +186,49 @@
       IF (LBC(inorth,isFsur,ng)%acquire.and.                            &
      &    DOMAIN(ng)%Northern_Edge(tile)) THEN
         cff=-0.6_r8*sin(2.0_r8*pi*time(ng)/(12.0_r8*3600.0_r8))
-        DO i=IstrR,IendR
+        DO i=IstrT,IendT
           BOUNDARY(ng)%zeta_north(i)=cff
         END DO
       END IF
+
+#elif defined OFFLINE
+! OFFLINE option
+      IF (LBC(ieast,isUvel,ng)%acquire.and.                             &
+     &    LBC(ieast,isVvel,ng)%acquire.and.                             &
+     &    DOMAIN(ng)%Eastern_Edge(tile)) THEN
+        DO j=JstrT,JendT
+!          BOUNDARY(ng)%zeta_east(j) = CLIMA(ng)%ssh(Iend+1,j)
+          BOUNDARY(ng)%zeta_east(j) = COUPLING(ng)%Zt_avg1(Iend+1,j)
+        END DO
+      END IF
+
+      IF (LBC(iwest,isUvel,ng)%acquire.and.                             &
+     &    LBC(iwest,isVvel,ng)%acquire.and.                             &
+     &    DOMAIN(ng)%Western_Edge(tile)) THEN
+        DO j=JstrT,JendT
+!          BOUNDARY(ng)%zeta_west(j) = CLIMA(ng)%ssh(Istr-1,j)
+          BOUNDARY(ng)%zeta_west(j) = COUPLING(ng)%Zt_avg1(Istr-1,j)
+        END DO
+      END IF
+
+      IF (LBC(isouth,isUvel,ng)%acquire.and.                            &
+     &    LBC(isouth,isVvel,ng)%acquire.and.                            &
+     &    DOMAIN(ng)%Southern_Edge(tile)) THEN
+        DO i=IstrT,IendT
+!          BOUNDARY(ng)%zeta_south(i) = CLIMA(ng)%ssh(i,Jstr-1)
+          BOUNDARY(ng)%zeta_south(i) = COUPLING(ng)%Zt_avg1(i,Jstr-1)
+        END DO
+      END IF
+
+      IF (LBC(inorth,isUvel,ng)%acquire.and.                            &
+     &    LBC(inorth,isVvel,ng)%acquire.and.                            &
+     &    DOMAIN(ng)%Northern_Edge(tile)) THEN
+        DO i=IstrT,IendT
+!          BOUNDARY(ng)%zeta_north(i) = CLIMA(ng)%ssh(i,Jend+1)
+          BOUNDARY(ng)%zeta_north(i) = COUPLING(ng)%Zt_avg1(i,Jend+1)
+        END DO
+      END IF
+
 #else
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
       IF (LBC(ieast,isFsur,ng)%acquire.and.                             &

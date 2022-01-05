@@ -1225,7 +1225,7 @@
 # ifndef ANA_TOBC
 !
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
-#  ifdef ANA_TOBC_BIO
+#  if defined ANA_TOBC_BIO && !defined OFFLINE
 !
       IF (LprocessOBC(ng)) THEN
         DO i=1,NAT

@@ -51,6 +51,12 @@
       USE mod_ncparam
       USE mod_ocean
       USE mod_scalars
+!!! >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: add
+#if defined OFFLINE
+      USE mod_clima
+#endif
+!!! <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
+
 !
 !  Imported variable declarations.
 !
@@ -113,6 +119,60 @@
           END DO
         END DO
       END IF
+!!! >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: add
+#elif defined OFFLINE
+      IF (LBC(ieast,isUvel,ng)%acquire.and.                             &
+     &    LBC(ieast,isVvel,ng)%acquire.and.                             &
+     &    DOMAIN(ng)%Eastern_Edge(tile)) THEN
+        DO k=1,N(ng)
+          DO j=JstrT,JendT
+            BOUNDARY(ng)%u_east(j,k) = CLIMA(ng)%uclm(Iend+1,j,k)
+          END DO
+          DO j=JstrP,JendT
+            BOUNDARY(ng)%v_east(j,k) = CLIMA(ng)%vclm(Iend+1,j,k)
+          END DO
+        END DO
+      END IF
+
+      IF (LBC(iwest,isUvel,ng)%acquire.and.                             &
+     &    LBC(iwest,isVvel,ng)%acquire.and.                             &
+     &    DOMAIN(ng)%Western_Edge(tile)) THEN
+        DO k=1,N(ng)
+          DO j=JstrT,JendT
+            BOUNDARY(ng)%u_west(j,k) = CLIMA(ng)%uclm(IstrU-1,j,k)
+          END DO
+          DO j=JstrP,JendT
+            BOUNDARY(ng)%v_west(j,k) = CLIMA(ng)%vclm(Istr-1,j,k)
+          END DO
+        END DO
+      END IF
+
+      IF (LBC(isouth,isUvel,ng)%acquire.and.                            &
+     &    LBC(isouth,isVvel,ng)%acquire.and.                            &
+     &    DOMAIN(ng)%Southern_Edge(tile)) THEN
+        DO k=1,N(ng)
+          DO i=IstrP,IendT
+            BOUNDARY(ng)%u_south(i,k) = CLIMA(ng)%uclm(i,Jstr-1,k)
+          END DO
+          DO i=IstrT,IendT
+            BOUNDARY(ng)%v_south(i,k) = CLIMA(ng)%vclm(i,JstrV-1,k)
+          END DO
+        END DO
+      END IF
+
+      IF (LBC(inorth,isUvel,ng)%acquire.and.                            &
+     &    LBC(inorth,isVvel,ng)%acquire.and.                            &
+     &    DOMAIN(ng)%Northern_Edge(tile)) THEN
+        DO k=1,N(ng)
+          DO i=IstrP,IendT
+            BOUNDARY(ng)%u_north(i,k) = CLIMA(ng)%uclm(i,Jend+1,k)
+          END DO
+          DO i=IstrT,IendT
+            BOUNDARY(ng)%v_north(i,k) = CLIMA(ng)%vclm(i,Jend+1,k)
+          END DO
+        END DO
+      END IF
+!!! <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
 #else
       IF (LBC(ieast,isUvel,ng)%acquire.and.                             &
      &    LBC(ieast,isVvel,ng)%acquire.and.                             &

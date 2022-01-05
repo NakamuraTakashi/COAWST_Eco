@@ -365,7 +365,7 @@
           END IF
         END DO
 
-#  if !defined OFFLINE  /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add */
+/*#  if !defined OFFLINE*/  /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add */
 !
 !  Apply boundary conditions.
 !
@@ -390,7 +390,7 @@
      &                   IminS, ImaxS, JminS, JmaxS,                    &
      &                   nstp, nnew,                                    &
      &                   v)
-#  endif   /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add */
+/*#  endif*/   /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add */
       END IF
 !
       IF (EWperiodic(ng).or.NSperiodic(ng)) THEN

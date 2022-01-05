@@ -1034,8 +1034,12 @@
      &                    (cff1*t(i,j,N(ng)  ,3,itrc)+                  &
      &                     cff2*t(i,j,N(ng)-1,3,itrc)-                  &
      &                     cff3*t(i,j,N(ng)-2,3,itrc))
+#  ifdef OFFLINE /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add*/
+            FC(i,N(ng))=W(i,j,N(ng))*t(i,j,N(ng),3,itrc)  !!! <<<<<<<<<<<< TN: add
+#  else          /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add*/
             FC(i,N(ng))=0.0_r8
-          END DO
+#  endif         /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add*/
+    END DO
 # endif
 # if defined WEC_VF
 !
@@ -1666,17 +1670,17 @@
 !-----------------------------------------------------------------------
 !
       ic=0
-#ifdef OFFLINE_BIOLOGY
-      DO ibt=1,NBT
-        itrc=idbio(ibt)
-#else
+!#ifdef OFFLINE_BIOLOGY
+!      DO ibt=1,NBT
+!        itrc=idbio(ibt)
+!#else
 !  Initialize tracer counter index. The "tclm" array is only allocated
 !  to the NTCLM fields that need to be processed. This is done to
 !  reduce memory.
 !
 !
       DO itrc=1,NT(ng)
-#endif
+!#endif
 !
 !  Set compact reduced memory tracer index for nudging coefficients and
 !  climatology arrays.

@@ -224,7 +224,7 @@
         END DO
 # endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
-!
+# if !defined OFFLINE /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add */
         DO i=Istr,Iend
           wrk(i)=W(i,j,N(ng))/(z_w(i,j,N(ng))-z_w(i,j,0))
         END DO
@@ -248,6 +248,7 @@
         DO i=Istr,Iend
           W(i,j,N(ng))=0.0_r8
         END DO
+# endif  /*!defined OFFLINE: <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add*/
       END DO
 !
 !  Set lateral boundary conditions.

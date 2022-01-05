@@ -797,7 +797,6 @@
               END DO
 # endif
             END DO LOOP_2D
-# endif  /*END if !defined OFFLINE*/ /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add */
 
 # ifdef NESTING
 #  if defined MASKING && defined WET_DRY
@@ -848,7 +847,6 @@
               CALL nesting (ng, iNLM, nzwgt)
             END DO
 # endif
-# if !defined OFFLINE /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add */
 !
 !-----------------------------------------------------------------------
 !  Time-step 3D momentum equations.
@@ -864,7 +862,7 @@
               END DO
 !$OMP BARRIER
             END DO
-# endif  /*if !defined OFFLINE*/
+# endif  /*!defined OFFLINE: <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add*/
 
 # ifdef NESTING
 !
