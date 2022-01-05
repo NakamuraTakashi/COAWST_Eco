@@ -308,7 +308,7 @@
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
 #if defined REEF_ECOSYS
       real(r8) :: TmpK, Salt, sspH, cCO3, cCO2aq, ssfCO2, ssCO2flux
-      real(r8) :: DOsatu, ssO2flux
+      real(r8) :: TIC, TAlk, Oxyg, DOsatu, ssO2flux
 #endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 
@@ -1054,6 +1054,9 @@
 
           TmpK = t(i,j,N(ng),1,iTemp)+273.15_r8
           Salt = t(i,j,N(ng),1,iSalt)
+          TIC  = t(i,j,N(ng),1,iTIC_)
+          TAlk = t(i,j,N(ng),1,iTAlk)
+          Oxyg = t(i,j,N(ng),1,iOxyg)
 
 # if defined CORAL_POLYP
           HisBio2d(i,j,iC1Pg) = 0.0_r8
@@ -1072,12 +1075,12 @@
 # endif
 
           DOsatu=O2satu(TmpK,Salt)
-          ssO2flux = Flux_O2(Oxyg0(ng), DOsatu, 0.0d0, TmpK, Salt )  ! sea to air is positive
+          ssO2flux = Flux_O2(Oxyg, DOsatu, 0.0d0, TmpK, Salt )  ! sea to air is positive
           HisBio2d(i,j,iO2fx) = ssO2flux
 
-          sspH = pH_fromATCT( TAlk0(ng), TIC_0(ng),TmpK, Salt )
-          cCO3=cCO3_fromCTpH( TIC_0(ng), sspH, TmpK, Salt )
-          cCO2aq = cCO2aq_fromCTpH( TIC_0(ng), sspH, TmpK, Salt )
+          sspH = pH_fromATCT( TAlk, TIC, TmpK, Salt )
+          cCO3=cCO3_fromCTpH( TIC, sspH, TmpK, Salt )
+          cCO2aq = cCO2aq_fromCTpH( TIC, sspH, TmpK, Salt )
 
           HisBio2d(i,j,ipHt_) = sspH
           HisBio2d(i,j,iWarg) = Warg_fromcCO3( cCO3, TmpK, Salt )
