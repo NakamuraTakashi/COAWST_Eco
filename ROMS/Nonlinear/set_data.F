@@ -2415,10 +2415,10 @@
 #  ifdef ANA_TOBC
         CALL ana_tobc (ng, tile, iNLM)
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
-#   if defined OFFLINE
+#   if defined OFFLINE_BIOLOGY
         CALL ana_tobc_bio (ng, tile, iNLM)
 #   endif
-#  elif defined ANA_TOBC_BIO && !defined OFFLINE
+#  elif defined ANA_TOBC_BIO && !defined OFFLINE_BIOLOGY
 
         IF (DOMAIN(ng)%SouthWest_Test(tile)) THEN
            DO itrc=1,NAT

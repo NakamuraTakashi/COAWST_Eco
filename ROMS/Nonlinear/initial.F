@@ -571,7 +571,7 @@
       END DO
 #endif
 
-#ifndef OFFLINE_FLOATS
+/*#ifndef OFFLINE_FLOATS*/ /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: rm */
 #ifdef INI_FILE
 !
 !  Read in initial conditions from initial NetCDF file.
@@ -795,7 +795,7 @@
 !$OMP BARRIER
       END DO
 #endif
-#endif /* !OFFLINE_FLOATS */
+/*#endif*/ /* !OFFLINE_FLOATS */ /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: rm */
 
 #if defined FOUR_DVAR || !defined TANGENT || !defined ADJOINT
 !
