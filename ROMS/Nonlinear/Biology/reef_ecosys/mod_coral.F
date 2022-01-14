@@ -1375,46 +1375,46 @@ CONTAINS
     
     if(time(n).ge.dsec(n)) then
       
-      write(10+n,*) time(n)/86400.0d0,',',PFD,','                     &
-       ,CORAL(ng)%Pg(n,i,j),',', CORAL(ng)%R (n,i,j),','              &
-       ,CORAL(ng)%Pg(n,i,j)-CORAL(ng)%R (n,i,j),','                   &
-       ,CORAL(ng)%G (n,i,j),',',CORAL(ng)%QC(n,i,j),','               &
-       ,CORAL(ng)%TAcal(n,i,j),',',CORAL(ng)%TAcoe(n,i,j),',',TAamb,','     &
-       ,CORAL(ng)%DICcal(n,i,j),',',CORAL(ng)%DICcoe(n,i,j),',',DICamb,','  &
-       ,CORAL(ng)%DOcoe(n,i,j),',',DOamb,','                          &
-       ,pHcal,',',pHcoe,',',pHamb,',',Wargcal,',',Wargamb,','         &
-       ,fCO2cal,',',fCO2coe,',',fCO2amb,','                           &
-       ,CORAL(ng)%cCO2aqcal(n,i,j),',',cHCO3cal,',',cCO3cal,','       &
-       ,CORAL(ng)%cCO2aqcoe(n,i,j),',',cHCO3coe,',',cCO3coe,','       &
+      write(10+n,'(*(g0:,", "))') time(n)/86400.0d0, PFD                         &
+       , CORAL(ng)%Pg(n,i,j), CORAL(ng)%R (n,i,j)                                &
+       , CORAL(ng)%Pg(n,i,j)-CORAL(ng)%R (n,i,j)                                 &
+       , CORAL(ng)%G (n,i,j), CORAL(ng)%QC(n,i,j)                                &
+       , CORAL(ng)%TAcal(n,i,j), CORAL(ng)%TAcoe(n,i,j),TAamb                    &
+       , CORAL(ng)%DICcal(n,i,j), CORAL(ng)%DICcoe(n,i,j),DICamb                 &
+       , CORAL(ng)%DOcoe(n,i,j), DOamb                                           &
+       , pHcal, pHcoe, pHamb, Wargcal, Wargamb                                   &
+       , fCO2cal, fCO2coe, fCO2amb                                               &
+       , CORAL(ng)%cCO2aqcal(n,i,j), cHCO3cal,cCO3cal                            &
+       , CORAL(ng)%cCO2aqcoe(n,i,j), cHCO3coe,cCO3coe                            &
 # if defined CORAL_CARBON_ISOTOPE
-       ,d13C_DICamb,',',d13C_DICcoe,',',d13C_QC,',',d13C_DICcal,','   &
-       ,d13C_arg,',',d13C_arg*CORAL(ng)%G (n,i,j),','                                  &
-       ,d13C_fromR13C(CORAL(ng)%c13CO2aqcal(n,i,j)/CORAL(ng)%cCO2aqcal(n,i,j)),','   &
-       ,d13C_fromR13C(cH13CO3cal/cHCO3cal),','                        &
-       ,d13C_fromR13C(c13CO3cal/cCO3cal),','                          &
-       ,d13C_fromR13C(CORAL(ng)%c13CO2aqcoe(n,i,j)/CORAL(ng)%cCO2aqcoe(n,i,j)),','   &
-       ,d13C_fromR13C(cH13CO3coe/cHCO3coe),','                        &
-       ,d13C_fromR13C(c13CO3coe/cCO3coe),','                          &
-       ,CORAL(ng)%c13CO2aqcal(n,i,j),',',cH13CO3cal,',',c13CO3cal,',' &
-       ,CORAL(ng)%c13CO2aqcoe(n,i,j),',',cH13CO3coe,',',c13CO3coe,',' &
+       , d13C_DICamb, d13C_DICcoe,d13C_QC, d13C_DICcal                           &
+       , d13C_arg, d13C_arg*CORAL(ng)%G (n,i,j)                                  &
+       , d13C_fromR13C(CORAL(ng)%c13CO2aqcal(n,i,j)/CORAL(ng)%cCO2aqcal(n,i,j))  &
+       , d13C_fromR13C(cH13CO3cal/cHCO3cal)                                      &
+       , d13C_fromR13C(c13CO3cal/cCO3cal)                                        &
+       , d13C_fromR13C(CORAL(ng)%c13CO2aqcoe(n,i,j)/CORAL(ng)%cCO2aqcoe(n,i,j))  &
+       , d13C_fromR13C(cH13CO3coe/cHCO3coe)                                      &
+       , d13C_fromR13C(c13CO3coe/cCO3coe)                                        &
+       , CORAL(ng)%c13CO2aqcal(n,i,j), cH13CO3cal, c13CO3cal                     &
+       , CORAL(ng)%c13CO2aqcoe(n,i,j), cH13CO3coe, c13CO3coe                     &
 # endif
 # if defined CORAL_ZOOXANTHELLAE
-       ,CORAL(ng)%ROS(n,i,j),',',F_zROS,',',F_detox,',',F_dam,','      &
+       , CORAL(ng)%ROS(n,i,j), F_zROS, F_detox, F_dam                            &
 # endif
 # if defined CORAL_BORON_ISOTOPE
-       ,d11Barg,','                                                   &
+       , d11Barg                                                                 &
 # endif
 # if defined ORGANIC_MATTER
-       ,DOCuptake,','                                                 &
+       , DOCuptake                                                               &
 # endif
 # if defined CORAL_INGESTION
-       ,ZOOuptake,','                                                 &
+       , ZOOuptake                                                               &
 # endif
 # if defined CORAL_SIZE_DYNAMICS
-       ,CORAL(ng)%growth(n,i,j),',', CORAL(ng)%mort(n,i,j),','        &
-       , Damage,',',F_Cgrowth,','                                     &
+       , CORAL(ng)%growth(n,i,j), CORAL(ng)%mort(n,i,j)                          &
+       , Damage,F_Cgrowth                                                        &
 # endif
-       ,E_ca
+       , E_ca
     
       dsec(n)=dsec(n)+OUTPUT_INTERVAL*60.
 
@@ -1437,21 +1437,21 @@ CONTAINS
 
     if((time(n)/86400.).ge.dday(n)) then
 
-      write(20+n,*) dday(n),','             &
-       ,S_PFD_dt(n)*1.d-6,','               &   !Photon flux density (mol m-2 d-1)
+      write(20+n,'(*(g0:,", "))') dday(n) &
+       , S_PFD_dt(n)*1.d-6                &   ! Photon flux density (mol m-2 d-1)
 # if defined CORAL_CARBON_ISOTOPE
-!       ,S_d13CargxGn_dt(n),','              &
-       ,S_d13CargxGn_dt(n)/S_Gn_dt(n),','   &   !d13C
-       ,S_d13C_QC_dt(n)/24./60./60.,','     &   ! 1 day avaraged value of d13C_QC
+!       , S_d13CargxGn_dt(n)               &
+       , S_d13CargxGn_dt(n)/S_Gn_dt(n)    &   ! d13C
+       , S_d13C_QC_dt(n)/24./60./60.      &   ! 1 day avaraged value of d13C_QC
 # endif
 # if defined CORAL_BORON_ISOTOPE
-        ,S_d11BargxGn_dt(n)/S_Gn_dt(n),','   & 
+       , S_d11BargxGn_dt(n)/S_Gn_dt(n)    & 
 # endif
-       ,S_Gn_dt(n)*1.d-3,','                &   !Calcification rate (umol cm-2 d-1)
-       ,S_Pg_dt(n)*1.d-3,','                &   !Gross photosynthesis rate (umol cm-2 d-1)
-       ,S_R_dt(n)*1.d-3,','                 &   !Respiration rate (umol cm-2 d-1)
-       ,S_QC_dt(n)/24./60./60.,','          &   ! 1 day avaraged value of QC
-       ,(S_Pg_dt(n)-S_R_dt(n))*1.d-3            !Net photosynthesis rate (umol cm-2 d-1)
+       , S_Gn_dt(n)*1.d-3                 &   ! Calcification rate (umol cm-2 d-1)
+       , S_Pg_dt(n)*1.d-3                 &   ! Gross photosynthesis rate (umol cm-2 d-1)
+       , S_R_dt(n)*1.d-3                  &   ! Respiration rate (umol cm-2 d-1)
+       , S_QC_dt(n)/24./60./60.           &   ! 1 day avaraged value of QC
+       , (S_Pg_dt(n)-S_R_dt(n))*1.d-3         ! Net photosynthesis rate (umol cm-2 d-1)
 
       dday(n)=dday(n)+AVERAGE_INTERVAL
         
@@ -1699,7 +1699,7 @@ CONTAINS
       ( ng, n, i, j          & ! ng: nested grid number; n: coral compartment; i,j: position
       , dt                   & ! Time step (sec)
       , PFDsurf              & ! Photon flux density (umol m-2 s-1)
-      , Tamb                 & ! Temperature (K)
+      , Tamb                 & ! Temperature (oC)
       , cCO2aqcoe            & ! CO2 concentration in the coral tissue
       , ROS                  & ! ROS concentration in Zooxanthellar cell
 !        output parameters
@@ -1726,7 +1726,7 @@ CONTAINS
 !  Estimated from Saragosti et al. (2010) data
 !    F_zROS = 0.0072d0*exp(0.14d0*(TKamb-273.15))+0.0024d0*(PFDsurf) ! (fmol min-1 cell-1)
 !  Estimated from combined data of Saragosti et al. (2010) and McGinty et al. (2012)
-    F_zROS = 6.0d-7*exp(0.5d0*(TKamb-273.15))+0.0024d0*(PFDsurf) ! (fmol min-1 cell-1)
+    F_zROS = 6.0d-7*exp(0.5d0*Tamb)+0.0024d0*(PFDsurf) ! (fmol min-1 cell-1)
     F_zROS = F_zROS/60.0d0 * 1.0d-3   ! (pmol cell-1 s-1)
 # endif
       
@@ -1942,25 +1942,19 @@ CONTAINS
     
     if(time(n).ge.dsec(n)) then
       
-      write(30+n,*)                                        &
-        time(n)/86400.0d0,',', PFDsurf,','                 &
-       ,ZOOX(ng)%Pg(n,i,j),',',  ZOOX(ng)%R(n,i,j),','     &
-       ,ZOOX(ng)%dens(n,i,j),',',ZOOX(ng)%QC(n,i,j),','    &
-       ,CORAL(ng)%ROS(n,i,j),','                           &
-       ,C_repro,',',Repro,',',Morta,',', F_zROS,','         &
-       ,F_Csec,','                                         &
+      write(30+n,'(*(g0:,", "))')                                        &
+         time(n)/86400.0d0, PFDsurf                                      &
+       , ZOOX(ng)%Pg(n,i,j), ZOOX(ng)%R(n,i,j), ZOOX(ng)%dens(n,i,j)     &
+       , ZOOX(ng)%QC(n,i,j), CORAL(ng)%ROS(n,i,j)                        &
+       , C_repro, Repro, Morta, F_zROS,F_Csec                            &
 #  if defined CORAL_NUTRIENTS
-       ,ZOOX(ng)%QN(n,i,j),',',ZOOX(ng)%QP(n,i,j),','      &
-       ,N_repro,',',P_repro,','                            &
-       ,ZOOX(ng)%NO3(n,i,j),','    &
-       ,ZOOX(ng)%NH4(n,i,j),',',F_ONOO,','                 &
-       ,NO3_trans,',',NH4_trans,','          &
-       ,NO3_reduc,','                       &
-       ,N_assim,',',N_dissim,','                           &
-       ,ZOOX(ng)%PO4(n,i,j),',',PO4_trans,',',P_assim,','  &
+       , ZOOX(ng)%QN(n,i,j), ZOOX(ng)%QP(n,i,j)                          &
+       , N_repro, P_repro                                                &
+       , ZOOX(ng)%NO3(n,i,j), ZOOX(ng)%NH4(n,i,j), F_ONOO                &
+       , NO3_trans, NH4_trans,NO3_reduc, N_assim, N_dissim               &
+       , ZOOX(ng)%PO4(n,i,j), PO4_trans, P_assim                         &
 #  endif
-       ,F_Zelm,',',Repro*ZOOX(ng)%dens(n,i,j),','        &
-       ,Morta*ZOOX(ng)%dens(n,i,j)
+       , F_Zelm, Repro*ZOOX(ng)%dens(n,i,j), Morta*ZOOX(ng)%dens(n,i,j)
 
       dsec(n)=dsec(n)+OUTPUT_INTERVAL*60.0d0
     
@@ -2135,15 +2129,12 @@ CONTAINS
     
     if(time(n).ge.dsec(n)) then
       
-      write(40+n,*)                                             &
-        time(n)/86400.0d0,',', PFDsurf,',', Tamb,','            &
-       ,ZPHOT(ng)%QAo(n,i,j),',',ZPHOT(ng)%QAr(n,i,j),','       &
-       ,ZPHOT(ng)%QAi(n,i,j),',',QAt,',',QAa,','                &
-       ,QAa/QAt,',',ZPHOT(ng)%QAo(n,i,j)/QAt,','                &
-       ,J_ea,',',J_ep_in,',',J_ep,',',J_ee,',',J_ep_max,','     &
-       ,Ji2a,',',Ja2i,',',kr,',',ko,',',F_zROS,','              &
-       ,Pg,',',J_ep_in*c2e,',',J_ep_max*c2e,','                 &
-       ,RubisCO,',', ZPHOT(ng)%Rep(n,i,j)
+      write(40+n,'(*(g0:,", "))')                                          &
+         time(n)/86400.0d0, PFDsurf, Tamb                                  &
+       , ZPHOT(ng)%QAo(n,i,j), ZPHOT(ng)%QAr(n,i,j), ZPHOT(ng)%QAi(n,i,j)  &
+       , QAt, QAa, QAa/QAt, ZPHOT(ng)%QAo(n,i,j)/QAt                       &
+       , J_ea, J_ep_in, J_ep, J_ee, J_ep_max, Ji2a, Ja2i, kr, ko, F_zROS   &
+       , Pg, J_ep_in*c2e, J_ep_max*c2e, RubisCO, ZPHOT(ng)%Rep(n,i,j)
 
       dsec(n)=dsec(n)+OUTPUT_INTERVAL*60.0d0
       
