@@ -1192,7 +1192,7 @@
               OCEAN(ng)%u(i,j,k,nstp(ng)) = CLIMA(ng)%uclm(i,j,k)
 #   ifdef WET_DRY
               OCEAN(ng)%u(i,j,k,nstp(ng)) = OCEAN(ng)%u(i,j,k,nstp(ng))  &
-     &                                      *GRID(ng)%umask_diff(i,j)
+     &                                      *GRID(ng)%umask_wet(i,j)
 #   endif              
 !              OCEAN(ng)%u(i,j,k,nnew(ng)) = CLIMA(ng)%uclm(i,j,k)
             END DO
@@ -1204,7 +1204,7 @@
               OCEAN(ng)%v(i,j,k,nstp(ng)) = CLIMA(ng)%vclm(i,j,k)
 #   ifdef WET_DRY
               OCEAN(ng)%v(i,j,k,nstp(ng)) = OCEAN(ng)%v(i,j,k,nstp(ng))  &
-     &                                      *GRID(ng)%vmask_diff(i,j)
+     &                                      *GRID(ng)%vmask_wet(i,j)
 #   endif              
 !              OCEAN(ng)%v(i,j,k,nnew(ng)) = CLIMA(ng)%vclm(i,j,k)
             END DO

@@ -919,7 +919,7 @@
 #  endif
             FC(i,N(ng))=0.0_r8
           END DO
-# elif defined TS_MPDATA
+# elif defined TS_MPDATA || defined OFFLINE
 #  if !defined WEC_VF
 !
 !  First_order, upstream differences vertical advective flux.
@@ -936,7 +936,11 @@
 #   else
             FC(i,0)=0.0_r8
 #   endif
+#   ifdef OFFLINE /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add*/
+            FC(i,N(ng))=W(i,j,N(ng))*t(i,j,N(ng),3,itrc)  !!! <<<<<<<<<<<< TN: add
+#   else          /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add*/
             FC(i,N(ng))=0.0_r8
+#   endif         /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add*/
           END DO
 #  endif
 # elif defined TS_HSIMT
