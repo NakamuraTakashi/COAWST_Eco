@@ -667,7 +667,7 @@
 !
 !     OLDFIL : ??
 !
-      CHARACTER HEDLIN*80, OLDFIL *36
+      CHARACTER HEDLIN*80, OLDFIL *140  !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN mod: 36 -> 140
 !                                                                         30.82
 !  8. SUBROUTINE USED
 !
@@ -694,7 +694,7 @@
 !       open namelist file and read first datafile name
         CALL FOR (NDSL, FILENM, 'OF', IOSTAT)                             40.00
         IF (STPNOW()) RETURN                                              34.01
-        READ(NDSL, '(A36)') FILENM
+        READ(NDSL, '(A140)') FILENM  !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN mod: A36 -> A140
       ELSE
         CALL INCSTR ('FNAME', FILENM, 'REQ', ' ')                         40.00
       ENDIF
