@@ -1283,6 +1283,7 @@
                   t(Isrc,Jsrc,k,nnew,itrc)=t(Isrc,Jsrc,k,nnew,itrc)+    &
      &                                     cff*SOURCES(ng)%Qsrc(is,k)*  &
      &                                     cff3
+!                  FC(Isrc,k)=FC(Isrc,k)+SOURCES(ng)%Qsrc(is,k)*cff3
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
                 END DO
               END IF

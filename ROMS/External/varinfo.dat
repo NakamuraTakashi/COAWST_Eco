@@ -9663,6 +9663,15 @@
     'r2dvar'
     1.0d0
 
+  'coral1_Zoox_chl'                                             ! Input/Output
+    'coral1 zooxanthellae chlorophyll'
+    'pg cell-1'                                 ! [pg cell-1]
+    'coral1_Zoox_chl, scalar, series'
+    'ocean_time'
+    'iHbio2(iC1zchl)'
+    'r2dvar'
+    1.0d0
+
   'coral1_mort'                                             ! Input/Output
     'coral1 mortality'
     's-1'                                 ! [s-1]
@@ -9741,6 +9750,15 @@
     'coral2_densZoox, scalar, series'
     'ocean_time'
     'iHbio2(iC2zx)'
+    'r2dvar'
+    1.0d0
+
+  'coral2_Zoox_chl'                                             ! Input/Output
+    'coral2 zooxanthellae chlorophyll'
+    'pg cell-1'                                 ! [pg cell-1]
+    'coral2_Zoox_chl, scalar, series'
+    'ocean_time'
+    'iHbio2(iC2zchl)'
     'r2dvar'
     1.0d0
 
@@ -10708,6 +10726,15 @@
     'river_Zoop_, scalar, series'
     'river_time'
     'idRtrc(iZoop(i))'
+    'nulvar'
+    1.0d0
+
+  'river_PIC_'                                         ! Input
+    'river runoff particulate inorganic carbon'
+    'umolC L-1'                       ! [umolC L-1]
+    'river_PIC_, scalar, series'
+    'river_time'
+    'idRtrc(iPIC(i))'
     'nulvar'
     1.0d0
 

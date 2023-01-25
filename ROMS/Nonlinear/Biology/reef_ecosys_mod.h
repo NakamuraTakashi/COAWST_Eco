@@ -111,6 +111,8 @@
 # ifdef CORAL_ZOOXANTHELLAE
       integer  :: iC1zx                       ! coral1 zooxanthellae density
       integer  :: iC2zx                       ! coral2 zooxanthellae density
+      integer  :: iC1zchl                     ! coral1 zooxanthellae chlorophyll
+      integer  :: iC2zchl                     ! coral2 zooxanthellae chlorophyll
 # endif
 # ifdef CORAL_SIZE_DYNAMICS
       integer  :: iC1mt                       ! coral1 mortality
@@ -425,6 +427,10 @@
       iC1zx=ic
       ic=ic+1
       iC2zx=ic
+      ic=ic+1
+      iC1zchl=ic
+      ic=ic+1
+      iC2zchl=ic
 # endif
 # ifdef CORAL_SIZE_DYNAMICS
       ic=ic+1
