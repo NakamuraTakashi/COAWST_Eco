@@ -74,11 +74,8 @@
 !
 !-----------------------------------------------------------------------
 
-#ifdef MPI
       include 'mpif.h'
-#endif
       integer (kind=int_kind) :: MyStr, MyEnd
-#ifdef MPI
       integer (kind=int_kind) :: MyError, MyRank, Nprocs, rank
       integer (kind=int_kind) :: ratio
       integer (kind=int_kind) :: i, j, ij, add1, add2, got_weight
@@ -88,7 +85,6 @@
       integer (kind=int_kind), dimension(:), allocatable :: Asendi
       integer (kind=int_kind), dimension(:), allocatable :: Arecv1
       integer (kind=int_kind), dimension(:), allocatable :: Arecv2
-#endif
 
       integer (kind=int_kind) :: n,icount,                              &
      &     dst_add,                                                     &
@@ -130,12 +126,10 @@
                              ! matrix determinant
      &     sum_wgts          ! sum of weights for normalization
 
-#ifdef MPI
       real (kind=dbl_kind), dimension(:), allocatable   ::  Asend
       real (kind=dbl_kind), dimension(:), allocatable   ::  Arecvw
       real (kind=dbl_kind), dimension(:,:), allocatable ::  Arecv
       real (kind=dbl_kind), dimension(:,:), allocatable ::  Arecvw2d
-#endif
 
 !-----------------------------------------------------------------------
 !
@@ -152,7 +146,6 @@
       !*** loop over destination grid 
       !***
 
-#ifdef MPI
       CALL mpi_comm_rank (MyComm, MyRank, MyError)
       CALL mpi_comm_size (MyComm, Nprocs, MyError)
 !
@@ -169,10 +162,6 @@
         MyEnd=MyStr+ratio-1
         IF (MyRank+1.eq.Nprocs) MyEnd=grid2_size
       END IF
-#else
-      MyStr=1
-      MyEnd=grid2_size
-#endif
 
 !     grid_loop1: do dst_add = 1, grid2_size
       grid_loop1: do dst_add = MyStr, MyEnd
@@ -497,7 +486,6 @@
       endif ! nmap=2
 
 
-#ifdef MPI
 !
 !  Here we need to gather all the data that was computed in 
 !  store_link_bilin.  Then we just allow the Master node to
@@ -594,7 +582,6 @@
       END IF
 
       deallocate(Numlinks)
-#endif
 
 !-----------------------------------------------------------------------
 

@@ -255,10 +255,8 @@
       implicit none
 
       integer (kind=int_kind), intent(in) :: ma, MyComm
-#ifdef MPI
       include 'mpif.h'
       integer (kind=int_kind) :: MyError, MyRank, Nprocs
-#endif
 !     integer (int_kind) :: ratio, MyStr, MyEnd
 !     integer (int_kind) :: Istr, Iend, Jstr, Jend
       integer (int_kind) :: i, j, ii, jj, ij, nx, ny, mm, nn, pgr
@@ -276,10 +274,8 @@
 
       integer (int_kind) :: we_size, sn_size, t_size
 
-#ifdef MPI
       CALL mpi_comm_rank (MyComm, MyRank, MyError)
       CALL mpi_comm_size (MyComm, Nprocs, MyError)
-#endif
 
       write(*,*) 'top of create wrf moving ', ma
 

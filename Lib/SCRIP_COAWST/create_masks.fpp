@@ -23,9 +23,7 @@
       use scrip         ! calls the scrip package subroutine
 
       implicit none
-#ifdef MPI
 !      include 'mpif.h'
-#endif
 !     Variables that are used in all the subroutines below
       character(char_len) :: grid1_file, grid2_file
       character(char_len) :: interp_file1, interp_file2
@@ -38,9 +36,7 @@
       integer(int_kind)   :: igrdstr, igrdstr1, igrdstr2, igrdend
       integer(int_kind)   :: N, INOUT, count, samegrid
       integer(int_kind)   :: ratio, MyStr, MyEnd, MyError, My_map_type
-#ifdef MPI
       integer(int_kind)   :: MyRank
-#endif
       real(dbl_kind)      :: dist1, dist_max, dlon
       real(dbl_kind)      :: latrad1, latrad2, dep, dlat
       real(dbl_kind)      :: xx1, yy1, xx2, yy2, PX, PY
@@ -63,7 +59,6 @@
 
       implicit none
       integer (kind=int_kind), intent(in) :: MyComm, nx, ny
-#ifdef MPI
       integer (kind=int_kind) :: MyError, MyRank, Nprocs
 
       CALL mpi_comm_rank (MyComm, MyRank, MyError)
@@ -78,10 +73,6 @@
         MyEnd=MyStr+ratio-1
         IF (MyRank+1.eq.Nprocs) MyEnd=nx*ny
       END IF
-#else
-      MyStr=1
-      MyEnd=nx*ny
-#endif
 
       end subroutine get_MyStrMyEnd
 
@@ -261,20 +252,16 @@
           map1_name='ROMS to SWAN distwgt Mapping'
           map2_name='unknown'
 
-#ifdef MPI
       CALL mpi_comm_rank (MyComm, MyRank, MyError)
       IF (MyRank.eq.0) THEN
-#endif
           write(stdout,*)"============================================="
           write(stdout,*)"Begin mapping between the two grids"
           write(stdout,*)"---------------------------------------------"
           write(stdout,*)"The interp file is: ", interp_file1
           write(stdout,*)"The src grid is: ", roms_grids(mo)
           write(stdout,*)"The dst grid is: ", swan_coord(mw)
-#ifdef MPI
       END IF
       CALL mpi_barrier (MyComm, MyError)
-#endif
 
           grid1_file=roms_grids(mo)
           grid2_file=swan_coord(mw)
@@ -486,20 +473,16 @@
           map1_name='SWAN to ROMS distwgt Mapping'
           map2_name='unknown'
 
-#ifdef MPI
       CALL mpi_comm_rank (MyComm, MyRank, MyError)
       IF (MyRank.eq.0) THEN
-#endif
           write(stdout,*)"============================================="
           write(stdout,*)"Begin mapping between the two grids"
           write(stdout,*)"---------------------------------------------"
           write(stdout,*)"The interp file is: ", interp_file1
           write(stdout,*)"The src grid is: ", swan_coord(mw)
           write(stdout,*)"The dst grid is: ", roms_grids(mo)
-#ifdef MPI
       END IF
       CALL mpi_barrier (MyComm, MyError)
-#endif
 
           grid1_file=swan_coord(mw)
           grid2_file=roms_grids(mo)
@@ -730,20 +713,16 @@
           map1_name='ROMS to HYDRO distwgt Mapping'
           map2_name='unknown'
 
-#ifdef MPI
       CALL mpi_comm_rank (MyComm, MyRank, MyError)
       IF (MyRank.eq.0) THEN
-#endif
           write(stdout,*)"============================================="
           write(stdout,*)"Begin mapping between the two grids"
           write(stdout,*)"---------------------------------------------"
           write(stdout,*)"The interp file is: ", interp_file1
           write(stdout,*)"The src grid is: ", roms_grids(mo)
           write(stdout,*)"The dst grid is: ", hydro_grids(mh)
-#ifdef MPI
       END IF
       CALL mpi_barrier (MyComm, MyError)
-#endif
 
           grid1_file=roms_grids(mo)
           grid2_file=hydro_grids(mh)
@@ -956,20 +935,16 @@
           map1_name='HYDRO to ROMS distwgt Mapping'
           map2_name='unknown'
 
-#ifdef MPI
       CALL mpi_comm_rank (MyComm, MyRank, MyError)
       IF (MyRank.eq.0) THEN
-#endif
           write(stdout,*)"============================================="
           write(stdout,*)"Begin mapping between the two grids"
           write(stdout,*)"---------------------------------------------"
           write(stdout,*)"The interp file is: ", interp_file1
           write(stdout,*)"The src grid is: ", hydro_grids(mh)
           write(stdout,*)"The dst grid is: ", roms_grids(mo)
-#ifdef MPI
       END IF
       CALL mpi_barrier (MyComm, MyError)
-#endif
 
           grid1_file=hydro_grids(mh)
           grid2_file=roms_grids(mo)
@@ -1017,9 +992,7 @@
 
       implicit none
 
-#ifdef MPI
       include 'mpif.h'
-#endif
       integer (kind=int_kind), intent(in) :: MyComm
 !     local variables
       real(dbl_kind), allocatable :: XX(:), YY(:)
@@ -1156,13 +1129,11 @@
 !    &                                 ngrd_rm(mo)%src_mask(Ikeep,Jkeep)
 !            enddo
           enddo
-#ifdef MPI
       call mpi_allreduce(mask_rho_vec, mask_rho_rec, nx*ny,             &
      &                   MPI_INT, MPI_SUM, MyComm, MyError)
       do ij =1,nx*ny
           mask_rho_vec(ij)=mask_rho_rec(ij)
       enddo
-#endif
 !
 !  Unvectorize the mask rho back into a 2D array.
 !
@@ -1278,20 +1249,16 @@
           map1_name='ROMS to WRF distwgt Mapping'
           map2_name='unknown'
 
-#ifdef MPI
       CALL mpi_comm_rank (MyComm, MyRank, MyError)
       IF (MyRank.eq.0) THEN
-#endif
           write(stdout,*)"============================================="
           write(stdout,*)"Begin mapping between the two grids"
           write(stdout,*)"---------------------------------------------"
           write(stdout,*)"The interp file is: ", interp_file1
           write(stdout,*)"The src grid is: ", roms_grids(mo)
           write(stdout,*)"The dst grid is: ", wrf_grids(ma)
-#ifdef MPI
       END IF
       CALL mpi_barrier (MyComm, MyError)
-#endif
 
           grid1_file=roms_grids(mo)
           grid2_file=wrf_grids(ma)
@@ -1361,9 +1328,7 @@
 
       implicit none
 
-#ifdef MPI
       include 'mpif.h'
-#endif
       integer (kind=int_kind), intent(in) :: MyComm
 !     local variables
       real(dbl_kind), allocatable :: XX(:), YY(:)
@@ -1509,7 +1474,6 @@
 !           enddo
           enddo
 
-#ifdef MPI
       call mpi_allreduce(mask_rho_vec, mask_rho_rec, nx*ny,             &
      &                   MPI_INT, MPI_SUM, MyComm, MyError)
       do ij =1,nx*ny
@@ -1520,7 +1484,6 @@
       do ij =1,nx*ny
           mask_rho_vec2(ij)=mask_rho_rec2(ij)
       enddo
-#endif
 !
 !  Unvectorize the mask rho back into a 2D array.
 !
@@ -1599,20 +1562,16 @@
           map1_name='WRF to ROMS distwgt Mapping'
           map2_name='unknown'
 
-#ifdef MPI
       CALL mpi_comm_rank (MyComm, MyRank, MyError)
       IF (MyRank.eq.0) THEN
-#endif
           write(stdout,*)"============================================="
           write(stdout,*)"Begin mapping between the two grids"
           write(stdout,*)"---------------------------------------------"
           write(stdout,*)"The interp file is: ", interp_file1
           write(stdout,*)"The src grid is: ", wrf_grids(ma)
           write(stdout,*)"The dst grid is: ", roms_grids(mo)
-#ifdef MPI
       END IF
       CALL mpi_barrier (MyComm, MyError)
-#endif
 
           grid1_file=wrf_grids(ma)
           grid2_file=roms_grids(mo)
@@ -1660,9 +1619,7 @@
 
       implicit none
 
-#ifdef MPI
       include 'mpif.h'
-#endif
       integer (kind=int_kind), intent(in) :: MyComm
 !     local variables
       real(dbl_kind), allocatable :: XX(:), YY(:)
@@ -1782,13 +1739,11 @@
 !           enddo
           enddo
 
-#ifdef MPI
       call mpi_allreduce(mask_rho_vec, mask_rho_rec, nx*ny,             &
      &                   MPI_INT, MPI_SUM, MyComm, MyError)
       do ij =1,nx*ny
           mask_rho_vec(ij)=mask_rho_rec(ij)
       enddo
-#endif
 !
 !  Unvectorize the mask rho back into a 2D array.
 !
@@ -1860,20 +1815,16 @@
           map1_name='WRF to SWAN distwgt Mapping'
           map2_name='unknown'
 
-#ifdef MPI
       CALL mpi_comm_rank (MyComm, MyRank, MyError)
       IF (MyRank.eq.0) THEN
-#endif
           write(stdout,*)"============================================="
           write(stdout,*)"Begin mapping between the two grids"
           write(stdout,*)"---------------------------------------------"
           write(stdout,*)"The interp file is: ", interp_file1
           write(stdout,*)"The src grid is: ", wrf_grids(ma)
           write(stdout,*)"The dst grid is: ", swan_coord(mw)
-#ifdef MPI
       END IF
       CALL mpi_barrier (MyComm, MyError)
-#endif
 
           grid1_file=wrf_grids(ma)
           grid2_file=swan_coord(mw)
@@ -1921,9 +1872,7 @@
 
       implicit none
 
-#ifdef MPI
       include 'mpif.h'
-#endif
       integer (kind=int_kind), intent(in) :: MyComm
 !     local variables
       real(dbl_kind), allocatable :: XX(:), YY(:)
@@ -2056,13 +2005,11 @@
 !    &                                 ngrd_sw(mw)%src_mask(Ikeep,Jkeep)
 !           enddo
           enddo
-#ifdef MPI
       call mpi_allreduce(mask_rho_vec, mask_rho_rec, nx*ny,             &
      &                   MPI_INT, MPI_SUM, MyComm, MyError)
       do ij =1,nx*ny
           mask_rho_vec(ij)=mask_rho_rec(ij)
       enddo
-#endif
 !
 !  Unvectorize the mask rho back into a 2D array.
 !
@@ -2134,20 +2081,16 @@
           map1_name='SWAN to WRF distwgt Mapping'
           map2_name='unknown'
 
-#ifdef MPI
       CALL mpi_comm_rank (MyComm, MyRank, MyError)
       IF (MyRank.eq.0) THEN
-#endif
           write(stdout,*)"============================================="
           write(stdout,*)"Begin mapping between the two grids"
           write(stdout,*)"---------------------------------------------"
           write(stdout,*)"The interp file is: ", interp_file1
           write(stdout,*)"The src grid is: ", swan_coord(mw)
           write(stdout,*)"The dst grid is: ", wrf_grids(ma)
-#ifdef MPI
       END IF
       CALL mpi_barrier (MyComm, MyError)
-#endif
 
           grid1_file=swan_coord(mw)
           grid2_file=wrf_grids(ma)
@@ -2385,20 +2328,16 @@
           map1_name='ROMS to WW3 distwgt Mapping'
           map2_name='unknown'
 
-#ifdef MPI
       CALL mpi_comm_rank (MyComm, MyRank, MyError)
       IF (MyRank.eq.0) THEN
-#endif
           write(stdout,*)"============================================="
           write(stdout,*)"Begin mapping between the two grids"
           write(stdout,*)"---------------------------------------------"
           write(stdout,*)"The interp file is: ", interp_file1
           write(stdout,*)"The src grid is: ", roms_grids(mo)
           write(stdout,*)"The dst grid is: ", ww3_xcoord(mw)
-#ifdef MPI
       END IF
       CALL mpi_barrier (MyComm, MyError)
-#endif
 
           grid1_file=roms_grids(mo)
           grid2_file=ww3_xcoord(mw)
@@ -2612,20 +2551,16 @@
           map1_name='WW3 to ROMS distwgt Mapping'
           map2_name='unknown'
 
-#ifdef MPI
       CALL mpi_comm_rank (MyComm, MyRank, MyError)
       IF (MyRank.eq.0) THEN
-#endif
           write(stdout,*)"============================================="
           write(stdout,*)"Begin mapping between the two grids"
           write(stdout,*)"---------------------------------------------"
           write(stdout,*)"The interp file is: ", interp_file1
           write(stdout,*)"The src grid is: ", ww3_xcoord(mw)
           write(stdout,*)"The dst grid is: ", roms_grids(mo)
-#ifdef MPI
       END IF
       CALL mpi_barrier (MyComm, MyError)
-#endif
 
           grid1_file=ww3_xcoord(mw)
           grid2_file=roms_grids(mo)
@@ -2674,9 +2609,7 @@
 
       implicit none
 
-#ifdef MPI
       include 'mpif.h'
-#endif
       integer (kind=int_kind), intent(in) :: MyComm
 !     local variables
       real(dbl_kind), allocatable :: XX(:), YY(:)
@@ -2796,13 +2729,11 @@
 !           enddo
           enddo
 
-#ifdef MPI
       call mpi_allreduce(mask_rho_vec, mask_rho_rec, nx*ny,             &
      &                   MPI_INT, MPI_SUM, MyComm, MyError)
       do ij =1,nx*ny
           mask_rho_vec(ij)=mask_rho_rec(ij)
       enddo
-#endif
 !
 !  Unvectorize the mask rho back into a 2D array.
 !
@@ -2873,20 +2804,16 @@
           map1_name='WRF to WW3 distwgt Mapping'
           map2_name='unknown'
 
-#ifdef MPI
       CALL mpi_comm_rank (MyComm, MyRank, MyError)
       IF (MyRank.eq.0) THEN
-#endif
           write(stdout,*)"============================================="
           write(stdout,*)"Begin mapping between the two grids"
           write(stdout,*)"---------------------------------------------"
           write(stdout,*)"The interp file is: ", interp_file1
           write(stdout,*)"The src grid is: ", wrf_grids(ma)
           write(stdout,*)"The dst grid is: ", ww3_xcoord(mw)
-#ifdef MPI
       END IF
       CALL mpi_barrier (MyComm, MyError)
-#endif
 
           grid1_file=wrf_grids(ma)
           grid2_file=ww3_xcoord(mw)
@@ -2934,9 +2861,7 @@
 
       implicit none
 
-#ifdef MPI
       include 'mpif.h'
-#endif
       integer (kind=int_kind), intent(in) :: MyComm
 !     local variables
       real(dbl_kind), allocatable :: XX(:), YY(:)
@@ -3071,13 +2996,11 @@
 !           enddo
           enddo
 
-#ifdef MPI
       call mpi_allreduce(mask_rho_vec, mask_rho_rec, nx*ny,             &
      &                   MPI_INT, MPI_SUM, MyComm, MyError)
       do ij =1,nx*ny
           mask_rho_vec(ij)=mask_rho_rec(ij)
       enddo
-#endif
 !
 !  Unvectorize the mask rho back into a 2D array.
 !
@@ -3151,20 +3074,16 @@
           map1_name='WW3 to WRF distwgt Mapping'
           map2_name='unknown'
 
-#ifdef MPI
       CALL mpi_comm_rank (MyComm, MyRank, MyError)
       IF (MyRank.eq.0) THEN
-#endif
           write(stdout,*)"============================================="
           write(stdout,*)"Begin mapping between the two grids"
           write(stdout,*)"---------------------------------------------"
           write(stdout,*)"The interp file is: ", interp_file1
           write(stdout,*)"The src grid is: ", ww3_xcoord(mw)
           write(stdout,*)"The dst grid is: ", wrf_grids(ma)
-#ifdef MPI
       END IF
       CALL mpi_barrier (MyComm, MyError)
-#endif
 
           grid1_file=ww3_xcoord(mw)
           grid2_file=wrf_grids(ma)
