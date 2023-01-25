@@ -5352,6 +5352,7 @@
       CHARACTER (LEN=80) :: HTXT(3)                                       41.62
       REAL, ALLOCATABLE :: VOQ(:,:)
       INTEGER VOQR(NMOVAR)                                                41.62
+      integer :: status   !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN add
 !
 !  8. Subroutines used
 !
@@ -5429,6 +5430,13 @@
 !NCF     &            INDEX (FILENM, '.nc'  ).NE.0                            41.40
          RAWPRT = INDEX( FILENM, '.RAW' ).NE.0 .OR.                       41.62
      &            INDEX (FILENM, '.raw' ).NE.0                            41.62
+
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN add
+         IF (NCF) THEN
+            status = nf90_close( OQI(1) + ncoffset(IRQ) )           
+            OPENED = .FALSE.
+         ENDIF
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN add
 
 !        --- if it is not open or already open thru another request
 
