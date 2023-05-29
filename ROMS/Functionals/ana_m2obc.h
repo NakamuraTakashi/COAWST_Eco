@@ -37,7 +37,7 @@
      &                     GRID(ng) % umask,                            &
 #endif
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
-#if defined SHIRAHO_REEF || defined FUKIDO
+#if defined SHIRAHO_REEF || defined FUKIDO || defined OFFLINE
      &                     krhs(ng), kstp(ng),                          &
      &                     OCEAN(ng) % ubar,                            &
      &                     OCEAN(ng) % vbar,                            &
@@ -68,7 +68,7 @@
      &                           umask,                                 &
 #endif
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
-#if defined SHIRAHO_REEF || defined FUKIDO
+#if defined SHIRAHO_REEF || defined FUKIDO || defined OFFLINE
      &                           krhs, kstp,                            &
      &                           ubar,                                  &
      &                           vbar,                                  &
@@ -82,6 +82,11 @@
       USE mod_grid
       USE mod_ncparam
       USE mod_scalars
+!!! >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: add
+#if defined OFFLINE
+      USE mod_clima
+#endif
+!!! <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
 !
 !  Imported variable declarations.
 !
@@ -90,9 +95,9 @@
       integer, intent(in) :: IminS, ImaxS, JminS, JmaxS
       integer, intent(in) :: knew
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
-# if defined SHIRAHO_REEF || defined FUKIDO
+#if defined SHIRAHO_REEF || defined FUKIDO || defined OFFLINE
       integer, intent(in) :: krhs, kstp
-# endif
+#endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
 #ifdef ASSUMED_SHAPE
@@ -105,7 +110,7 @@
       real(r8), intent(in) :: umask(LBi:,LBj:)
 # endif
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
-# if defined SHIRAHO_REEF || defined FUKIDO
+# if defined SHIRAHO_REEF || defined FUKIDO || defined OFFLINE
       real(r8), intent(in) :: ubar(LBi:,LBj:,:)
       real(r8), intent(in) :: vbar(LBi:,LBj:,:)
 # endif
@@ -121,7 +126,7 @@
       real(r8), intent(in) :: umask(LBi:UBi,LBj:UBj)
 # endif
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
-# if defined SHIRAHO_REEF || defined FUKIDO
+# if defined SHIRAHO_REEF || defined FUKIDO || defined OFFLINE
       real(r8), intent(in) :: ubar(LBi:UBi,LBj:UBj,3)
       real(r8), intent(in) :: vbar(LBi:UBi,LBj:UBj,3)
 # endif
@@ -139,7 +144,7 @@
      &            model_flux
 #endif
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
-#if defined SHIRAHO_REEF || defined FUKIDO
+#if defined SHIRAHO_REEF || defined FUKIDO || defined OFFLINE
       integer :: know
 !      real(r8) :: my_area, my_flux, tid_flow, riv_flow, cff1, cff2,     &
 !     &            model_flux
@@ -438,6 +443,53 @@
           BOUNDARY(ng)%vbar_north(i)=vbar(i,Jend,know)
         END DO
       END IF
+
+#elif defined OFFLINE
+! OFFLINE option
+      IF (LBC(ieast,isUvel,ng)%acquire.and.                             &
+     &    LBC(ieast,isVvel,ng)%acquire.and.                             &
+     &    DOMAIN(ng)%Eastern_Edge(tile)) THEN
+        DO j=JstrT,JendT
+          BOUNDARY(ng)%ubar_east(j) = CLIMA(ng)%ubarclm(Iend+1,j)
+        END DO
+        DO j=JstrP,JendT
+          BOUNDARY(ng)%vbar_east(j) = CLIMA(ng)%vbarclm(Iend+1,j)
+        END DO
+      END IF
+
+      IF (LBC(iwest,isUvel,ng)%acquire.and.                             &
+     &    LBC(iwest,isVvel,ng)%acquire.and.                             &
+     &    DOMAIN(ng)%Western_Edge(tile)) THEN
+        DO j=JstrT,JendT
+          BOUNDARY(ng)%ubar_west(j) = CLIMA(ng)%ubarclm(IstrU-1,j)
+        END DO
+        DO j=JstrP,JendT
+          BOUNDARY(ng)%vbar_west(j) = CLIMA(ng)%vbarclm(Istr-1,j)
+        END DO
+      END IF
+
+      IF (LBC(isouth,isUvel,ng)%acquire.and.                            &
+     &    LBC(isouth,isVvel,ng)%acquire.and.                            &
+     &    DOMAIN(ng)%Southern_Edge(tile)) THEN
+        DO i=IstrP,IendT
+          BOUNDARY(ng)%ubar_south(i) = CLIMA(ng)%ubarclm(i,Jstr-1)
+        END DO
+        DO i=IstrT,IendT
+          BOUNDARY(ng)%vbar_south(i) = CLIMA(ng)%vbarclm(i,JstrV-1)
+        END DO
+      END IF
+
+      IF (LBC(inorth,isUvel,ng)%acquire.and.                            &
+     &    LBC(inorth,isVvel,ng)%acquire.and.                            &
+     &    DOMAIN(ng)%Northern_Edge(tile)) THEN
+        DO i=IstrP,IendT
+          BOUNDARY(ng)%ubar_north(i) = CLIMA(ng)%ubarclm(i,Jend+1)
+        END DO
+        DO i=IstrT,IendT
+          BOUNDARY(ng)%vbar_north(i) = CLIMA(ng)%vbarclm(i,Jend+1)
+        END DO
+      END IF
+
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #else
       IF (LBC(ieast,isUbar,ng)%acquire.and.                             &

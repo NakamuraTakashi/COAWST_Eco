@@ -517,6 +517,8 @@
 # ifdef CORAL_ZOOXANTHELLAE
             HisBio2d(i,j,iC1zx) = ZOOX(ng)%dens(1,i,j)
             HisBio2d(i,j,iC2zx) = ZOOX(ng)%dens(2,i,j)
+            HisBio2d(i,j,iC1zchl) = ZOOX(ng)%Chl(1,i,j)  ! (pg/cell)
+            HisBio2d(i,j,iC2zchl) = ZOOX(ng)%Chl(2,i,j)  ! (pg/cell)
 # endif
 # ifdef CORAL_SIZE_DYNAMICS
             HisBio2d(i,j,iC1mt) = CORAL(ng)%mort(1,i,j)

@@ -813,6 +813,9 @@
           IF (cff1.lt.2.0_r8) THEN
             umask_diff(i,j) = 0.0_r8
           END IF
+#  if defined OFFLINE  /* <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add */
+          umask_wet(i,j)=umask_diff(i,j) !!! <<<<<<<<<<<<<<<< TN: add
+#  else  /* <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add */
           IF (cff1.eq.1.0_r8) THEN
             cff1=wetdry(i-1,j)-wetdry(i,j)
           END IF
@@ -825,6 +828,7 @@
               umask_wet(i,j)=0.0_r8
             END IF
           END IF
+#  endif /* <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add */
         END DO
       END DO
 !
@@ -837,6 +841,10 @@
           IF (cff1.lt.2.0_r8) THEN
             vmask_diff(i,j) = 0.0_r8
           END IF
+#  if defined OFFLINE  /* <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add */
+          vmask_wet(i,j)=vmask_diff(i,j) !!! <<<<<<<<<<<<<<<< TN: add
+#  else  /* <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add */
+
           IF (cff1.eq.1.0_r8) THEN
             cff1=wetdry(i,j-1)-wetdry(i,j)
           END IF
@@ -849,6 +857,7 @@
               vmask_wet(i,j)=0.0_r8
             END IF
           END IF
+#  endif /* <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add */
         END DO
       END DO
 !

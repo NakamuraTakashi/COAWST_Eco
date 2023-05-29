@@ -1598,18 +1598,27 @@ contains
 !--- Dissolved Oxygen (DO) ------------------------------
 !     TN test
 
-  real(8) function DO_Profile2(SST, SSS, SSDIC, DIC)
+  real(8) function DO_Profile2(SST, SSS, SSDIC, DIC, SSTA, TA)
     implicit none
     real(8), intent(in) :: SST   ! Sea Surface Temperatureture (oC)
     real(8), intent(in) :: SSS   ! Sea Surface Salinity (psu)
     real(8), intent(in) :: SSDIC ! Sea Surface DIC (umol kg-1)
     real(8), intent(in) :: DIC   ! in situ DIC (umol kg-1)
+    real(8), intent(in) :: SSTA ! Sea Surface DIC (umol kg-1)
+    real(8), intent(in) :: TA   ! in situ DIC (umol kg-1)
 
     ! C106 H212 O106 N16 P (POM) + 127.25*O2 + 9.5*H2O
     ! --> 106*CO2 + 106*H2O +19*H+ + 16*NO3- + PO43-
 
-    DO_Profile2 = O2satu(SST+273.15d0, SSS) - ( DIC - SSDIC )*127.25d0/106.0d0
-    DO_Profile2 = max( DO_Profile2, 10.0d0 ) !! Error handling
+    real(8) :: dTA, dDIC, CaCO3_Dissol
+
+    dTA = TA - SSTA
+    dDIC = DIC - SSDIC
+    CaCO3_Dissol = 0.50d0*( dTA + dDIC*16.0d0/106.0d0 + dDIC*1.0d0/106.0d0 )
+
+    DO_Profile2 = O2satu(SST+273.15d0, SSS)               &
+          - ( dDIC - CaCO3_Dissol )*127.25d0/106.0d0*1.024d0
+    DO_Profile2 = max( DO_Profile2, 50.0d0 ) !! Error handling
 
   end function DO_Profile2
 
@@ -1754,16 +1763,16 @@ contains
 !--- NO3 -------------------------------------
 !     TN test 
 
-  real(8) function NO3_Profile3( SSNO3, SSDIC, DIC )
+  real(8) function NO3_Profile3( SSNO3, SSDO, DO )
     implicit none
     real(8), intent(in) :: SSNO3 ! Sea surface NO3 (umol L-1)
-    real(8), intent(in) :: SSDIC ! Sea Surface DIC (umol kg-1)
-    real(8), intent(in) :: DIC   ! in situ DIC (umol kg-1)
+    real(8), intent(in) :: SSDO  ! Sea Surface DO (umol L-1)
+    real(8), intent(in) :: DO    ! in situ DO (umol L-1)
 
     ! C106 H212 O106 N16 P (POM) + 127.25*O2 + 9.5*H2O
     ! --> 106*CO2 + 106*H2O +19*H+ + 16*NO3- + PO43-
  
-    NO3_Profile3 = SSNO3 + ( DIC - SSDIC )*16.0d0/106.0d0
+    NO3_Profile3 = SSNO3 + ( SSDO- DO )*16.0d0/127.25d0
     NO3_Profile3 = max( NO3_Profile3, SSNO3 )  !! Error handling
 
   end function NO3_Profile3
@@ -1807,16 +1816,16 @@ contains
 !--- PO4 -------------------------------------
 !     TN test
 
-  real(8) function PO4_Profile3( SSPO4, SSDIC, DIC )
+  real(8) function PO4_Profile3( SSPO4, SSDO, DO )
     implicit none
     real(8), intent(in) :: SSPO4 ! Sea surface PO4 (umol L-1)
-    real(8), intent(in) :: SSDIC ! Sea Surface DIC (umol kg-1)
-    real(8), intent(in) :: DIC   ! in situ DIC (umol kg-1)
+    real(8), intent(in) :: SSDO ! Sea Surface DO (umol L-1)
+    real(8), intent(in) :: DO   ! in situ DO (umol L-1)
 
     ! C106 H212 O106 N16 P (POM) + 127.25*O2 + 9.5*H2O
     ! --> 106*CO2 + 106*H2O +19*H+ + 16*NO3- + PO43-
  
-    PO4_Profile3 = SSPO4 + ( DIC - SSDIC )/106.0d0
+    PO4_Profile3 = SSPO4 + ( SSDO- DO )/127.25d0
     PO4_Profile3 = max(PO4_Profile3, SSPO4)  !! Error handling
 
   end function PO4_Profile3

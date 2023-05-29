@@ -1,5 +1,5 @@
 #include "cppdefs.h"
-#if defined NONLINEAR && defined SOLVE3D && (!defined OFFLINE)
+#if defined NONLINEAR && defined SOLVE3D /*&& (!defined OFFLINE)*/ /*>>>>>>>> TN: rm */
       SUBROUTINE main3d (RunInterval)
 !
 !svn $Id: main3d.F 830 2017-01-24 21:21:11Z arango $
@@ -685,6 +685,7 @@
               END IF
             END DO
 # endif
+# if !defined OFFLINE /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add */
 !
 !-----------------------------------------------------------------------
 !  Solve the vertically integrated primitive equations for the
@@ -861,6 +862,7 @@
               END DO
 !$OMP BARRIER
             END DO
+# endif  /*!defined OFFLINE: <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add*/
 
 # ifdef NESTING
 !

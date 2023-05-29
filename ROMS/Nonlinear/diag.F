@@ -283,6 +283,10 @@
               my_Cw=0.5_r8*ABS(wvel(i,j,k-1)+wvel(i,j,k))*              &
      &              dt(ng)/Hz(i,j,k)
               my_C=my_Cu+my_Cv+my_Cw
+
+              IF(u2v2*0.0_r8 /= 0.0_r8) write(*,*) 'u2v2', u2v2,i,j,k  !!!---------Error Handling: Check NAN !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+              IF(Hz(i,j,k)*0.0_r8 /= 0.0_r8) write(*,*) 'Hz', Hz(i,j,k),i,j,k  !!!---------Error Handling: Check NAN !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
               IF (my_C.gt.my_max_C) THEN
                 my_max_C =my_C
                 my_max_Cu=my_Cu
@@ -659,20 +663,20 @@
             IF (Master) print *, 'DIAG rho trouble ', maxrho(ng), ng
           END IF
 # ifdef BIOLOGY
-          DO ibt=1,NBT
-            IF (maxbio(ibt,ng).gt.max_bio(ibt)) THEN
-              IF (Master) print *, 'BIO trouble in DIAG ', maxbio(:,ng)
-!              exit_flag=1  !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: rm
-              EXIT   !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
-            END IF
-          END DO
+!          DO ibt=1,NBT
+!            IF (maxbio(ibt,ng).gt.max_bio(ibt)) THEN
+!              IF (Master) print *, 'BIO trouble in DIAG ', maxbio(:,ng)
+!!              exit_flag=1  !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: rm
+!              EXIT   !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
+!            END IF
+!          END DO
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: add
-          DO ibt=1,NBT
-            IF (minbio(ibt,ng) < min_bio(ibt)) THEN
-              IF (Master) print *, 'BIO trouble in DIAG ', minbio(:,ng)
-              EXIT
-            END IF
-          END DO
+!          DO ibt=1,NBT
+!            IF (minbio(ibt,ng) < min_bio(ibt)) THEN
+!              IF (Master) print *, 'BIO trouble in DIAG ', minbio(:,ng)
+!              EXIT
+!            END IF
+!          END DO
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
 # endif
 #endif

@@ -113,11 +113,8 @@
 !
 !-----------------------------------------------------------------------
 
-#ifdef MPI
       include 'mpif.h'
-#endif
       integer (kind=int_kind) :: MyStr, MyEnd
-#ifdef MPI
       integer (kind=int_kind) :: MyError, MyRank, Nprocs, rank
       integer (kind=int_kind) :: ratio
       integer (kind=int_kind) :: i, j, ij, add1, add2, got_weight
@@ -127,7 +124,6 @@
       integer (kind=int_kind), dimension(:), allocatable :: Asendi
       integer (kind=int_kind), dimension(:), allocatable :: Arecv1
       integer (kind=int_kind), dimension(:), allocatable :: Arecv2
-#endif
       integer (kind=int_kind), parameter ::                             &
      &        max_subseg = 10000 ! max number of subsegments per segment
                                  ! to prevent infinite loop
@@ -181,12 +177,10 @@
                                                    ! full segment
 
       real (kind=dbl_kind), dimension(6) :: weights ! local wgt array
-#ifdef MPI
       real (kind=dbl_kind), dimension(:), allocatable   ::  Asend
       real (kind=dbl_kind), dimension(:), allocatable   ::  Arecvw
       real (kind=dbl_kind), dimension(:,:), allocatable ::  Arecv
       real (kind=dbl_kind), dimension(:,:), allocatable ::  Arecvw2d
-#endif
 
 !-----------------------------------------------------------------------
 !
@@ -210,7 +204,6 @@
 !
 !-----------------------------------------------------------------------
 
-#ifdef MPI
       CALL mpi_comm_rank (MyComm, MyRank, MyError)
       CALL mpi_comm_size (MyComm, Nprocs, MyError)
 !
@@ -227,17 +220,11 @@
         MyEnd=MyStr+ratio-1
         IF (MyRank+1.eq.Nprocs) MyEnd=grid1_size
       END IF
-#else
-      MyStr=1
-      MyEnd=grid1_size
-#endif
 
       allocate(srch_mask(grid2_size))
 
       print *,'grid1 sweep grid1 size is ', grid1_size
-#ifdef MPI
       print *,'MyRank is ', MyRank
-#endif
       first_call=.true.  ! first_call set to true 
 
 !     do grid1_add = 1,grid1_size
@@ -452,7 +439,6 @@
 
       deallocate(srch_mask)
 
-#ifdef MPI
 !
 !  Here we need to gather all the data to each proc so they know the
 !  full data set.
@@ -565,14 +551,12 @@
         END DO
       END DO
       deallocate(Asend, Arecv)
-#endif
 !-----------------------------------------------------------------------
 !
 !     integrate around each cell on grid2
 !
 !-----------------------------------------------------------------------
 
-#ifdef MPI
 !
 ! To do this in mpi, we will just break up the sweep loops into chunks. Then
 ! gather all of the data at end of each loop so that each proc has a full set of
@@ -587,10 +571,6 @@
         MyEnd=MyStr+ratio-1
         IF (MyRank+1.eq.Nprocs) MyEnd=grid2_size
       END IF
-#else
-        MyStr=1
-        MyEnd=grid2_size
-#endif
 
       allocate(srch_mask(grid1_size))
 
@@ -599,15 +579,11 @@
 !     do grid2_add = 1,grid2_size
       do grid2_add = MyStr,MyEnd
 
-#ifdef MPI
         IF (MyRank.eq.0) THEN
-#endif
 !        write(*,*) 'percont done about ',                               &
 !     &             REAL((grid2_add-MyStr),dbl_kind)/                    &
 !     &             REAL((MyEnd-MyStr),dbl_kind)*100./2.+50.
-#ifdef MPI
         END IF
-#endif
 
         !***
         !*** restrict searches first using search bins
@@ -805,7 +781,6 @@
       end do
 
       deallocate(srch_mask)
-#ifdef MPI
 !
 !  Here we need to gather all the data to each proc so they know the
 !  full data set.
@@ -918,10 +893,8 @@
         END DO
       END DO
       deallocate(Asend, Arecv)
-#endif
 
 
-#ifdef MPI
 !
 !  Here we need to gather all the data that was computed in 
 !  store_link_cnsrv.  Then we just allow the Master node to
@@ -1050,7 +1023,6 @@
       deallocate(Numlinks)
       CALL mpi_comm_rank (MyComm, MyRank, MyError)
       IF (MyRank.eq.0) THEN
-#endif
 !-----------------------------------------------------------------------
 !
 !     correct for situations where N/S pole not explicitly included in
@@ -1382,9 +1354,7 @@
           endif
         end do
       endif
-#ifdef MPI
       END IF
-#endif
       deallocate(grid1_centroid_lat, grid1_centroid_lon)
       deallocate(grid2_centroid_lat, grid2_centroid_lon)
 !-----------------------------------------------------------------------

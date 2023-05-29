@@ -35,9 +35,7 @@
      &                      nc_grdlat_id, nc_grdlon_id,                 &
      &                      nc_grdcrnrlat_id, nc_grdcrnrlon_id,         &
      &                      nc_grdmsk_id
-#ifdef MPI
       integer(int_kind) :: MyRank, MyError
-#endif
       real(dbl_kind) :: xx2, yy2, xxend_1, yyend_1
       real(dbl_kind) :: dist1, dist_max, scale
       real(dbl_kind), allocatable :: lon_psi_o(:,:), lat_psi_o(:,:)
@@ -55,9 +53,7 @@
 
       allocate(ngrd_rm(Ngrids_roms))
 
-#ifdef MPI
       CALL mpi_comm_rank (MyComm, MyRank, MyError)
-#endif
 
       do mo=1,Ngrids_roms
 
@@ -103,17 +99,13 @@
           ncstat=nf_get_att_int(nc_file_id,NF_GLOBAL,                   &
      &                           'refine_factor',ngrd_rm(mo)%ref_fac)
           call netcdf_error_handler(ncstat)
-#ifdef MPI
           IF (MyRank.eq.0) THEN
-#endif
             print*,"ROMS starting i j index of parent w.r.t child grid"
             print*,ngrd_rm(mo)%istr_o, ngrd_rm(mo)%jstr_o
             print*,"ending i & j index of parent w.r.t child grid--"
             print*,ngrd_rm(mo)%iend_o, ngrd_rm(mo)%jend_o
-#ifdef MPI
           END IF
           CALL mpi_barrier (MyComm, MyError)
-#endif
         endif
 
 !     Read spherical variable (it can be True/False or 1/0)

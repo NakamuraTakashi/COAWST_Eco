@@ -148,11 +148,11 @@
 #ifdef SOLVE3D
 # if defined BIOLOGY
 #  if defined ANA_BIOLOGY
-        IF (nrrec(ng).ne.0) THEN
-          DO itrc=1,NBT
-            get_var(idTvar(idbio(itrc)))=.TRUE.
-          END DO
-        END IF
+!        IF (nrrec(ng).ne.0) THEN  !!!>>>>>>>>>>>>>>>>>>>>>>TN: rm
+!          DO itrc=1,NBT
+!            get_var(idTvar(idbio(itrc)))=.TRUE.
+!          END DO
+!        END IF                   !!!>>>>>>>>>>>>>>>>>>>>>>>TN: rm
 #  else
         DO itrc=1,NBT
           get_var(idTvar(idbio(itrc)))=.TRUE.

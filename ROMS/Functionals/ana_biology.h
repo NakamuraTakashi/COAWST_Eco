@@ -308,7 +308,7 @@
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
 #if defined REEF_ECOSYS
       real(r8) :: TmpK, Salt, sspH, cCO3, cCO2aq, ssfCO2, ssCO2flux
-      real(r8) :: DOsatu, ssO2flux
+      real(r8) :: TIC, TAlk, Oxyg, DOsatu, ssO2flux
 #endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 
@@ -703,7 +703,7 @@
 !  Coral reef ecosystem model.
 !-----------------------------------------------------------------------
 !
-# if defined CORAL_TRIANGLE
+# if defined CORAL_TRIANGLE || defined BIO_VPROFILE_CT
 !------------------------------------------------------------------------
 !   CORAL_TRIANGLE CASE
 !------------------------------------------------------------------------
@@ -804,7 +804,7 @@
         END DO
       END DO
 
-# elif defined YAEYAMA2
+# elif defined YAEYAMA2 || defined BIO_VPROFILE_YAEYAMA
 !------------------------------------------------------------------------
 !   YAEYAMA2 CASE
 !------------------------------------------------------------------------
@@ -813,8 +813,23 @@
         DO i=IstrT,IendT
           t(i,j,k,1,iTIC_) = DIC_Profile( t(i,j,k,1,iTemp) )        
           t(i,j,k,1,iTAlk) = TA_Profile ( t(i,j,k,1,iTemp) )
+        END DO
+      END DO
+    END DO
+    DO k=1,N(ng)
+      DO j=JstrT,JendT
+        DO i=IstrT,IendT
           t(i,j,k,1,iOxyg) = DO_Profile2( t(i,j,N(ng),1,iTemp)              &
-   &        , t(i,j,N(ng),1,iSalt), TIC_0(ng), t(i,j,k,1,iTIC_) )
+   &                           , t(i,j,N(ng),1,iSalt)                       &
+   &                           , t(i,j,N(ng),1,iTIC_), t(i,j,k,1,iTIC_)     &
+   &                           , t(i,j,N(ng),1,iTAlk), t(i,j,k,1,iTAlk) )
+        END DO
+      END DO
+    END DO
+
+    DO k=1,N(ng)
+      DO j=JstrT,JendT
+        DO i=IstrT,IendT
 
 #  if defined ORGANIC_MATTER
           DO itrc=1,N_dom
@@ -878,12 +893,12 @@
 #  if defined NUTRIENTS
 !          t(i,j,k,1,iNO3_) = NO3_Profile2( z_r(i,j,k) )           &
           t(i,j,k,1,iNO3_) = NO3_Profile3( NO3_0(ng)           &
-     &            , TIC_0(ng), t(i,j,k,1,iTIC_) )   ! umolN L-1
+     &            , t(i,j,N(ng),1,iOxyg), t(i,j,k,1,iOxyg) )   ! umolN L-1
 !          t(i,j,k,1,iNO2_) = NO2_0(ng)  ! umolN L-1
           t(i,j,k,1,iNH4_) = NH4_0(ng)  ! umolN L-1
 !          t(i,j,k,1,iPO4_) = PO4_Profile2( z_r(i,j,k) )  ! umolP L-1
           t(i,j,k,1,iPO4_) = PO4_Profile3( PO4_0(ng)           &
-     &            , TIC_0(ng), t(i,j,k,1,iTIC_) )   ! umolN L-1
+     &            , t(i,j,N(ng),1,iOxyg), t(i,j,k,1,iOxyg) )   ! umolP L-1
 
 #   if defined ORGANIC_MATTER
           DO itrc=1,N_dom
@@ -1039,6 +1054,9 @@
 
           TmpK = t(i,j,N(ng),1,iTemp)+273.15_r8
           Salt = t(i,j,N(ng),1,iSalt)
+          TIC  = t(i,j,N(ng),1,iTIC_)
+          TAlk = t(i,j,N(ng),1,iTAlk)
+          Oxyg = t(i,j,N(ng),1,iOxyg)
 
 # if defined CORAL_POLYP
           HisBio2d(i,j,iC1Pg) = 0.0_r8
@@ -1057,12 +1075,12 @@
 # endif
 
           DOsatu=O2satu(TmpK,Salt)
-          ssO2flux = Flux_O2(Oxyg0(ng), DOsatu, 0.0d0, TmpK, Salt )  ! sea to air is positive
+          ssO2flux = Flux_O2(Oxyg, DOsatu, 0.0d0, TmpK, Salt )  ! sea to air is positive
           HisBio2d(i,j,iO2fx) = ssO2flux
 
-          sspH = pH_fromATCT( TAlk0(ng), TIC_0(ng),TmpK, Salt )
-          cCO3=cCO3_fromCTpH( TIC_0(ng), sspH, TmpK, Salt )
-          cCO2aq = cCO2aq_fromCTpH( TIC_0(ng), sspH, TmpK, Salt )
+          sspH = pH_fromATCT( TAlk, TIC, TmpK, Salt )
+          cCO3=cCO3_fromCTpH( TIC, sspH, TmpK, Salt )
+          cCO2aq = cCO2aq_fromCTpH( TIC, sspH, TmpK, Salt )
 
           HisBio2d(i,j,ipHt_) = sspH
           HisBio2d(i,j,iWarg) = Warg_fromcCO3( cCO3, TmpK, Salt )

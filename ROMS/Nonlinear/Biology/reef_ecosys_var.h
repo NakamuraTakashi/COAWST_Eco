@@ -519,6 +519,10 @@
                 iHbio2(iC1zx)=varid
               CASE ('iHbio2(iC2zx)')
                 iHbio2(iC2zx)=varid
+              CASE ('iHbio2(iC1zchl)')
+                iHbio2(iC1zchl)=varid
+              CASE ('iHbio2(iC2zchl)')
+                iHbio2(iC2zchl)=varid
 # endif
 # ifdef CORAL_SIZE_DYNAMICS
               CASE ('iHbio2(iC1mt)')

@@ -680,11 +680,11 @@
 # endif
 # if defined ALBEDO && defined SHORTWAVE
 #   if defined ALBEDO_CLOUD && !defined BENCHMARK
-          SRad(i,j) = SRad(i,j)*cawdir(i,j) !>>> LB: Remove
-!          SRad(i,j) = SRad(i,j)*1.0_r8  !<<< LB: Add
+!          SRad(i,j) = SRad(i,j)*cawdir(i,j) !>>> LB: Remove
+          SRad(i,j) = SRad(i,j)*1.0_r8  !<<< LB: Add
 #  else
-          SRad(i,j) = SRad(i,j)*(1.0_r8-albedo(i,j)) !>>> LB: Remove
-!          SRad(i,j) = SRad(i,j)*1.0_r8 !<<< LB: Add
+!          SRad(i,j) = SRad(i,j)*(1.0_r8-albedo(i,j)) !>>> LB: Remove
+          SRad(i,j) = SRad(i,j)*1.0_r8 !<<< LB: Add
 #  endif
 # endif
           Tcff(i)=alpha(i,j)
@@ -712,24 +712,14 @@
 !  is assumed constant, but it is a function of latitude varying from
 !  1.0 at poles to 0.5 at the Equator).
 !
-#  ifdef SPECIFIC_HUMIDITY
-!  specific humidity in units of kg/kg
-          vap_p=PairM*RH/(1.0_r8+0.378_r8*RH)             !WPB
-#  else
-      IF(RH.lt.2.0_r8) THEN                               !WPB   >>> LB: Remove
           cff=(0.7859_r8+0.03477_r8*TairC(i))/                          &
      &        (1.0_r8+0.00412_r8*TairC(i))
           e_sat=10.0_r8**cff   ! saturation vapor pressure (hPa or mbar)
           vap_p=e_sat*RH       ! water vapor pressure (hPa or mbar)
-      ELSE                                                !WPB   >>> LB: Remove
-          vap_p=0.001_r8*PairM*RH/(1.0_r8+0.000378_r8*RH) !WPB   >>> LB: Remove
-      ENDIF                                               !WPB   >>> LB: Remove
-#  endif
           cff2=TairK(i)*TairK(i)*TairK(i)
           cff1=cff2*TairK(i)
           LRad(i,j)=-emmiss*StefBo*                                     &
      &              (cff1*(0.39_r8-0.05_r8*SQRT(vap_p))*                &
-!    &              (cff1*(0.39_r8-0.05_r8*SQRT(0.01_r8*vap_p))*        &
      &                    (1.0_r8-0.6823_r8*cloud(i,j)*cloud(i,j))+     &
      &               cff2*4.0_r8*(TseaK(i)-TairK(i)))
 
@@ -1256,13 +1246,13 @@
 # endif
 # if defined ALBEDO && defined SHORTWAVE
 #   if defined ALBEDO_CLOUD && !defined BENCHMARK
-          cawdif = 1._r8-albw_d                                  ! >>>LB: Remove
-          srflx(i,j) = srflx(i,j)*(cawdir(i,j)*                         &
-     &                 (1._r8-cloud(i,j))+cawdif*cloud(i,j))     ! >>>LB: Remove 
-!          srflx(i,j) = srflx(i,j)*1.0_r8    !<<< LB: Add   
+!          cawdif = 1._r8-albw_d                                  ! >>>LB: Remove
+!          srflx(i,j) = srflx(i,j)*(cawdir(i,j)*                         &
+!     &                 (1._r8-cloud(i,j))+cawdif*cloud(i,j))     ! >>>LB: Remove 
+          srflx(i,j) = srflx(i,j)*1.0_r8    !<<< LB: Add   
 #  else
-          srflx(i,j) = srflx(i,j)*(1._r8-albedo(i,j))   !>>>LB: Remove
-!          srflx(i,j) = srflx(i,j)*1.0_r8   !<<< LB: Add
+!          srflx(i,j) = srflx(i,j)*(1._r8-albedo(i,j))   !>>>LB: Remove
+          srflx(i,j) = srflx(i,j)*1.0_r8   !<<< LB: Add
 #  endif
 # endif
           lrflx(i,j) = LRad(i,j)*Hscale2

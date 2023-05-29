@@ -755,7 +755,11 @@
 #   else
             FC(i,0)=0.0_r8
 #   endif
+#   ifdef OFFLINE /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add*/
+            FC(i,N(ng))=W(i,j,N(ng))*t(i,j,N(ng),nstp,itrc)  !!! <<<<<<<<<<<< TN: add
+#   else          /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add*/
             FC(i,N(ng))=0.0_r8
+#   endif         /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add*/
           END DO
 
 #  elif defined TS_C2VADVECTION
@@ -775,7 +779,11 @@
 #   else
             FC(i,0)=0.0_r8
 #   endif
+#   ifdef OFFLINE /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add*/
+            FC(i,N(ng))=W(i,j,N(ng))*t(i,j,N(ng),nstp,itrc)  !!! <<<<<<<<<<<< TN: add
+#   else          /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add*/
             FC(i,N(ng))=0.0_r8
+#   endif         /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add*/
           END DO
 
 #  elif defined TS_MPDATA || defined TS_HSIMT
@@ -795,7 +803,11 @@
 #    else
             FC(i,0)=0.0_r8
 #    endif
+#    ifdef OFFLINE /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add*/
+            FC(i,N(ng))=W(i,j,N(ng))*t(i,j,N(ng),nstp,itrc)  !!! <<<<<<<<<<<< TN: add
+#    else          /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add*/
             FC(i,N(ng))=0.0_r8
+#    endif         /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add*/
           END DO
 #   else
           DO i=Istr,Iend
@@ -836,7 +848,11 @@
      &                    (cff1*t(i,j,N(ng)  ,nstp,itrc)+               &
      &                     cff2*t(i,j,N(ng)-1,nstp,itrc)-               &
      &                     cff3*t(i,j,N(ng)-2,nstp,itrc))
+#   ifdef OFFLINE /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add*/
+            FC(i,N(ng))=W(i,j,N(ng))*t(i,j,N(ng),nstp,itrc)  !!! <<<<<<<<<<<< TN: add
+#   else          /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add*/
             FC(i,N(ng))=0.0_r8
+#   endif         /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add*/
           END DO
 #   endif
 !

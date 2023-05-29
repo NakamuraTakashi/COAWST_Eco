@@ -128,7 +128,6 @@
       CALL vegetation_drag_cal (ng, tile)
 # endif
 
-# if !defined OFFLINE_BIOLOGY
 !
 !-----------------------------------------------------------------------
 !  Compute right-hand-side terms for the 3D momentum equations.
@@ -210,7 +209,6 @@
 !
       CALL uv3dmix4 (ng, tile)
 # endif
-# endif /* !OFFLINE */
       RETURN
       END SUBROUTINE rhs3d
 !

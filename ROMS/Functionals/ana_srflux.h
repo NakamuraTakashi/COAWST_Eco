@@ -188,16 +188,19 @@
             cff=(0.7859_r8+0.03477_r8*Tair(i,j))/                       &
      &          (1.0_r8+0.00412_r8*Tair(i,j))
             e_sat=10.0_r8**cff    ! saturation vapor pressure (hPa=mbar)
-#  ifdef SPECIFIC_HUMIDITY
-!  With this directive specific humidity is input as kg/kg
-            vap_p=Pair(i,j)*Hair(i,j)/(0.62197_r8+0.378_r8*Hair(i,j))
-#  else
             vap_p=e_sat*Hair(i,j) ! water vapor pressure (hPa=mbar)
-#  endif
             srflx(i,j)=Rsolar*zenith*zenith*                            &
-     &                 (1.0_r8-0.6_r8*cloud(i,j)**3)/                   &   !!!>>> TN: rm <<< LB: restore
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: add
+#  ifdef JMAMSM_FLUXES
+     &             (1.0_r8-1.5_r8*cloud(i,j)**2+0.98_r8*cloud(i,j)**3)/ &   !!!>>> TN: add
+#  else
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
+     &                 (1.0_r8-0.6_r8*cloud(i,j)**3)/                   &
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: add
 !     &                 (0.77_r8-0.5_r8*cloud(i,j)**2)/                  &   !!!>>> TN: add  Kagimoto et al. (2009)
-!     &                 (0.96_r8-0.9_r8*cloud(i,j)**2)/                  &   !!!>>> TN: add Orig. form. >>> LB: rm
+!     &                 (0.96_r8-0.9_r8*cloud(i,j)**2)/                  &   !!!>>> TN: add
+#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
      &                 ((zenith+2.7_r8)*vap_p*1.0E-3_r8+                &
      &                  1.085_r8*zenith+0.1_r8)
           END IF

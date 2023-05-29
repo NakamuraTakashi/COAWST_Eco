@@ -157,7 +157,8 @@
         tdays(ng)=dstart
         time(ng)=tdays(ng)*day2sec
 !$OMP MASTER
-        ntstart(ng)=INT((time(ng)-dstart*day2sec)/dt(ng))+1
+!        ntstart(ng)=INT((time(ng)-dstart*day2sec)/dt(ng))+1 !!! >>>>>> TN: rm
+        ntstart(ng)=1                      !!!<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
         ntend(ng)=ntstart(ng)+ntimes(ng)-1
         ntfirst(ng)=ntstart(ng)
 !$OMP END MASTER
@@ -570,7 +571,7 @@
       END DO
 #endif
 
-#ifndef OFFLINE_FLOATS
+/*#ifndef OFFLINE_FLOATS*/ /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: rm */
 #ifdef INI_FILE
 !
 !  Read in initial conditions from initial NetCDF file.
@@ -615,12 +616,12 @@
 !  Analytical initial conditions for biology tracers.
 !
       DO ng=1,Ngrids
-        IF (nrrec(ng).eq.0) THEN
+!        IF (nrrec(ng).eq.0) THEN   !!!>>>>>>>>>>>>>>>>>>> TN:rm
           DO tile=first_tile(ng),last_tile(ng),+1
             CALL ana_biology (ng, tile, iNLM)
           END DO
 !$OMP BARRIER
-        END IF
+!        END IF  !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: rm
       END DO
 #endif
 !<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< FA: MOVED
@@ -794,7 +795,7 @@
 !$OMP BARRIER
       END DO
 #endif
-#endif /* !OFFLINE_FLOATS */
+/*#endif*/ /* !OFFLINE_FLOATS */ /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: rm */
 
 #if defined FOUR_DVAR || !defined TANGENT || !defined ADJOINT
 !

@@ -135,15 +135,11 @@
       integer (kind=int_kind) :: n,                                     &
                                         ! dummy counter
      &                           iunit  ! unit number for namelist file
-!#ifdef MPI
+!#ifdef 1
       integer (kind=int_kind) :: MyError, MyRank
 !#endif
 
-#ifdef MPI
       CALL mpi_comm_rank (MyComm, MyRank, MyError)
-#else
-      MyRank=0
-#endif
 
 !-----------------------------------------------------------------------
 !
@@ -221,16 +217,12 @@
      &                      grid2_lon_psi, grid2_lat_psi,               &
      &                      src_mask, dst_mask, MyRank)
 
-#ifdef MPI
 !     CALL mpi_comm_rank (MyComm, MyRank, MyError)
       IF (MyRank.eq.0) THEN
-#endif
       write(stdout, *) ' Computing remappings between: ',grid1_file
       write(stdout, *) '                          and  ',grid2_file
-#ifdef MPI
       END IF
       CALL mpi_barrier (MyComm, MyError)
-#endif
 
 !-----------------------------------------------------------------------
 !
@@ -260,10 +252,8 @@
         stop 'Invalid Map Type'
       end select
 
-#ifdef MPI
 !     CALL mpi_comm_rank (MyComm, MyRank, MyError)
       IF (MyRank.eq.0) THEN
-#endif
 !-----------------------------------------------------------------------
 !
 !     reduce size of remapping arrays and then write remapping info
@@ -288,22 +278,16 @@
      &                 interp_file1, interp_file2, output_opt,          &
      &                 counter_grid, Ngrids_comb_total, output_ncfile)
 
-#ifdef MPI
       END IF
       CALL mpi_barrier (MyComm, MyError)
-#endif
 !-----------------------------------------------------------------------
 !     DEALLOCATE HERE for SCRIP_COAWST package
-#ifdef MPI
 !     CALL mpi_comm_rank (MyComm, MyRank, MyError)
       IF (MyRank.eq.0) THEN
-#endif
       write(stdout,*) "-------------------------------------------"
       write(stdout,*) "Reached the end of mapping one set of grids"
-#ifdef MPI
       END IF
       CALL mpi_barrier (MyComm, MyError)
-#endif
 
 !     deallocate arrays from grids.f
       deallocate ( grid1_dims, grid2_dims )
@@ -326,17 +310,13 @@
         endif
       endif
 
-#ifdef MPI
 !      CALL mpi_comm_rank (MyComm, MyRank, MyError)
       IF (MyRank.eq.0) THEN
-#endif
       if (counter_grid.eq.Ngrids_comb_total) then
         write(*,*) 'end of scrip package '
       end if
-#ifdef MPI
       END IF
       CALL mpi_barrier (MyComm, MyError)
-#endif
       end subroutine scrip_package
 
 !======================================================================                                                                       

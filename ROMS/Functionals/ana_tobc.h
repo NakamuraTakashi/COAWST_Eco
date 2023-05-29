@@ -28,7 +28,7 @@
       CALL ana_tobc_tile (ng, tile, model,                              &
      &                    LBi, UBi, LBj, UBj,                           &
      &                    IminS, ImaxS, JminS, JmaxS,                   &
-     &                    nstp(ng),                                     &
+     &                    nstp(ng), nnew(ng),                           &
      &                    GRID(ng) % z_r,                               &
      &                    OCEAN(ng) % t)
 !
@@ -49,7 +49,7 @@
       SUBROUTINE ana_tobc_tile (ng, tile, model,                        &
      &                          LBi, UBi, LBj, UBj,                     &
      &                          IminS, ImaxS, JminS, JmaxS,             &
-     &                          nstp,                                   &
+     &                          nstp, nnew,                             &
      &                          z_r, t)
 !***********************************************************************
 !
@@ -66,6 +66,9 @@
       USE mod_biology
       USE mod_geochem
 #endif
+#ifdef OFFLINE
+      USE mod_clima
+#endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
 !  Imported variable declarations.
@@ -73,7 +76,7 @@
       integer, intent(in) :: ng, tile, model
       integer, intent(in) :: LBi, UBi, LBj, UBj
       integer, intent(in) :: IminS, ImaxS, JminS, JmaxS
-      integer, intent(in) :: nstp
+      integer, intent(in) :: nstp, nnew
 
 #ifdef ASSUMED_SHAPE
       real(r8), intent(in) :: z_r(LBi:,LBj:,:)
@@ -225,7 +228,52 @@
         END DO
       END IF
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
-#elif defined SHIRAHO_REEF || defined FUKIDO
+#elif defined OFFLINE
+! ---- Eastern boundary -----------------------------------------------
+      IF (ANY(LBC(ieast,isTvar(:),ng)%acquire).and.                     &
+     &    DOMAIN(ng)%Eastern_Edge(tile)) THEN
+        DO k=1,N(ng)
+          DO j=JstrT,JendT
+            BOUNDARY(ng)%t_east(j,k,itemp) = CLIMA(ng)%tclm(Iend+1,j,k,itemp)
+            BOUNDARY(ng)%t_east(j,k,isalt) = CLIMA(ng)%tclm(Iend+1,j,k,isalt)
+          END DO
+        END DO
+      END IF
+! ---- Western boundary -----------------------------------------------
+      IF (ANY(LBC(iwest,isTvar(:),ng)%acquire).and.                     &
+     &    DOMAIN(ng)%Western_Edge(tile)) THEN
+        DO k=1,N(ng)
+          DO j=JstrT,JendT
+            BOUNDARY(ng)%t_west(j,k,itemp) = CLIMA(ng)%tclm(Istr-1,j,k,itemp)
+            BOUNDARY(ng)%t_west(j,k,isalt) = CLIMA(ng)%tclm(Istr-1,j,k,isalt)
+          END DO
+        END DO
+      END IF
+
+! ---- Southern boundary -----------------------------------------------
+      IF (ANY(LBC(isouth,isTvar(:),ng)%acquire).and.                    &
+     &    DOMAIN(ng)%Southern_Edge(tile)) THEN
+        DO k=1,N(ng)
+          DO i=IstrT,IendT
+            BOUNDARY(ng)%t_south(i,k,itemp) = CLIMA(ng)%tclm(i,Jstr-1,k,itemp)
+            BOUNDARY(ng)%t_south(i,k,isalt) = CLIMA(ng)%tclm(i,Jstr-1,k,isalt)
+          END DO
+        END DO
+      END IF
+
+! ---- Northern boundary -----------------------------------------------
+      IF (ANY(LBC(inorth,isTvar(:),ng)%acquire).and.                    &
+     &    DOMAIN(ng)%Northern_Edge(tile)) THEN
+        DO k=1,N(ng)
+          DO i=IstrT,IendT
+            BOUNDARY(ng)%t_north(i,k,itemp) = CLIMA(ng)%tclm(i,Jend+1,k,itemp)
+            BOUNDARY(ng)%t_north(i,k,isalt) = CLIMA(ng)%tclm(i,Jend+1,k,isalt)
+          END DO
+        END DO
+      END IF
+
+
+#elif defined SHIRAHO_REEF || defined FUKIDO || defined BIO_VPROFILE_CONST
 !-----------------------------------------------------------------------
 !  SHIRAHO_REEF & FUKIDO CASES
 !-----------------------------------------------------------------------

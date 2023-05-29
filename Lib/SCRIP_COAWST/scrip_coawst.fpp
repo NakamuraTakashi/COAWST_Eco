@@ -23,17 +23,14 @@
       use create_masks
 
       implicit none
-#ifdef MPI
       include 'mpif.h'
       integer (kind=int_kind) :: Nnodes
-#endif
       integer (kind=int_kind) :: MyComm
 !     local variables
       character(len=char_len) :: inputfile
       integer (kind=int_kind) :: OutThread
 !
-#ifdef MPI
-!  Initialize MPI execution environment.
+!  Initialize 1 execution environment.
 !
       CALL mpi_init (MyError)
 !
@@ -44,10 +41,6 @@
       CALL mpi_comm_rank (MPI_COMM_WORLD, MyRank, MyError)
       MyComm=MPI_COMM_WORLD
       OutThread=MyRank
-#else
-      MyComm=0
-      OutThread=0
-#endif
 !
 !     Reading input file 
       call getarg(1,inputfile)
@@ -177,9 +170,7 @@
         call ocn2hyd_mask(MyComm)
       end if
 
-#ifdef MPI
       CALL mpi_finalize (MyError)
-#endif
       STOP
       end program scrip_coawst
 
@@ -194,10 +185,8 @@
  
       integer (kind=int_kind), intent(in) :: MyComm
 
-#ifdef MPI
       include 'mpif.h'
       integer (kind=int_kind) :: MyRank, Nnodes, MyError
-#endif
 
 !     local variables
       integer(int_kind) :: i
@@ -212,17 +201,13 @@
      &                  wrf_grids, parent_grid_ratio, parent_id,        &
      &                  output_ncfile, hydro_grids
 
-#ifdef MPI
       CALL mpi_comm_rank (MyComm, MyRank, MyError)
       IF (MyRank.eq.0) THEN
-#endif
       write(stdout,*)"================================================"
       write(stdout,*) ' Read input_file for SCRIP_COAWST Wrapper '
       write(stdout,*)"================================================"
-#ifdef MPI
       END IF
       CALL mpi_barrier (MyComm, MyError)
-#endif
 
       read (iunit, inputs)
 
@@ -234,10 +219,8 @@
      &                   Ngrids_roms*Ngrids_hyd  +                      &
      &                   Ngrids_ww3*Ngrids_wrf)*2
 
-#ifdef MPI
       CALL mpi_comm_rank (MyComm, MyRank, MyError)
       IF (MyRank.eq.0) THEN
-#endif
       write(stdout,*) "Ngrid_roms=",Ngrids_roms
       write(stdout,*) "Ngrid_swan=",Ngrids_swan
       write(stdout,*) "Ngrid_ww3= ",Ngrids_ww3
@@ -269,10 +252,8 @@
       end do 
       write(stdout,*)"================================================"
 
-#ifdef MPI
       END IF
       CALL mpi_barrier (MyComm, MyError)
-#endif
 
  10   FORMAT(A16, 1X, I1, A3, 1X, A)
  11   FORMAT(A16, 1X, I1, A3, 1X, A)

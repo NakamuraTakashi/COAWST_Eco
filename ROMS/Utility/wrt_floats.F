@@ -307,9 +307,9 @@
      &                 __FILE__)) RETURN
       END DO
 
-#  ifdef OFFLINE_FLOATS
+/*#  ifdef OFFLINE_FLOATS*/
       IF (Master) print *, '  WRT_FLOATS, model time (days), t=', tdays
-#  endif
+/*#  endif*/
 # endif
 
 # ifdef FLOAT_OYSTER

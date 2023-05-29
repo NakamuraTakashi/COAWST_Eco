@@ -200,6 +200,11 @@
 # ifdef T_PASSIVE
       USE pt3dbc_mod, ONLY : pt3dbc_tile
 # endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# ifdef OFFLINE_BIOLOGY
+      USE mod_biology
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
 !  Imported variable declarations.
 !
@@ -893,7 +898,11 @@
 #  else
             FC(i,0)=0.0_r8
 #  endif
+#  ifdef OFFLINE /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add*/
+            FC(i,N(ng))=W(i,j,N(ng))*t(i,j,N(ng),3,itrc)  !!! <<<<<<<<<<<< TN: add
+#  else          /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add*/
             FC(i,N(ng))=0.0_r8
+#  endif         /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add*/
           END DO
 # elif defined TS_C2VADVECTION
 !
@@ -912,7 +921,11 @@
 #  else
             FC(i,0)=0.0_r8
 #  endif
+#  ifdef OFFLINE /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add*/
+            FC(i,N(ng))=W(i,j,N(ng))*t(i,j,N(ng),3,itrc)  !!! <<<<<<<<<<<< TN: add
+#  else          /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add*/
             FC(i,N(ng))=0.0_r8
+#  endif         /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add*/
           END DO
 # elif defined TS_MPDATA
 #  if !defined WEC_VF
@@ -931,7 +944,11 @@
 #   else
             FC(i,0)=0.0_r8
 #   endif
+#   ifdef OFFLINE /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add*/
+            FC(i,N(ng))=W(i,j,N(ng))*t(i,j,N(ng),3,itrc)  !!! <<<<<<<<<<<< TN: add
+#   else          /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add*/
             FC(i,N(ng))=0.0_r8
+#   endif         /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add*/
           END DO
 #  endif
 # elif defined TS_HSIMT
@@ -995,7 +1012,11 @@
 #   else
             FC(i,0)=0.0_r8
 #   endif
+#   ifdef OFFLINE /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add*/
+            FC(i,N(ng))=W(i,j,N(ng))*t(i,j,N(ng),3,itrc)  !!! <<<<<<<<<<<< TN: add
+#   else          /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add*/
             FC(i,N(ng))=0.0_r8
+#   endif         /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add*/
           END DO
 # else
 !
@@ -1029,8 +1050,12 @@
      &                    (cff1*t(i,j,N(ng)  ,3,itrc)+                  &
      &                     cff2*t(i,j,N(ng)-1,3,itrc)-                  &
      &                     cff3*t(i,j,N(ng)-2,3,itrc))
+#  ifdef OFFLINE /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add*/
+            FC(i,N(ng))=W(i,j,N(ng))*t(i,j,N(ng),3,itrc)  !!! <<<<<<<<<<<< TN: add
+#  else          /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add*/
             FC(i,N(ng))=0.0_r8
-          END DO
+#  endif         /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add*/
+    END DO
 # endif
 # if defined WEC_VF
 !
@@ -1206,33 +1231,60 @@
             DO is=1,Nsrc(ng)
               Isrc=SOURCES(ng)%Isrc(is)
               Jsrc=SOURCES(ng)%Jsrc(is)
-              IF (LtracerSrc(itrc,ng).and.                              &
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:rm
+!              IF (LtracerSrc(itrc,ng).and.                              &
+!#  if defined TS_MPDATA || defined TS_HSIMT
+!     &            ((IstrUm2.le.Isrc).and.(Isrc.le.Iendp2i)).and.        &
+!#  else
+!     &            ((IstrR.le.Isrc).and.(Isrc.le.IendR)).and.            &
+!#  endif
+!     &            (j.eq.Jsrc)) THEN
+!                DO k=1,N(ng)-1
+!#  ifdef ONE_TRACER_SOURCE
+!                    FC(Isrc,k)=FC(Isrc,k)+0.5_r8*                       &
+!     &                      (SOURCES(ng)%Qsrc(is,k  )*                  &
+!     &                       SOURCES(ng)%Tsrc(itrc)+                    &
+!     &                       SOURCES(ng)%Qsrc(is,k+1)*                  &
+!     &                       SOURCES(ng)%Tsrc(itrc) )
+!#  elif defined TWO_D_TRACER_SOURCE
+!                    FC(Isrc,k)=FC(Isrc,k)+0.5_r8*                       &
+!     &                      (SOURCES(ng)%Qsrc(is,k  )*                  &
+!     &                       SOURCES(ng)%Tsrc(is,itrc)+                 &
+!     &                       SOURCES(ng)%Qsrc(is,k+1)*                  &
+!     &                       SOURCES(ng)%Tsrc(is,itrc) )
+!#  else
+!                  FC(Isrc,k)=FC(Isrc,k)+0.5_r8*                         &
+!     &                       (SOURCES(ng)%Qsrc(is,k  )*                 &
+!     &                        SOURCES(ng)%Tsrc(is,k  ,itrc)+            &
+!     &                        SOURCES(ng)%Qsrc(is,k+1)*                 &
+!     &                        SOURCES(ng)%Tsrc(is,k+1,itrc))
+!#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:rm
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
 #  if defined TS_MPDATA || defined TS_HSIMT
-     &            ((IstrUm2.le.Isrc).and.(Isrc.le.Iendp2i)).and.        &
+              IF (((IstrUm2.le.Isrc).and.(Isrc.le.Iendp2i)).and.        &
 #  else
-     &            ((IstrR.le.Isrc).and.(Isrc.le.IendR)).and.            &
+              IF (((IstrR.le.Isrc).and.(Isrc.le.IendR)).and.            &
 #  endif
      &            (j.eq.Jsrc)) THEN
-                DO k=1,N(ng)-1
+                DO k=1,N(ng)
+                  cff=dt(ng)*pm(Isrc,Jsrc)*pn(Isrc,Jsrc)
+                  IF (LtracerSrc(itrc,ng)) THEN
 #  ifdef ONE_TRACER_SOURCE
-                    FC(Isrc,k)=FC(Isrc,k)+0.5_r8*                       &
-     &                      (SOURCES(ng)%Qsrc(is,k  )*                  &
-     &                       SOURCES(ng)%Tsrc(itrc)+                    &
-     &                       SOURCES(ng)%Qsrc(is,k+1)*                  &
-     &                       SOURCES(ng)%Tsrc(itrc) )
+                    cff3=SOURCES(ng)%Tsrc(itrc)
 #  elif defined TWO_D_TRACER_SOURCE
-                    FC(Isrc,k)=FC(Isrc,k)+0.5_r8*                       &
-     &                      (SOURCES(ng)%Qsrc(is,k  )*                  &
-     &                       SOURCES(ng)%Tsrc(is,itrc)+                 &
-     &                       SOURCES(ng)%Qsrc(is,k+1)*                  &
-     &                       SOURCES(ng)%Tsrc(is,itrc) )
+                    cff3=SOURCES(ng)%Tsrc(is,itrc)
 #  else
-                  FC(Isrc,k)=FC(Isrc,k)+0.5_r8*                         &
-     &                       (SOURCES(ng)%Qsrc(is,k  )*                 &
-     &                        SOURCES(ng)%Tsrc(is,k  ,itrc)+            &
-     &                        SOURCES(ng)%Qsrc(is,k+1)*                 &
-     &                        SOURCES(ng)%Tsrc(is,k+1,itrc))
+                    cff3=SOURCES(ng)%Tsrc(is,k,itrc)
 #  endif
+                  ELSE
+                    cff3=t(Isrc,Jsrc,k,3,itrc)
+                  END IF
+                  t(Isrc,Jsrc,k,nnew,itrc)=t(Isrc,Jsrc,k,nnew,itrc)+    &
+     &                                     cff*SOURCES(ng)%Qsrc(is,k)*  &
+     &                                     cff3
+!                  FC(Isrc,k)=FC(Isrc,k)+SOURCES(ng)%Qsrc(is,k)*cff3
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
                 END DO
               END IF
             END DO
@@ -1243,8 +1295,18 @@
 !  Apply mass point sources - Volume influx.
 !
           DO i=I_RANGE
-            FC(i,0)=FC(i,0)+SOURCES(ng)%Qsgd*                           &
-     &                      SOURCES(ng)%Tsgd(itrc)*sgd_src(i,j)
+            cff=dt(ng)*pm(i,j)*pn(i,j)
+            IF (LtracerSrc(itrc,ng)) THEN
+              cff3=SOURCES(ng)%Tsgd(itrc)
+            ELSE
+              cff3=t(i,j,1,3,itrc)
+            END IF
+            t(i,j,1,nnew,itrc)=t(i,j,1,nnew,itrc)+                 &
+     &                         cff*SOURCES(ng)%Qsgd*sgd_src(i,j)*  &
+     &                         cff3
+!  Old version
+!            FC(i,0)=FC(i,0)+SOURCES(ng)%Qsgd*                           &
+!     &                      SOURCES(ng)%Tsgd(itrc)*sgd_src(i,j)
           END DO
 # endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
@@ -1625,17 +1687,17 @@
 !-----------------------------------------------------------------------
 !
       ic=0
-#ifdef OFFLINE_BIOLOGY
-      DO ibt=1,NBT
-        itrc=idbio(ibt)
-#else
+!#ifdef OFFLINE_BIOLOGY
+!      DO ibt=1,NBT
+!        itrc=idbio(ibt)
+!#else
 !  Initialize tracer counter index. The "tclm" array is only allocated
 !  to the NTCLM fields that need to be processed. This is done to
 !  reduce memory.
 !
 !
       DO itrc=1,NT(ng)
-#endif
+!#endif
 !
 !  Set compact reduced memory tracer index for nudging coefficients and
 !  climatology arrays.

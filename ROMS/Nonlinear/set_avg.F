@@ -2219,9 +2219,11 @@
           DO j=JstrR,JendR
             DO i=IstrR,IendR
               AVERAGE(ng)%avgzeta(i,j)=AVERAGE(ng)%avgzeta(i,j)+        &
-# ifdef WET_DRY
-     &                                 GRID(ng)%rmask_full(i,j)*        &
-# endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: rm
+!# ifdef WET_DRY
+!     &                                 GRID(ng)%rmask_full(i,j)*        &
+!# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: rm
      &                                 OCEAN(ng)%zeta(i,j,Kout)
             END DO
           END DO
@@ -2353,10 +2355,12 @@
             DO k=1,N(ng)
               DO j=JstrR,JendR
                 DO i=IstrR,IendR
-                  AVERAGE(ng)%avgt(i,j,k,it)=AVERAGE(ng)%avgt(i,j,k,it)+&
-#  ifdef WET_DRY
-     &                                       GRID(ng)%rmask_full(i,j)*  &
-#  endif
+                  AVERAGE(ng)%avgt(i,j,k,it)=AVERAGE(ng)%avgt(i,j,k,it)+ &
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: rm
+!#  ifdef WET_DRY
+!     &                                       GRID(ng)%rmask_full(i,j)*  &
+!#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: rm
      &                                       OCEAN(ng)%t(i,j,k,Nout,it)
                 END DO
               END DO
@@ -4134,8 +4138,15 @@
         IF (Aout(idFsur,ng)) THEN
           DO j=JstrR,JendR
             DO i=IstrR,IendR
-              AVERAGE(ng)%avgzeta(i,j)=rfac(i,j)*                       &
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: rm
+!              AVERAGE(ng)%avgzeta(i,j)=rfac(i,j)*                       &
+!     &                                 AVERAGE(ng)%avgzeta(i,j)
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: rm
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: add
+              AVERAGE(ng)%avgzeta(i,j)=1.0_r8/REAL(nAVG(ng),r8)*        &
      &                                 AVERAGE(ng)%avgzeta(i,j)
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
+              
             END DO
           END DO
           IF (EWperiodic(ng).or.NSperiodic(ng)) THEN
@@ -4371,8 +4382,14 @@
             DO k=1,N(ng)
               DO j=JstrR,JendR
                 DO i=IstrR,IendR
-                  AVERAGE(ng)%avgt(i,j,k,it)=rfac(i,j)*                 &
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: rm
+!                  AVERAGE(ng)%avgt(i,j,k,it)=rfac(i,j)*                 &
+!     &                                       AVERAGE(ng)%avgt(i,j,k,it)
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: rm                  
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: add
+                  AVERAGE(ng)%avgt(i,j,k,it)=1.0_r8/REAL(nAVG(ng),r8)*        &
      &                                       AVERAGE(ng)%avgt(i,j,k,it)
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add                 
                 END DO
               END DO
             END DO

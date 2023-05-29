@@ -28,9 +28,7 @@
 
       subroutine load_swan_grid( MyComm )
 
-#ifdef MPI
       include 'mpif.h'
-#endif
       integer (kind=int_kind), intent(in) :: MyComm
 
 !     local variables 
@@ -38,9 +36,7 @@
       integer(int_kind) :: nxs, nys, nxr, nyr
       integer(int_kind) :: test1, test2, test3
       integer(int_kind) :: mw, mo, nx, ny, grdsize
-#ifdef MPI
       integer (kind=int_kind) :: MyError, MyRank
-#endif
 
       real(dbl_kind) :: bf, scale
       real(dbl_kind) :: lons, lats, lond, latd, tol, cff
@@ -211,16 +207,12 @@
       else
         roms_swan_samegrid=0
       end if
-#ifdef MPI
         CALL mpi_comm_rank (MyComm, MyRank, MyError)
         IF (MyRank.eq.0) THEN
-#endif
         write(*,*) 'ROMS and SWAN same grids (0=no or 1=yes) ',         &
      &              roms_swan_samegrid
-#ifdef MPI
         END IF
         CALL mpi_barrier (MyComm, MyError)
-#endif
 
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -273,18 +265,14 @@
           enddo
         endif
 
-#ifdef MPI
         CALL mpi_comm_rank (MyComm, MyRank, MyError)
         IF (MyRank.eq.0) THEN
-#endif
          print*,"SWAN starting i & j index of parent w.r.t child grid--"
          print*,ngrd_sw(mw+1)%istr_w, ngrd_sw(mw+1)%jstr_w
          print*,"ending i & j index of parent w.r.t child grid--"
          print*,ngrd_sw(mw+1)%iend_w, ngrd_sw(mw+1)%jend_w
-#ifdef MPI
         END IF
         CALL mpi_barrier (MyComm, MyError)
-#endif
 
       enddo
 
