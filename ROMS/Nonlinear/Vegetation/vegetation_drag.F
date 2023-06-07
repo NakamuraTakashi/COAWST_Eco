@@ -16,7 +16,7 @@
 !                                                                      !
 !  This routine computes the vegetation (posture-dependent) drag       !
 !  for rhs3d.F                                                         !
-!                                                                      !  
+!                                                                      !
 !  References:                                                         !
 !                                                                      !
 !  Luhar M., and H. M. Nepf (2011), Flow-induced reconfiguration of    !
@@ -29,6 +29,9 @@
 
       PRIVATE
       PUBLIC  :: vegetation_drag_cal
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+      PRIVATE :: mangr_get_farea
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 
       CONTAINS
 !
@@ -54,7 +57,7 @@
       CALL vegetation_drag_tile  (ng, tile,                             &
      &                        LBi, UBi, LBj, UBj,                       &
      &                        IminS, ImaxS, JminS, JmaxS,               &
-     &                        nrhs(ng),                                 & 
+     &                        nrhs(ng),                                 &
      &                        GRID(ng) % Hz,                            &
      &                        OCEAN(ng) % u,                            &
      &                        OCEAN(ng) % v,                            &
@@ -64,10 +67,14 @@
 # endif
      &                        VEG(ng) % ru_loc_veg,                     &
      &                        VEG(ng) % rv_loc_veg,                     &
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+     &                        VEG(ng) % ru_loc_veg_root,                &
+     &                        VEG(ng) % rv_loc_veg_root,                &
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
      &                        VEG(ng) % ru_veg,                         &
-     &                        VEG(ng) % rv_veg,                         & 
+     &                        VEG(ng) % rv_veg,                         &
      &                        VEG(ng) % step2d_uveg,                    &
-     &                        VEG(ng) % step2d_vveg,                    & 
+     &                        VEG(ng) % step2d_vveg,                    &
      &                        VEG(ng) % Lveg)
 
 # ifdef PROFILE
@@ -80,7 +87,7 @@
       SUBROUTINE vegetation_drag_tile  (ng, tile,                       &
      &                              LBi, UBi, LBj, UBj,                 &
      &                              IminS, ImaxS, JminS, JmaxS,         &
-     &                              nrhs,                               & 
+     &                              nrhs,                               &
      &                              Hz,                                 &
      &                              u, v,                               &
      &                              plant,                              &
@@ -88,6 +95,9 @@
      &                              bend,                               &
 # endif
      &                              ru_loc_veg, rv_loc_veg,             &
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+     &                              ru_loc_veg_root, rv_loc_veg_root,   &
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
      &                              ru_veg, rv_veg,                     &
      &                              step2d_uveg, step2d_vveg,           &
      &                              Lveg)
@@ -97,6 +107,9 @@
       USE mod_scalars
       USE mod_vegetation
       USE mod_vegarr
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+      USE mod_mangr_root
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 !
 !  Imported variable declarations.
 !
@@ -115,6 +128,10 @@
 #  endif
       real(r8), intent(inout) :: ru_loc_veg(LBi:,LBj:,:,:)
       real(r8), intent(inout) :: rv_loc_veg(LBi:,LBj:,:,:)
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+      real(r8), intent(inout) :: ru_loc_veg_root(LBi:,LBj:,:,:)
+      real(r8), intent(inout) :: rv_loc_veg_root(LBi:,LBj:,:,:)
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
       real(r8), intent(inout) :: ru_veg(LBi:,LBj:,:)
       real(r8), intent(inout) :: rv_veg(LBi:,LBj:,:)
       real(r8), intent(inout) :: step2d_uveg(LBi:,LBj:)
@@ -131,6 +148,11 @@
       real(r8), intent(inout) ::                                        &
     &               ru_loc_veg(LBi:UBi,LBj:UBj,N(ng),NVEG),             &
     &               rv_loc_veg(LBi:UBi,LBj:UBj,N(ng),NVEG)
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+      real(r8), intent(inout) ::                                        &
+    &               ru_loc_veg_root(LBi:UBi,LBj:UBj,N(ng),NVEG),        &
+    &               rv_loc_veg_root(LBi:UBi,LBj:UBj,N(ng),NVEG)
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
       real(r8), intent(inout) :: ru_veg(LBi:UBi,LBj:UBj,N(ng))
       real(r8), intent(inout) :: rv_veg(LBi:UBi,LBj:UBj,N(ng))
       real(r8), intent(inout) :: step2d_uveg(LBi:UBi,LBj:UBj)
@@ -141,7 +163,7 @@
 !  Local variable declarations.
 !
       integer :: i, j, k, iveg
-! 
+!
       real(r8), parameter :: one_third  = 1.0_r8/3.0_r8
       real(r8), parameter :: one_twelfth  = 1.0_r8/12.0_r8
       real(r8), parameter :: Inival  = 0.0_r8
@@ -150,6 +172,10 @@
       real(r8) :: Lveg_loc, plant_height_eff
       real(r8), dimension(IminS:ImaxS,JminS:JmaxS,0:N(ng)) :: dab
       real(r8), dimension(IminS:ImaxS,JminS:JmaxS) :: wrk
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+      real(r8), dimension(IminS:ImaxS,JminS:JmaxS) :: wrk_root           ! For mangrove roots
+      real(r8), dimension(IminS:ImaxS,JminS:JmaxS,1:N(ng)) :: farea_out  ! Root projected area in a layer (m2 root/m2 ground)
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 !
 # include "set_bounds.h"
 !
@@ -161,6 +187,9 @@
       ru_veg=Inival
       rv_veg=Inival
       Lveg=Inival
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+      farea_out=Inival
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 !
 # ifdef WET_DRY
 !
@@ -173,7 +202,24 @@
 # endif
 
       VEG_LOOP: DO iveg=1,NVEG
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+!
+# ifdef FISH_FARM
+!
+! Initialization of depth from the water surface (m)
+!
+        dab = Inival
+!
+! Loop for vertical layers
+!
+        K_LOOP: DO k=N(ng),1,-1
+!
+# else
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
         K_LOOP: DO k=1,N(ng)
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
           DO j=JstrV-1,Jend
             DO i=IstrU-1,Iend
 
@@ -182,7 +228,7 @@
 ! Flexible vegetation
 !
 ! Second moment of area
-! 
+!
               sma=(plant(i,j,iveg,pdiam)*                               &
      &             plant(i,j,iveg,pthck)**3.0_r8)*(one_twelfth)
 !
@@ -224,18 +270,74 @@
 !
               plant_height_eff=plant(i,j,iveg,phght)
 # endif
+
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+!
+# ifdef FISH_FARM
+!
+! depth from the water surface (m)
+!
+              if (k == N(ng)) then
+                 dab(i,j,k) = Hz(i,j,k)
+              else
+                 dab(i,j,k) = dab(i,j,k+1) + Hz(i,j,k)
+              end if
+!
+# else
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 !
 ! Select the grid cell (full or part) within the canopy layer
 !
               dab(i,j,k)=dab(i,j,k-1)+Hz(i,j,k)
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
               Hz_inverse=1.0_r8/Hz(i,j,k)
               cff1=MIN((dab(i,j,k)-plant_height_eff)*Hz_inverse,1.0_r8)
               Lveg_loc=MIN(1.0_r8-cff1,1.0_r8)
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+!
+! If this is Rhizophora, compute the vertically integrated root
+! projected area in a layer
+!
+              IF (SPE_MANGR(iveg,ng)==1 .and.                           &
+     &            dab(i,j,k-1)<mangr_layer_thck*                        &
+     &            dble(mangr_n_layer)) THEN
+                CALL mangr_get_farea ( &
+                                                     ! *** Input ***
+                plant(i,j,iveg,pdiam)           , &  ! DBH given in a grid-cell (m)
+                plant(i,j,iveg,pdens)           , &  ! Tree density (tree/m2)
+                dab(i,j,k-1)                    , &  ! Height of lower boundary of the layer (m)
+                dab(i,j,k)                      , &  ! Height of upper boundary of the layer (m)
+                                                     !
+                                                     ! *** Output ***
+                farea_out(i,j,k)                  &  ! Vertically integrated root projected area in a layer (m2 root/m2 ground)
+                )
+              ELSE
+                farea_out(i,j,k)=0.0_r8
+              END IF
+!
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 !
 ! Prepare drag term (at rho points)
-!       
+!
               wrk(i,j)=0.5_r8*cd_veg(iveg,ng)*plant(i,j,iveg,pdiam)*    &
      &                 plant(i,j,iveg,pdens)*Hz(i,j,k)*Lveg_loc
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+# ifdef BAK_EXPERI_STEMFAC
+!
+! For Bakhawan drag experiment case, account for presence of multiple stems
+!
+              wrk(i,j)=0.5_r8*cd_veg(iveg,ng)*plant(i,j,iveg,pdiam)*    &
+     &                 plant(i,j,iveg,pdens)*Hz(i,j,k)*Lveg_loc*        &
+     &                 multistem_fac
+# endif
+!
+! Drag term by the mangrove roots
+              wrk_root(i,j) = 0.5_r8*cd_veg(iveg,ng)*farea_out(i,j,k)
+              ! wrk(i,j)=wrk(i,j)+0.5_r8*cd_veg(iveg,ng)*farea_out(i,j,k)
+!
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 !
 ! Store Lveg_loc for all vegetation types
 !
@@ -254,6 +356,14 @@
               cff2=SQRT(u(i,j,k,nrhs)*u(i,j,k,nrhs)+cff1*cff1)
               cff3=u(i,j,k,nrhs)*cff2
               ru_loc_veg(i,j,k,iveg)=0.5_r8*(wrk(i-1,j)+wrk(i,j))*cff3
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+!
+! For mangrove roots
+!
+              ru_loc_veg_root(i,j,k,iveg)=0.5_r8*(wrk_root(i-1,j)+      &
+     &                                            wrk_root(i,j))*cff3
+!
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 !
 !  Add the ru_iveg from this veg type to another veg type
 !  which can be there at the same point (i,j,k)
@@ -261,6 +371,13 @@
 !                     multiple vegetation types are concomitant
 !
               ru_veg(i,j,k)=ru_loc_veg(i,j,k,iveg)+ru_veg(i,j,k)
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+!
+! Add contribution of mangrove roots
+!
+              ru_veg(i,j,k)=ru_loc_veg_root(i,j,k,iveg)+ru_veg(i,j,k)
+!
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 
 # ifdef WET_DRY
               cff4=cff*0.5_r8*(Hz(i-1,j,k)+Hz(i,j,k))
@@ -280,11 +397,26 @@
               cff2=SQRT(cff1*cff1+v(i,j,k,nrhs)*v(i,j,k,nrhs))
               cff3=v(i,j,k,nrhs)*cff2
               rv_loc_veg(i,j,k,iveg)=0.5_r8*(wrk(i,j-1)+wrk(i,j))*cff3
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+!
+! For mangrove roots
+!
+              rv_loc_veg_root(i,j,k,iveg)=0.5_r8*(wrk_root(i-1,j)+      &
+     &                                            wrk_root(i,j))*cff3
+!
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 !
 !   Add the rv_iveg from this veg type to another veg type
 !   which can be there at the same point (i,j,k)
 !
               rv_veg(i,j,k)=rv_loc_veg(i,j,k,iveg)+rv_veg(i,j,k)
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+!
+! Add contribution of mangrove roots
+!
+              rv_veg(i,j,k)=rv_loc_veg_root(i,j,k,iveg)+rv_veg(i,j,k)
+!
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 
 # ifdef WET_DRY
               cff4=cff*0.5_r8*(Hz(i,j-1,k)+Hz(i,j,k))
@@ -329,5 +461,73 @@
 !
       RETURN
       END SUBROUTINE vegetation_drag_tile
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+
+      !-----------------------------------------------------------------------
+      SUBROUTINE mangr_get_farea ( &
+                                           ! *** Input ***
+        diameter                      , &  ! DBH given in a grid-cell (m)
+        tree_dens                     , &  ! Tree density (tree/m2)
+        h_lower                       , &  ! Height of lower boundary of the layer (m)
+        h_upper                       , &  ! Height of upper boundary of the layer (m)
+                                           !
+                                           ! *** Output ***
+        mangr_farea_out_layer           &  ! Vertically integrated root projected area in a layer (m2 root/m2 ground)
+        )
+        !
+        ! !DESCRIPTION:
+        ! Calculate the vertically integrated root projected area in a layer
+        !
+        ! !USES:
+        USE mod_mangr_root, only : mangr_DBH_class, mangr_d_DBH,        &
+     &                             mangr_layer_thck, mangr_n_layer,     &
+     &                             mangr_azi_effect,                    &
+     &                             mangr_root_farea
+        USE mod_kinds
+        !
+        ! !ARGUMENTS:
+        implicit none
+        real(r8), intent(in)    :: diameter, tree_dens, h_lower, h_upper
+        real(r8), intent(inout) :: mangr_farea_out_layer
+        !
+        ! !LOCAL VARIABLES:
+        real(r8), dimension(0:mangr_n_layer) :: mangr_dab  ! Depth above bed for mangrove root layers
+        real(r8) :: mangr_Hz_inverse, mangr_cff1, mangr_cff2
+        real(r8) :: mangr_Lveg_loc1, mangr_Lveg_loc2, mangr_layer_frac
+        integer  :: k, my_dbh_class
+        !---------------------------------------------------------------------
+
+        ! Zero out
+
+        mangr_dab(:) = 0.0_r8
+        mangr_farea_out_layer = 0.0_r8
+
+        ! Constant variable
+
+        mangr_Hz_inverse = 1.0_r8/mangr_layer_thck
+        my_dbh_class = max(nint(diameter/mangr_d_DBH),1)
+        my_dbh_class = min(my_dbh_class, mangr_DBH_class)
+
+        ! Compute the root projected area in the layer
+
+        IF (tree_dens>1.e-06_r8) THEN
+          DO k=1,mangr_n_layer
+            mangr_dab(k)=mangr_dab(k-1)+mangr_layer_thck
+            mangr_cff1=MIN((mangr_dab(k)-h_upper)*mangr_Hz_inverse,1.0_r8)
+            mangr_Lveg_loc1=MIN(1.0_r8-mangr_cff1,1.0_r8)
+            mangr_cff2=MIN((mangr_dab(k)-h_lower)*mangr_Hz_inverse,1.0_r8)
+            mangr_Lveg_loc2=MIN(1.0_r8-mangr_cff2,1.0_r8)
+            mangr_layer_frac=MAX(mangr_Lveg_loc1-mangr_Lveg_loc2,0.0_r8)
+            mangr_farea_out_layer=mangr_farea_out_layer+                &
+     &                            mangr_root_farea(my_dbh_class,k)*     &
+     &                            tree_dens*mangr_azi_effect*           &
+     &                            mangr_layer_frac
+          END DO
+        END IF
+
+      RETURN
+      END SUBROUTINE mangr_get_farea
+
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 #endif
       END MODULE vegetation_drag_mod
