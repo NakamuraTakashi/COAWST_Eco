@@ -889,6 +889,14 @@
             cff=VEG(ng)%plant(i,j,iveg,pdens)+cff
           END DO
           A(ij)=cff/NVEG
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+# if defined VEG_SWAN_DEP_AVE
+!         This replaces "plant density" with the depth-averaged vegetation
+!         projected area density (m-1) to consider the wave damping effects
+!         of depth-variable vegetations such as mangroves.
+          A(ij)=VEG(ng)%veg_farea_dens(i,j)
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
         END DO
       END DO
       CALL AttrVect_importRAttr (AttrVect_G(ng)%ocn2wav_AV, "VEGDENS",  &
