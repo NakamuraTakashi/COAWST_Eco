@@ -290,7 +290,12 @@ CONTAINS
     real(8), parameter :: k_Ddon(Ndom) = [ 2.0d-7,   1.0d-11   ]    ! (s-1)    Decomposition rate of DON at 0 oC (0.02d0 d-1; Kishi et al., 2007)
     real(8), parameter :: k_Ddop(Ndom) = [ 2.0d-7,   1.0d-11   ]    ! (s-1)    Decomposition rate of DOP at 0 oC 
   
-    real(8), parameter :: k_Dpoc(Npom) = [ 3.0d-7,   1.0d-10   ]    ! (s-1)    Decomposition rate of POC at 0 oC (0.3d0 d-1; Kishi et al., 2001)
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:rm
+!    real(8), parameter :: k_Dpoc(Npom) = [ 3.0d-7,   1.0d-10   ]    ! (s-1)    Decomposition rate of POC at 0 oC (0.3d0 d-1; Kishi et al., 2001)
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:rm
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+    real(8), parameter :: k_Dpoc(Npom) = [ 3.5d-6,   3.5d-6    ]    ! (s-1)    For testing upwelling: Decomposition rate of POC at 0 oC (0.3d0 d-1; Kishi et al., 2001)
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
     real(8), parameter :: k_Dpon(Npom) = [ 1.0d-7,   1.0d-10   ]    ! (s-1)    Decomposition rate of PON at 0 oC (0.1d0 d-1; Kishi et al., 2007)
     real(8), parameter :: k_Dpop(Npom) = [ 1.0d-7,   1.0d-10   ]    ! (s-1)    Decomposition rate of POP at 0 oC 
 
@@ -791,7 +796,6 @@ CONTAINS
       dTA_dt = dTA_dt + 1.0d0*Ddon(k) - 2.0d0*Ddop(k)
 #endif
     END DO
-
 !----- Decomposition rate of POM (umol L-1 s-1) -----------------
 
     DO k=1, Npom
@@ -799,7 +803,43 @@ CONTAINS
       IF(DOx <= 0.0d0) THEN !-----For Error handling
         Dpoc(k) = 0.0d0
       ENDIF
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+#ifdef UPWELL_TRACER
+      ! Give constant decay rate for POM
+      Dpoc(k) = k_Dpoc(k) * POC(k)
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
       Dpoc(k) = MAX( Dpoc(k), 0.0d0 )  !!! Error handling
+
+!     === Mass barance ===
+
+      dPOC_dt(k) = dPOC_dt(k) - Dpoc(k)
+      dDIC_dt = dDIC_dt + Dpoc(k)
+      dDOx_dt = dDOx_dt - Dpoc(k)
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+#ifdef UPWELL_TRACER
+      ! No oxygen consumption
+      dDOx_dt = dDOx_dt + Dpoc(k)
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
+#if defined CARBON_ISOTOPE
+      dPO13C_dt(k) = dPO13C_dt(k) - Dpoc(k)*rPO13C(k)
+      dDI13C_dt = dDI13C_dt + Dpoc(k)*rPO13C(k)
+#endif
+
+#if defined NUTRIENTS
+      Dpon(k) = k_Dpon(k) * exp(b_Dpon(k)*Tmp) * PON(k)
+      IF(DOx <= 0.0d0) THEN !-----For Error handling
+        Dpon(k) = 0.0d0
+      ENDIF
+      Dpon(k) = MAX( Dpon(k), 0.0d0 )  !!! Error handling
+
+      Dpop(k) = k_Dpop(k) * exp(b_Dpop(k)*Tmp) * POP(k)
+      IF(DOx <= 0.0d0) THEN !-----For Error handling
+        Dpop(k) = 0.0d0
+      ENDIF
+      Dpop(k) = MAX( Dpop(k), 0.0d0 )  !!! Error handling
+
 
 !     === Mass barance ===
 
@@ -842,7 +882,14 @@ CONTAINS
         IF(DOx <= 0.0d0) THEN !-----For Error handling
           Dp2doc(m,k) = 0.0d0
         ENDIF
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+#ifdef UPWELL_TRACER
+        ! Prevent transformation to DOM
+        Dp2doc(m,k) = 0.0d0
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
         Dp2doc(m,k) = MAX( Dp2doc(m,k), 0.0d0 )  !!! Error handling
+
   
 !     === Mass barance ===
 
