@@ -477,7 +477,78 @@
           bottom(i,j,izdef)=Zob(ng)
         END DO
       END DO
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN:Add
+!!!<<<<<<<< Shiraho reef case <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN:Add
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+# elif defined BAK_EXPERI_SED
+      DO j=JstrT,JendT
+        DO i=IstrT,IendT
+!
+!  Set bed layer properties.
+!
+          DO k=1,Nbed
+             bed(i,j,k,iaged)=time(ng)
+             bed(i,j,k,ithck)=1.0_r8
+             bed(i,j,k,iporo)=0.70_r8
+             DO ised=1,NST
+               bed_frac(i,j,k,ised)=1.0_r8/REAL(NST,r8)
+             ENDDO
+          END DO
+!
+!  Set exposed sediment layer properties.
+!
+          bottom(i,j,irlen)=0.10_r8
+          bottom(i,j,irhgt)=0.01_r8
+          bottom(i,j,izdef)=Zob(ng)
+        END DO
+      END DO
+# elif defined BAK_EXPERI_SED_DISC
+      DO j=JstrT,JendT
+        DO i=IstrT,IendT
+!
+!  Set bed layer properties.
+!
+          DO k=1,Nbed
+             bed(i,j,k,iaged)=time(ng)
+             bed(i,j,k,ithck)=1.0_r8
+             bed(i,j,k,iporo)=0.70_r8
+             DO ised=1,NST
+               bed_frac(i,j,k,ised)=0.0_r8/REAL(NST,r8)
+             ENDDO
+          END DO
+!
+!  Set exposed sediment layer properties.
+!
+          bottom(i,j,irlen)=0.10_r8
+          bottom(i,j,irhgt)=0.01_r8
+          bottom(i,j,izdef)=Zob(ng)
+        END DO
+      END DO
+# elif defined FUK_BASE_SED
+      DO j=JstrT,JendT
+        DO i=IstrT,IendT
+!
+!  Set bed layer properties.
+!
+          DO k=1,Nbed
+             bed(i,j,k,iaged)=time(ng)
+             bed(i,j,k,ithck)=1.0_r8
+             bed(i,j,k,iporo)=0.70_r8
+             DO ised=1,NCS
+               bed_frac(i,j,k,ised)=0.0_r8
+             ENDDO
+             DO ised=NCS+1,NST
+               bed_frac(i,j,k,ised)=1.0_r8/REAL(NNS,r8)
+             ENDDO
+          END DO
+!
+!  Set exposed sediment layer properties.
+!
+          bottom(i,j,irlen)=0.10_r8
+          bottom(i,j,irhgt)=0.01_r8
+          bottom(i,j,izdef)=Zob(ng)
+        END DO
+      END DO
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 # else
       ana_sediment.h: no values provided for bed, bed_mass, bottom.
 # endif
