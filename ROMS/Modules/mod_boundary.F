@@ -450,6 +450,11 @@
 #ifndef ANA_M2OBC
           real(r8), pointer :: ubarG_west(:,:)
           real(r8), pointer :: vbarG_west(:,:)
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+#elif defined BAK_EXPERI_BRY
+          real(r8), pointer :: ubarG_west(:,:)
+          real(r8), pointer :: vbarG_west(:,:)
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 #endif
 
           real(r8), pointer :: ubar_east(:)
@@ -465,6 +470,11 @@
 #ifndef ANA_M2OBC
           real(r8), pointer :: ubarG_east(:,:)
           real(r8), pointer :: vbarG_east(:,:)
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+#elif defined BAK_EXPERI_BRY
+          real(r8), pointer :: ubarG_east(:,:)
+          real(r8), pointer :: vbarG_east(:,:)
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 #endif
 
           real(r8), pointer :: ubar_south(:)
@@ -480,6 +490,11 @@
 #ifndef ANA_M2OBC
           real(r8), pointer :: ubarG_south(:,:)
           real(r8), pointer :: vbarG_south(:,:)
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+#elif defined BAK_EXPERI_BRY
+          real(r8), pointer :: ubarG_south(:,:)
+          real(r8), pointer :: vbarG_south(:,:)
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 #endif
 
           real(r8), pointer :: ubar_north(:)
@@ -1028,6 +1043,10 @@
 #endif
 #ifndef ANA_M2OBC
         allocate ( BOUNDARY(ng) % ubarG_west(LBj:UBj,2) )
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+#elif defined BAK_EXPERI_BRY
+        allocate ( BOUNDARY(ng) % ubarG_west(LBj:UBj,2) )
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 #endif
       END IF
 
@@ -1045,6 +1064,10 @@
 #endif
 #ifndef ANA_M2OBC
         allocate ( BOUNDARY(ng) % ubarG_east(LBj:UBj,2) )
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+#elif defined BAK_EXPERI_BRY
+        allocate ( BOUNDARY(ng) % ubarG_east(LBj:UBj,2) )
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 #endif
       END IF
 
@@ -1062,6 +1085,10 @@
 #endif
 #ifndef ANA_M2OBC
         allocate ( BOUNDARY(ng) % ubarG_south(LBi:UBi,2) )
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+#elif defined BAK_EXPERI_BRY
+        allocate ( BOUNDARY(ng) % ubarG_south(LBi:UBi,2) )
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 #endif
       END IF
 
@@ -1096,6 +1123,10 @@
 #endif
 #ifndef ANA_M2OBC
         allocate ( BOUNDARY(ng) % vbarG_west(LBj:UBj,2) )
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+#elif defined BAK_EXPERI_BRY
+        allocate ( BOUNDARY(ng) % vbarG_west(LBj:UBj,2) )
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 #endif
       END IF
 
@@ -1113,6 +1144,10 @@
 #endif
 #ifndef ANA_M2OBC
         allocate ( BOUNDARY(ng) % vbarG_east(LBj:UBj,2) )
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+#elif defined BAK_EXPERI_BRY
+        allocate ( BOUNDARY(ng) % vbarG_east(LBj:UBj,2) )
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 #endif
       END IF
 
@@ -1130,6 +1165,10 @@
 #endif
 #ifndef ANA_M2OBC
         allocate ( BOUNDARY(ng) % vbarG_south(LBi:UBi,2) )
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+#elif defined BAK_EXPERI_BRY
+        allocate ( BOUNDARY(ng) % vbarG_south(LBi:UBi,2) )
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 #endif
       END IF
 
@@ -1971,6 +2010,10 @@
 #endif
 #ifndef ANA_M2OBC
           BOUNDARY(ng) % ubarG_west = IniVal
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+#elif defined BAK_EXPERI_BRY
+          BOUNDARY(ng) % ubarG_west = IniVal
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 #endif
         END IF
 
@@ -1984,6 +2027,10 @@
 #endif
 #ifndef ANA_M2OBC
           BOUNDARY(ng) % ubarG_east = IniVal
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+#elif defined BAK_EXPERI_BRY
+          BOUNDARY(ng) % ubarG_east = IniVal
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 #endif
         END IF
 
@@ -1997,6 +2044,10 @@
 #endif
 #ifndef ANA_M2OBC
           BOUNDARY(ng) % ubarG_south = IniVal
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+#elif defined BAK_EXPERI_BRY
+          BOUNDARY(ng) % ubarG_south = IniVal
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 #endif
         END IF
 
@@ -2024,6 +2075,10 @@
 #endif
 #ifndef ANA_M2OBC
           BOUNDARY(ng) % vbarG_west = IniVal
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+#elif defined BAK_EXPERI_BRY
+          BOUNDARY(ng) % vbarG_west = IniVal
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 #endif
         END IF
 
@@ -2037,6 +2092,10 @@
 #endif
 #ifndef ANA_M2OBC
           BOUNDARY(ng) % vbarG_east = IniVal
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+#elif defined BAK_EXPERI_BRY
+          BOUNDARY(ng) % vbarG_east = IniVal
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 #endif
         END IF
 
@@ -2050,6 +2109,10 @@
 #endif
 #ifndef ANA_M2OBC
           BOUNDARY(ng) % vbarG_south = IniVal
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+#elif defined BAK_EXPERI_BRY
+          BOUNDARY(ng) % vbarG_south = IniVal
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 #endif
         END IF
 
