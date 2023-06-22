@@ -805,6 +805,12 @@ contains
       ELSE
         w_PM = -(rho_POM(itrc)/1.024d0 - 1.0d0)*grav*D_POM(itrc)*D_POM(itrc)*1.0d-6/18.0d0/vis_sw
       END IF
+      !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+#ifdef UPWELL_TRACER
+      ! Give zero settling velocity
+      w_PM = 0.0d0
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
       CALL bio_vadv2(N, dt, dz, z_r, z_w, w_PM, POC(:,itrc), dPOC(:,itrc), Fdep_POC(itrc))
 # if defined CARBON_ISOTOPE
       CALL bio_vadv2(N, dt, dz, z_r, z_w, w_PM, PO13C(:,itrc), dPO13C(:,itrc), Fdep_PO13C(itrc))

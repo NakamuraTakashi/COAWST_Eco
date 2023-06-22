@@ -4808,6 +4808,15 @@
         ObcData(ng)=ObcData(ng).or.ANY(ad_LBC(:,isUbar,ng)%acquire)     &
      &                         .or.ANY(ad_LBC(:,isVbar,ng)%acquire)
 # endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add <= not confident if this is really needed.
+#elif defined BAK_EXPERI_BRY
+        ObcData(ng)=ObcData(ng).or.ANY(LBC(:,isUbar,ng)%acquire)        &
+     &                         .or.ANY(LBC(:,isVbar,ng)%acquire)
+# if defined ADJOINT || defined TANGENT || defined TL_IOMS
+        ObcData(ng)=ObcData(ng).or.ANY(ad_LBC(:,isUbar,ng)%acquire)     &
+     &                         .or.ANY(ad_LBC(:,isVbar,ng)%acquire)
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 #endif
 #ifdef SOLVE3D
 # ifndef ANA_M3OBC

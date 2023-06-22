@@ -1737,10 +1737,14 @@
 !
 !  2D momentum.
 !
-      IF (LprocessOBC(ng)) THEN
+            IF (LprocessOBC(ng)) THEN
 # ifdef ANA_M2OBC
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+#  ifndef BAK_EXPERI_BRY
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
         CALL ana_m2obc (ng, tile, iNLM)
-# else
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+#  else
         IF (DOMAIN(ng)%SouthWest_Test(tile)) THEN
           IF (LBC(iwest,isUbar,ng)%acquire) THEN
             CALL set_ngfld (ng, iNLM, idU2bc(iwest), JLB, JUB, 1,       &
@@ -1801,34 +1805,12 @@
             IF (FoundError(exit_flag, NoError, __LINE__,                &
      &                     __FILE__)) RETURN
           END IF
-
-          IF (LBC(inorth,isUbar,ng)%acquire) THEN
-            CALL set_ngfld (ng, iNLM, idU2bc(inorth), ILB, IUB, 1,      &
-     &                      1, Lm(ng)+1, 1,                             &
-     &                      BOUNDARY(ng) % ubarG_north,                 &
-     &                      BOUNDARY(ng) % ubar_north,                  &
-     &                      update)
-            IF (FoundError(exit_flag, NoError, __LINE__,                &
-     &                     __FILE__)) RETURN
-          END IF
-
-          IF (LBC(inorth,isVbar,ng)%acquire) THEN
-            CALL set_ngfld (ng, iNLM, idV2bc(inorth), ILB, IUB, 1,      &
-     &                      0, Lm(ng)+1, 1,                             &
-     &                      BOUNDARY(ng) % vbarG_north,                 &
-     &                      BOUNDARY(ng) % vbar_north,                  &
-     &                      update)
-            IF (FoundError(exit_flag, NoError, __LINE__,                &
-     &                     __FILE__)) RETURN
-          END IF
+!
+          CALL ana_m2obc (ng, tile, iNLM)
+!
         END IF
-# endif
-      END IF
-
-#ifdef ICE_MODEL
-      IF (.not.(RefinedGrid(ng).and.RefineScale(ng).gt.0)) THEN
-# ifdef ANA_AIOBC
-        CALL ana_aiobc (ng, tile, iNLM)
+#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 # else
         IF (DOMAIN(ng)%SouthWest_Test(tile)) THEN
           IF (LBC(iwest,isAice,ng)%acquire) THEN
