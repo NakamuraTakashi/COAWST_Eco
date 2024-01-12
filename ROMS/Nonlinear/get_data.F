@@ -54,6 +54,9 @@
       integer :: ILB, IUB, JLB, JUB
       integer :: LBi, UBi, LBj, UBj
       integer :: i, ic, my_tile
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+      integer :: NTread
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
 !  Lower and upper bounds for nontiled (global values) boundary arrays.
 !
@@ -1291,9 +1294,14 @@
 !
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
 #  if defined ANA_TOBC_BIO && !defined OFFLINE
+#   if defined ANA_TOBC_SED
+      NTread = NAT
+#   else
+      NTread = NAT+NPT+NST
+#   endif
 !
       IF (LprocessOBC(ng)) THEN
-        DO i=1,NAT
+        DO i=1,NTread
           IF (LBC(iwest,isTvar(i),ng)%acquire) THEN
             CALL get_ngfld (ng, iNLM, idTbry(iwest,i),                  &
      &                      ncBRYid(idTbry(iwest,i),ng),                &
@@ -1305,7 +1313,7 @@
           END IF
         END DO
 
-        DO i=1,NAT
+        DO i=1,NTread
           IF (LBC(ieast,isTvar(i),ng)%acquire) THEN
             CALL get_ngfld (ng, iNLM, idTbry(ieast,i),                  &
      &                      ncBRYid(idTbry(ieast,i),ng),                &
@@ -1317,7 +1325,7 @@
           END IF
         END DO
 
-        DO i=1,NAT
+        DO i=1,NTread
           IF (LBC(isouth,isTvar(i),ng)%acquire) THEN
             CALL get_ngfld (ng, iNLM, idTbry(isouth,i),                 &
      &                      ncBRYid(idTbry(isouth,i),ng),               &
@@ -1329,7 +1337,7 @@
           END IF
         END DO
 
-        DO i=1,NAT
+        DO i=1,NTread
           IF (LBC(inorth,isTvar(i),ng)%acquire) THEN
             CALL get_ngfld (ng, iNLM, idTbry(inorth,i),                 &
      &                      ncBRYid(idTbry(inorth,i),ng),               &
