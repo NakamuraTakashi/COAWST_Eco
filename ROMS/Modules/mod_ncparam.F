@@ -96,6 +96,12 @@
 #ifdef SPECTRAL_LIGHT
         integer, parameter :: s3dvar = 11        ! 3D spectral light variable
 #endif
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+#ifdef SEDIMENT_ECOSYS
+        integer, parameter :: d3dvar = 12        ! 3D Sed_Eco variable
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+
 !
 !  Number of horizontal interior and boundary water points.
 !
@@ -1135,6 +1141,13 @@
             CASE ('s3dvar')
               gtype=s3dvar
 #endif
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+#ifdef SEDIMENT_ECOSYS
+            CASE ('d3dvar')
+              gtype=d3dvar
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+
             CASE DEFAULT
               gtype=0
           END SELECT

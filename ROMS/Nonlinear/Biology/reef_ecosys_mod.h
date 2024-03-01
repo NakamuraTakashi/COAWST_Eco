@@ -131,12 +131,6 @@
       integer  :: iAg_R                       ! Algal respiration rate
       integer  :: iAgPn                       ! Algal net photosynthesis rate
 #endif
-#ifdef SEDIMENT_ECOSYS
-      integer  :: iSdPg                       ! Sediment gross photosynthesis rate
-      integer  :: iSd_R                       ! Sediment respiration rate
-      integer  :: iSdPn                       ! Sediment net photosynthesis rate
-      integer  :: iSd_G                       ! Sediment net calcification rate
-#endif
       integer  :: ipHt_                       ! sea surface pH (total scale)
       integer  :: iWarg                       ! sea surface aragonite saturation state
 
@@ -160,7 +154,6 @@
 !  Biological parameters.
 !
       integer, allocatable :: CrlIter(:)
-      integer, allocatable :: SedIter(:)
 
       real(r8), allocatable :: PARfrac(:)            ! nondimensional
       real(r8), allocatable :: pCO2air(:)            ! ppmv
@@ -211,6 +204,64 @@
       real(r8), allocatable :: COTe0(:)              ! umolC/L
       real(r8), allocatable :: COTl0(:)              ! umolC/L
 #endif
+
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+#ifdef SEDIMENT_ECOSYS
+!
+!  Biological 3D Sediment Histrory variable IDs.
+!
+      integer, allocatable :: iHbiosed3(:)       ! 3D biological sediment terms
+
+      integer :: iSdporo   !! Porosity (cm_w3 cm_s-3)
+      integer :: iSdTmp    !! Temperature    (ºC)
+      integer :: iSdSal    !! Salinity       (PSU)
+      ! integer :: iSdpH     !! pH   
+      integer :: iSdTA     !! Total Alkalinity
+      ! integer :: iSdDIC    !! Dissolved inorganic carbon
+      integer :: iSdO2     !! Dissolved Oxygen    (µmol l-1)
+      integer :: iSdCO2    !! Carbon dyoxide      (µmol l-1)
+      integer :: iSdN2     !! Nitrogen            (µmol l-1)
+! Organic matters
+# if defined ORGANIC_MATTER
+      integer :: iSdDOCf    !! Dissolved organic carbon   (fast :Labile)       (µmol l-1)
+      integer :: iSdDOCs    !! Dissolved organic carbon   (slow :Refractory)   (µmol l-1)
+      integer :: iSdPOCf    !! Particulate organic carbon (fast :Labile)       (nmol g-1)
+      integer :: iSdPOCs    !! Particulate organic carbon (slow :Refractory)   (nmol g-1)
+      integer :: iSdPOCn    !! Particulate organic carbon (non-degradable)     (nmol g-1)
+# endif
+!  Nutrients dynamics
+# if defined NUTRIENTS
+      integer :: iSdNO3     !! Nitrate     (µmol l-1)
+      integer :: iSdNH4     !! Ammonium    (µmol l-1)
+      integer :: iSdPO4     !! Phosphate   (µmol l-1)
+#  if defined ORGANIC_MATTER
+      integer :: iSdDONf     !! Dissolved organic nitrogen     (fast :Labile)      (µmol l-1)
+      integer :: iSdDONs     !! Dissolved organic nitrogen     (slow :Refractory)  (µmol l-1)
+      integer :: iSdPONf     !! Particulate organic nitrogen   (fast :Labile)      (µmol l-1)
+      integer :: iSdPONs     !! Particulate organic nitrogen   (slow :Refractory)  (µmol l-1)
+      integer :: iSdPONn     !! Particulate organic nitrogen   (non-degradable)    (µmol l-1)
+      integer :: iSdDOPf     !! Dissolved organic phosphorus   (fast :Labile)      (µmol l-1)
+      integer :: iSdDOPs     !! Dissolved organic phosphorus   (slow :Refractory)  (µmol l-1)
+      integer :: iSdPOPf     !! Particulate organic phosphorus (fast :Labile)      (µmol l-1)
+      integer :: iSdPOPs     !! Particulate organic phosphorus (slow :Refractory)  (µmol l-1)
+      integer :: iSdPOPn     !! Particulate organic phosphorus (non-degradable)    (µmol l-1)
+#  endif
+# endif
+! Sulfur dynamics
+# if defined SULFATE
+      integer :: iSdMn2       !! Manganese ion        (µmol l-1)
+      integer :: iSdMnO2      !! Manganese dioxide    (nmol g-1)
+      integer :: iSdFe2       !! iron(II)          (µmol l-1)
+      integer :: iSdFeS       !! iron sulfide      (nmol g-1)
+      integer :: iSdFeS2      !! pyrite            (nmol g-1)
+      integer :: iSdFeOOH     !! iron hydroxide    (nmol g-1)
+      integer :: iSdFeOOH_PO4 !! iron-bound phosphate (FeOOH=PO43-)   (nmol g-1)
+      integer :: iSdH2S       !! hydrogen sulfide         (µmol l-1)
+      integer :: iSdSO4       !! sulfate   (µmol l-1)
+      integer :: iSdS0        !! sulfur    (nmol g-1)
+# endif
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 
       CONTAINS
 
@@ -459,17 +510,7 @@
       ic=ic+1
       iAgPn=ic
 #endif
-#ifdef SEDIMENT_ECOSYS
-      ic=ic+1
-      iSdPg=ic
-      ic=ic+1
-      iSd_R=ic
-      ic=ic+1
-      iSdPn=ic
-      ic=ic+1
-      iSd_G=ic
-#endif
-
+!
 !  Set number of 2D history terms.
 !
       NHbio2d=ic
@@ -498,6 +539,109 @@
         allocate ( iHbio3(NHbio3d) )
       END IF
 
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+!----------------------------------------------------------------------
+!  Initialize 3D biological sediment indices.
+!
+#ifdef SEDIMENT_ECOSYS  
+      ic=0     ! ic reset
+
+      ic=ic+1
+      iSdporo=ic
+      ic=ic+1
+      iSdTmp=ic
+      ic=ic+1
+      iSdSal=ic
+      ! ic=ic+1
+      ! iSdpH=ic
+      ic=ic+1
+      iSdTA=ic
+      ! ic=ic+1
+      ! iSdDIC=ic
+      ic=ic+1
+      iSdO2=ic
+      ic=ic+1
+      iSdCO2=ic
+      ic=ic+1
+      iSdN2=ic
+# if defined ORGANIC_MATTER
+      ic=ic+1
+      iSdDOCf=ic
+      ic=ic+1
+      iSdDOCs=ic
+      ic=ic+1
+      iSdPOCf=ic
+      ic=ic+1
+      iSdPOCs=ic
+      ic=ic+1
+      iSdPOCn=ic
+# endif
+# if defined NUTRIENTS
+      ic=ic+1
+      iSdNO3=ic
+      ic=ic+1
+      iSdNH4=ic
+      ic=ic+1
+      iSdPO4=ic
+#  if defined ORGANIC_MATTER
+      ic=ic+1
+      iSdDONf=ic
+      ic=ic+1
+      iSdDONs=ic
+      ic=ic+1
+      iSdPONf=ic
+      ic=ic+1
+      iSdPONs=ic
+      ic=ic+1
+      iSdPONn=ic
+      ic=ic+1
+      iSdDOPf=ic
+      ic=ic+1
+      iSdDOPs=ic
+      ic=ic+1
+      iSdPOPf=ic
+      ic=ic+1
+      iSdPOPs=ic
+      ic=ic+1
+      iSdPOPn=ic
+#  endif
+# endif
+# if defined SULFATE
+      ic=ic+1
+      iSdMn2=ic
+      ic=ic+1
+      iSdMnO2=ic
+      ic=ic+1
+      iSdFe2=ic
+      ic=ic+1
+      iSdFeS=ic
+      ic=ic+1
+      iSdFeS2=ic
+      ic=ic+1
+      iSdFeOOH=ic
+      ic=ic+1
+      iSdFeOOH_PO4=ic
+      ic=ic+1
+      iSdH2S=ic
+      ic=ic+1
+      iSdSO4=ic
+      ic=ic+1
+      iSdS0=ic
+# endif
+!
+!  Set number of 3D biological sediment history terms.
+!
+NHbiosed3d=ic
+!
+!  Allocate biological history vectors
+!
+      IF (.not.allocated(iHbiosed3)) THEN
+        allocate ( iHbiosed3(NHbiosed3d) )
+      END IF
+
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+
 !
 !-----------------------------------------------------------------------
 !  Allocate various module variables.
@@ -505,9 +649,6 @@
 !
       IF (.not.allocated(CrlIter)) THEN
         allocate ( CrlIter(Ngrids) )
-      END IF
-      IF (.not.allocated(SedIter)) THEN
-        allocate ( SedIter(Ngrids) )
       END IF
       IF (.not.allocated(PARfrac)) THEN
         allocate ( PARfrac(Ngrids) )

@@ -183,6 +183,11 @@
 # if defined REEF_ECOSYS
           real(r8), pointer :: HisBio2d(:,:,:)
           real(r8), pointer :: HisBio3d(:,:,:,:)
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+#  if defined SEDIMENT_ECOSYS
+          real(r8), pointer :: HisBiosed3d(:,:,:,:)
+#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 # endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 # ifdef RED_TIDE
@@ -496,6 +501,11 @@
 # if defined REEF_ECOSYS
       allocate ( OCEAN(ng) % HisBio2d(LBi:UBi,LBj:UBj,NHbio2d) )
       allocate ( OCEAN(ng) % HisBio3d(LBi:UBi,LBj:UBj,N(ng),NHbio3d) )
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+#  if defined SEDIMENT_ECOSYS
+      allocate ( OCEAN(ng) % HisBiosed3d(LBi:UBi,LBj:UBj,Nsed(ng),NHbiosed3d) )
+#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 # endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 # ifdef RED_TIDE

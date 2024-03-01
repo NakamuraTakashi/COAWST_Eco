@@ -40,6 +40,12 @@
       logical, dimension(NHbio2d,Ngrids) :: Hbio2
       logical, dimension(NHbio3d,Ngrids) :: Hbio3
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+      logical, dimension(NHbiosed3d,Ngrids) :: Hbiosed3
+      integer, dimension(Ngrids) :: NsedTemporary
+      real(r8), allocatable :: SedEcoLayerDepthsTemporary(:)
+      integer :: k
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 
       real(r8), dimension(NBT,Ngrids) :: Rbio
 
@@ -78,8 +84,6 @@
               Npts=load_l(Nval, Cval, Ngrids, Lbiology)
             CASE ('CrlIter')
               Npts=load_i(Nval, Rval, Ngrids, CrlIter)
-            CASE ('SedIter')
-              Npts=load_i(Nval, Rval, Ngrids, SedIter)
             CASE ('PARfrac')
               Npts=load_r(Nval, Rval, Ngrids, PARfrac)
             CASE ('pCO2air')
@@ -253,6 +257,26 @@
             CASE ('COTl0')
               Npts=load_r(Nval, Rval, Ngrids, COTl0)
 #endif
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+# ifdef SEDIMENT_ECOSYS
+            CASE ('Nsed')
+              Npts=load_i(Nval, Rval, Ngrids, NsedTemporary)
+              DO ng=1,Ngrids
+                Nsed(ng) = NsedTemporary(ng)
+              ENDDO
+            CASE ('SedEcoLayerDepths')
+              allocate ( SedEcoLayerDepths(Ngrids, maxval(Nsed)) )
+              allocate ( SedEcoLayerDepthsTemporary(sum(Nsed)) )
+              i=0
+              Npts=load_r(Nval, Rval, sum(Nsed), SedEcoLayerDepthsTemporary)
+              DO ng=1,Ngrids
+                DO k=1, Nsed(ng)
+                  i=i+1
+                  SedEcoLayerDepths(ng, k) = SedEcoLayerDepthsTemporary(i)
+                ENDDO
+              ENDDO
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
             CASE ('TNU2')
               Npts=load_r(Nval, Rval, NBT*Ngrids, Rbio)
@@ -449,7 +473,22 @@
                 END DO
               END DO
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
-
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+            CASE ('Hout(iHbiosed3)')
+              Npts=load_l(Nval, Cval, NHbiosed3d*Ngrids, Hbiosed3)
+              DO ng=1,Ngrids
+                DO itrc=1,NHbiosed3d
+                  i=iHbiosed3(itrc)
+                  IF (i.eq.0) THEN
+                    IF (Master) WRITE (out,30)                          &
+     &                                'iHbiosed3(', itrc, ')'
+                    exit_flag=5
+                    RETURN
+                  END IF
+                  Hout(i,ng)=Hbiosed3(itrc,ng)
+                END DO
+              END DO
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
             CASE ('Qout(idTvar)')
               Npts=load_l(Nval, Cval, NBT*Ngrids, Ltrc)
               DO ng=1,Ngrids
@@ -637,8 +676,6 @@
             WRITE (out,60) ng
             WRITE (out,70) CrlIter(ng), 'CrlIter',                      &
      &            'Number of iterations for nonlinear convergence.'
-            WRITE (out,70) SedIter(ng), 'SedIter',                      &
-     &            'Number of iterations for nonlinear convergence.'
             WRITE (out,90) PARfrac(ng), 'PARfrac',                      &
      &            'Fraction of shortwave radiation that is',            &
      &            'photosynthetically active (nondimensional).'
@@ -755,6 +792,16 @@
             WRITE (out,80) COTl0(ng), 'COTl0',                          &
      &            'Larvae of crown-of thorns starfish (umol/L).'
 #endif
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+# ifdef SEDIMENT_ECOSYS
+            WRITE (out,70) Nsed(ng), 'Nsed',                      &
+     &            'Number of biological sediment layers.'
+            DO k=1,Nsed(ng)
+              WRITE (out,140) SedEcoLayerDepths(ng,k), 'SedEcoLayerDepths', k,                      &
+      &            'Depth (cm) from surface at bottom of each biological sediment layer.'
+            ENDDO
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #ifdef TS_DIF2
             DO itrc=1,NBT
@@ -877,6 +924,14 @@
      &            'Write out', TRIM(Vname(1,i))
             END DO
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+            DO itrc=1,NHbiosed3d
+              i=iHbiosed3(itrc)
+              IF (Hout(i,ng)) WRITE (out,130)                           &
+     &            Hout(i,ng), 'Hout(iHbiosed3)',                           &
+     &            'Write out', TRIM(Vname(1,i))
+            END DO
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 #if defined AVERAGES    || \
    (defined AD_AVERAGES && defined ADJOINT) || \
    (defined RP_AVERAGES && defined TL_IOMS) || \
