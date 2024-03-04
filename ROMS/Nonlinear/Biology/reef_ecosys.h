@@ -647,7 +647,8 @@
     
               !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
               ! if (isnan(t(i,j,k,nnew,ibio)) .or. abs(t(i,j,k,nnew,ibio)) > huge(t(i,j,k,nnew,ibio))) then
-              if (isnan(t(i,j,k,nnew,ibio)) .or. abs(t(i,j,k,nnew,ibio)) > 1.0d22) then
+              ! if (isnan(t(i,j,k,nnew,ibio)) .or. abs(t(i,j,k,nnew,ibio)) > 1.0d22) then
+              if (isnan(t(i,j,k,nnew,ibio)) .or. t(i,j,k,nnew,ibio) > 1.0d22 .or. t(i,j,k,nnew,ibio) < -100.0d0) then
                 write(*,*) 'yt_debug: reef_ecosys.h      i =', i, '   j =', j, '   k =', k, '   ibio =', ibio
                 write(*,*) 'yt_debug:     t(i,j,k,nnew,ibio) =', t(i,j,k,nnew,ibio)
                 error stop

@@ -860,6 +860,7 @@ CONTAINS
     real(8),parameter :: NO3lim   = 5.0d0     !(µmol l-1)     Fossing2004
     real(8),parameter :: MnO2lim  = 50000d0   !(nmol g-1)     Fossing2004
     real(8),parameter :: FeOOHlim = 100000d0  !(nmol g-1)     Fossing2004
+    real(8),parameter :: SO4lim   = 5.0d0     !(µmol g-1)
 
 
 !! Net Production and Consumption  -------------------------------------------
@@ -1321,7 +1322,7 @@ CONTAINS
         vOC(k)   = vdoc(k,1) + vdoc(k,2)
         vON(k)   = vdon(k,1) + vdon(k,2)
         vOP(k)   = vdop(k,1) + vdop(k,2)
-        v1(k)   = vOC(k)
+        v1(k)   = 0d0
         v2(k)   = 0d0
         v3(k)   = 0d0
         v4(k)   = 0d0
@@ -1357,66 +1358,118 @@ CONTAINS
             !! ギブスエネルギーで反応が変化するようにするべきだ
 # else
 
-        !! Redox concentration limit in organic matter degradation (Berg et al.2003)
-        !! -- Denitrification (NO3) (µmol L-1)--!!
-        ! redoxlevel(k) = 1d0 !!for debug
+        ! if (SEDECO(ng)%O2(i,j,k)  < O2lim .and. &                           ! yt_debug if O2 < O2lim   &&   NO3 > NO3lim
+        !     SEDECO(ng)%NO3(i,j,k) > NO3lim) then
+        !     v1(k) = vOC(k) * (SEDECO(ng)%O2(i,j,k) / O2lim)
+        !     v2(k) = vOC(k) * (1d0 - SEDECO(ng)%O2(i,j,k) / O2lim)
+        !     ! redoxlevel(k) = 2d0 !!for debug
+        ! endif
+        ! !! -- Manganese reduction (MnO2) (nmol g-1)--!!
+        ! if (SEDECO(ng)%O2(i,j,k)  < O2lim .and. &                           ! yt_debug if O2 < O2lim   &&   NO3 < NO3lim   &&   Mn02 > MnO2lim
+        !     SEDECO(ng)%NO3(i,j,k) < NO3lim .and. &
+        !     SEDECO(ng)%MnO2(i,j,k) > MnO2lim)  then
+        !     v1(k) = vOC(k) * (SEDECO(ng)%O2(i,j,k) / O2lim)
+        !     v2(k) = vOC(k) * (1d0 - SEDECO(ng)%O2(i,j,k) / O2lim) &
+        !                      * (SEDECO(ng)%NO3(i,j,k) / NO3lim)
+        !     v3(k) = vOC(k) * (1d0 - SEDECO(ng)%O2(i,j,k) / O2lim) &
+        !                      * (1d0 - SEDECO(ng)%NO3(i,j,k) / NO3lim)
+        !     ! redoxlevel(k) = 3d0 !!for debug
+        ! endif
+        ! !! -- Iron reduction (FeOOH) (nmol g-1)--!!
+        ! if (SEDECO(ng)%O2(i,j,k)  < O2lim .and. &                           ! yt_debug if O2 < O2lim   &&   NO3 < NO3lim   &&   Mn02 < MnO2lim   &&   FeOOH > FeOOHlim
+        !     SEDECO(ng)%NO3(i,j,k) < NO3lim .and. &
+        !     SEDECO(ng)%MnO2(i,j,k) < MnO2lim .and. &
+        !     SEDECO(ng)%FeOOH(i,j,k) > FeOOHlim)  then
+        !     v1(k) = vOC(k) * (SEDECO(ng)%O2(i,j,k) / O2lim)
+        !     v2(k) = vOC(k) * (1d0 - SEDECO(ng)%O2(i,j,k) / O2lim) &
+        !                    * (SEDECO(ng)%NO3(i,j,k) / NO3lim)
+        !     v3(k) = vOC(k) * (1d0 - SEDECO(ng)%O2(i,j,k) / O2lim) &
+        !                    * (1d0 - SEDECO(ng)%NO3(i,j,k) / NO3lim) &
+        !                    * (SEDECO(ng)%MnO2(i,j,k) / MnO2lim)
+        !     v4(k) = vOC(k) * (1d0 - SEDECO(ng)%O2(i,j,k) / O2lim) &
+        !                    * (1d0 - SEDECO(ng)%NO3(i,j,k) / NO3lim) &
+        !                    * (1d0 - SEDECO(ng)%MnO2(i,j,k) / MnO2lim)
+        !     ! redoxlevel(k) = 4d0 !!for debug
+        ! endif
+        ! !! -- Sulfate reduction (SO4) (µmol L-1)--!!
+        ! if (SEDECO(ng)%O2(i,j,k)  < O2lim .and. &                           ! yt_debug if O2 < O2lim   &&   NO3 < NO3lim   &&   Mn02 < MnO2lim   &&   FeOOH < FeOOHlim
+        !     SEDECO(ng)%NO3(i,j,k) < NO3lim .and. &
+        !     SEDECO(ng)%MnO2(i,j,k) < MnO2lim .and. &
+        !     SEDECO(ng)%FeOOH(i,j,k) < FeOOHlim )  then
+        !     v1(k) = vOC(k) * (SEDECO(ng)%O2(i,j,k) / O2lim)
+        !     v2(k) = vOC(k) * (1d0 - SEDECO(ng)%O2(i,j,k) / O2lim) &
+        !                    * (SEDECO(ng)%NO3(i,j,k) / NO3lim)
+        !     v3(k) = vOC(k) * (1d0 - SEDECO(ng)%O2(i,j,k) / O2lim) &
+        !                    * (1d0 - SEDECO(ng)%NO3(i,j,k) / NO3lim) &
+        !                    * (SEDECO(ng)%MnO2(i,j,k) / MnO2lim)
+        !     v4(k) = vOC(k) * (1d0 - SEDECO(ng)%O2(i,j,k) / O2lim) &
+        !                    * (1d0 - SEDECO(ng)%NO3(i,j,k) / NO3lim) &
+        !                    * (1d0 - SEDECO(ng)%MnO2(i,j,k) / MnO2lim) &
+        !                    * (SEDECO(ng)%FeOOH(i,j,k) / FeOOHlim)
+        !     v5(k) = vOC(k) - v1(k) -v2(k) -v3(k) - v4(k)
+        !     ! redoxlevel(k) = 5d0 !!for debug
+        ! endif
 
-        if (SEDECO(ng)%O2(i,j,k)  < O2lim .and. &
-            SEDECO(ng)%NO3(i,j,k) > NO3lim) then
+
+        !! Redox concentration limit in organic matter degradation (Berg et al.2003)
+        if (SEDECO(ng)%O2(i,j,k) > O2lim) then            !! -- Redox of CH2O       (CH2O)  (µmol L-1) -- !!   if O2 > O2lim
+            v1(k) = vOC(k)
+            ! redoxlevel(k) = 1d0 !!for debug
+        else if(SEDECO(ng)%NO3(i,j,k) > NO3lim) then      !! -- Denitrification     (NO3)   (µmol L-1) -- !!   if O2 < O2lim   &&   NO3 > NO3lim
             v1(k) = vOC(k) * (SEDECO(ng)%O2(i,j,k) / O2lim)
             v2(k) = vOC(k) * (1d0 - SEDECO(ng)%O2(i,j,k) / O2lim)
             ! redoxlevel(k) = 2d0 !!for debug
-        endif
-        !! -- Manganese reduction (MnO2) (nmol g-1)--!!
-        if (SEDECO(ng)%O2(i,j,k)  < O2lim .and. &
-            SEDECO(ng)%NO3(i,j,k) < NO3lim .and. &
-            SEDECO(ng)%MnO2(i,j,k) > MnO2lim)  then
-            v1(k) = vOC(k) * (SEDECO(ng)%O2(i,j,k) / O2lim)
-            v2(k) = vOC(k) * (1d0 - SEDECO(ng)%O2(i,j,k) / O2lim) &
-                             * (SEDECO(ng)%NO3(i,j,k) / NO3lim)
-            v3(k) = vOC(k) * (1d0 - SEDECO(ng)%O2(i,j,k) / O2lim) &
-                             * (1d0 - SEDECO(ng)%NO3(i,j,k) / NO3lim) &
-                             * (SEDECO(ng)%MnO2(i,j,k) / MnO2lim)
+        else if(SEDECO(ng)%MnO2(i,j,k) > MnO2lim) then    !! -- Manganese reduction (MnO2)  (nmol g-1) -- !!   if O2 < O2lim   &&   NO3 < NO3lim   &&   Mn02 > MnO2lim
+            v1(k) = vOC(k) * (SEDECO(ng)%O2 (i,j,k) / O2lim )
+            v2(k) = vOC(k) * (1d0 - SEDECO(ng)%O2 (i,j,k) / O2lim ) &
+                           * (SEDECO(ng)%NO3(i,j,k) / NO3lim)
+            v3(k) = vOC(k) * (1d0 - SEDECO(ng)%O2 (i,j,k) / O2lim ) &
+                           * (1d0 - SEDECO(ng)%NO3(i,j,k) / NO3lim)
             ! redoxlevel(k) = 3d0 !!for debug
-        endif
-        !! -- Iron reduction (FeOOH) (nmol g-1)--!!
-        if (SEDECO(ng)%O2(i,j,k)  < O2lim .and. &
-            SEDECO(ng)%NO3(i,j,k) < NO3lim .and. &
-            SEDECO(ng)%MnO2(i,j,k) < MnO2lim .and. &
-            SEDECO(ng)%FeOOH(i,j,k) > FeOOHlim)  then
-            v1(k) = vOC(k) * (SEDECO(ng)%O2(i,j,k) / O2lim)
-            v2(k) = vOC(k) * (1d0 - SEDECO(ng)%O2(i,j,k) / O2lim) &
-                           * (SEDECO(ng)%NO3(i,j,k) / NO3lim)
-            v3(k) = vOC(k) * (1d0 - SEDECO(ng)%O2(i,j,k) / O2lim) &
-                           * (1d0 - SEDECO(ng)%NO3(i,j,k) / NO3lim) &
+        else if(SEDECO(ng)%FeOOH(i,j,k) > FeOOHlim) then  !! -- Iron reduction      (FeOOH) (nmol g-1) -- !!   if O2 < O2lim   &&   NO3 < NO3lim   &&   Mn02 < MnO2lim   &&   FeOOH > FeOOHlim
+            v1(k) = vOC(k) * (SEDECO(ng)%O2  (i,j,k) / O2lim  )
+            v2(k) = vOC(k) * (1d0 - SEDECO(ng)%O2  (i,j,k) / O2lim  ) &
+                           * (SEDECO(ng)%NO3 (i,j,k) / NO3lim )
+            v3(k) = vOC(k) * (1d0 - SEDECO(ng)%O2  (i,j,k) / O2lim  ) &
+                           * (1d0 - SEDECO(ng)%NO3 (i,j,k) / NO3lim ) &
                            * (SEDECO(ng)%MnO2(i,j,k) / MnO2lim)
-            v4(k) = vOC(k) * (1d0 - SEDECO(ng)%O2(i,j,k) / O2lim) &
-                           * (1d0 - SEDECO(ng)%NO3(i,j,k) / NO3lim) &
-                           * (1d0 - SEDECO(ng)%MnO2(i,j,k) / MnO2lim) &
-                           * (SEDECO(ng)%FeOOH(i,j,k) / FeOOHlim)
+            v4(k) = vOC(k) * (1d0 - SEDECO(ng)%O2  (i,j,k) / O2lim  ) &
+                           * (1d0 - SEDECO(ng)%NO3 (i,j,k) / NO3lim ) &
+                           * (1d0 - SEDECO(ng)%MnO2(i,j,k) / MnO2lim)
             ! redoxlevel(k) = 4d0 !!for debug
-        endif
-        !! -- Sulfate reduction (SO4) (µmol L-1)--!!
-        if (SEDECO(ng)%O2(i,j,k)  < O2lim .and. &
-            SEDECO(ng)%NO3(i,j,k) < NO3lim .and. &
-            SEDECO(ng)%MnO2(i,j,k) < MnO2lim .and. &
-            SEDECO(ng)%FeOOH(i,j,k) < FeOOHlim )  then
-            v1(k) = vOC(k) * (SEDECO(ng)%O2(i,j,k) / O2lim)
-            v2(k) = vOC(k) * (1d0 - SEDECO(ng)%O2(i,j,k) / O2lim) &
-                           * (SEDECO(ng)%NO3(i,j,k) / NO3lim)
-            v3(k) = vOC(k) * (1d0 - SEDECO(ng)%O2(i,j,k) / O2lim) &
-                           * (1d0 - SEDECO(ng)%NO3(i,j,k) / NO3lim) &
-                           * (SEDECO(ng)%MnO2(i,j,k) / MnO2lim)
-            v4(k) = vOC(k) * (1d0 - SEDECO(ng)%O2(i,j,k) / O2lim) &
-                           * (1d0 - SEDECO(ng)%NO3(i,j,k) / NO3lim) &
-                           * (1d0 - SEDECO(ng)%MnO2(i,j,k) / MnO2lim) &
+        else if(SEDECO(ng)%SO4(i,j,k) > SO4lim) then      !! -- Sulfate reduction   (SO4)   (µmol L-1) -- !!   if O2 < O2lim   &&   NO3 < NO3lim   &&   Mn02 < MnO2lim   &&   FeOOH < FeOOHlim   &&   SO4 > SO4lim
+            v1(k) = vOC(k) * (SEDECO(ng)%O2   (i,j,k) / O2lim   )
+            v2(k) = vOC(k) * (1d0 - SEDECO(ng)%O2   (i,j,k) / O2lim   ) &
+                           * (SEDECO(ng)%NO3  (i,j,k) / NO3lim  )
+            v3(k) = vOC(k) * (1d0 - SEDECO(ng)%O2   (i,j,k) / O2lim   ) &
+                           * (1d0 - SEDECO(ng)%NO3  (i,j,k) / NO3lim  ) &
+                           * (SEDECO(ng)%MnO2 (i,j,k) / MnO2lim )
+            v4(k) = vOC(k) * (1d0 - SEDECO(ng)%O2   (i,j,k) / O2lim   ) &
+                           * (1d0 - SEDECO(ng)%NO3  (i,j,k) / NO3lim  ) &
+                           * (1d0 - SEDECO(ng)%MnO2 (i,j,k) / MnO2lim ) &
                            * (SEDECO(ng)%FeOOH(i,j,k) / FeOOHlim)
-            v5(k) = vOC(k) - v1(k) -v2(k) -v3(k) - v4(k)
+            v5(k) = vOC(k) * (1d0 - SEDECO(ng)%O2   (i,j,k) / O2lim   ) &
+                           * (1d0 - SEDECO(ng)%NO3  (i,j,k) / NO3lim  ) &
+                           * (1d0 - SEDECO(ng)%MnO2 (i,j,k) / MnO2lim ) &
+                           * (1d0 - SEDECO(ng)%FeOOH(i,j,k) / FeOOHlim)
             ! redoxlevel(k) = 5d0 !!for debug
-        endif
-        !! stop OM decomposition if SEDECO(ng)%SO4(i,j,k) == 0
-        if (SEDECO(ng)%SO4(i,j,k) <= 0d0 )then
-            v5(k) = 0d0
+        else                                              !! limit OM decomposition if SO4 < SO4lim    -- !!   if O2 < O2lim   &&   NO3 < NO3lim   &&   Mn02 < MnO2lim   &&   FeOOH < FeOOHlim   &&   SO4 < SO4lim
+            v1(k) = vOC(k) * (SEDECO(ng)%O2   (i,j,k) / O2lim   )
+            v2(k) = vOC(k) * (1d0 - SEDECO(ng)%O2   (i,j,k) / O2lim   ) &
+                           * (SEDECO(ng)%NO3  (i,j,k) / NO3lim  )
+            v3(k) = vOC(k) * (1d0 - SEDECO(ng)%O2   (i,j,k) / O2lim   ) &
+                           * (1d0 - SEDECO(ng)%NO3  (i,j,k) / NO3lim  ) &
+                           * (SEDECO(ng)%MnO2 (i,j,k) / MnO2lim )
+            v4(k) = vOC(k) * (1d0 - SEDECO(ng)%O2   (i,j,k) / O2lim   ) &
+                           * (1d0 - SEDECO(ng)%NO3  (i,j,k) / NO3lim  ) &
+                           * (1d0 - SEDECO(ng)%MnO2 (i,j,k) / MnO2lim ) &
+                           * (SEDECO(ng)%FeOOH(i,j,k) / FeOOHlim)
+            v5(k) = vOC(k) * (1d0 - SEDECO(ng)%O2   (i,j,k) / O2lim   ) &
+                           * (1d0 - SEDECO(ng)%NO3  (i,j,k) / NO3lim  ) &
+                           * (1d0 - SEDECO(ng)%MnO2 (i,j,k) / MnO2lim ) &
+                           * (1d0 - SEDECO(ng)%FeOOH(i,j,k) / FeOOHlim) &
+                           * (SEDECO(ng)%SO4  (i,j,k) / SO4lim  )
+            ! redoxlevel(k) = 5d0 !!for debug
         endif
 # endif
     ENDDO
@@ -1622,7 +1675,7 @@ CONTAINS
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt)
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%O2(i,j,k)) .or. abs(SEDECO(ng)%O2(i,j,k)) > huge(SEDECO(ng)%O2(i,j,k))) then
-        if (isnan(SEDECO(ng)%O2(i,j,k)) .or. abs(SEDECO(ng)%O2(i,j,k)) > 1.0d15) then
+        if (isnan(SEDECO(ng)%O2(i,j,k)) .or. SEDECO(ng)%O2(i,j,k) > 1.0d15 .or. SEDECO(ng)%O2(i,j,k) < 0.0d0) then
           write(*,*) 'yt_debug: sedecosys SEDECO(ng)%O2(i,j,k)      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     SEDECO(ng)%O2(i,j,k) =', SEDECO(ng)%O2(i,j,k)
           write(*,*) 'yt_debug:     FT_O2(k) =', FT_O2(k)
@@ -1639,7 +1692,7 @@ CONTAINS
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt)
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%CO2(i,j,k)) .or. abs(SEDECO(ng)%CO2(i,j,k)) > huge(SEDECO(ng)%CO2(i,j,k))) then
-        if (isnan(SEDECO(ng)%CO2(i,j,k)) .or. abs(SEDECO(ng)%CO2(i,j,k)) > 1.0d15) then
+        if (isnan(SEDECO(ng)%CO2(i,j,k)) .or. SEDECO(ng)%CO2(i,j,k) > 1.0d15 .or. SEDECO(ng)%CO2(i,j,k) < 0.0d0) then
           write(*,*) 'yt_debug: sedecosys SEDECO(ng)%CO2(i,j,k)      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     SEDECO(ng)%CO2(i,j,k) =', SEDECO(ng)%CO2(i,j,k)
           write(*,*) 'yt_debug:     FT_CO2(k) =', FT_CO2(k)
@@ -1656,7 +1709,7 @@ CONTAINS
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt)
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%N2(i,j,k)) .or. abs(SEDECO(ng)%N2(i,j,k)) > huge(SEDECO(ng)%N2(i,j,k))) then
-        if (isnan(SEDECO(ng)%N2(i,j,k)) .or. abs(SEDECO(ng)%N2(i,j,k)) > 1.0d15) then
+        if (isnan(SEDECO(ng)%N2(i,j,k)) .or. SEDECO(ng)%N2(i,j,k) > 1.0d15 .or. SEDECO(ng)%N2(i,j,k) < 0.0d0) then
           write(*,*) 'yt_debug: sedecosys SEDECO(ng)%N2(i,j,k)      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     SEDECO(ng)%N2(i,j,k) =', SEDECO(ng)%N2(i,j,k)
           write(*,*) 'yt_debug:     FT_N2(k) =', FT_N2(k)
@@ -1674,7 +1727,7 @@ CONTAINS
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt)  ! DOCf
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%DOCf(i,j,k)) .or. abs(SEDECO(ng)%DOCf(i,j,k)) > huge(SEDECO(ng)%DOCf(i,j,k))) then
-        if (isnan(SEDECO(ng)%DOCf(i,j,k)) .or. abs(SEDECO(ng)%DOCf(i,j,k)) > 1.0d15) then
+        if (isnan(SEDECO(ng)%DOCf(i,j,k)) .or. SEDECO(ng)%DOCf(i,j,k) > 1.0d15 .or. SEDECO(ng)%DOCf(i,j,k) < 0.0d0) then
           write(*,*) 'yt_debug: sedecosys SEDECO(ng)%DOCf(i,j,k)      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     SEDECO(ng)%DOCf(i,j,k) =', SEDECO(ng)%DOCf(i,j,k)
           write(*,*) 'yt_debug:     FT_DOC(k,1) =', FT_DOC(k,1)
@@ -1690,7 +1743,7 @@ CONTAINS
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt)  ! DOCs
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%DOCs(i,j,k)) .or. abs(SEDECO(ng)%DOCs(i,j,k)) > huge(SEDECO(ng)%DOCs(i,j,k))) then
-        if (isnan(SEDECO(ng)%DOCs(i,j,k)) .or. abs(SEDECO(ng)%DOCs(i,j,k)) > 1.0d15) then
+        if (isnan(SEDECO(ng)%DOCs(i,j,k)) .or. SEDECO(ng)%DOCs(i,j,k) > 1.0d15 .or. SEDECO(ng)%DOCs(i,j,k) < 0.0d0) then
           write(*,*) 'yt_debug: sedecosys SEDECO(ng)%DOCs(i,j,k)      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     SEDECO(ng)%DOCs(i,j,k) =', SEDECO(ng)%DOCs(i,j,k)
           write(*,*) 'yt_debug:     FT_DOC(k,2) =', FT_DOC(k,2)
@@ -1707,7 +1760,7 @@ CONTAINS
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k))  ! POCf
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%POCf(i,j,k)) .or. abs(SEDECO(ng)%POCf(i,j,k)) > huge(SEDECO(ng)%POCf(i,j,k))) then
-        if (isnan(SEDECO(ng)%POCf(i,j,k)) .or. abs(SEDECO(ng)%POCf(i,j,k)) > 1.0d15) then
+        if (isnan(SEDECO(ng)%POCf(i,j,k)) .or. SEDECO(ng)%POCf(i,j,k) > 1.0d15 .or. SEDECO(ng)%POCf(i,j,k) < 0.0d0) then
           write(*,*) 'yt_debug: sedecosys SEDECO(ng)%POCf(i,j,k)      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     SEDECO(ng)%POCf(i,j,k) =', SEDECO(ng)%POCf(i,j,k)
           write(*,*) 'yt_debug:     FT_POC(k,1) =', FT_POC(k,1)
@@ -1724,7 +1777,7 @@ CONTAINS
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k))  ! POCs
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%POCs(i,j,k)) .or. abs(SEDECO(ng)%POCs(i,j,k)) > huge(SEDECO(ng)%POCs(i,j,k))) then
-        if (isnan(SEDECO(ng)%POCs(i,j,k)) .or. abs(SEDECO(ng)%POCs(i,j,k)) > 1.0d15) then
+        if (isnan(SEDECO(ng)%POCs(i,j,k)) .or. SEDECO(ng)%POCs(i,j,k) > 1.0d15 .or. SEDECO(ng)%POCs(i,j,k) < 0.0d0) then
           write(*,*) 'yt_debug: sedecosys SEDECO(ng)%POCs(i,j,k)      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     SEDECO(ng)%POCs(i,j,k) =', SEDECO(ng)%POCs(i,j,k)
           write(*,*) 'yt_debug:     FT_POC(k,2) =', FT_POC(k,2)
@@ -1741,7 +1794,7 @@ CONTAINS
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k))  ! POCs
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%POCn(i,j,k)) .or. abs(SEDECO(ng)%POCn(i,j,k)) > huge(SEDECO(ng)%POCn(i,j,k))) then
-        if (isnan(SEDECO(ng)%POCn(i,j,k)) .or. abs(SEDECO(ng)%POCn(i,j,k)) > 1.0d15) then
+        if (isnan(SEDECO(ng)%POCn(i,j,k)) .or. SEDECO(ng)%POCn(i,j,k) > 1.0d15 .or. SEDECO(ng)%POCn(i,j,k) < 0.0d0) then
           write(*,*) 'yt_debug: sedecosys SEDECO(ng)%POCn(i,j,k)      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     SEDECO(ng)%POCn(i,j,k) =', SEDECO(ng)%POCn(i,j,k)
           write(*,*) 'yt_debug:     FT_POC(k,3) =', FT_POC(k,3)
@@ -1761,7 +1814,7 @@ CONTAINS
                                             dz(k),(SEDECO(ng)%poro(i,j,k)+rhos_d(k)*(1d0 - SEDECO(ng)%poro(i,j,k))*Kad_NO3),dt) 
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%NO3(i,j,k)) .or. abs(SEDECO(ng)%NO3(i,j,k)) > huge(SEDECO(ng)%NO3(i,j,k))) then
-        if (isnan(SEDECO(ng)%NO3(i,j,k)) .or. abs(SEDECO(ng)%NO3(i,j,k)) > 1.0d15) then
+        if (isnan(SEDECO(ng)%NO3(i,j,k)) .or. SEDECO(ng)%NO3(i,j,k) > 1.0d15 .or. SEDECO(ng)%NO3(i,j,k) < 0.0d0) then
           write(*,*) 'yt_debug: sedecosys SEDECO(ng)%NO3(i,j,k)      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     SEDECO(ng)%NO3(i,j,k) =', SEDECO(ng)%NO3(i,j,k)
           write(*,*) 'yt_debug:     FT_NO3(k) =', FT_NO3(k)
@@ -1780,7 +1833,7 @@ CONTAINS
                                             dz(k),(SEDECO(ng)%poro(i,j,k)+rhos_d(k)*(1d0 - SEDECO(ng)%poro(i,j,k))*Kad_NH4),dt) 
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%NH4(i,j,k)) .or. abs(SEDECO(ng)%NH4(i,j,k)) > huge(SEDECO(ng)%NH4(i,j,k))) then
-        if (isnan(SEDECO(ng)%NH4(i,j,k)) .or. abs(SEDECO(ng)%NH4(i,j,k)) > 1.0d15) then
+        if (isnan(SEDECO(ng)%NH4(i,j,k)) .or. SEDECO(ng)%NH4(i,j,k) > 1.0d15 .or. SEDECO(ng)%NH4(i,j,k) < 0.0d0) then
           write(*,*) 'yt_debug: sedecosys SEDECO(ng)%NH4(i,j,k)      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     SEDECO(ng)%NH4(i,j,k) =', SEDECO(ng)%NH4(i,j,k)
           write(*,*) 'yt_debug:     FT_NH4(k) =', FT_NH4(k)
@@ -1799,7 +1852,7 @@ CONTAINS
                                             dz(k),(SEDECO(ng)%poro(i,j,k)+rhos_d(k)*(1d0 - SEDECO(ng)%poro(i,j,k))*Kad_PO4),dt)
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%PO4(i,j,k)) .or. abs(SEDECO(ng)%PO4(i,j,k)) > huge(SEDECO(ng)%PO4(i,j,k))) then
-        if (isnan(SEDECO(ng)%PO4(i,j,k)) .or. abs(SEDECO(ng)%PO4(i,j,k)) > 1.0d15) then
+        if (isnan(SEDECO(ng)%PO4(i,j,k)) .or. SEDECO(ng)%PO4(i,j,k) > 1.0d15 .or. SEDECO(ng)%PO4(i,j,k) < 0.0d0) then
           write(*,*) 'yt_debug: sedecosys SEDECO(ng)%PO4(i,j,k)      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     SEDECO(ng)%PO4(i,j,k) =', SEDECO(ng)%PO4(i,j,k)
           write(*,*) 'yt_debug:     FT_PO4(k) =', FT_PO4(k)
@@ -1819,7 +1872,7 @@ CONTAINS
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt) 
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%NO3(i,j,k)) .or. abs(SEDECO(ng)%NO3(i,j,k)) > huge(SEDECO(ng)%NO3(i,j,k))) then
-        if (isnan(SEDECO(ng)%NO3(i,j,k)) .or. abs(SEDECO(ng)%NO3(i,j,k)) > 1.0d15) then
+        if (isnan(SEDECO(ng)%NO3(i,j,k)) .or. SEDECO(ng)%NO3(i,j,k) > 1.0d15 .or. SEDECO(ng)%NO3(i,j,k) < 0.0d0) then
           write(*,*) 'yt_debug: sedecosys SEDECO(ng)%NO3(i,j,k)      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     SEDECO(ng)%NO3(i,j,k) =', SEDECO(ng)%NO3(i,j,k)
           write(*,*) 'yt_debug:     FT_NO3(k) =', FT_NO3(k)
@@ -1836,7 +1889,7 @@ CONTAINS
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt) 
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%NH4(i,j,k)) .or. abs(SEDECO(ng)%NH4(i,j,k)) > huge(SEDECO(ng)%NH4(i,j,k))) then
-        if (isnan(SEDECO(ng)%NH4(i,j,k)) .or. abs(SEDECO(ng)%NH4(i,j,k)) > 1.0d15) then
+        if (isnan(SEDECO(ng)%NH4(i,j,k)) .or. SEDECO(ng)%NH4(i,j,k) > 1.0d15 .or. SEDECO(ng)%NH4(i,j,k) < 0.0d0) then
           write(*,*) 'yt_debug: sedecosys SEDECO(ng)%NH4(i,j,k)      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     SEDECO(ng)%NH4(i,j,k) =', SEDECO(ng)%NH4(i,j,k)
           write(*,*) 'yt_debug:     FT_NH4(k) =', FT_NH4(k)
@@ -1853,7 +1906,7 @@ CONTAINS
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt)
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%PO4(i,j,k)) .or. abs(SEDECO(ng)%PO4(i,j,k)) > huge(SEDECO(ng)%PO4(i,j,k))) then
-        if (isnan(SEDECO(ng)%PO4(i,j,k)) .or. abs(SEDECO(ng)%PO4(i,j,k)) > 1.0d15) then
+        if (isnan(SEDECO(ng)%PO4(i,j,k)) .or. SEDECO(ng)%PO4(i,j,k) > 1.0d15 .or. SEDECO(ng)%PO4(i,j,k) < 0.0d0) then
           write(*,*) 'yt_debug: sedecosys SEDECO(ng)%PO4(i,j,k)      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     SEDECO(ng)%PO4(i,j,k) =', SEDECO(ng)%PO4(i,j,k)
           write(*,*) 'yt_debug:     FT_PO4(k) =', FT_PO4(k)
@@ -1873,7 +1926,7 @@ CONTAINS
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt)  ! DONf
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%DONf(i,j,k)) .or. abs(SEDECO(ng)%DONf(i,j,k)) > huge(SEDECO(ng)%DONf(i,j,k))) then
-        if (isnan(SEDECO(ng)%DONf(i,j,k)) .or. abs(SEDECO(ng)%DONf(i,j,k)) > 1.0d15) then
+        if (isnan(SEDECO(ng)%DONf(i,j,k)) .or. SEDECO(ng)%DONf(i,j,k) > 1.0d15 .or. SEDECO(ng)%DONf(i,j,k) < 0.0d0) then
           write(*,*) 'yt_debug: sedecosys SEDECO(ng)%DONf(i,j,k)      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     SEDECO(ng)%DONf(i,j,k) =', SEDECO(ng)%DONf(i,j,k)
           write(*,*) 'yt_debug:     FT_DON(k,1) =', FT_DON(k,1)
@@ -1889,7 +1942,7 @@ CONTAINS
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt)  ! DONs
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%DONs(i,j,k)) .or. abs(SEDECO(ng)%DONs(i,j,k)) > huge(SEDECO(ng)%DONs(i,j,k))) then
-        if (isnan(SEDECO(ng)%DONs(i,j,k)) .or. abs(SEDECO(ng)%DONs(i,j,k)) > 1.0d15) then
+        if (isnan(SEDECO(ng)%DONs(i,j,k)) .or. SEDECO(ng)%DONs(i,j,k) > 1.0d15 .or. SEDECO(ng)%DONs(i,j,k) < 0.0d0) then
           write(*,*) 'yt_debug: sedecosys SEDECO(ng)%DONs(i,j,k)      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     SEDECO(ng)%DONs(i,j,k) =', SEDECO(ng)%DONs(i,j,k)
           write(*,*) 'yt_debug:     FT_DON(k,2) =', FT_DON(k,2)
@@ -1906,7 +1959,7 @@ CONTAINS
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k))  ! PONf
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%PONf(i,j,k)) .or. abs(SEDECO(ng)%PONf(i,j,k)) > huge(SEDECO(ng)%PONf(i,j,k))) then
-        if (isnan(SEDECO(ng)%PONf(i,j,k)) .or. abs(SEDECO(ng)%PONf(i,j,k)) > 1.0d15) then
+        if (isnan(SEDECO(ng)%PONf(i,j,k)) .or. SEDECO(ng)%PONf(i,j,k) > 1.0d15 .or. SEDECO(ng)%PONf(i,j,k) < 0.0d0) then
           write(*,*) 'yt_debug: sedecosys SEDECO(ng)%PONf(i,j,k)      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     SEDECO(ng)%PONf(i,j,k) =', SEDECO(ng)%PONf(i,j,k)
           write(*,*) 'yt_debug:     FT_PON(k,1) =', FT_PON(k,1)
@@ -1923,7 +1976,7 @@ CONTAINS
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k))  ! PONs
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%PONs(i,j,k)) .or. abs(SEDECO(ng)%PONs(i,j,k)) > huge(SEDECO(ng)%PONs(i,j,k))) then
-        if (isnan(SEDECO(ng)%PONs(i,j,k)) .or. abs(SEDECO(ng)%PONs(i,j,k)) > 1.0d15) then
+        if (isnan(SEDECO(ng)%PONs(i,j,k)) .or. SEDECO(ng)%PONs(i,j,k) > 1.0d15 .or. SEDECO(ng)%PONs(i,j,k) < 0.0d0) then
           write(*,*) 'yt_debug: sedecosys SEDECO(ng)%PONs(i,j,k)      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     SEDECO(ng)%PONs(i,j,k) =', SEDECO(ng)%PONs(i,j,k)
           write(*,*) 'yt_debug:     FT_PON(k,2) =', FT_PON(k,2)
@@ -1940,7 +1993,7 @@ CONTAINS
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k))  ! PONs
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%PONn(i,j,k)) .or. abs(SEDECO(ng)%PONn(i,j,k)) > huge(SEDECO(ng)%PONn(i,j,k))) then
-        if (isnan(SEDECO(ng)%PONn(i,j,k)) .or. abs(SEDECO(ng)%PONn(i,j,k)) > 1.0d15) then
+        if (isnan(SEDECO(ng)%PONn(i,j,k)) .or. SEDECO(ng)%PONn(i,j,k) > 1.0d15 .or. SEDECO(ng)%PONn(i,j,k) < 0.0d0) then
           write(*,*) 'yt_debug: sedecosys SEDECO(ng)%PONn(i,j,k)      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     SEDECO(ng)%PONn(i,j,k) =', SEDECO(ng)%PONn(i,j,k)
           write(*,*) 'yt_debug:     FT_PON(k,3) =', FT_PON(k,3)
@@ -1957,7 +2010,7 @@ CONTAINS
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt)  ! DOPf
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%DOPf(i,j,k)) .or. abs(SEDECO(ng)%DOPf(i,j,k)) > huge(SEDECO(ng)%DOPf(i,j,k))) then
-        if (isnan(SEDECO(ng)%DOPf(i,j,k)) .or. abs(SEDECO(ng)%DOPf(i,j,k)) > 1.0d15) then
+        if (isnan(SEDECO(ng)%DOPf(i,j,k)) .or. SEDECO(ng)%DOPf(i,j,k) > 1.0d15 .or. SEDECO(ng)%DOPf(i,j,k) < 0.0d0) then
           write(*,*) 'yt_debug: sedecosys SEDECO(ng)%DOPf(i,j,k)      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     SEDECO(ng)%DOPf(i,j,k) =', SEDECO(ng)%DOPf(i,j,k)
           write(*,*) 'yt_debug:     FT_DOP(k,1) =', FT_DOP(k,1)
@@ -1973,7 +2026,7 @@ CONTAINS
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt)  ! DOPs
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%DOPs(i,j,k)) .or. abs(SEDECO(ng)%DOPs(i,j,k)) > huge(SEDECO(ng)%DOPs(i,j,k))) then
-        if (isnan(SEDECO(ng)%DOPs(i,j,k)) .or. abs(SEDECO(ng)%DOPs(i,j,k)) > 1.0d15) then
+        if (isnan(SEDECO(ng)%DOPs(i,j,k)) .or. SEDECO(ng)%DOPs(i,j,k) > 1.0d15 .or. SEDECO(ng)%DOPs(i,j,k) < 0.0d0) then
           write(*,*) 'yt_debug: sedecosys SEDECO(ng)%DOPs(i,j,k)      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     SEDECO(ng)%DOPs(i,j,k) =', SEDECO(ng)%DOPs(i,j,k)
           write(*,*) 'yt_debug:     FT_DOP(k,2) =', FT_DOP(k,2)
@@ -1990,7 +2043,7 @@ CONTAINS
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k))  ! POPf
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%POPf(i,j,k)) .or. abs(SEDECO(ng)%POPf(i,j,k)) > huge(SEDECO(ng)%POPf(i,j,k))) then
-        if (isnan(SEDECO(ng)%POPf(i,j,k)) .or. abs(SEDECO(ng)%POPf(i,j,k)) > 1.0d15) then
+        if (isnan(SEDECO(ng)%POPf(i,j,k)) .or. SEDECO(ng)%POPf(i,j,k) > 1.0d15 .or. SEDECO(ng)%POPf(i,j,k) < 0.0d0) then
           write(*,*) 'yt_debug: sedecosys SEDECO(ng)%POPf(i,j,k)      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     SEDECO(ng)%POPf(i,j,k) =', SEDECO(ng)%POPf(i,j,k)
           write(*,*) 'yt_debug:     FT_POP(k,1) =', FT_POP(k,1)
@@ -2007,7 +2060,7 @@ CONTAINS
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k))  ! POPs
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%POPs(i,j,k)) .or. abs(SEDECO(ng)%POPs(i,j,k)) > huge(SEDECO(ng)%POPs(i,j,k))) then
-        if (isnan(SEDECO(ng)%POPs(i,j,k)) .or. abs(SEDECO(ng)%POPs(i,j,k)) > 1.0d15) then
+        if (isnan(SEDECO(ng)%POPs(i,j,k)) .or. SEDECO(ng)%POPs(i,j,k) > 1.0d15 .or. SEDECO(ng)%POPs(i,j,k) < 0.0d0) then
           write(*,*) 'yt_debug: sedecosys SEDECO(ng)%POPs(i,j,k)      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     SEDECO(ng)%POPs(i,j,k) =', SEDECO(ng)%POPs(i,j,k)
           write(*,*) 'yt_debug:     FT_POP(k,2) =', FT_POP(k,2)
@@ -2024,7 +2077,7 @@ CONTAINS
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k))  ! POPs
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%POPn(i,j,k)) .or. abs(SEDECO(ng)%POPn(i,j,k)) > huge(SEDECO(ng)%POPn(i,j,k))) then
-        if (isnan(SEDECO(ng)%POPn(i,j,k)) .or. abs(SEDECO(ng)%POPn(i,j,k)) > 1.0d15) then
+        if (isnan(SEDECO(ng)%POPn(i,j,k)) .or. SEDECO(ng)%POPn(i,j,k) > 1.0d15 .or. SEDECO(ng)%POPn(i,j,k) < 0.0d0) then
           write(*,*) 'yt_debug: sedecosys SEDECO(ng)%POPn(i,j,k)      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     SEDECO(ng)%POPn(i,j,k) =', SEDECO(ng)%POPn(i,j,k)
           write(*,*) 'yt_debug:     FT_POP(k,3) =', FT_POP(k,3)
@@ -2044,7 +2097,7 @@ CONTAINS
                                             dz(k),(SEDECO(ng)%poro(i,j,k)+rhos_d(k)*(1d0 - SEDECO(ng)%poro(i,j,k))*Kad_Mn2),dt) 
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%Mn2(i,j,k)) .or. abs(SEDECO(ng)%Mn2(i,j,k)) > huge(SEDECO(ng)%Mn2(i,j,k))) then
-        if (isnan(SEDECO(ng)%Mn2(i,j,k)) .or. abs(SEDECO(ng)%Mn2(i,j,k)) > 1.0d15) then
+        if (isnan(SEDECO(ng)%Mn2(i,j,k)) .or. SEDECO(ng)%Mn2(i,j,k) > 1.0d15 .or. SEDECO(ng)%Mn2(i,j,k) < 0.0d0) then
           write(*,*) 'yt_debug: sedecosys SEDECO(ng)%Mn2(i,j,k)      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     SEDECO(ng)%Mn2(i,j,k) =', SEDECO(ng)%Mn2(i,j,k)
           write(*,*) 'yt_debug:     FT_Mn2(k) =', FT_Mn2(k)
@@ -2063,7 +2116,7 @@ CONTAINS
                                             dz(k),(SEDECO(ng)%poro(i,j,k)+rhos_d(k)*(1d0 - SEDECO(ng)%poro(i,j,k))*Kad_Fe2),dt) 
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%Fe2(i,j,k)) .or. abs(SEDECO(ng)%Fe2(i,j,k)) > huge(SEDECO(ng)%Fe2(i,j,k))) then
-        if (isnan(SEDECO(ng)%Fe2(i,j,k)) .or. abs(SEDECO(ng)%Fe2(i,j,k)) > 1.0d15) then
+        if (isnan(SEDECO(ng)%Fe2(i,j,k)) .or. SEDECO(ng)%Fe2(i,j,k) > 1.0d15 .or. SEDECO(ng)%Fe2(i,j,k) < 0.0d0) then
           write(*,*) 'yt_debug: sedecosys SEDECO(ng)%Fe2(i,j,k)      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     SEDECO(ng)%Fe2(i,j,k) =', SEDECO(ng)%Fe2(i,j,k)
           write(*,*) 'yt_debug:     FT_Fe2(k) =', FT_Fe2(k)
@@ -2083,7 +2136,7 @@ CONTAINS
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt) 
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%Mn2(i,j,k)) .or. abs(SEDECO(ng)%Mn2(i,j,k)) > huge(SEDECO(ng)%Mn2(i,j,k))) then
-        if (isnan(SEDECO(ng)%Mn2(i,j,k)) .or. abs(SEDECO(ng)%Mn2(i,j,k)) > 1.0d15) then
+        if (isnan(SEDECO(ng)%Mn2(i,j,k)) .or. SEDECO(ng)%Mn2(i,j,k) > 1.0d15 .or. SEDECO(ng)%Mn2(i,j,k) < 0.0d0) then
           write(*,*) 'yt_debug: sedecosys SEDECO(ng)%Mn2(i,j,k)      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     SEDECO(ng)%Mn2(i,j,k) =', SEDECO(ng)%Mn2(i,j,k)
           write(*,*) 'yt_debug:     FT_Mn2(k) =', FT_Mn2(k)
@@ -2100,7 +2153,7 @@ CONTAINS
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt) 
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%Fe2(i,j,k)) .or. abs(SEDECO(ng)%Fe2(i,j,k)) > huge(SEDECO(ng)%Fe2(i,j,k))) then
-        if (isnan(SEDECO(ng)%Fe2(i,j,k)) .or. abs(SEDECO(ng)%Fe2(i,j,k)) > 1.0d15) then
+        if (isnan(SEDECO(ng)%Fe2(i,j,k)) .or. SEDECO(ng)%Fe2(i,j,k) > 1.0d15 .or. SEDECO(ng)%Fe2(i,j,k) < 0.0d0) then
           write(*,*) 'yt_debug: sedecosys SEDECO(ng)%Fe2(i,j,k)      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     SEDECO(ng)%Fe2(i,j,k) =', SEDECO(ng)%Fe2(i,j,k)
           write(*,*) 'yt_debug:     FT_Fe2(k) =', FT_Fe2(k)
@@ -2118,7 +2171,7 @@ CONTAINS
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k)) 
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%MnO2(i,j,k)) .or. abs(SEDECO(ng)%MnO2(i,j,k)) > huge(SEDECO(ng)%MnO2(i,j,k))) then
-        if (isnan(SEDECO(ng)%MnO2(i,j,k)) .or. abs(SEDECO(ng)%MnO2(i,j,k)) > 1.0d15) then
+        if (isnan(SEDECO(ng)%MnO2(i,j,k)) .or. SEDECO(ng)%MnO2(i,j,k) > 1.0d15 .or. SEDECO(ng)%MnO2(i,j,k) < 0.0d0) then
           write(*,*) 'yt_debug: sedecosys SEDECO(ng)%MnO2(i,j,k)      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     SEDECO(ng)%MnO2(i,j,k) =', SEDECO(ng)%MnO2(i,j,k)
           write(*,*) 'yt_debug:     FT_MnO2(k) =', FT_MnO2(k)
@@ -2136,7 +2189,7 @@ CONTAINS
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k)) 
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%FeS(i,j,k)) .or. abs(SEDECO(ng)%FeS(i,j,k)) > huge(SEDECO(ng)%FeS(i,j,k))) then
-        if (isnan(SEDECO(ng)%FeS(i,j,k)) .or. abs(SEDECO(ng)%FeS(i,j,k)) > 1.0d15) then
+        if (isnan(SEDECO(ng)%FeS(i,j,k)) .or. SEDECO(ng)%FeS(i,j,k) > 1.0d15 .or. SEDECO(ng)%FeS(i,j,k) < 0.0d0) then
           write(*,*) 'yt_debug: sedecosys SEDECO(ng)%FeS(i,j,k)      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     SEDECO(ng)%FeS(i,j,k) =', SEDECO(ng)%FeS(i,j,k)
           write(*,*) 'yt_debug:     FT_FeS(k) =', FT_FeS(k)
@@ -2154,7 +2207,7 @@ CONTAINS
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k)) 
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%FeS2(i,j,k)) .or. abs(SEDECO(ng)%FeS2(i,j,k)) > huge(SEDECO(ng)%FeS2(i,j,k))) then
-        if (isnan(SEDECO(ng)%FeS2(i,j,k)) .or. abs(SEDECO(ng)%FeS2(i,j,k)) > 1.0d15) then
+        if (isnan(SEDECO(ng)%FeS2(i,j,k)) .or. SEDECO(ng)%FeS2(i,j,k) > 1.0d15 .or. SEDECO(ng)%FeS2(i,j,k) < 0.0d0) then
           write(*,*) 'yt_debug: sedecosys SEDECO(ng)%FeS2(i,j,k)      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     SEDECO(ng)%FeS2(i,j,k) =', SEDECO(ng)%FeS2(i,j,k)
           write(*,*) 'yt_debug:     FT_FeS2(k) =', FT_FeS2(k)
@@ -2172,7 +2225,7 @@ CONTAINS
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k)) 
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%FeOOH(i,j,k)) .or. abs(SEDECO(ng)%FeOOH(i,j,k)) > huge(SEDECO(ng)%FeOOH(i,j,k))) then
-        if (isnan(SEDECO(ng)%FeOOH(i,j,k)) .or. abs(SEDECO(ng)%FeOOH(i,j,k)) > 1.0d15) then
+        if (isnan(SEDECO(ng)%FeOOH(i,j,k)) .or. SEDECO(ng)%FeOOH(i,j,k) > 1.0d15 .or. SEDECO(ng)%FeOOH(i,j,k) < 0.0d0) then
           write(*,*) 'yt_debug: sedecosys SEDECO(ng)%FeOOH(i,j,k)      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     SEDECO(ng)%FeOOH(i,j,k) =', SEDECO(ng)%FeOOH(i,j,k)
           write(*,*) 'yt_debug:     FT_FeOOH(k) =', FT_FeOOH(k)
@@ -2190,7 +2243,7 @@ CONTAINS
                                                   R_FeOOH_PO4(k),dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k)) 
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%FeOOH_PO4(i,j,k)) .or. abs(SEDECO(ng)%FeOOH_PO4(i,j,k)) > huge(SEDECO(ng)%FeOOH_PO4(i,j,k))) then
-        if (isnan(SEDECO(ng)%FeOOH_PO4(i,j,k)) .or. abs(SEDECO(ng)%FeOOH_PO4(i,j,k)) > 1.0d15) then
+        if (isnan(SEDECO(ng)%FeOOH_PO4(i,j,k)) .or. SEDECO(ng)%FeOOH_PO4(i,j,k) > 1.0d15 .or. SEDECO(ng)%FeOOH_PO4(i,j,k) < 0.0d0) then
           write(*,*) 'yt_debug: sedecosys SEDECO(ng)%FeOOH_PO4(i,j,k)      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     SEDECO(ng)%FeOOH_PO4(i,j,k) =', SEDECO(ng)%FeOOH_PO4(i,j,k)
           write(*,*) 'yt_debug:     FT_FeOOH_PO4(k) =', FT_FeOOH_PO4(k)
@@ -2208,7 +2261,7 @@ CONTAINS
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt) 
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%H2S(i,j,k)) .or. abs(SEDECO(ng)%H2S(i,j,k)) > huge(SEDECO(ng)%H2S(i,j,k))) then
-        if (isnan(SEDECO(ng)%H2S(i,j,k)) .or. abs(SEDECO(ng)%H2S(i,j,k)) > 1.0d15) then
+        if (isnan(SEDECO(ng)%H2S(i,j,k)) .or. SEDECO(ng)%H2S(i,j,k) > 1.0d15 .or. SEDECO(ng)%H2S(i,j,k) < 0.0d0) then
           write(*,*) 'yt_debug: sedecosys SEDECO(ng)%H2S(i,j,k)      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     SEDECO(ng)%H2S(i,j,k) =', SEDECO(ng)%H2S(i,j,k)
           write(*,*) 'yt_debug:     FT_H2S(k) =', FT_H2S(k)
@@ -2226,7 +2279,7 @@ CONTAINS
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k)) 
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%S0(i,j,k)) .or. abs(SEDECO(ng)%S0(i,j,k)) > huge(SEDECO(ng)%S0(i,j,k))) then
-        if (isnan(SEDECO(ng)%S0(i,j,k)) .or. abs(SEDECO(ng)%S0(i,j,k)) > 1.0d15) then
+        if (isnan(SEDECO(ng)%S0(i,j,k)) .or. SEDECO(ng)%S0(i,j,k) > 1.0d15 .or. SEDECO(ng)%S0(i,j,k) < 0.0d0) then
           write(*,*) 'yt_debug: sedecosys SEDECO(ng)%S0(i,j,k)      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     SEDECO(ng)%S0(i,j,k) =', SEDECO(ng)%S0(i,j,k)
           write(*,*) 'yt_debug:     FT_S0(k) =', FT_S0(k)
@@ -2244,7 +2297,7 @@ CONTAINS
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt)
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%SO4(i,j,k)) .or. abs(SEDECO(ng)%SO4(i,j,k)) > huge(SEDECO(ng)%SO4(i,j,k))) then
-        if (isnan(SEDECO(ng)%SO4(i,j,k)) .or. abs(SEDECO(ng)%SO4(i,j,k)) > 1.0d15) then
+        if (isnan(SEDECO(ng)%SO4(i,j,k)) .or. SEDECO(ng)%SO4(i,j,k) > 1.0d15 .or. SEDECO(ng)%SO4(i,j,k) < 0.0d0) then
           write(*,*) 'yt_debug: sedecosys SEDECO(ng)%SO4(i,j,k)      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     SEDECO(ng)%SO4(i,j,k) =', SEDECO(ng)%SO4(i,j,k)
           write(*,*) 'yt_debug:     FT_SO4(k) =', FT_SO4(k)
