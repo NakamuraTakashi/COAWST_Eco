@@ -150,6 +150,11 @@
 !     &            model_flux
 #endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+#if defined BAK_EXPERI_BRY
+      real(r8) :: transport
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 #if defined TEST_CHAN
       real(r8) :: my_area, my_width
 #endif
@@ -491,6 +496,74 @@
       END IF
 
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+#elif defined ANA_M2OBC_SOUTH
+!
+!-----------------------------------------------------------------------
+!  Set time-indices
+!-----------------------------------------------------------------------
+!
+      IF (FIRST_2D_STEP) THEN
+        know=krhs
+!        dt2d=dtfast(ng)
+      ELSE IF (PREDICTOR_2D_STEP(ng)) THEN
+        know=krhs
+!        dt2d=2.0_r8*dtfast(ng)
+      ELSE
+        know=kstp
+!        dt2d=dtfast(ng)
+      END IF
+
+! This condition have to use with Flather boundary condition
+
+      IF (LBC(isouth,isUbar,ng)%acquire.and.                            &
+     &    LBC(isouth,isVbar,ng)%acquire.and.                            &
+     &    DOMAIN(ng)%Southern_Edge(tile)) THEN
+        DO i=IstrP,IendT
+          BOUNDARY(ng)%ubar_south(i)=ubar(i,Jstr,know)
+        END DO
+        DO i=IstrT,IendT
+          BOUNDARY(ng)%vbar_south(i)=vbar(i,Jstr,know)
+        END DO
+      END IF
+
+#elif defined BAK_EXPERI_BRY
+!
+!-----------------------------------------------------------------------
+!  Set time-indices
+!-----------------------------------------------------------------------
+!
+      IF (FIRST_2D_STEP) THEN
+        know=krhs
+!        dt2d=dtfast(ng)
+      ELSE IF (PREDICTOR_2D_STEP(ng)) THEN
+        know=krhs
+!        dt2d=2.0_r8*dtfast(ng)
+      ELSE
+        know=kstp
+!        dt2d=dtfast(ng)
+      END IF
+
+! Give the 2D velocity at north to meet the water transport at sourh
+
+      IF (LBC(inorth,isVbar,ng)%acquire.and.                            &
+     &    DOMAIN(ng)%Northern_Edge(tile)) THEN
+        DO i=IstrT,IendT
+          ! BOUNDARY(ng)%vbar_north(i)=vbar(i,Jend,know)
+          ! write(*,*) 'V of Boundary at i:', i, BOUNDARY(ng)%vbar_south(i)
+          ! write(*,*) 'zeta of Boundary at i:',i, BOUNDARY(ng)%zeta_south(i)
+          ! write(*,*) 'zeta of my Boundary at i:',i, zeta(i,Jstr-1,know)
+          ! write(*,*) 'wdep of Boundary at i:',i, zeta(i,Jstr-1,know)+h(i,Jstr-1)
+          ! write(*,*) 'zeta of north at i:',i, zeta(i,Jend+1,know)
+          ! transport=BOUNDARY(ng)%vbar_south(i)*                         &
+          !           (BOUNDARY(ng)%zeta_south(i)+h(i,Jstr-1))
+          transport=BOUNDARY(ng)%vbar_south(20)*                         &
+                    (BOUNDARY(ng)%zeta_south(20)+h(20,Jstr-1))
+          BOUNDARY(ng)%vbar_north(i)=transport/                         &
+                                     (zeta(i,Jend+1,know)+h(i,Jend+1))
+        END DO
+      END IF
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
 #else
       IF (LBC(ieast,isUbar,ng)%acquire.and.                             &
      &    LBC(ieast,isVbar,ng)%acquire.and.                             &

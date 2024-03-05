@@ -55,6 +55,10 @@
 #endif
 #if defined VEGETATION
       USE mod_vegarr,ONLY:allocate_vegarr, initialize_vegarr
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+!     ! For Rhozophora root drag computation
+      USE mod_mangr_root
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add  
 #endif
       USE mod_sources, ONLY : allocate_sources
 #if defined TRC_PSOURCE
@@ -279,7 +283,19 @@
         END DO
 !$OMP BARRIER
       END DO
-
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+!$OMP MASTER
+#ifdef VEGETATION
+!     ! Run Rhizophora root model for each DBH class
+# ifdef DISTRIBUTE
+        CALL calc_root_farea ()
+# else
+      CALL calc_root_farea ()
+# endif
+#endif
+!$OMP END MASTER
+!$OMP BARRIER
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 #ifdef PROFILE
 !
 !-----------------------------------------------------------------------

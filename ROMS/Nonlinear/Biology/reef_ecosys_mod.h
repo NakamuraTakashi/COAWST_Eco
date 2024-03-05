@@ -154,6 +154,7 @@
 !  Biological parameters.
 !
       integer, allocatable :: CrlIter(:)
+      integer, allocatable :: SedIter(:)
 
       real(r8), allocatable :: PARfrac(:)            ! nondimensional
       real(r8), allocatable :: pCO2air(:)            ! ppmv
@@ -649,6 +650,9 @@ NHbiosed3d=ic
 !
       IF (.not.allocated(CrlIter)) THEN
         allocate ( CrlIter(Ngrids) )
+      END IF
+      IF (.not.allocated(SedIter)) THEN
+        allocate ( SedIter(Ngrids) )
       END IF
       IF (.not.allocated(PARfrac)) THEN
         allocate ( PARfrac(Ngrids) )

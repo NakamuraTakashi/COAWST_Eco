@@ -54,6 +54,9 @@
       integer :: ILB, IUB, JLB, JUB
       integer :: LBi, UBi, LBj, UBj
       integer :: i, ic, my_tile
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+      integer :: NTread
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
 !  Lower and upper bounds for nontiled (global values) boundary arrays.
 !
@@ -1134,6 +1137,71 @@
      &                   __FILE__)) RETURN
         END IF
       END IF
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+#elif defined BAK_EXPERI_BRY
+!
+      IF (LprocessOBC(ng)) THEN
+        IF (LBC(iwest,isUbar,ng)%acquire) THEN
+          CALL get_ngfld (ng, iNLM, idU2bc(iwest),                      &
+     &                    ncBRYid(idU2bc(iwest),ng),                    &
+     &                    nBCfiles(ng), BRY(1,ng), update(1),           &
+     &                    JLB, JUB, 1, 2, 0, Mm(ng)+1, 1,               &
+     &                    BOUNDARY(ng) % ubarG_west)
+          IF (FoundError(exit_flag, NoError, __LINE__,                  &
+     &                   __FILE__)) RETURN
+        END IF
+
+        IF (LBC(iwest,isVbar,ng)%acquire) THEN
+          CALL get_ngfld (ng, iNLM, idV2bc(iwest),                      &
+     &                    ncBRYid(idV2bc(iwest),ng),                    &
+     &                    nBCfiles(ng), BRY(1,ng), update(1),           &
+     &                    JLB, JUB, 1, 2, 1, Mm(ng)+1, 1,               &
+     &                    BOUNDARY(ng) % vbarG_west)
+          IF (FoundError(exit_flag, NoError, __LINE__,                  &
+     &                   __FILE__)) RETURN
+        END IF
+
+        IF (LBC(ieast,isUbar,ng)%acquire) THEN
+          CALL get_ngfld (ng, iNLM, idU2bc(ieast),                      &
+     &                    ncBRYid(idU2bc(ieast),ng),                    &
+     &                    nBCfiles(ng), BRY(1,ng), update(1),           &
+     &                    JLB, JUB, 1, 2, 0, Mm(ng)+1, 1,               &
+     &                    BOUNDARY(ng) % ubarG_east)
+          IF (FoundError(exit_flag, NoError, __LINE__,                  &
+     &                   __FILE__)) RETURN
+        END IF
+
+        IF (LBC(ieast,isVbar,ng)%acquire) THEN
+          CALL get_ngfld (ng, iNLM, idV2bc(ieast),                      &
+     &                    ncBRYid(idV2bc(ieast),ng),                    &
+     &                    nBCfiles(ng), BRY(1,ng), update(1),           &
+     &                    JLB, JUB, 1, 2, 1, Mm(ng)+1, 1,               &
+     &                    BOUNDARY(ng) % vbarG_east)
+          IF (FoundError(exit_flag, NoError, __LINE__,                  &
+     &                   __FILE__)) RETURN
+        END IF
+
+        IF (LBC(isouth,isUbar,ng)%acquire) THEN
+          CALL get_ngfld (ng, iNLM, idU2bc(isouth),                     &
+     &                    ncBRYid(idU2bc(isouth),ng),                   &
+     &                    nBCfiles(ng), BRY(1,ng), update(1),           &
+     &                    ILB, IUB, 1, 2, 1, Lm(ng)+1, 1,               &
+     &                    BOUNDARY(ng) % ubarG_south)
+          IF (FoundError(exit_flag, NoError, __LINE__,                  &
+     &                   __FILE__)) RETURN
+        END IF
+
+        IF (LBC(isouth,isVbar,ng)%acquire) THEN
+          CALL get_ngfld (ng, iNLM, idV2bc(isouth),                     &
+     &                    ncBRYid(idV2bc(isouth),ng),                   &
+     &                    nBCfiles(ng), BRY(1,ng), update(1),           &
+     &                    ILB, IUB, 1, 2, 0, Lm(ng)+1, 1,               &
+     &                    BOUNDARY(ng) % vbarG_south)
+          IF (FoundError(exit_flag, NoError, __LINE__,                  &
+     &                   __FILE__)) RETURN
+        END IF
+      END IF
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 #endif
 
 #ifdef SOLVE3D
@@ -1226,9 +1294,14 @@
 !
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
 #  if defined ANA_TOBC_BIO && !defined OFFLINE
+#   if defined ANA_TOBC_SED
+      NTread = NAT
+#   else
+      NTread = NAT+NPT+NST
+#   endif
 !
       IF (LprocessOBC(ng)) THEN
-        DO i=1,NAT
+        DO i=1,NTread
           IF (LBC(iwest,isTvar(i),ng)%acquire) THEN
             CALL get_ngfld (ng, iNLM, idTbry(iwest,i),                  &
      &                      ncBRYid(idTbry(iwest,i),ng),                &
@@ -1240,7 +1313,7 @@
           END IF
         END DO
 
-        DO i=1,NAT
+        DO i=1,NTread
           IF (LBC(ieast,isTvar(i),ng)%acquire) THEN
             CALL get_ngfld (ng, iNLM, idTbry(ieast,i),                  &
      &                      ncBRYid(idTbry(ieast,i),ng),                &
@@ -1252,7 +1325,7 @@
           END IF
         END DO
 
-        DO i=1,NAT
+        DO i=1,NTread
           IF (LBC(isouth,isTvar(i),ng)%acquire) THEN
             CALL get_ngfld (ng, iNLM, idTbry(isouth,i),                 &
      &                      ncBRYid(idTbry(isouth,i),ng),               &
@@ -1264,7 +1337,7 @@
           END IF
         END DO
 
-        DO i=1,NAT
+        DO i=1,NTread
           IF (LBC(inorth,isTvar(i),ng)%acquire) THEN
             CALL get_ngfld (ng, iNLM, idTbry(inorth,i),                 &
      &                      ncBRYid(idTbry(inorth,i),ng),               &

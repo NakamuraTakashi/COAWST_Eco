@@ -84,6 +84,8 @@
               Npts=load_l(Nval, Cval, Ngrids, Lbiology)
             CASE ('CrlIter')
               Npts=load_i(Nval, Rval, Ngrids, CrlIter)
+            CASE ('SedIter')
+              Npts=load_i(Nval, Rval, Ngrids, SedIter)
             CASE ('PARfrac')
               Npts=load_r(Nval, Rval, Ngrids, PARfrac)
             CASE ('pCO2air')
@@ -675,6 +677,8 @@
           IF (Lbiology(ng)) THEN
             WRITE (out,60) ng
             WRITE (out,70) CrlIter(ng), 'CrlIter',                      &
+     &            'Number of iterations for nonlinear convergence.'
+            WRITE (out,70) SedIter(ng), 'SedIter',                      &
      &            'Number of iterations for nonlinear convergence.'
             WRITE (out,90) PARfrac(ng), 'PARfrac',                      &
      &            'Fraction of shortwave radiation that is',            &
