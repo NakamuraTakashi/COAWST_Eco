@@ -90,57 +90,55 @@ contains
 #ifdef SEDIMENT_ECOSYS
     , p_sand         &   ! sediment coverage (0-1)
 #endif
-    , Tmp            &   ! Tmp(N): Temperature (oC)
-    , Sal            &   ! Sal(N): Salinity (PSU)
-    , DIC            &   ! DIC(N): Total dissolved inorganic carbon (DIC: umol kg-1)
-    , TA             &   ! TA (N): Total alkalinity (TA: umol kg-1)
-    , DOx            &   ! DOx(N): Dissolved oxygen (umol L-1)
+    , Tmp_in            &   ! Tmp(N): Temperature (oC)
+    , Sal_in            &   ! Sal(N): Salinity (PSU)
+    , DIC_in            &   ! DIC(N): Total dissolved inorganic carbon (DIC: umol kg-1)
+    , TA_in             &   ! TA (N): Total alkalinity (TA: umol kg-1)
+    , DOx_in            &   ! DOx(N): Dissolved oxygen (umol L-1)
 #if defined ORGANIC_MATTER
-    , DOC            &   ! DOC(N,Ndom): Labile Dissolved organic carbon (DOC: umol L-1)
-    , POC            &   ! POC (N,:): Particulate organic carbon (POC: umol L-1)
-    , PHY            &   ! PHY(N,:): phytoplankton1 (umol C L-1), dinoflagellate
-    , ZOO            &   ! ZOO (N,:): zooplankton (umol C L-1)
-    , PIC            &   ! PIC (N,:): Particulate inorganic carbon (PIC: umol L-1), coccolith (CaCO3)
+    , DOC_in            &   ! DOC(N,Ndom): Labile Dissolved organic carbon (DOC: umol L-1)
+    , POC_in            &   ! POC (N,:): Particulate organic carbon (POC: umol L-1)
+    , PHY_in            &   ! PHY(N,:): phytoplankton1 (umol C L-1), dinoflagellate
+    , ZOO_in            &   ! ZOO (N,:): zooplankton (umol C L-1)
+    , PIC_in            &   ! PIC (N,:): Particulate inorganic carbon (PIC: umol L-1), coccolith (CaCO3)
 # if defined FOODWEB_TESTMODE
-    , DeadPHY        &   ! DeadPHY(Nphy): Dead phytoplankton (umol C L-1)
+    , DeadPHY_in        &   ! DeadPHY(Nphy): Dead phytoplankton (umol C L-1)
 # endif
 #endif
 #if defined CARBON_ISOTOPE
-    , DI13C          &   ! DI13C (N): 13C of DIC (umol kg-1)
+    , DI13C_in          &   ! DI13C (N): 13C of DIC (umol kg-1)
 # if defined ORGANIC_MATTER
-    , DO13C          &   ! DO13C (N): 13C of Labile Dissolved organic carbon (DOC: umol L-1)
-    , PO13C          &   ! PO13C (N): 13C of Particulate organic carbon (POC: umol L-1)
-    , PHY13C         &   ! PHY13C(N): 13C of phytoplankton1 (umol C L-1), dinoflagellate
-    , ZOO13C         &   ! ZOO13C(N): 13C of zooplankton (umol C L-1)
-    , PI13C          &   ! PI13C (N): 13C of Particulate inorganic carbon (PIC: umol L-1), coccolith (CaCO3)
+    , DO13C_in          &   ! DO13C (N): 13C of Labile Dissolved organic carbon (DOC: umol L-1)
+    , PO13C_in          &   ! PO13C (N): 13C of Particulate organic carbon (POC: umol L-1)
+    , PHY13C_in         &   ! PHY13C(N): 13C of phytoplankton1 (umol C L-1), dinoflagellate
+    , ZOO13C_in         &   ! ZOO13C(N): 13C of zooplankton (umol C L-1)
+    , PI13C_in          &   ! PI13C (N): 13C of Particulate inorganic carbon (PIC: umol L-1), coccolith (CaCO3)
 # endif
 #endif
 #if defined NUTRIENTS            
-    , NO3            &   ! NO3(N): NO3 (umol L-1)
-!    , NO2            &   ! NO2(N): NO2 (umol L-1)
-    , NH4            &   ! NH4(N): NH4 (umol L-1)
-    , PO4            &   ! PO4(N): PO4 (umol L-1)
+    , NO3_in            &   ! NO3(N): NO3 (umol L-1)
+    , NH4_in            &   ! NH4(N): NH4 (umol L-1)
+    , PO4_in            &   ! PO4(N): PO4 (umol L-1)
 # if defined ORGANIC_MATTER
-    , DON            &   ! DON(N): Labile Dissolved organic nitrogen (DON: umol L-1)
-    , PON            &   ! PON(N): Particulate organic nitrogen (PON: umol L-1)
-    , DOP            &   ! DOP(N): Labile Dissolved organic phosporius (DOP: umol L-1)
-    , POP            &   ! POP(N): Particulate organic phosporius (POP: umol L-1)
+    , DON_in            &   ! DON(N): Labile Dissolved organic nitrogen (DON: umol L-1)
+    , PON_in            &   ! PON(N): Particulate organic nitrogen (PON: umol L-1)
+    , DOP_in            &   ! DOP(N): Labile Dissolved organic phosporius (DOP: umol L-1)
+    , POP_in            &   ! POP(N): Particulate organic phosporius (POP: umol L-1)
 # endif
 # if defined NITROGEN_ISOTOPE
-    , NO3_15N        &   ! NO3_15N(N): 15N of NO3 (umol L-1)
-!    , NO2_15N        &   ! NO2_15N(N): 15N of NO2 (umol L-1)
-    , NH4_15N        &   ! NH4_15N(N): 15N of NH4 (umol L-1)
+    , NO3_15N_in        &   ! NO3_15N(N): 15N of NO3 (umol L-1)
+    , NH4_15N_in        &   ! NH4_15N(N): 15N of NH4 (umol L-1)
 #  if defined ORGANIC_MATTER
-    , DO15N          &   ! LDO15N  (N): 15N of Labile Dissolved organic nitrogen (DON: umol L-1)
-    , PO15N          &   ! PO15N   (N): 15N of Particulate organic nitrogen (PON: umol L-1)
-    , PHY15N         &   ! PHY15N(N): 15N of phytoplankton1 (umol C L-1), dinoflagellate
-    , ZOO15N         &   ! ZOO15N (N): 15N of zooplankton (umol C L-1)
+    , DO15N_in          &   ! LDO15N  (N): 15N of Labile Dissolved organic nitrogen (DON: umol L-1)
+    , PO15N_in          &   ! PO15N   (N): 15N of Particulate organic nitrogen (PON: umol L-1)
+    , PHY15N_in         &   ! PHY15N(N): 15N of phytoplankton1 (umol C L-1), dinoflagellate
+    , ZOO15N_in         &   ! ZOO15N (N): 15N of zooplankton (umol C L-1)
 #  endif
 # endif
 #endif
 #if defined COT_STARFISH         
-    , COTe           &   ! COTe(N): COT starfish egg (umol L-1)
-    , COTl           &   ! COTl(N): COT starfish larvae (umol L-1)
+    , COTe_in           &   ! COTe(N): COT starfish egg (umol L-1)
+    , COTl_in           &   ! COTl(N): COT starfish larvae (umol L-1)
 #endif
 !   output parameters
     , dDIC_dt        &   ! dDIC_dt(N): dDIC/dt (umol kg-1 s-1)
@@ -274,56 +272,110 @@ contains
     real(8), intent(in) :: p_sand      
 #endif
 
-    real(8), intent(in) :: Tmp(N)        
-    real(8), intent(in) :: Sal(N)        
-    real(8), intent(in) :: DIC(N)        
-    real(8), intent(in) :: TA (N)        
-    real(8), intent(in) :: DOx(N)        
+! raw tracer inputs
+    real(8), intent(in) :: Tmp_in(N)        
+    real(8), intent(in) :: Sal_in(N)        
+    real(8), intent(in) :: DIC_in(N)        
+    real(8), intent(in) :: TA_in (N)        
+    real(8), intent(in) :: DOx_in(N)        
 #if defined ORGANIC_MATTER
-    real(8), intent(in) :: DOC(N,Ndom)           ! Labile Dissolved organic carbon (DOC: umol L-1)
-    real(8), intent(in) :: POC(N,Npom)            ! Particulate organic carbon (POC: umol L-1)
-    real(8), intent(in) :: PHY(N,Nphy)           ! phytoplankton1 (umol C L-1), dinoflagellate
-    real(8), intent(in) :: ZOO(N,Nzoo)            ! zooplankton (umol C L-1)
-    real(8), intent(in) :: PIC(N,Npim)            ! Particulate inorganic carbon (PIC: umol L-1), coccolith (CaCO3)
+    real(8), intent(in) :: DOC_in(N,Ndom)           ! Labile Dissolved organic carbon (DOC: umol L-1)
+    real(8), intent(in) :: POC_in(N,Npom)           ! Particulate organic carbon (POC: umol L-1)
+    real(8), intent(in) :: PHY_in(N,Nphy)           ! phytoplankton1 (umol C L-1), dinoflagellate
+    real(8), intent(in) :: ZOO_in(N,Nzoo)           ! zooplankton (umol C L-1)
+    real(8), intent(in) :: PIC_in(N,Npim)           ! Particulate inorganic carbon (PIC: umol L-1), coccolith (CaCO3)
 # if defined FOODWEB_TESTMODE
-    real(8), intent(in) :: DeadPHY(N,Nphy)  ! DeadPHY(Nphy): Dead phytoplankton (umol C L-1)
+    real(8), intent(in) :: DeadPHY_in(N,Nphy)  ! DeadPHY(Nphy): Dead phytoplankton (umol C L-1)
 # endif
 #endif
 #if defined CARBON_ISOTOPE
-    real(8), intent(in) :: DI13C(N)          ! 13C of DIC (umol kg-1)
+    real(8), intent(in) :: DI13C_in(N)          ! 13C of DIC (umol kg-1)
 # if defined ORGANIC_MATTER
-    real(8), intent(in) :: DO13C(N,Ndom)         ! 13C of Labile Dissolved organic carbon (DOC: umol L-1)
-    real(8), intent(in) :: PO13C(N,Npom)          ! 13C of Particulate organic carbon (POC: umol L-1)
-    real(8), intent(in) :: PHY13C(N,Nphy)       ! 13C of phytoplankton1 (umol C L-1), dinoflagellate
-    real(8), intent(in) :: ZOO13C(N,Nzoo)        ! 13C of zooplankton (umol C L-1)
-    real(8), intent(in) :: PI13C(N,Npim)          ! 13C of Particulate inorganic carbon (PIC: umol L-1), coccolith (CaCO3)
+    real(8), intent(in) :: DO13C_in (N,Ndom)         ! 13C of Labile Dissolved organic carbon (DOC: umol L-1)
+    real(8), intent(in) :: PO13C_in (N,Npom)          ! 13C of Particulate organic carbon (POC: umol L-1)
+    real(8), intent(in) :: PHY13C_in(N,Nphy)       ! 13C of phytoplankton1 (umol C L-1), dinoflagellate
+    real(8), intent(in) :: ZOO13C_in(N,Nzoo)        ! 13C of zooplankton (umol C L-1)
+    real(8), intent(in) :: PI13C_in (N,Npim)          ! 13C of Particulate inorganic carbon (PIC: umol L-1), coccolith (CaCO3)
 # endif
 #endif
 #if defined NUTRIENTS            
-    real(8), intent(in) :: NO3(N)         
-    real(8), intent(in) :: NH4(N)        
-    real(8), intent(in) :: PO4(N)        
+    real(8), intent(in) :: NO3_in(N)         
+    real(8), intent(in) :: NH4_in(N)        
+    real(8), intent(in) :: PO4_in(N)        
 # if defined ORGANIC_MATTER
-    real(8), intent(in) :: DON(N,Ndom)           ! Labile Dissolved organic nitrogen (DON: umol L-1)
-    real(8), intent(in) :: PON(N,Npom)            ! Particulate organic nitrogen (PON: umol L-1)
-    real(8), intent(in) :: DOP(N,Ndom)           ! Labile Dissolved organic phosporius (DOP: umol L-1)
-    real(8), intent(in) :: POP(N,Npom)            ! Particulate organic phosporius (POP: umol L-1)
+    real(8), intent(in) :: DON_in(N,Ndom)           ! Labile Dissolved organic nitrogen (DON: umol L-1)
+    real(8), intent(in) :: PON_in(N,Npom)            ! Particulate organic nitrogen (PON: umol L-1)
+    real(8), intent(in) :: DOP_in(N,Ndom)           ! Labile Dissolved organic phosporius (DOP: umol L-1)
+    real(8), intent(in) :: POP_in(N,Npom)            ! Particulate organic phosporius (POP: umol L-1)
 # endif
 # if defined NITROGEN_ISOTOPE
-    real(8), intent(in) :: NO3_15N(N)        ! 15N of NO3 (umol L-1)
-    real(8), intent(in) :: NH4_15N(N)        ! 15N of NH4 (umol L-1)
+    real(8), intent(in) :: NO3_15N_in(N)        ! 15N of NO3 (umol L-1)
+    real(8), intent(in) :: NH4_15N_in(N)        ! 15N of NH4 (umol L-1)
 #  if defined ORGANIC_MATTER
-    real(8), intent(in) :: DO15N(N,Ndom)         ! 15N of Labile Dissolved organic nitrogen (DON: umol L-1)
-    real(8), intent(in) :: PO15N(N,Npom)          ! 15N of Particulate organic nitrogen (PON: umol L-1)
-    real(8), intent(in) :: PHY15N(N,Nphy)       ! 15N of phytoplankton1 (umol C L-1), dinoflagellate
-    real(8), intent(in) :: ZOO15N(N,Nzoo)        ! 15N of zooplankton (umol C L-1)
+    real(8), intent(in) :: DO15N_in(N,Ndom)         ! 15N of Labile Dissolved organic nitrogen (DON: umol L-1)
+    real(8), intent(in) :: PO15N_in(N,Npom)          ! 15N of Particulate organic nitrogen (PON: umol L-1)
+    real(8), intent(in) :: PHY15N_in(N,Nphy)       ! 15N of phytoplankton1 (umol C L-1), dinoflagellate
+    real(8), intent(in) :: ZOO15N_in(N,Nzoo)        ! 15N of zooplankton (umol C L-1)
 #  endif
 # endif
 #endif
 #if defined COT_STARFISH         
-    real(8), intent(in) :: COTe(N)         ! COT starfish egg (umol L-1)
-    real(8), intent(in) :: COTl(N)         ! COT starfish larvae (umol L-1)
+    real(8), intent(in) :: COTe_in(N)         ! COT starfish egg (umol L-1)
+    real(8), intent(in) :: COTl_in(N)         ! COT starfish larvae (umol L-1)
 #endif
+
+! input with negatives corrected to zero
+    real(8) :: Tmp(N)        
+    real(8) :: Sal(N)        
+    real(8) :: DIC(N)        
+    real(8) :: TA (N)        
+    real(8) :: DOx(N)        
+#if defined ORGANIC_MATTER
+    real(8) :: DOC(N,Ndom)           ! Labile Dissolved organic carbon (DOC: umol L-1)
+    real(8) :: POC(N,Npom)            ! Particulate organic carbon (POC: umol L-1)
+    real(8) :: PHY(N,Nphy)           ! phytoplankton1 (umol C L-1), dinoflagellate
+    real(8) :: ZOO(N,Nzoo)            ! zooplankton (umol C L-1)
+    real(8) PIC(N,Npim)            ! Particulate inorganic carbon (PIC: umol L-1), coccolith (CaCO3)
+# if defined FOODWEB_TESTMODE
+    real(8) :: DeadPHY(N,Nphy)  ! DeadPHY(Nphy): Dead phytoplankton (umol C L-1)
+# endif
+#endif
+#if defined CARBON_ISOTOPE
+    real(8) :: DI13C(N)          ! 13C of DIC (umol kg-1)
+# if defined ORGANIC_MATTER
+    real(8) :: DO13C(N,Ndom)         ! 13C of Labile Dissolved organic carbon (DOC: umol L-1)
+    real(8) :: PO13C(N,Npom)          ! 13C of Particulate organic carbon (POC: umol L-1)
+    real(8) :: PHY13C(N,Nphy)       ! 13C of phytoplankton1 (umol C L-1), dinoflagellate
+    real(8) :: ZOO13C(N,Nzoo)        ! 13C of zooplankton (umol C L-1)
+    real(8) :: PI13C(N,Npim)          ! 13C of Particulate inorganic carbon (PIC: umol L-1), coccolith (CaCO3)
+# endif
+#endif
+#if defined NUTRIENTS            
+    real(8) :: NO3(N)         
+    real(8) :: NH4(N)        
+    real(8) :: PO4(N)        
+# if defined ORGANIC_MATTER
+    real(8) :: DON(N,Ndom)           ! Labile Dissolved organic nitrogen (DON: umol L-1)
+    real(8) :: PON(N,Npom)            ! Particulate organic nitrogen (PON: umol L-1)
+    real(8) :: DOP(N,Ndom)           ! Labile Dissolved organic phosporius (DOP: umol L-1)
+    real(8) :: POP(N,Npom)            ! Particulate organic phosporius (POP: umol L-1)
+# endif
+# if defined NITROGEN_ISOTOPE
+    real(8) :: NO3_15N(N)        ! 15N of NO3 (umol L-1)
+    real(8) :: NH4_15N(N)        ! 15N of NH4 (umol L-1)
+#  if defined ORGANIC_MATTER
+    real(8) :: DO15N(N,Ndom)         ! 15N of Labile Dissolved organic nitrogen (DON: umol L-1)
+    real(8) :: PO15N(N,Npom)          ! 15N of Particulate organic nitrogen (PON: umol L-1)
+    real(8) :: PHY15N(N,Nphy)       ! 15N of phytoplankton1 (umol C L-1), dinoflagellate
+    real(8) :: ZOO15N(N,Nzoo)        ! 15N of zooplankton (umol C L-1)
+#  endif
+# endif
+#endif
+#if defined COT_STARFISH         
+    real(8) :: COTe(N)         ! COT starfish egg (umol L-1)
+    real(8) :: COTl(N)         ! COT starfish larvae (umol L-1)
+#endif
+
 ! output parameters
     real(8), intent(out) :: dDIC_dt(N)     
     real(8), intent(out) :: dTA_dt(N)     
@@ -499,6 +551,191 @@ contains
     real(8), parameter :: OUTPUT_INTERVAL = 5.0d0     ! Output interval (min)
     real(8), save :: time = 0.0d0 !sec
     real(8), save :: dsec = 0.0d0 !sec
+#endif
+
+
+
+!-----------------------------------------------------------------------
+! Rewrite inputs to replace negative values with zeros
+!-----------------------------------------------------------------------
+
+    where ( Tmp_in > 0.0d0 )
+      Tmp = Tmp_in
+    else where
+      Tmp = 0.0d0
+    end where
+    where ( Sal_in > 0.0d0 )
+      Sal = Sal_in
+    else where
+      Sal = 0.0d0
+    end where
+    where ( DIC_in > 0.0d0 )
+      DIC = DIC_in
+    else where
+      DIC = 0.0d0
+    end where
+    where ( TA_in > 0.0d0 )
+      TA = TA_in
+    else where
+      TA = 0.0d0
+    end where
+    where ( DOx_in > 0.0d0 )
+      DOx = DOx_in
+    else where
+      DOx = 0.0d0
+    end where
+#if defined ORGANIC_MATTER
+    where ( DOC_in > 0.0d0 )
+      DOC = DOC_in
+    else where
+      DOC = 0.0d0
+    end where
+    where ( POC_in > 0.0d0 )
+      POC = POC_in
+    else where
+      POC = 0.0d0
+    end where
+    where ( PHY_in > 0.0d0 )
+      PHY = PHY_in
+    else where
+      PHY = 0.0d0
+    end where
+    where ( ZOO_in > 0.0d0 )
+      ZOO = ZOO_in
+    else where
+      ZOO = 0.0d0
+    end where
+    where ( PIC_in > 0.0d0 )
+      PIC = PIC_in
+    else where
+      PIC = 0.0d0
+    end where
+# if defined FOODWEB_TESTMODE
+    where ( DeadPHY_in > 0.0d0 )
+      DeadPHY = DeadPHY_in
+    else where
+      DeadPHY = 0.0d0
+    end where
+# endif
+#endif
+#if defined CARBON_ISOTOPE
+    where ( DI13C_in > 0.0d0 )
+      DI13C = DI13C_in
+    else where
+      DI13C = 0.0d0
+    end where
+# if defined ORGANIC_MATTER
+    where ( DO13C_in > 0.0d0 )
+      DO13C = DO13C_in
+    else where
+      DO13C = 0.0d0
+    end where
+    where ( PO13C_in > 0.0d0 )
+      PO13C = PO13C_in
+    else where
+      PO13C = 0.0d0
+    end where
+    where ( PHY13C_in > 0.0d0 )
+      PHY13C = PHY13C_in
+    else where
+      PHY13C = 0.0d0
+    end where
+    where ( ZOO13C_in > 0.0d0 )
+      ZOO13C = ZOO13C_in
+    else where
+      ZOO13C = 0.0d0
+    end where
+    where ( PI13C_in > 0.0d0 )
+      PI13C = PI13C_in
+    else where
+      PI13C = 0.0d0
+    end where
+# endif
+#endif
+#if defined NUTRIENTS            
+    where ( NO3_in > 0.0d0 )
+      NO3 = NO3_in
+    else where
+      NO3 = 0.0d0
+    end where
+    where ( NH4_in > 0.0d0 )
+      NH4 = NH4_in
+    else where
+      NH4 = 0.0d0
+    end where
+    where ( PO4_in > 0.0d0 )
+      PO4 = PO4_in
+    else where
+      PO4 = 0.0d0
+    end where
+# if defined ORGANIC_MATTER
+    where ( DON_in > 0.0d0 )
+      DON = DON_in
+    else where
+      DON = 0.0d0
+    end where
+    where ( PON_in > 0.0d0 )
+      PON = PON_in
+    else where
+      PON = 0.0d0
+    end where
+    where ( DOP_in > 0.0d0 )
+      DOP = DOP_in
+    else where
+      DOP = 0.0d0
+    end where
+    where ( POP_in > 0.0d0 )
+      POP = POP_in
+    else where
+      POP = 0.0d0
+    end where
+# endif
+# if defined NITROGEN_ISOTOPE
+    where ( NO3_15N_in > 0.0d0 )
+      NO3_15N = NO3_15N_in
+    else where
+      NO3_15N = 0.0d0
+    end where
+    where ( NH4_15N_in > 0.0d0 )
+      NH4_15N = NH4_15N_in
+    else where
+      NH4_15N = 0.0d0
+    end where
+#  if defined ORGANIC_MATTER
+    where ( DO15N_in > 0.0d0 )
+      DO15N = DO15N_in
+    else where
+      DO15N = 0.0d0
+    end where
+    where ( PO15N_in > 0.0d0 )
+      PO15N = PO15N_in
+    else where
+      PO15N = 0.0d0
+    end where
+    where ( PHY15N_in > 0.0d0 )
+      PHY15N = PHY15N_in
+    else where
+      PHY15N = 0.0d0
+    end where
+    where ( ZOO15N_in > 0.0d0 )
+      ZOO15N = ZOO15N_in
+    else where
+      ZOO15N = 0.0d0
+    end where
+#  endif
+# endif
+#endif
+#if defined COT_STARFISH         
+    where ( COTe_in > 0.0d0 )
+      COTe = COTe_in
+    else where
+      COTe = 0.0d0
+    end where
+    where ( COTl_in > 0.0d0 )
+      COTl = COTl_in
+    else where
+      COTl = 0.0d0
+    end where
 #endif
 
 !-----------------------------------------------------------------------
