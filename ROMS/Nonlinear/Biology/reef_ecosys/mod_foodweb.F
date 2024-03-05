@@ -930,6 +930,12 @@ CONTAINS
       Dissol = 0.0d0
     END IF
     Dissol = MAX( Dissol, 0.0d0 )  !!! Error handling
+    ! yt_edit >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    ! arbitrarily limit Dissolution rate to 80% of PIC per time step to prevent negative PIC values
+    IF (0.8d0*PIC(iCaCO3) - Dissol*dt < 0.0d0) THEN
+      Dissol = 0.8d0*PIC(iCaCO3)/dt
+    ENDIF
+    ! yt_edit <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 !     === Mass barance ===
 

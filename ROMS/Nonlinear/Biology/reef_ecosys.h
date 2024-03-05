@@ -370,6 +370,75 @@
      &                          (bvstr(i,j)+bvstr(i,j+1))) *rho0
 #endif
 
+! yt_edit >>>>>>>>>>>>>>>>>>> replace negative values with zero
+            where ( t(i,j,:,nstp,iTemp) < 0.0d0 )
+              t(i,j,:,nstp,iTemp) = 0.0d0
+            end where
+            where ( t(i,j,:,nstp,iSalt) < 0.0d0 )
+              t(i,j,:,nstp,iSalt) = 0.0d0
+            end where
+            where ( t(i,j,:,nstp,iTIC_) < 0.0d0 )
+              t(i,j,:,nstp,iTIC_) = 0.0d0
+            end where
+            where ( t(i,j,:,nstp,iTAlk) < 0.0d0 )
+              t(i,j,:,nstp,iTAlk) = 0.0d0
+            end where
+            where ( t(i,j,:,nstp,iOxyg) < 0.0d0 )
+              t(i,j,:,nstp,iOxyg) = 0.0d0
+            end where
+#if defined ORGANIC_MATTER
+            where ( t(i,j,:,nstp,iDOC(:)) < 0.0d0 )
+              t(i,j,:,nstp,iDOC(:)) = 0.0d0
+            end where
+            where ( t(i,j,:,nstp,iPOC(:)) < 0.0d0 )
+              t(i,j,:,nstp,iPOC(:)) = 0.0d0
+            end where
+            where ( t(i,j,:,nstp,iPhyt(:)) < 0.0d0 )
+              t(i,j,:,nstp,iPhyt(:)) = 0.0d0
+            end where
+            where ( t(i,j,:,nstp,iZoop(:)) < 0.0d0 )
+              t(i,j,:,nstp,iZoop(:)) = 0.0d0
+            end where
+            where ( t(i,j,:,nstp,iPIC(:)) < 0.0d0 )
+              t(i,j,:,nstp,iPIC(:)) = 0.0d0
+            end where
+#endif
+#if defined NUTRIENTS         
+            where ( t(i,j,:,nstp,iNO3_) < 0.0d0 )
+              t(i,j,:,nstp,iNO3_) = 0.0d0
+            end where
+            where ( t(i,j,:,nstp,iNH4_) < 0.0d0 )
+              t(i,j,:,nstp,iNH4_) = 0.0d0
+            end where
+            where ( t(i,j,:,nstp,iPO4_) < 0.0d0 )
+              t(i,j,:,nstp,iPO4_) = 0.0d0
+            end where
+# if defined ORGANIC_MATTER
+            where ( t(i,j,:,nstp,iDON(:)) < 0.0d0 )
+              t(i,j,:,nstp,iDON(:)) = 0.0d0
+            end where
+            where ( t(i,j,:,nstp,iPON(:)) < 0.0d0 )
+              t(i,j,:,nstp,iPON(:)) = 0.0d0
+            end where
+            where ( t(i,j,:,nstp,iDOP(:)) < 0.0d0 )
+              t(i,j,:,nstp,iDOP(:)) = 0.0d0
+            end where
+            where ( t(i,j,:,nstp,iPOP(:)) < 0.0d0 )
+              t(i,j,:,nstp,iPOP(:)) = 0.0d0
+            end where
+# endif
+#endif
+#if defined COT_STARFISH         
+            where ( t(i,j,:,nstp,iCOTe) < 0.0d0 )
+              t(i,j,:,nstp,iCOTe) = 0.0d0
+            end where
+            where ( t(i,j,:,nstp,iCOTl) < 0.0d0 )
+              t(i,j,:,nstp,iCOTl) = 0.0d0
+            end where
+#endif
+! yt_edit <<<<<<<<<<<<<<<<<<< 
+
+
 !----- Ecosystem model ----------------------------------------
             CALL reef_ecosys           &
 !          input parameters
@@ -648,10 +717,13 @@
               !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
               ! if (isnan(t(i,j,k,nnew,ibio)) .or. abs(t(i,j,k,nnew,ibio)) > huge(t(i,j,k,nnew,ibio))) then
               ! if (isnan(t(i,j,k,nnew,ibio)) .or. abs(t(i,j,k,nnew,ibio)) > 1.0d22) then
-              if (isnan(t(i,j,k,nnew,ibio)) .or. t(i,j,k,nnew,ibio) > 1.0d22 .or. t(i,j,k,nnew,ibio) < -100.0d0) then
+              if (isnan(t(i,j,k,nnew,ibio)) .or. abs(t(i,j,k,nnew,ibio)) > 1.0d22) then
                 write(*,*) 'yt_debug: reef_ecosys.h      i =', i, '   j =', j, '   k =', k, '   ibio =', ibio
                 write(*,*) 'yt_debug:     t(i,j,k,nnew,ibio) =', t(i,j,k,nnew,ibio)
                 error stop
+              else if (t(i,j,k,nnew,ibio) < -100d0) then
+                write(*,*) 'yt_debug: reef_ecosys.h      i =', i, '   j =', j, '   k =', k, '   ibio =', ibio &
+                , '   t(i,j,k,nnew,ibio) =', t(i,j,k,nnew,ibio)
               endif
               !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 

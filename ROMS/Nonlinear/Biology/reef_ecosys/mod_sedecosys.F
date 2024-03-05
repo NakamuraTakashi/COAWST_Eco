@@ -943,6 +943,94 @@ CONTAINS
 !!! 実行文 executable statement
 
 ! ***************************** !
+!!! Check for input errors (yt_edit comment out for faster production runs)
+! ***************************** !
+
+    !! General   
+    if(Tamb < 0.0d0) then
+        write(*,*) 'yt_debug:   i =', i, '   j =', j, '   Tamb =', Tamb
+    endif
+    if(Samb < 0.0d0) then
+        write(*,*) 'yt_debug:   i =', i, '   j =', j, '   Samb =', Samb
+    endif
+    if(TAamb < 0.0d0) then
+        write(*,*) 'yt_debug:   i =', i, '   j =', j, '   TAamb =', TAamb
+    endif
+
+    if(O2amb < 0.0d0) then
+        write(*,*) 'yt_debug:   i =', i, '   j =', j, '   O2amb =', O2amb
+    endif
+    if(CO2amb < 0.0d0) then
+        write(*,*) 'yt_debug:   i =', i, '   j =', j, '   CO2amb =', CO2amb
+    endif
+    if(N2amb < 0.0d0) then
+        write(*,*) 'yt_debug:   i =', i, '   j =', j, '   N2amb =', N2amb
+    endif
+    !! Organic matters (Carbon)
+# if defined ORGANIC_MATTER
+    if(POCamb < 0.0d0) then
+        write(*,*) 'yt_debug:   i =', i, '   j =', j, '   POCamb =', POCamb
+    endif
+# endif
+    !! Nutrient
+# if defined NUTRIENTS
+    if(NO3amb < 0.0d0) then
+        write(*,*) 'yt_debug:   i =', i, '   j =', j, '   NO3amb =', NO3amb
+    endif
+    if(NH4amb < 0.0d0) then
+        write(*,*) 'yt_debug:   i =', i, '   j =', j, '   NH4amb =', NH4amb
+    endif
+    if(PO4amb < 0.0d0) then
+        write(*,*) 'yt_debug:   i =', i, '   j =', j, '   PO4amb =', PO4amb
+    endif
+#  if defined ORGANIC_MATTER
+    if(PONamb < 0.0d0) then
+        write(*,*) 'yt_debug:   i =', i, '   j =', j, '   PONamb =', PONamb
+    endif
+    if(POPamb < 0.0d0) then
+        write(*,*) 'yt_debug:   i =', i, '   j =', j, '   POPamb =', POPamb
+    endif
+#  endif
+# endif
+    !! Sulfate
+# if defined SULFATE
+    if(Mn2amb < 0.0d0) then
+        write(*,*) 'yt_debug:   i =', i, '   j =', j, '   Mn2amb =', Mn2amb
+    endif
+    if(Fe2amb < 0.0d0) then
+        write(*,*) 'yt_debug:   i =', i, '   j =', j, '   Fe2amb =', Fe2amb
+    endif
+    if(H2Samb < 0.0d0) then
+        write(*,*) 'yt_debug:   i =', i, '   j =', j, '   H2Samb =', H2Samb
+    endif
+    if(SO4amb < 0.0d0) then
+        write(*,*) 'yt_debug:   i =', i, '   j =', j, '   SO4amb =', SO4amb
+    endif
+    !! Deposition Flux (test) Kasih 2009 -------- 
+    if(Fdep_MnO2 < 0.0d0) then
+        write(*,*) 'yt_debug:   i =', i, '   j =', j, '   Fdep_MnO2 =', Fdep_MnO2
+    endif
+    if(Fdep_FeOOH < 0.0d0) then
+        write(*,*) 'yt_debug:   i =', i, '   j =', j, '   Fdep_FeOOH =', Fdep_FeOOH
+    endif
+# endif
+# if defined ORGANIC_MATTER
+    if(Fdep_POC < 0.0d0) then
+        write(*,*) 'yt_debug:   i =', i, '   j =', j, '   Fdep_POC =', Fdep_POC
+    endif
+#  if defined NUTRIENTS
+    if(Fdep_PON < 0.0d0) then
+        write(*,*) 'yt_debug:   i =', i, '   j =', j, '   Fdep_PON =', Fdep_PON
+    endif
+    if(Fdep_POP < 0.0d0) then
+        write(*,*) 'yt_debug:   i =', i, '   j =', j, '   Fdep_POP =', Fdep_POP
+    endif
+#  endif
+# endif
+
+
+
+! ***************************** !
 !!! physical properties of sediment layers 
 ! ***************************** !
 
