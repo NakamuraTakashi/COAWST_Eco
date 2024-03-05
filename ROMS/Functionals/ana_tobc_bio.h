@@ -114,7 +114,7 @@
      &    DOMAIN(ng)%Eastern_Edge(tile)) THEN
         DO k=1,N(ng)
           DO j=JstrT,JendT
-# ifdef SEDIMENT
+# if defined SEDIMENT && defined ANA_TOBC_SED
             DO ised=1,NST
               BOUNDARY(ng)%t_east(j,k,idsed(ised))=0.0_r8
             END DO
@@ -260,7 +260,7 @@
      &    DOMAIN(ng)%Western_Edge(tile)) THEN
         DO k=1,N(ng)
           DO j=JstrT,JendT
-# ifdef SEDIMENT
+# if defined SEDIMENT && defined ANA_TOBC_SED
             DO ised=1,NST
               BOUNDARY(ng)%t_west(j,k,idsed(ised))=0.0_r8
             END DO
@@ -405,7 +405,7 @@
      &    DOMAIN(ng)%Southern_Edge(tile)) THEN
         DO k=1,N(ng)
           DO i=IstrT,IendT
-# ifdef SEDIMENT
+# if defined SEDIMENT && defined ANA_TOBC_SED
             DO ised=1,NST
               BOUNDARY(ng)%t_south(i,k,idsed(ised))=0.0_r8
             END DO
@@ -550,7 +550,7 @@
      &    DOMAIN(ng)%Northern_Edge(tile)) THEN
         DO k=1,N(ng)
           DO i=IstrT,IendT
-# ifdef SEDIMENT
+# if defined SEDIMENT && defined ANA_TOBC_SED
             DO ised=1,NST
               BOUNDARY(ng)%t_north(i,k,idsed(ised))=0.0_r8
             END DO
@@ -702,7 +702,7 @@
 ! ---- Eastern boundary -----------------------------------------------
       IF (ANY(LBC(ieast,isTvar(:),ng)%acquire).and.                     &
      &    DOMAIN(ng)%Eastern_Edge(tile)) THEN
-# ifdef SEDIMENT
+# if defined SEDIMENT && defined ANA_TOBC_SED
         DO k=1,N(ng)
           DO j=JstrT,JendT
             DO ised=1,NST
@@ -872,7 +872,7 @@
 ! ---- Western boundary -----------------------------------------------
       IF (ANY(LBC(iwest,isTvar(:),ng)%acquire).and.                     &
      &    DOMAIN(ng)%Western_Edge(tile)) THEN
-# ifdef SEDIMENT
+# if defined SEDIMENT && defined ANA_TOBC_SED
         DO k=1,N(ng)
           DO j=JstrT,JendT
             DO ised=1,NST
@@ -1041,7 +1041,7 @@
 ! ---- Southern boundary -----------------------------------------------
       IF (ANY(LBC(isouth,isTvar(:),ng)%acquire).and.                    &
      &    DOMAIN(ng)%Southern_Edge(tile)) THEN
-# ifdef SEDIMENT
+# if defined SEDIMENT && defined ANA_TOBC_SED
         DO k=1,N(ng)
           DO i=IstrT,IendT
             DO ised=1,NST
@@ -1210,7 +1210,7 @@
 ! ---- Northern boundary -----------------------------------------------
       IF (ANY(LBC(inorth,isTvar(:),ng)%acquire).and.                    &
      &    DOMAIN(ng)%Northern_Edge(tile)) THEN
-# ifdef SEDIMENT
+# if defined SEDIMENT && defined ANA_TOBC_SED
         DO k=1,N(ng)
           DO i=IstrT,IendT
             DO ised=1,NST
@@ -1390,7 +1390,7 @@
           DO j=JstrT,JendT
             BOUNDARY(ng)%t_east(j,k,itemp)=T0(ng)
             BOUNDARY(ng)%t_east(j,k,isalt)=S0(ng)
-# ifdef SEDIMENT
+# if defined SEDIMENT && defined ANA_TOBC_SED
             DO ised=1,NST
               BOUNDARY(ng)%t_east(j,k,idsed(ised))=0.0_r8
             END DO
@@ -1529,7 +1529,7 @@
           DO j=JstrT,JendT
             BOUNDARY(ng)%t_west(j,k,itemp)=T0(ng)
             BOUNDARY(ng)%t_west(j,k,isalt)=S0(ng)
-# ifdef SEDIMENT
+# if defined SEDIMENT && defined ANA_TOBC_SED
             DO ised=1,NST
               BOUNDARY(ng)%t_west(j,k,idsed(ised))=0.0_r8
             END DO
@@ -1667,7 +1667,7 @@
           DO i=IstrT,IendT
             BOUNDARY(ng)%t_south(i,k,itemp)=T0(ng)
             BOUNDARY(ng)%t_south(i,k,isalt)=S0(ng)
-# ifdef SEDIMENT
+# if defined SEDIMENT && defined ANA_TOBC_SED
             DO ised=1,NST
               BOUNDARY(ng)%t_south(i,k,idsed(ised))=0.0_r8
             END DO
@@ -1805,7 +1805,7 @@
           DO i=IstrT,IendT
             BOUNDARY(ng)%t_north(i,k,itemp)=T0(ng)
             BOUNDARY(ng)%t_north(i,k,isalt)=S0(ng)
-# ifdef SEDIMENT
+# if defined SEDIMENT && defined ANA_TOBC_SED
             DO ised=1,NST
               BOUNDARY(ng)%t_north(i,k,idsed(ised))=0.0_r8
             END DO
