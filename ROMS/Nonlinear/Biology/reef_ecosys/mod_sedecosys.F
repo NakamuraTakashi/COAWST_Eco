@@ -7,6 +7,7 @@
  
 #include "cppdefs.h"
 
+#ifdef SEDIMENT_ECOSYS
 
 !!!**** MODULE OF SEDIMENT ECOSYSTEM MODEL ************************************
 #if defined SEDIMENT_EMPIRICAL
@@ -225,6 +226,10 @@ END MODULE mod_sedecosys
 
 
 #else         
+
+
+
+    
 !!! **********************************************************************
 !!!  Sediment model
 !!! **********************************************************************
@@ -2744,4 +2749,5 @@ CONTAINS
   END SUBROUTINE sedecosys
 END MODULE mod_sedecosys
 
+#endif
 #endif
