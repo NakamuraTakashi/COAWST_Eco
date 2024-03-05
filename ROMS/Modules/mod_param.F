@@ -427,6 +427,14 @@
 !                                                 |                |
 !                                                 ----W(i,j,k-1)----
       integer, allocatable :: N(:)
+
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+# ifdef SEDIMENT_ECOSYS
+      integer, allocatable :: Nsed(:)
+      real(8), allocatable :: SedEcoLayerDepths(:, :) ! (ng, k)        ! depth (cm) from surface at bottom of each biological sediment layer
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+
 !
 !-----------------------------------------------------------------------
 !  Tracers parameters.
@@ -557,6 +565,11 @@
 !
       integer :: NHbio2d                ! 2D fields
       integer :: NHbio3d                ! 3D fields
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+# ifdef SEDIMENT_ECOSYS
+      integer :: NHbiosed3d             ! 3D fields for the biological sediment layers in sedecosys
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 #endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 
@@ -690,6 +703,12 @@
       allocate ( Jm(Ngrids) )
 
       allocate ( N(Ngrids) )
+
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+# ifdef SEDIMENT_ECOSYS
+      allocate ( Nsed(Ngrids) )
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 
       allocate ( NT(Ngrids) )
 

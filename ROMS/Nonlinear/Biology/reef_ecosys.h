@@ -50,7 +50,6 @@
 #ifdef PROFILE
       CALL wclock_on (ng, iNLM, 15)
 #endif
-
       CALL biology_tile (ng, tile,                                      &
      &                   LBi, UBi, LBj, UBj, N(ng), NT(ng),             &
      &                   IminS, ImaxS, JminS, JmaxS,                    &
@@ -74,6 +73,11 @@
 #endif
      &                   OCEAN(ng) % HisBio2d,                          &
      &                   OCEAN(ng) % HisBio3d,                          &
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+#ifdef SEDIMENT_ECOSYS
+     &                   OCEAN(ng) % HisBiosed3d,                       &
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 #ifdef CORAL_POLYP
      &                   GRID(ng) % p_coral,                            &
 #endif
@@ -128,6 +132,9 @@
      &                         sustr, svstr,                            &
 #endif
      &                         HisBio2d, HisBio3d,                      &
+#ifdef SEDIMENT_ECOSYS
+     &                         HisBiosed3d,                             &   ! yuta_edits_for_masa
+#endif
 #ifdef CORAL_POLYP
      &                         p_coral,                                 &
 #endif
@@ -172,6 +179,8 @@
 #ifdef SEDIMENT_ECOSYS
       USE mod_sedecosys
 #endif
+
+
 !
 !  Imported variable declarations.
 !
@@ -200,6 +209,9 @@
 # endif
       real(r8), intent(inout) :: HisBio2d(LBi:,LBj:,:)
       real(r8), intent(inout) :: HisBio3d(LBi:,LBj:,:,:)
+# ifdef SEDIMENT_ECOSYS
+      real(r8), intent(inout) :: HisBiosed3d(LBi:,LBj:,:,:)   ! yuta_edits_for_masa
+# endif
 # ifdef CORAL_POLYP
       real(r8), intent(inout) :: p_coral(2,LBi:UBi,LBj:UBj)
 # endif
@@ -248,6 +260,9 @@
 # endif
       real(r8), intent(inout) :: HisBio2d(LBi:UBi,LBj:UBj,NHbio2d)
       real(r8), intent(inout) :: HisBio3d(LBi:UBi,LBj:UBj,UBk,NHbio3d)
+# ifdef SEDIMENT_ECOSYS
+      real(r8), intent(inout) :: HisBiosed3d(LBi:UBi,LBj:UBj,Nsed(ng),NHbiosed3d)   ! yuta_edits_for_masa
+# endif
 # ifdef CORAL_POLYP
       real(r8), intent(inout) :: p_coral(2,LBi:UBi,LBj:UBj)
 # endif
@@ -355,14 +370,86 @@
      &                          (bvstr(i,j)+bvstr(i,j+1))) *rho0
 #endif
 
-!----- Ecosystem model ----------------------------------------
+! yt_edit >>>>>>>>>>>>>>>>>>> replace negative values with zero
+            where ( t(i,j,:,nstp,iTemp) < 0.0d0 )
+              t(i,j,:,nstp,iTemp) = 0.0d0
+            end where
+            where ( t(i,j,:,nstp,iSalt) < 0.0d0 )
+              t(i,j,:,nstp,iSalt) = 0.0d0
+            end where
+            where ( t(i,j,:,nstp,iTIC_) < 0.0d0 )
+              t(i,j,:,nstp,iTIC_) = 0.0d0
+            end where
+            where ( t(i,j,:,nstp,iTAlk) < 0.0d0 )
+              t(i,j,:,nstp,iTAlk) = 0.0d0
+            end where
+            where ( t(i,j,:,nstp,iOxyg) < 0.0d0 )
+              t(i,j,:,nstp,iOxyg) = 0.0d0
+            end where
+#if defined ORGANIC_MATTER
+            where ( t(i,j,:,nstp,iDOC(:)) < 0.0d0 )
+              t(i,j,:,nstp,iDOC(:)) = 0.0d0
+            end where
+            where ( t(i,j,:,nstp,iPOC(:)) < 0.0d0 )
+              t(i,j,:,nstp,iPOC(:)) = 0.0d0
+            end where
+            where ( t(i,j,:,nstp,iPhyt(:)) < 0.0d0 )
+              t(i,j,:,nstp,iPhyt(:)) = 0.0d0
+            end where
+            where ( t(i,j,:,nstp,iZoop(:)) < 0.0d0 )
+              t(i,j,:,nstp,iZoop(:)) = 0.0d0
+            end where
+            where ( t(i,j,:,nstp,iPIC(:)) < 0.0d0 )
+              t(i,j,:,nstp,iPIC(:)) = 0.0d0
+            end where
+#endif
+#if defined NUTRIENTS         
+            where ( t(i,j,:,nstp,iNO3_) < 0.0d0 )
+              t(i,j,:,nstp,iNO3_) = 0.0d0
+            end where
+            where ( t(i,j,:,nstp,iNH4_) < 0.0d0 )
+              t(i,j,:,nstp,iNH4_) = 0.0d0
+            end where
+            where ( t(i,j,:,nstp,iPO4_) < 0.0d0 )
+              t(i,j,:,nstp,iPO4_) = 0.0d0
+            end where
+# if defined ORGANIC_MATTER
+            where ( t(i,j,:,nstp,iDON(:)) < 0.0d0 )
+              t(i,j,:,nstp,iDON(:)) = 0.0d0
+            end where
+            where ( t(i,j,:,nstp,iPON(:)) < 0.0d0 )
+              t(i,j,:,nstp,iPON(:)) = 0.0d0
+            end where
+            where ( t(i,j,:,nstp,iDOP(:)) < 0.0d0 )
+              t(i,j,:,nstp,iDOP(:)) = 0.0d0
+            end where
+            where ( t(i,j,:,nstp,iPOP(:)) < 0.0d0 )
+              t(i,j,:,nstp,iPOP(:)) = 0.0d0
+            end where
+# endif
+#endif
+#if defined COT_STARFISH         
+            where ( t(i,j,:,nstp,iCOTe) < 0.0d0 )
+              t(i,j,:,nstp,iCOTe) = 0.0d0
+            end where
+            where ( t(i,j,:,nstp,iCOTl) < 0.0d0 )
+              t(i,j,:,nstp,iCOTl) = 0.0d0
+            end where
+#endif
+! yt_edit <<<<<<<<<<<<<<<<<<< 
 
+
+!----- Ecosystem model ----------------------------------------
             CALL reef_ecosys           &
 !          input parameters
      &            (ng, i, j            &   ! ng: nested grid number; i,j: position
      &            ,N(ng)               &   ! Number of vertical grid (following ROMS vertical grid)
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+# ifdef SEDIMENT_ECOSYS
+     &            ,Nsed(ng)            &   ! Number of vertical biological sediment layers
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
      &            ,CrlIter(ng)         &   ! Internal loop counts of coral polyp model
-     &            ,SedIter(ng)         &   ! Internal loop counts of sediment ecosystem model
      &            ,dt(ng)              &   ! Time step (sec)
      &            ,Hz(i,j,:)           &   ! dz(N): vertical grid size (m)
      &            ,PFDsurf             &   ! Sea surface photon flux density (umol m-2 s-1)
@@ -537,12 +624,56 @@
             HisBio2d(i,j,iAg_R) = ALGAE(ng)%R (1,i,j)
             HisBio2d(i,j,iAgPn) = ALGAE(ng)%Pg(1,i,j)-ALGAE(ng)%R (1,i,j)
 #endif
-#ifdef SEDIMENT_ECOSYS
-            HisBio2d(i,j,iSdPg) = SEDECO(ng)%Pg(i,j)
-            HisBio2d(i,j,iSd_R) = SEDECO(ng)%R (i,j)
-            HisBio2d(i,j,iSdPn) = SEDECO(ng)%Pg(i,j)-SEDECO(ng)%R (i,j)
-            HisBio2d(i,j,iSd_G) = SEDECO(ng)%G (i,j)
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+#ifdef SEDIMENT_ECOSYS  
+            HisBiosed3d(i,j,:,iSdporo) = SEDECO(ng)%poro(i,j,:)
+            HisBiosed3d(i,j,:,iSdTmp ) = SEDECO(ng)%Tmp (i,j,:)
+            HisBiosed3d(i,j,:,iSdSal ) = SEDECO(ng)%Sal (i,j,:)
+            ! HisBiosed3d(i,j,:,iSdpH  ) = SEDECO(ng)%pH  (i,j,:)
+            HisBiosed3d(i,j,:,iSdTA  ) = SEDECO(ng)%TA  (i,j,:)
+            ! HisBiosed3d(i,j,:,iSdDIC ) = SEDECO(ng)%DIC (i,j,:)
+            HisBiosed3d(i,j,:,iSdO2  ) = SEDECO(ng)%O2  (i,j,:)
+            HisBiosed3d(i,j,:,iSdCO2 ) = SEDECO(ng)%CO2 (i,j,:)
+            HisBiosed3d(i,j,:,iSdN2  ) = SEDECO(ng)%N2  (i,j,:)
+# if defined ORGANIC_MATTER
+            HisBiosed3d(i,j,:,iSdDOCf) = SEDECO(ng)%DOCf(i,j,:)
+            HisBiosed3d(i,j,:,iSdDOCs) = SEDECO(ng)%DOCs(i,j,:)
+            HisBiosed3d(i,j,:,iSdPOCf) = SEDECO(ng)%POCf(i,j,:)
+            HisBiosed3d(i,j,:,iSdPOCs) = SEDECO(ng)%POCs(i,j,:)
+            HisBiosed3d(i,j,:,iSdPOCn) = SEDECO(ng)%POCn(i,j,:)
+# endif
+# if defined NUTRIENTS
+            HisBiosed3d(i,j,:,iSdNO3 ) = SEDECO(ng)%NO3 (i,j,:)
+            HisBiosed3d(i,j,:,iSdNH4 ) = SEDECO(ng)%NH4 (i,j,:)
+            HisBiosed3d(i,j,:,iSdPO4 ) = SEDECO(ng)%PO4 (i,j,:)
+#  if defined ORGANIC_MATTER
+            HisBiosed3d(i,j,:,iSdDONf ) = SEDECO(ng)%DONf (i,j,:)
+            HisBiosed3d(i,j,:,iSdDONs ) = SEDECO(ng)%DONs (i,j,:)
+            HisBiosed3d(i,j,:,iSdPONf ) = SEDECO(ng)%PONf (i,j,:)
+            HisBiosed3d(i,j,:,iSdPONs ) = SEDECO(ng)%PONs (i,j,:)
+            HisBiosed3d(i,j,:,iSdPONn ) = SEDECO(ng)%PONn (i,j,:)
+            HisBiosed3d(i,j,:,iSdDOPf ) = SEDECO(ng)%DOPf (i,j,:)
+            HisBiosed3d(i,j,:,iSdDOPs ) = SEDECO(ng)%DOPs (i,j,:)
+            HisBiosed3d(i,j,:,iSdPOPf ) = SEDECO(ng)%POPf (i,j,:)
+            HisBiosed3d(i,j,:,iSdPOPs ) = SEDECO(ng)%POPs (i,j,:)
+            HisBiosed3d(i,j,:,iSdPOPn ) = SEDECO(ng)%POPn (i,j,:)
+#  endif
+# endif
+# if defined SULFATE
+            HisBiosed3d(i,j,:,iSdMn2 ) = SEDECO(ng)%Mn2 (i,j,:)
+            HisBiosed3d(i,j,:,iSdMnO2) = SEDECO(ng)%MnO2(i,j,:)
+            HisBiosed3d(i,j,:,iSdFe2 ) = SEDECO(ng)%Fe2 (i,j,:)
+            HisBiosed3d(i,j,:,iSdFeS ) = SEDECO(ng)%FeS (i,j,:)
+            HisBiosed3d(i,j,:,iSdFeS2) = SEDECO(ng)%FeS2(i,j,:)
+            HisBiosed3d(i,j,:,iSdFeOOH    ) = SEDECO(ng)%FeOOH    (i,j,:)
+            HisBiosed3d(i,j,:,iSdFeOOH_PO4) = SEDECO(ng)%FeOOH_PO4(i,j,:)
+            HisBiosed3d(i,j,:,iSdH2S ) = SEDECO(ng)%H2S (i,j,:)
+            HisBiosed3d(i,j,:,iSdSO4 ) = SEDECO(ng)%SO4 (i,j,:)
+            HisBiosed3d(i,j,:,iSdS0  ) = SEDECO(ng)%S0  (i,j,:)
+# endif
 #endif
+
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 
 !-----------------------------------------------------------------------
 !  Update global tracer variables: Add increment due to BGC processes
@@ -564,6 +695,15 @@
             DO itrc=1,NBT
               ibio=idbio(itrc)
               
+              !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+              ! if (isnan(dtrc_dt(k,ibio)) .or. abs(dtrc_dt(k,ibio)) > huge(dtrc_dt(k,ibio))) then
+              if (isnan(dtrc_dt(k,ibio)) .or. abs(dtrc_dt(k,ibio)) > 1.0d20) then
+                write(*,*) 'yt_debug: reef_ecosys.h      i =', i, '   j =', j, '   k =', k, '   ibio =', ibio
+                write(*,*) 'yt_debug:     dtrc_dt(k,ibio) =', dtrc_dt(k,ibio)
+                error stop
+              endif
+              !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
               IF(dtrc_dt(k,ibio)*0.0_r8 /= 0.0_r8) THEN  !!!---------Error Handling: Check NAN
 !                write(50,*) i,j,k,itrc,dtrc_dt(k,ibio),ssO2flux, ssCO2flux,rmask(i,j) 
 !                write(50,*) t(i,j,k,nnew,:)
@@ -574,6 +714,19 @@
               t(i,j,k,nnew,ibio)=t(i,j,k,nnew,ibio)                    &
     &                              +dtrc_dt(k,ibio)*dt(ng)*Hz(i,j,k)
     
+              !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+              ! if (isnan(t(i,j,k,nnew,ibio)) .or. abs(t(i,j,k,nnew,ibio)) > huge(t(i,j,k,nnew,ibio))) then
+              ! if (isnan(t(i,j,k,nnew,ibio)) .or. abs(t(i,j,k,nnew,ibio)) > 1.0d22) then
+              if (isnan(t(i,j,k,nnew,ibio)) .or. abs(t(i,j,k,nnew,ibio)) > 1.0d22) then
+                write(*,*) 'yt_debug: reef_ecosys.h      i =', i, '   j =', j, '   k =', k, '   ibio =', ibio
+                write(*,*) 'yt_debug:     t(i,j,k,nnew,ibio) =', t(i,j,k,nnew,ibio)
+                error stop
+              else if (t(i,j,k,nnew,ibio) < -100d0) then
+                write(*,*) 'yt_debug: reef_ecosys.h      i =', i, '   j =', j, '   k =', k, '   ibio =', ibio &
+                , '   t(i,j,k,nnew,ibio) =', t(i,j,k,nnew,ibio)
+              endif
+              !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
               t(i,j,k,nnew,ibio)=MAX(0.0_r8,t(i,j,k,nnew,ibio))!!!---------Error Handling
               
             END DO

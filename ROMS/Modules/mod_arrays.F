@@ -186,7 +186,13 @@
 !!!  Initialize coral polyp model parameters
 !!!----------------------------------------------------------------------
 #ifdef REEF_ECOSYS
-          CALL initialize_reef_ecosys(ng, Ngrids, LBi, UBi, LBj, UBj)
+          CALL initialize_reef_ecosys(ng, Ngrids, LBi, UBi, LBj, UBj   &
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+# ifdef SEDIMENT_ECOSYS
+          , Nsed(ng)                                  &   ! Number of vertical biological sediment layers
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+          )
 #endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
           IF (LuvSrc(ng).or.LwSrc(ng).or.ANY(LtracerSrc(:,ng))) THEN

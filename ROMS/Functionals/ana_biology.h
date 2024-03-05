@@ -48,6 +48,11 @@
 #ifdef REEF_ECOSYS
      &                       OCEAN(ng) % HisBio2d,                      &
      &                       OCEAN(ng) % HisBio3d,                      &
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+# ifdef SEDIMENT_ECOSYS
+     &                       OCEAN(ng) % HisBiosed3d,                   &
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add 
      &                       GRID(ng)  % z_r,                           &
 #endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
@@ -120,6 +125,11 @@
 #if defined REEF_ECOSYS
      &                             HisBio2d,                            &
      &                             HisBio3d,                            &
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+# ifdef SEDIMENT_ECOSYS
+     &                             HisBiosed3d,                         &
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
      &                             z_r,                                 &
 #endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
@@ -190,6 +200,11 @@
 # if defined REEF_ECOSYS
       real(r8), intent(inout) :: HisBio2d(LBi:,LBj:,:)
       real(r8), intent(inout) :: HisBio3d(LBi:,LBj:,:,:)
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+# ifdef SEDIMENT_ECOSYS
+      real(r8), intent(inout) :: HisBiosed3d(LBi:,LBj:,:,:)
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
       real(r8), intent(inout) :: z_r(LBi:,LBj:,:)
 # endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
@@ -244,6 +259,11 @@
 # if defined REEF_ECOSYS
       real(r8), intent(inout) :: HisBio2d(LBi:UBi,LBj:UBj,NHbio2d)
       real(r8), intent(inout) :: HisBio3d(LBi:UBi,LBj:UBj,UBk,NHbio3d)
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+# ifdef SEDIMENT_ECOSYS
+      real(r8), intent(inout) :: HisBiosed3d(LBi:UBi,LBj:UBj,Nsed,NHbiosed3d)
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
       real(r8), intent(inout) :: z_r(LBi:UBi,LBj:UBj,N(ng))
 # endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
@@ -304,6 +324,12 @@
       logical, save :: first = .TRUE.
 
       integer :: i, is, itrc, j, k
+
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+#  if defined SEDIMENT_ECOSYS
+      integer :: k_sed
+#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
 #if defined REEF_ECOSYS
@@ -1094,6 +1120,77 @@
       END DO
 
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
+
+! !!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+! # ifdef SEDIMENT_ECOSYS
+! #  if defined SHIRAHO_REEF
+!       DO j=JstrT,JendT
+!         DO i=IstrT,IendT
+! ! yuta_edits_for_masa   Fill in these initial values for analytical start conditions!!!
+! ! yuta_edits_for_masa   different conditions can be used for different domains ex (SHIRAHO_REEF)
+!           ! HisBio2d(i,j,iSdPg) = 0.0_r8
+!           ! HisBio2d(i,j,iSdR ) = 0.0_r8
+!           ! HisBio2d(i,j,iSdG ) = 0.0_r8
+
+!           DO k_sed=1,Nsed(ng)
+!             HisBiosed3d(i,j,k_sed,iSdporo) = 1.0_r8
+!             HisBiosed3d(i,j,k_sed,iSdTmp ) = 20.0_r8
+!             HisBiosed3d(i,j,k_sed,iSdSal ) = 34.0_r8
+!             ! HisBiosed3d(i,j,k_sed,iSdpH  ) = 8.0_r8
+!             HisBiosed3d(i,j,k_sed,iSdTA  ) = 2000.0_r8
+!             ! HisBiosed3d(i,j,k_sed,iSdDIC ) = 0.0_r8
+!             HisBiosed3d(i,j,k_sed,iSdO2  ) = 0.0_r8
+!             HisBiosed3d(i,j,k_sed,iSdCO2 ) = 0.0_r8
+!             HisBiosed3d(i,j,k_sed,iSdN2  ) = 0.0_r8
+! #   if defined ORGANIC_MATTER
+!             HisBiosed3d(i,j,k_sed,iSdDOCf) = 0.0_r8
+!             HisBiosed3d(i,j,k_sed,iSdDOCs) = 0.0_r8
+!             HisBiosed3d(i,j,k_sed,iSdPOCf) = 0.0_r8
+!             HisBiosed3d(i,j,k_sed,iSdPOCs) = 0.0_r8
+!             HisBiosed3d(i,j,k_sed,iSdPOCn) = 0.0_r8
+! #   endif
+! #   if defined NUTRIENTS
+!             HisBiosed3d(i,j,k_sed,iSdNO3 ) = 0.0_r8
+!             HisBiosed3d(i,j,k_sed,iSdNH4 ) = 0.0_r8
+!             HisBiosed3d(i,j,k_sed,iSdPO4 ) = 0.0_r8
+! #    if defined ORGANIC_MATTER
+!             HisBiosed3d(i,j,k_sed,iSdDONf ) = 0.0_r8
+!             HisBiosed3d(i,j,k_sed,iSdDONs ) = 0.0_r8
+!             HisBiosed3d(i,j,k_sed,iSdPONf ) = 0.0_r8
+!             HisBiosed3d(i,j,k_sed,iSdPONs ) = 0.0_r8
+!             HisBiosed3d(i,j,k_sed,iSdPONn ) = 0.0_r8
+!             HisBiosed3d(i,j,k_sed,iSdDOPf ) = 0.0_r8
+!             HisBiosed3d(i,j,k_sed,iSdDOPs ) = 0.0_r8
+!             HisBiosed3d(i,j,k_sed,iSdPOPf ) = 0.0_r8
+!             HisBiosed3d(i,j,k_sed,iSdPOPs ) = 0.0_r8
+!             HisBiosed3d(i,j,k_sed,iSdPOPn ) = 0.0_r8
+! #    endif
+! #   endif
+! #   if defined SULFATE
+!             HisBiosed3d(i,j,k_sed,iSdMn2 ) = 0.0_r8
+!             HisBiosed3d(i,j,k_sed,iSdMnO2) = 0.0_r8
+!             HisBiosed3d(i,j,k_sed,iSdFe2 ) = 0.0_r8
+!             HisBiosed3d(i,j,k_sed,iSdFeS ) = 0.0_r8
+!             HisBiosed3d(i,j,k_sed,iSdFeS2) = 0.0_r8
+!             HisBiosed3d(i,j,k_sed,iSdFeOOH    ) = 0.0_r8
+!             HisBiosed3d(i,j,k_sed,iSdFeOOH_PO4) = 0.0_r8
+!             HisBiosed3d(i,j,k_sed,iSdH2S ) = 0.0_r8
+!             HisBiosed3d(i,j,k_sed,iSdSO4 ) = 28000.0_r8
+!             HisBiosed3d(i,j,k_sed,iSdS0  ) = 0.0_r8
+!           ENDDO
+! #   endif
+!         ENDDO
+!       ENDDO
+! #  else
+!       DO j=JstrT,JendT
+!         DO i=IstrT,IendT
+! ! yuta_edits_for_masa   you can alo set a default value for all other projedts. 
+!         ENDDO
+!       ENDDO
+! #  endif
+! # endif
+! !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+
 #elif defined BEST_NPZ
 # include "ana_biology_BESTnpz.h"
 #elif defined BIO_GOANPZ

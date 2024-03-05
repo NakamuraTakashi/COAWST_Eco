@@ -30,6 +30,7 @@
 !                       'v3dvar' => 3D V-variable.                            !
 !                       'w3dvar' => 3D W-variable.                            !
 !                       'b3dvar' => 3D BED-sediment.                          !
+!                       'd3dvar' => 3D Sed_Eco-layer.                         !   yuta_edits_for_masa
 !       scale         Scale to convert input data to model units.             !
 !                                                                             !
 !  Enclose Vinfo variables with single quotes so this file can be read with   !
@@ -9835,44 +9836,6 @@
     'r2dvar'
     1.0d0
 
-  'sediment_Pg'                                             ! Input/Output
-    'sediment gross photosynthetic rate'
-    'mmol m-2 s-1'                                 ! [mmol m-2 s-1]
-    'Pg, scalar, series'
-    'ocean_time'
-    'iHbio2(iSdPg)'
-    'r2dvar'
-    1.0d0
-
-  'sediment_R'                                             ! Input/Output
-    'sediment respiration rate'
-    'mmol m-2 s-1'                                 ! [mmol m-2 s-1]
-    'R, scalar, series'
-    'ocean_time'
-    'iHbio2(iSd_R)'
-    'r2dvar'
-    1.0d0
-
-  'sediment_Pn'                                             ! Input/Output
-    'sediment net photosynthetic rate'
-    'mmol m-2 s-1'                                 ! [mmol m-2 s-1]
-    'Pn, scalar, series'
-    'ocean_time'
-    'iHbio2(iSdPn)'
-    'r2dvar'
-    1.0d0
-
-  'sediment_G'                                             ! Input/Output
-    'sediment net calcification rate'
-    'mmol m-2 s-1'                                 ! [mmol m-2 s-1]
-    'G, scalar, series'
-    'ocean_time'
-    'iHbio2(iSd_G)'
-    'r2dvar'
-    1.0d0
-
-  !---------------------------------------------------
-
   'd13C_DIC'                                              ! Input/Output
     'carbon isotope ratio of DIC'
     'per mill VPDB'                                       ! [per mill]
@@ -10874,3 +10837,347 @@
     1.0d0
 
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
+
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+  !
+  !------------------------------------------------------------------------------
+  !  SEDIMENT_ECOSYS variables.
+  !------------------------------------------------------------------------------
+  !
+
+  ! 3D sediment variables
+
+  'sediment_poro'                                             ! Input/Output
+    'SedEco: porosity'
+    'cm_w3 cm_s-3'                                 ! (cm_w3 cm_s-3)
+    'sediment_poro, scalar, series'
+    'ocean_time'
+    'iHbiosed3(iSdporo)'
+    'd3dvar'
+    1.0d0
+
+  'sediment_Tmp'                                             ! Input/Output
+    'SedEco: temperature'
+    'ºC'                                 ! (ºC)
+    'sediment_Tmp, scalar, series'
+    'ocean_time'
+    'iHbiosed3(iSdTmp)'
+    'd3dvar'
+    1.0d0
+
+  'sediment_Sal'                                             ! Input/Output
+    'SedEco: salinity'
+    'PSU'                                 ! (PSU)
+    'sediment_Sal, scalar, series'
+    'ocean_time'
+    'iHbiosed3(iSdSal)'
+    'd3dvar'
+    1.0d0
+
+  ! 'sediment_pH'                                             ! Input/Output
+  !   'SedEco: pH'
+  !   'pH'                                 ! (pH)
+  !   'sediment_pH, scalar, series'
+  !   'ocean_time'
+  !   'iHbiosed3(iSdpH)'
+  !   'd3dvar'
+  !   1.0d0
+
+  'sediment_TA'                                             ! Input/Output
+    'SedEco: total alkalinity'
+    'umol kg-1'                                 ! (µmol kg-1)
+    'sediment_TA, scalar, series'
+    'ocean_time'
+    'iHbiosed3(iSdTA)'
+    'd3dvar'
+    1.0d0
+
+  ! 'sediment_DIC'                                             ! Input/Output
+  !   'SedEco: dissolved inorganic carbon'
+  !   'umolC kg-1'                                 ! (µmol kg-1)
+  !   'sediment_pH, scalar, series'
+  !   'ocean_time'
+  !   'iHbiosed3(iSdDIC)'
+  !   'd3dvar'
+  !   1.0d0
+
+  'sediment_O2'                                             ! Input/Output
+    'SedEco: dissolved oxygen'
+    'umolO2 L-1'                                 ! (µmol l-1)
+    'sediment_O2, scalar, series'
+    'ocean_time'
+    'iHbiosed3(iSdO2)'
+    'd3dvar'
+    1.0d0
+
+  'sediment_CO2'                                             ! Input/Output
+    'SedEco: dissolved carbon dioxide'
+    'umolCO2 L-1'                                 ! (µmol l-1)
+    'sediment_CO2, scalar, series'
+    'ocean_time'
+    'iHbiosed3(iSdCO2)'
+    'd3dvar'
+    1.0d0
+
+  'sediment_N2'                                             ! Input/Output
+    'SedEco: dissolved nitrogen'
+    'umolN2 L-1'                                 ! (µmol l-1)
+    'sediment_N2, scalar, series'
+    'ocean_time'
+    'iHbiosed3(iSdN2)'
+    'd3dvar'
+    1.0d0
+
+  'sediment_DOCf'                                             ! Input/Output
+    'SedEco: dissolved organic carbon (fast: labile)'
+    'µmolC L-1'                                 ! (µmol l-1)
+    'sediment_DOCf, scalar, series'
+    'ocean_time'
+    'iHbiosed3(iSdDOCf)'
+    'd3dvar'
+    1.0d0
+
+  'sediment_DOCs'                                             ! Input/Output
+    'SedEco: dissolved organic carbon (slow: refractory)'
+    'µmolC L-1'                                 ! (µmol l-1)
+    'sediment_DOCs, scalar, series'
+    'ocean_time'
+    'iHbiosed3(iSdDOCs)'
+    'd3dvar'
+    1.0d0
+
+  'sediment_POCf'                                             ! Input/Output
+    'SedEco: particulate organic carbon (fast: labile)'
+    'nmolC g-1'                                 ! (nmol g-1)
+    'sediment_POCf, scalar, series'
+    'ocean_time'
+    'iHbiosed3(iSdPOCf)'
+    'd3dvar'
+    1.0d0
+
+  'sediment_POCs'                                             ! Input/Output
+    'SedEco: particulate organic carbon (slow: refractory)'
+    'nmolC g-1'                                 ! (nmol g-1)
+    'sediment_POCs, scalar, series'
+    'ocean_time'
+    'iHbiosed3(iSdPOCs)'
+    'd3dvar'
+    1.0d0
+
+  'sediment_POCn'                                             ! Input/Output
+    'SedEco: particulate organic carbon (non-degradable)'
+    'nmolC g-1'                                 ! (nmol g-1)
+    'sediment_POCn, scalar, series'
+    'ocean_time'
+    'iHbiosed3(iSdPOCn)'
+    'd3dvar'
+    1.0d0
+
+  'sediment_NO3'                                             ! Input/Output
+    'SedEco: nitrate'
+    'umolNO3 L-1'                                 ! (µmol l-1)
+    'sediment_NO3, scalar, series'
+    'ocean_time'
+    'iHbiosed3(iSdNO3)'
+    'd3dvar'
+    1.0d0
+
+  'sediment_NH4'                                             ! Input/Output
+    'SedEco: ammonium'
+    'umolNH4 L-1'                                 ! (µmol l-1)
+    'sediment_NH4, scalar, series'
+    'ocean_time'
+    'iHbiosed3(iSdNH4)'
+    'd3dvar'
+    1.0d0
+
+  'sediment_PO4'                                             ! Input/Output
+    'SedEco: phosphate'
+    'umolPO4 L-1'                                 ! (µmol l-1)
+    'sediment_PO4, scalar, series'
+    'ocean_time'
+    'iHbiosed3(iSdPO4)'
+    'd3dvar'
+    1.0d0
+
+  'sediment_DONf'                                             ! Input/Output
+    'SedEco: dissolved organic nitrogen (fast: labile)'
+    'umolN L-1'                                 ! (µmol l-1)
+    'sediment_DONf, scalar, series'
+    'ocean_time'
+    'iHbiosed3(iSdDONf)'
+    'd3dvar'
+    1.0d0
+
+  'sediment_DONs'                                             ! Input/Output
+    'SedEco: dissolved organic nitrogen (slow: refractory)'
+    'umolN L-1'                                 ! (µmol l-1)
+    'sediment_DONs, scalar, series'
+    'ocean_time'
+    'iHbiosed3(iSdDONs)'
+    'd3dvar'
+    1.0d0
+
+  'sediment_PONf'                                             ! Input/Output
+    'SedEco: particulate organic nitrogen (fast: labile)'
+    'umolN L-1'                                 ! (µmol l-1)
+    'sediment_PONf, scalar, series'
+    'ocean_time'
+    'iHbiosed3(iSdPONf)'
+    'd3dvar'
+    1.0d0
+
+  'sediment_PONs'                                             ! Input/Output
+    'SedEco: particulate organic nitrogen (slow: refractory)'
+    'umolN L-1'                                 ! (µmol l-1)
+    'sediment_PONs, scalar, series'
+    'ocean_time'
+    'iHbiosed3(iSdPONs)'
+    'd3dvar'
+    1.0d0
+
+  'sediment_PONn'                                             ! Input/Output
+    'SedEco: particulate organic nitrogen (non-degradable)'
+    'umolN L-1'                                 ! (µmol l-1)
+    'sediment_PONn, scalar, series'
+    'ocean_time'
+    'iHbiosed3(iSdPONn)'
+    'd3dvar'
+    1.0d0
+
+  'sediment_DOPf'                                             ! Input/Output
+    'SedEco: dissolved organic phosphorus (fast: labile)'
+    'umolN L-1'                                 ! (µmol l-1)
+    'sediment_DOPf, scalar, series'
+    'ocean_time'
+    'iHbiosed3(iSdDOPf)'
+    'd3dvar'
+    1.0d0
+    
+  'sediment_DOPs'                                             ! Input/Output
+    'SedEco: dissolved organic phosphorus (slow: refractory)'
+    'umolN L-1'                                 ! (µmol l-1)
+    'sediment_DOPs, scalar, series'
+    'ocean_time'
+    'iHbiosed3(iSdDOPs)'
+    'd3dvar'
+    1.0d0
+
+  'sediment_POPf'                                             ! Input/Output
+    'SedEco: particulate organic phosphorus (fast: labile)'
+    'umolN L-1'                                 ! (µmol l-1)
+    'sediment_POPf, scalar, series'
+    'ocean_time'
+    'iHbiosed3(iSdPOPf)'
+    'd3dvar'
+    1.0d0
+
+  'sediment_POPs'                                             ! Input/Output
+    'SedEco: particulate organic phosphorus (slow: refractory)'
+    'umolN L-1'                                 ! (µmol l-1)
+    'sediment_POPs, scalar, series'
+    'ocean_time'
+    'iHbiosed3(iSdPOPs)'
+    'd3dvar'
+    1.0d0
+
+  'sediment_POPn'                                             ! Input/Output
+    'SedEco: particulate organic phosphorus (non-degradable)'
+    'umolN L-1'                                 ! (µmol l-1)
+    'sediment_POPn, scalar, series'
+    'ocean_time'
+    'iHbiosed3(iSdPOPn)'
+    'd3dvar'
+    1.0d0
+
+  'sediment_Mn2'                                             ! Input/Output
+    'SedEco: manganese ion'
+    'umolMn L-1'                                 ! (µmol l-1)
+    'sediment_Mn2, scalar, series'
+    'ocean_time'
+    'iHbiosed3(iSdMn2)'
+    'd3dvar'
+    1.0d0
+
+  'sediment_MnO2'                                             ! Input/Output
+    'SedEco: manganese dioxide'
+    'umolMnO2 L-1'                                 ! (µmol l-1)
+    'sediment_MnO2, scalar, series'
+    'ocean_time'
+    'iHbiosed3(iSdMnO2)'
+    'd3dvar'
+    1.0d0
+
+  'sediment_Fe2'                                             ! Input/Output
+    'SedEco: iron(II)'
+    'umolFe L-1'                                 ! (µmol l-1)
+    'sediment_Fe2, scalar, series'
+    'ocean_time'
+    'iHbiosed3(iSdFe2)'
+    'd3dvar'
+    1.0d0
+
+  'sediment_FeS'                                             ! Input/Output
+    'SedEco: iron sulfide'
+    'nmolFeS g-1'                                 ! (nmol g-1)
+    'sediment_FeS, scalar, series'
+    'ocean_time'
+    'iHbiosed3(iSdFeS)'
+    'd3dvar'
+    1.0d0
+
+  'sediment_FeS2'                                             ! Input/Output
+    'SedEco: pyrite'
+    'nmolFeS2 g-1'                                 ! (nmol g-1)
+    'sediment_FeS2, scalar, series'
+    'ocean_time'
+    'iHbiosed3(iSdFeS2)'
+    'd3dvar'
+    1.0d0
+
+  'sediment_FeOOH'                                             ! Input/Output
+    'SedEco: iron hydroxide'
+    'nmolFeOOH g-1'                                 ! (nmol g-1)
+    'sediment_FeOOH, scalar, series'
+    'ocean_time'
+    'iHbiosed3(iSdFeOOH)'
+    'd3dvar'
+    1.0d0
+
+  'sediment_FeOOH_PO4'                                             ! Input/Output
+    'SedEco: iron-bound phosphate (FeOOH=PO43-)'
+    'nmolFeOOH_PO4 g-1'                                 ! (nmol g-1)
+    'sediment_FeOOH_PO4, scalar, series'
+    'ocean_time'
+    'iHbiosed3(iSdFeOOH_PO4)'
+    'd3dvar'
+    1.0d0
+
+  'sediment_H2S'                                             ! Input/Output
+    'SedEco: hydrogen sulfide'
+    'umolH2S L-1'                                 ! (µmol l-1)
+    'sediment_H2S, scalar, series'
+    'ocean_time'
+    'iHbiosed3(iSdH2S)'
+    'd3dvar'
+    1.0d0
+
+  'sediment_SO4'                                             ! Input/Output
+    'SedEco: sulfate'
+    'umolSO4 L-1'                                 ! (µmol l-1)
+    'sediment_SO4, scalar, series'
+    'ocean_time'
+    'iHbiosed3(iSdSO4)'
+    'd3dvar'
+    1.0d0
+
+  'sediment_S0'                                             ! Input/Output
+    'SedEco: sulfur'
+    'nmolS g-1'                                 ! (nmol g-1)
+    'sediment_S0, scalar, series'
+    'ocean_time'
+    'iHbiosed3(iSdS0)'
+    'd3dvar'
+    1.0d0
+
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add

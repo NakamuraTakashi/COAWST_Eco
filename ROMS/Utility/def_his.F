@@ -63,7 +63,12 @@
       integer :: t2dobc(4)
 #endif
 
-#if defined VEGETATION && (defined VEG_DRAG || defined VEG_BIOMASS)
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+#if defined SEDIMENT_ECOSYS
+      integer :: DimIDs(36)
+#elif defined VEGETATION && (defined VEG_DRAG || defined VEG_BIOMASS)
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+! #if defined VEGETATION && (defined VEG_DRAG || defined VEG_BIOMASS)
       integer :: DimIDs(35)
 #elif defined ESTUARYBGC
       integer :: DimIDs(34)
@@ -95,6 +100,11 @@
 # endif
 #endif
       integer :: t3dgrd(4), u3dgrd(4), v3dgrd(4), w3dgrd(4)
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+#ifdef SEDIMENT_ECOSYS
+      integer :: biosed3dgrd(4)
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 # ifdef ADJUST_BOUNDARY
       integer :: t3dobc(5)
 # endif
@@ -332,6 +342,16 @@
 # endif
 #endif
 
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+#if defined SEDIMENT_ECOSYS
+        status=def_dim(ng, iNLM, HIS(ng)%ncid, ncname, 'sed_eco_layer', &
+     &                 Nsed(ng), DimIDs(36))
+        IF (FoundError(exit_flag, NoError, __LINE__,                    &
+     &                 __FILE__)) RETURN
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+
+
 #ifdef ADJUST_BOUNDARY
         status=def_dim(ng, iNLM, HIS(ng)%ncid, ncname, 'obc_adjust',    &
      &                 Nbrec(ng), DimIDs(31))
@@ -380,6 +400,14 @@
         t3dgrd(4)=DimIDs(12)
 # endif
 #endif
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+#ifdef SEDIMENT_ECOSYS
+        biosed3dgrd(1)=DimIDs( 1)
+        biosed3dgrd(2)=DimIDs( 5)
+        biosed3dgrd(3)=DimIDs(36)
+        biosed3dgrd(4)=DimIDs(12)
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 #ifdef ADJUST_BOUNDARY
         t2dobc(1)=IorJdim
         t2dobc(2)=DimIDs(14)
@@ -4280,6 +4308,33 @@
         END DO
 
 #endif
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+#if defined SEDIMENT_ECOSYS
+!
+!  Define time-varying Biological sediment 3D field.
+!
+        DO i=1,NHbiosed3d
+          ifield=iHbiosed3(i)
+          IF (Hout(ifield,ng)) THEN
+            Vinfo( 1)=Vname(1,ifield)
+            Vinfo( 2)=Vname(2,ifield)
+            Vinfo( 3)=Vname(3,ifield)
+            Vinfo(14)=Vname(4,ifield)
+            Vinfo(16)=Vname(1,idtime)
+# if defined WRITE_WATER && defined MASKING
+            Vinfo(20)='mask_rho'
+# endif
+            Vinfo(22)='coordinates'
+            Aval(5)=REAL(Iinfo(1,ifield,ng),r8)
+            status=def_var(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(ifield),   &
+      &                     NF_FOUT, 4, biosed3dgrd, Aval, Vinfo, ncname)
+            IF (exit_flag.ne.NoError) RETURN
+          END IF
+        END DO
+
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+
 
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !

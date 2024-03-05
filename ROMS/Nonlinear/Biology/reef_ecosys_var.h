@@ -551,21 +551,97 @@
               CASE ('iHbio2(iAgPn)')
                 iHbio2(iAgPn)=varid
 #endif
-#ifdef SEDIMENT_ECOSYS
-              CASE ('iHbio2(iSdPg)')
-                iHbio2(iSdPg)=varid
-              CASE ('iHbio2(iSd_R)')
-                iHbio2(iSd_R)=varid
-              CASE ('iHbio2(iSdPn)')
-                iHbio2(iSdPn)=varid
-              CASE ('iHbio2(iSd_G)')
-                iHbio2(iSd_G)=varid
-#endif
-
 # ifdef CARBON_ISOTOPE
               CASE ('iHbio3(id13C)')
                 iHbio3(id13C)=varid
 # endif
+
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+#ifdef SEDIMENT_ECOSYS
+              CASE ('iHbiosed3(iSdporo)')
+                iHbiosed3(iSdporo)=varid
+              CASE ('iHbiosed3(iSdTmp)')
+                iHbiosed3(iSdTmp)=varid
+              CASE ('iHbiosed3(iSdSal)')
+                iHbiosed3(iSdSal)=varid
+              ! CASE ('iHbiosed3(iSdpH)')
+              !   iHbiosed3(iSdpH)=varid
+              CASE ('iHbiosed3(iSdTA)')
+                iHbiosed3(iSdTA)=varid
+              ! CASE ('iHbiosed3(iSdDIC)')
+              !   iHbiosed3(iSdDIC)=varid
+              CASE ('iHbiosed3(iSdO2)')
+                iHbiosed3(iSdO2)=varid
+              CASE ('iHbiosed3(iSdCO2)')
+                iHbiosed3(iSdCO2)=varid
+              CASE ('iHbiosed3(iSdN2)')
+                iHbiosed3(iSdN2)=varid
+# if defined ORGANIC_MATTER
+              CASE ('iHbiosed3(iSdDOCf)')
+                iHbiosed3(iSdDOCf)=varid
+              CASE ('iHbiosed3(iSdDOCs)')
+                iHbiosed3(iSdDOCs)=varid
+              CASE ('iHbiosed3(iSdPOCf)')
+                iHbiosed3(iSdPOCf)=varid
+              CASE ('iHbiosed3(iSdPOCs)')
+                iHbiosed3(iSdPOCs)=varid
+              CASE ('iHbiosed3(iSdPOCn)')
+                iHbiosed3(iSdPOCn)=varid
+# endif
+# if defined NUTRIENTS
+              CASE ('iHbiosed3(iSdNO3)')
+                iHbiosed3(iSdNO3)=varid
+              CASE ('iHbiosed3(iSdNH4)')
+                iHbiosed3(iSdNH4)=varid
+              CASE ('iHbiosed3(iSdPO4)')
+                iHbiosed3(iSdPO4)=varid
+#  if defined ORGANIC_MATTER
+              CASE ('iHbiosed3(iSdDONf)')
+                iHbiosed3(iSdDONf)=varid
+              CASE ('iHbiosed3(iSdDONs)')
+                iHbiosed3(iSdDONs)=varid
+              CASE ('iHbiosed3(iSdPONf)')
+                iHbiosed3(iSdPONf)=varid
+              CASE ('iHbiosed3(iSdPONs)')
+                iHbiosed3(iSdPONs)=varid
+              CASE ('iHbiosed3(iSdPONn)')
+                iHbiosed3(iSdPONn)=varid
+              CASE ('iHbiosed3(iSdDOPf)')
+                iHbiosed3(iSdDOPf)=varid
+              CASE ('iHbiosed3(iSdDOPs)')
+                iHbiosed3(iSdDOPs)=varid
+              CASE ('iHbiosed3(iSdPOPf)')
+                iHbiosed3(iSdPOPf)=varid
+              CASE ('iHbiosed3(iSdPOPs)')
+                iHbiosed3(iSdPOPs)=varid
+              CASE ('iHbiosed3(iSdPOPn)')
+                iHbiosed3(iSdPOPn)=varid
+#  endif
+# endif
+# if defined SULFATE
+              CASE ('iHbiosed3(iSdMn2)')
+                iHbiosed3(iSdMn2)=varid
+              CASE ('iHbiosed3(iSdMnO2)')
+                iHbiosed3(iSdMnO2)=varid
+              CASE ('iHbiosed3(iSdFe2)')
+                iHbiosed3(iSdFe2)=varid
+              CASE ('iHbiosed3(iSdFeS)')
+                iHbiosed3(iSdFeS)=varid
+              CASE ('iHbiosed3(iSdFeS2)')
+                iHbiosed3(iSdFeS2)=varid
+              CASE ('iHbiosed3(iSdFeOOH)')
+                iHbiosed3(iSdFeOOH)=varid
+              CASE ('iHbiosed3(iSdFeOOH_PO4)')
+                iHbiosed3(iSdFeOOH_PO4)=varid
+              CASE ('iHbiosed3(iSdH2S)')
+                iHbiosed3(iSdH2S)=varid
+              CASE ('iHbiosed3(iSdSO4)')
+                iHbiosed3(iSdSO4)=varid
+              CASE ('iHbiosed3(iSdS0)')
+                iHbiosed3(iSdS0)=varid
+# endif
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 
 /*
 **  Biological tracers open boundary conditions.

@@ -59,7 +59,8 @@
       integer :: MinnerDim, NinnerDim, NouterDim
       integer :: vardim(2)
 # endif
-      integer :: DimIDs(32), t2dgrd(3), u2dgrd(3), v2dgrd(3)
+      ! integer :: DimIDs(32), t2dgrd(3), u2dgrd(3), v2dgrd(3) 
+      integer :: DimIDs(36), t2dgrd(3), u2dgrd(3), v2dgrd(3) ! yuta_edits_for_masa
 # ifdef ADJUST_BOUNDARY
       integer :: t2dobc(4)
 # endif
@@ -76,6 +77,11 @@
       integer :: t3dfrc(4)
 #  endif
 # endif
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+# ifdef SEDIMENT_ECOSYS
+      integer :: biosed3dgrd(4)
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 # ifdef ADJUST_WSTRESS
       integer :: u3dfrc(4), v3dfrc(4)
 # endif
@@ -247,6 +253,15 @@
 #   endif
 #  endif
 
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+#  ifdef SEDIMENT_ECOSYS
+        status=def_dim(ng, iADM, ADM(ng)%ncid, ncname, 'sed_eco_layer',          &
+     &                 Nsed(ng), DimIDs(36))
+        IF (FoundError(exit_flag, NoError, __LINE__,                    &
+     &                 __FILE__)) RETURN
+#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+
 #  ifdef ECOSIM
         status=def_dim(ng, iADM, ADM(ng)%ncid, ncname, 'Nphy',          &
      &                 Nphy, DimIDs(25))
@@ -363,6 +378,14 @@
         t3dfrc(4)=DimIDs(12)
 #  endif
 # endif
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+# ifdef SEDIMENT_ECOSYS
+        biosed3dgrd(1)=DimIDs( 1)
+        biosed3dgrd(2)=DimIDs( 5)
+        biosed3dgrd(3)=DimIDs(36)
+        biosed3dgrd(4)=DimIDs(12)
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 # ifdef ADJUST_BOUNDARY
         t2dobc(1)=IorJdim
         t2dobc(2)=DimIDs(14)

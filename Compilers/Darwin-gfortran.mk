@@ -28,7 +28,7 @@
 # First the defaults
 #
                FC := gfortran
-           FFLAGS := -frepack-arrays
+           FFLAGS := -frepack-arrays -fallow-argument-mismatch
               CPP := /usr/bin/cpp
          CPPFLAGS := -P -traditional
                CC := gcc
@@ -51,12 +51,12 @@
 #
 
 ifdef USE_NETCDF4
-        NF_CONFIG ?= nf-config
-    NETCDF_INCDIR ?= $(shell $(NF_CONFIG) --prefix)/include
-             LIBS := $(shell $(NF_CONFIG) --flibs)
+        NF_CONFIG ?= /usr/local/Cellar/netcdf/4.9.0/bin/nf-config
+    NETCDF_INCDIR ?= /usr/local/Cellar/netcdf/4.9.0/include
+             LIBS := -L/usr/local/Cellar/netcdf/4.9.0/lib -L/usr/local/Cellar/netcdf-fortran/4.6.0/lib -lnetcdff -lnetcdf -lnetcdf
 else
-    NETCDF_INCDIR ?= /usr/local/include
-    NETCDF_LIBDIR ?= /usr/local/lib
+    NETCDF_INCDIR ?= /usr/local/Cellar/netcdf/4.9.0/include
+    NETCDF_LIBDIR ?= /usr/local/Cellar/netcdf/4.9.0/lib
              LIBS := -L$(NETCDF_LIBDIR) -lnetcdf -lnetcdff
 endif
 
