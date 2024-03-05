@@ -1,6 +1,6 @@
       SUBROUTINE biology (ng,tile)
 
-!!!=== Copyright (c) 2012-2020 Takashi NAKAMURA  =====
+!!!=== Copyright (c) 2012-2024 Takashi NAKAMURA  =====
 !***********************************************************************
 !  References:                                                         !
 !                                                                      !
@@ -450,6 +450,7 @@
 # endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
      &            ,CrlIter(ng)         &   ! Internal loop counts of coral polyp model
+     &            ,SedIter(ng)         &   ! Internal loop counts of sediment ecosystem model
      &            ,dt(ng)              &   ! Time step (sec)
      &            ,Hz(i,j,:)           &   ! dz(N): vertical grid size (m)
      &            ,PFDsurf             &   ! Sea surface photon flux density (umol m-2 s-1)

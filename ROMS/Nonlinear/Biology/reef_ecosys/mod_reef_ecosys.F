@@ -1,5 +1,5 @@
 
-!!!=== Copyright (c) 2012-2020 Takashi NAKAMURA  =====
+!!!=== Copyright (c) 2012-2024 Takashi NAKAMURA  =====
 
 #include "cppdefs.h"
 
@@ -72,6 +72,7 @@ contains
 #endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
     , isplitc        &   ! Internal loop counts of coral polyp model
+    , isplitsed      &   ! Internal loop counts of sediment ecosystem model
     , dt             &   ! Time step (sec)
     , dz             &   ! dz(N): vertical grid size (m)
     , PFDsurf        &   ! Sea surface photon flux density (umol m-2 s-1)
@@ -255,6 +256,7 @@ contains
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 
     integer, intent(in) :: isplitc     
+    integer, intent(in) :: isplitsed     
     real(8), intent(in) :: dt         
     real(8), intent(in) :: dz(N)      
     real(8), intent(in) :: PFDsurf    
@@ -391,7 +393,8 @@ contains
 #endif
     
     real(8) :: dtc     ! Internal time step for coral polyp model (sec)
-
+    real(8) :: dtsed   ! Internal time step for sediment ecosystem model (sec)
+  
     integer :: k, m, itrc          
     integer :: yt_iter ! yt_debug
     integer :: icl, itic
@@ -506,6 +509,7 @@ contains
 !-----------------------------------------------------------------------
       
     dtc = dt/isplitc                  ! Internal time step for coral polyp model (sec)
+    dtsed = dt/isplitsed              ! Internal time step for sediment ecosystem model (sec)
     
     DO k=1,N
 
@@ -1599,254 +1603,305 @@ contains
 ! Compute sediment ecosystem model.
 !-----------------------------------------------------------------------
 !
+    IF(p_sand .gt. 0.0d0) THEN
+# ifdef SEDIMENT_EMPIRICAL
+!!!  Empirical sediment model
+      CALL sedecosys     &
+!       input parameters
+        ( ng, i, j       &   ! ng: nested grid number; i,j: position
+        , PFDbott        &   ! Photon flux density (umol m-2 s-1)
+        , rho_sw(1)      &   ! Density of seawater (g cm-3)
+        , DIC(1)         &   ! DIC (umol kg-1)
+        , TA (1)         &   ! TA (umol kg-1)
+        , DOx(1)         &   ! DO (umol L-1)
+#  if defined NUTRIENTS         
+        , NH4(1)         &   ! NH4 concentration (umol L-1)
+#  endif
+#  if defined CARBON_ISOTOPE
+        , DI13C(1)       &   ! 13C of DIC (umol kg-1)
+#  endif
+!       output parameters
+        , Flux_DIC       &   ! DIC uptake rate (mmol m-2 s-1)  * direction of water column to coral is positive
+        , Flux_TA        &   ! DIC uptake rate (mmol m-2 s-1)  * direction of water column to coral is positive
+        , Flux_DO        &   ! DO  uptake rate (mmol m-2 s-1)  * direction of water column to coral is positive
+#  if defined NUTRIENTS         
+        , Flux_NO3       &   ! NO3 uptake rate (mmol m-2 s-1)  * direction of water column to coral is positive
+        , Flux_NH4       &   ! NH4 uptake rate (mmol m-2 s-1)  * direction of water column to coral is positive
+        , Flux_PO4       &   ! PO4 uptake rate (mmol m-2 s-1)  * direction of water column to coral is positive
+#  endif
+#  if defined CARBON_ISOTOPE
+        , Flux_DI13C     &   ! DI13C uptake rate (mmol m-2 s-1)  * direction of water column to coral is positive
+#  endif
+        )
+     
+      ! 1 mmol m-2 s-1, 1 mmol m-3 = 1 umol L-1 = 1/1.024 umol kg-1
+      ! cff: convaert [mmol cm-2 s-1] to [umol L-1 s-1]
+
+      cff=1.0d0 /dz(1) * p_sand
+
+      dDIC_dt(1) = dDIC_dt(1) - Flux_DIC * cff/rho_sw(1)
+      dTA_dt (1) = dTA_dt (1) - Flux_TA  * cff/rho_sw(1)
+      dDOx_dt(1) = dDOx_dt(1) - Flux_DO  * cff
+#  if defined CARBON_ISOTOPE
+      dDI13C_dt(1) = dDI13C_dt(1) - Flux_DI13C * cff/rho_sw(1)
+#  endif
+#  if defined NUTRIENTS
+      dNO3_dt(1) = dNO3_dt(1) - Flux_NO3 * cff
+!      dNO2_dt(1) = dNO2_dt(1) - Flux_NO2 * cff
+      dNH4_dt(1) = dNH4_dt(1) - Flux_NH4 * cff
+      dPO4_dt(1) = dPO4_dt(1) - Flux_PO4 * cff
+#  endif
+# else
+!!!  Sediment ecosystem model
 
 ! yt_edit to do put output data in his2.nc file
 ! yt_edit don't run under reef rock (confirm coverage type interactions)
 ! yt_edit porosity from coverage??
 
-    CALL sedecosys      &
+      DO m=1,isplitsed   !!! Loop for sediment model: dtc <= 0.05 sec
+
+        CALL sedecosys      &
 !         input parameters
-      ( ng, i, j        &   ! ng: nested grid number; i,j: position
-      , Nsed            &   ! Number of vertical biological sediment layers
-      , dt              &   ! Time step (sec)
-      , Tmp(1)          &   ! Tmp: Temperature (oC)
-      , Sal(1)          &   ! Sal: Salinity (PSU)
-      , TA(1)*rho_sw(1) &   ! TA: Total alkalinity (umol L-1)
-      , DOx(1)          &   ! DOx: Dissolved oxygen (umol L-1)
-      , DIC(1)*rho_sw(1)&   ! CO2: Dissolved CO2    (µmol L-1)   ! DIC(umol kg-1) * rho(kg L-1) = (umol L-1)
-      , 0.0d0           &   ! N2: Dissolved Nitrogen(µmol L-1)
-# if defined ORGANIC_MATTER
-      , POC(1,1)         &   ! POC: Particulate organic carbon (DOC: umol L-1)
-# endif
-# if defined NUTRIENTS            
-      , NO3(1)         &   ! NO3: NO3 (umol L-1)
-      , NH4(1)         &   ! NH4: NH4 (umol L-1)
-      , PO4(1)         &   ! PO4: PO4 (umol L-1)
+          ( ng, i, j        &   ! ng: nested grid number; i,j: position
+          , Nsed            &   ! Number of vertical biological sediment layers
+          , dt              &   ! Time step (sec)
+          , Tmp(1)          &   ! Tmp: Temperature (oC)
+          , Sal(1)          &   ! Sal: Salinity (PSU)
+          , TA(1)*rho_sw(1) &   ! TA: Total alkalinity (umol L-1)
+          , DOx(1)          &   ! DOx: Dissolved oxygen (umol L-1)
+          , DIC(1)*rho_sw(1)&   ! CO2: Dissolved CO2    (µmol L-1)   ! DIC(umol kg-1) * rho(kg L-1) = (umol L-1)
+          , 0.0d0           &   ! N2: Dissolved Nitrogen(µmol L-1)
 #  if defined ORGANIC_MATTER
-      , PON(1,1)         &   ! PON: Particulate organic nitrogen (PON: umol L-1)
-      , POP(1,1)         &   ! POP: Particulate organic phosporius (POP: umol L-1)
+          , POC(1,1)         &   ! POC: Particulate organic carbon (DOC: umol L-1)
 #  endif
-# endif
-# if defined SULFATE
-      , 0.0d0            &  ! Mn2: Manganese ion    (µmol L-1)
-      , 0.0d0            &  ! Fe2: iron(II)         (µmol L-1)
-      , 0.0d0            &  ! H2S: hydrogen sulfide (µmol L-1)
-      , 27300d0          &  ! SO4: sulfate          (µmol L-1)
-      , 10d0  / 86400d0  &  ! MnO2 deposition flux  (nmol cm-2 s-1)
-      , 100d0 / 86400d0  &  ! FeOOH depositoin flux (nmol cm-2 s-1)    
-# endif
-# if defined ORGANIC_MATTER
-      , -Fdep_POC(1)      &   ! POC deposition flux (nmol cm-2 s-1)  * direction of water column to sediment is positive ! yt_edit POC deposition flux   ! double check advection scheme
-#  if defined NUTRIENTS
-      , -Fdep_PON(1)  &   ! PON deposition flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
-      , -Fdep_POP(1)  &   ! POP deposition flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
+#  if defined NUTRIENTS            
+          , NO3(1)         &   ! NO3: NO3 (umol L-1)
+          , NH4(1)         &   ! NH4: NH4 (umol L-1)
+          , PO4(1)         &   ! PO4: PO4 (umol L-1)
+#   if defined ORGANIC_MATTER
+          , PON(1,1)         &   ! PON: Particulate organic nitrogen (PON: umol L-1)
+          , POP(1,1)         &   ! POP: Particulate organic phosporius (POP: umol L-1)
+#   endif
 #  endif
-# endif
+#  if defined SULFATE
+          , 0.0d0            &  ! Mn2: Manganese ion    (µmol L-1)
+          , 0.0d0            &  ! Fe2: iron(II)         (µmol L-1)
+          , 0.0d0            &  ! H2S: hydrogen sulfide (µmol L-1)
+          , 27300d0          &  ! SO4: sulfate          (µmol L-1)
+          , 10d0  / 86400d0  &  ! MnO2 deposition flux  (nmol cm-2 s-1)
+          , 100d0 / 86400d0  &  ! FeOOH depositoin flux (nmol cm-2 s-1)    
+#  endif
+#  if defined ORGANIC_MATTER
+          , -Fdep_POC(1)      &   ! POC deposition flux (nmol cm-2 s-1)  * direction of water column to sediment is positive ! yt_edit POC deposition flux   ! double check advection scheme
+#   if defined NUTRIENTS
+          , -Fdep_PON(1)  &   ! PON deposition flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
+          , -Fdep_POP(1)  &   ! POP deposition flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
+#   endif
+#  endif
 !         output parameters
-      ! , Flux_Tmp       &   ! Temperature flux (K cm-2 s-1)  * direction of water column to sediment is positive
-      ! , Flux_Sal       &   ! Salinity  flux (cm-2 s-1)  * direction of water column to sediment is positive
-      , Flux_TA        &   ! Total Alkalinity flux (??? cm-2 s-1)  * direction of water column to sediment is positive
-      , Flux_DO        &   ! DO  flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
-      , Flux_CO2sed    &   ! CO2 flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
-      , Flux_N2        &   ! N2 flux
-# if defined ORGANIC_MATTER
-      , Flux_POCf       &   ! POC flux (nmol cm-2 s-1) * direction of water column to sediment is positive
-      , Flux_POCs       &   ! POC flux (nmol cm-2 s-1) * direction of water column to sediment is positive
-# endif
-# if defined NUTRIENTS
-      , Flux_NO3       &   ! NO3 flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
-      , Flux_NH4       &   ! NH4 flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
-      , Flux_PO4       &   ! PO4 flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
+        ! , Flux_Tmp       &   ! Temperature flux (K cm-2 s-1)  * direction of water column to sediment is positive
+        ! , Flux_Sal       &   ! Salinity  flux (cm-2 s-1)  * direction of water column to sediment is positive
+          , Flux_TA        &   ! Total Alkalinity flux (??? cm-2 s-1)  * direction of water column to sediment is positive
+          , Flux_DO        &   ! DO  flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
+          , Flux_CO2sed    &   ! CO2 flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
+          , Flux_N2        &   ! N2 flux
 #  if defined ORGANIC_MATTER
-      , Flux_PONf       &   ! PONf flux (nmol cm-2 s-1) * direction of water column to sediment is positive
-      , Flux_PONs       &   ! PONs flux (nmol cm-2 s-1) * direction of water column to sediment is positive
-      , Flux_POPf       &   ! POPf flux (nmol cm-2 s-1) * direction of water column to sediment is positive
-      , Flux_POPs       &   ! POPs flux (nmol cm-2 s-1) * direction of water column to sediment is positive
+          , Flux_POCf       &   ! POC flux (nmol cm-2 s-1) * direction of water column to sediment is positive
+          , Flux_POCs       &   ! POC flux (nmol cm-2 s-1) * direction of water column to sediment is positive
 #  endif
-# endif
-# if defined SULFATE
-      , Flux_Mn2       &   ! Mn2 flux   (nmol cm-2 s-1) * direction of water column to sediment is positive
-      , Flux_MnO2      &   ! MnO2 flux  (nmol cm-2 s-1) * direction of water column to sediment is positive
-
-      , Flux_Fe2       &   ! Fe2 flux    (nmol cm-2 s-1) * direction of water column to sediment is positive
-      ! , Flux_FeS       &   ! FeS flux    (nmol cm-2 s-1) * direction of water column to sediment is positive  ! yt_edit diffusion is not modeled so flux is zero
-      ! , Flux_FeS2      &   ! FeS2 flux   (nmol cm-2 s-1) * direction of water column to sediment is positive  ! yt_edit diffusion is not modeled so flux is zero
-      , Flux_FeOOH     &   ! FeOOH flux  (nmol cm-2 s-1) * direction of water column to sediment is positive
-      ! , Flux_FeOOH_PO4 &   ! FeOOH=PO43 flux   (nmol cm-2 s-1) * direction of water column to sediment is positive  ! yt_edit diffusion is not modeled so flux is zero
-
-      , Flux_H2S       &   ! H2S flux   (nmol cm-2 s-1) * direction of water column to sediment is positive
-      ! , Flux_S0        &   ! S0 flux    (nmol cm-2 s-1) * direction of water column to sediment is positive  ! yt_edit diffusion is not modeled so flux is zero
-      , Flux_SO4       &   ! SO4 flux   (nmol cm-2 s-1) * direction of water column to sediment is positive
-# endif
-    )
+#  if defined NUTRIENTS
+          , Flux_NO3       &   ! NO3 flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
+          , Flux_NH4       &   ! NH4 flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
+          , Flux_PO4       &   ! PO4 flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
+#   if defined ORGANIC_MATTER
+          , Flux_PONf       &   ! PONf flux (nmol cm-2 s-1) * direction of water column to sediment is positive
+          , Flux_PONs       &   ! PONs flux (nmol cm-2 s-1) * direction of water column to sediment is positive
+          , Flux_POPf       &   ! POPf flux (nmol cm-2 s-1) * direction of water column to sediment is positive
+          , Flux_POPs       &   ! POPs flux (nmol cm-2 s-1) * direction of water column to sediment is positive
+#   endif
+#  endif
+#  if defined SULFATE
+          , Flux_Mn2       &   ! Mn2 flux   (nmol cm-2 s-1) * direction of water column to sediment is positive
+          , Flux_MnO2      &   ! MnO2 flux  (nmol cm-2 s-1) * direction of water column to sediment is positive
+          , Flux_Fe2       &   ! Fe2 flux    (nmol cm-2 s-1) * direction of water column to sediment is positive
+        ! , Flux_FeS       &   ! FeS flux    (nmol cm-2 s-1) * direction of water column to sediment is positive  ! yt_edit diffusion is not modeled so flux is zero
+        ! , Flux_FeS2      &   ! FeS2 flux   (nmol cm-2 s-1) * direction of water column to sediment is positive  ! yt_edit diffusion is not modeled so flux is zero
+          , Flux_FeOOH     &   ! FeOOH flux  (nmol cm-2 s-1) * direction of water column to sediment is positive
+        ! , Flux_FeOOH_PO4 &   ! FeOOH=PO43 flux   (nmol cm-2 s-1) * direction of water column to sediment is positive  ! yt_edit diffusion is not modeled so flux is zero
+          , Flux_H2S       &   ! H2S flux   (nmol cm-2 s-1) * direction of water column to sediment is positive
+        ! , Flux_S0        &   ! S0 flux    (nmol cm-2 s-1) * direction of water column to sediment is positive  ! yt_edit diffusion is not modeled so flux is zero
+          , Flux_SO4       &   ! SO4 flux   (nmol cm-2 s-1) * direction of water column to sediment is positive
+#  endif
+        )
+      END DO
       
     ! 1 nmol cm-2 s-1 = 0.01 mmol m-2 s-1, 1 mmol m-3 = 1 umol L-1 = 1/1.024 umol kg-1
     ! x[nmol/cm2 s] (umol/1000nmol) (10000cm2/m2) (1/dz)[1/m] (m3/1000L)= x/dz 0.01(umol L-1 s-1)
     ! cff: convaert [nmol cm-2 s-1] to [umol L-1 s-1]
-    cff=0.01d0 /dz(1)
+      cff=0.01d0 /dz(1) * p_sand
     ! (umol L-1 s-1) / rho(kg L-1) = (1/rho) (umol kg-1 s-1)
 
-    ! dTA_dt (1) = dTA_dt (1) - Flux_TA  * cff ! yt_edit what are the units? do we need to divide by rho?
-    dDOx_dt(1) = dDOx_dt(1) - Flux_DO  * cff
-    dDIC_dt(1) = dDIC_dt(1) - Flux_CO2sed * cff/rho_sw(1)
+      ! dTA_dt (1) = dTA_dt (1) - Flux_TA  * cff ! yt_edit what are the units? do we need to divide by rho?
+      dDOx_dt(1) = dDOx_dt(1) - Flux_DO  * cff
+      dDIC_dt(1) = dDIC_dt(1) - Flux_CO2sed * cff/rho_sw(1)
 
-# if defined ORGANIC_MATTER
-    dPOC_dt(1,1) = dPOC_dt(1,1) - (Flux_POCf + Flux_POCs) * cff
-# endif
-
-# if defined NUTRIENTS
-    dNO3_dt(1) = dNO3_dt(1) - Flux_NO3 * cff
-    dNH4_dt(1) = dNH4_dt(1) - Flux_NH4 * cff
-    dPO4_dt(1) = dPO4_dt(1) - Flux_PO4 * cff
 #  if defined ORGANIC_MATTER
-    dPON_dt(1,1) = dPON_dt(1,1) - (Flux_PONf + Flux_PONs) * cff
-    dPOP_dt(1,1) = dPOP_dt(1,1) - (Flux_POPf + Flux_POPs) * cff
+      dPOC_dt(1,1) = dPOC_dt(1,1) - (Flux_POCf + Flux_POCs) * cff
 #  endif
-# endif
-! # if defined SULFATE
-!     Flux_Mn2         ! Mn2 flux   (nmol cm-2 s-1) * direction of water column to sediment is positive
-!     Flux_MnO2        ! MnO2 flux  (nmol cm-2 s-1) * direction of water column to sediment is positive
 
-!     Flux_Fe2         ! Fe2 flux    (nmol cm-2 s-1) * direction of water column to sediment is positive
-!     Flux_FeS         ! FeS flux    (nmol cm-2 s-1) * direction of water column to sediment is positive
-!     Flux_FeS2        ! FeS2 flux   (nmol cm-2 s-1) * direction of water column to sediment is positive
-!     Flux_FeOOH       ! FeOOH flux  (nmol cm-2 s-1) * direction of water column to sediment is positive
-!     Flux_FeOOH_PO4   ! FeOOH=PO43 flux   (nmol cm-2 s-1) * direction of water column to sediment is positive
+#  if defined NUTRIENTS
+      dNO3_dt(1) = dNO3_dt(1) - Flux_NO3 * cff
+      dNH4_dt(1) = dNH4_dt(1) - Flux_NH4 * cff
+      dPO4_dt(1) = dPO4_dt(1) - Flux_PO4 * cff
+#   if defined ORGANIC_MATTER
+      dPON_dt(1,1) = dPON_dt(1,1) - (Flux_PONf + Flux_PONs) * cff
+      dPOP_dt(1,1) = dPOP_dt(1,1) - (Flux_POPf + Flux_POPs) * cff
+#   endif
+#  endif
+!#  if defined SULFATE
+!      Flux_Mn2         ! Mn2 flux   (nmol cm-2 s-1) * direction of water column to sediment is positive
+!      Flux_MnO2        ! MnO2 flux  (nmol cm-2 s-1) * direction of water column to sediment is positive
 
-!     Flux_H2S         ! H2S flux   (nmol cm-2 s-1) * direction of water column to sediment is positive
-!     Flux_S0          ! S0 flux    (nmol cm-2 s-1) * direction of water column to sediment is positive
-!     Flux_SO4         ! SO4 flux   (nmol cm-2 s-1) * direction of water column to sediment is positive
-! # endif
-#endif
+!      Flux_Fe2         ! Fe2 flux    (nmol cm-2 s-1) * direction of water column to sediment is positive
+!      Flux_FeS         ! FeS flux    (nmol cm-2 s-1) * direction of water column to sediment is positive
+!      Flux_FeS2        ! FeS2 flux   (nmol cm-2 s-1) * direction of water column to sediment is positive
+!      Flux_FeOOH       ! FeOOH flux  (nmol cm-2 s-1) * direction of water column to sediment is positive
+!      Flux_FeOOH_PO4   ! FeOOH=PO43 flux   (nmol cm-2 s-1) * direction of water column to sediment is positive
+
+!      Flux_H2S         ! H2S flux   (nmol cm-2 s-1) * direction of water column to sediment is positive
+!      Flux_S0          ! S0 flux    (nmol cm-2 s-1) * direction of water column to sediment is positive
+!      Flux_SO4         ! SO4 flux   (nmol cm-2 s-1) * direction of water column to sediment is positive
+!#  endif
 
 !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    DO k=1,N
-      ! if (isnan() .or. abs() > huge()) then
-      if (isnan(dDIC_dt(k)) .or. abs(dDIC_dt(k)) > 1.0d15 .or. DIC(k)+dDIC_dt(k)*dt*dz(k) < -100.0d0) then
-        write(*,*) 'yt_debug: mod_reef_ecosys.F dDIC_dt(k)    sediment      i =', i, '   j =', j, '   k =', k
-        write(*,*) 'yt_debug:     dDIC_dt(k) =', dDIC_dt(k)
-        write(*,*) 'yt_debug:     DIC(k) =', DIC(k)
-        write(*,*) 'yt_debug:     DIC(k)+dDIC_dt(k)*dt*dz(k) =', DIC(k)+dDIC_dt(k)*dt*dz(k)
-      endif
-      ! if (isnan() .or. abs() > huge()) then
-      if (isnan(dTA_dt(k)) .or. abs(dTA_dt(k)) > 1.0d15 .or. TA(k)+dTA_dt(k)*dt*dz(k) < -100.0d0) then
-        write(*,*) 'yt_debug: mod_reef_ecosys.F dTA_dt(k)    sediment      i =', i, '   j =', j, '   k =', k
-        write(*,*) 'yt_debug:     dTA_dt(k) =', dTA_dt(k)
-        write(*,*) 'yt_debug:     TA(k) =', TA(k)
-        write(*,*) 'yt_debug:     TA(k)+dTA_dt(k)*dt*dz(k) =', TA(k)+dTA_dt(k)*dt*dz(k)
-      endif
-      ! if (isnan() .or. abs() > huge()) then
-      if (isnan(dDOx_dt(k)) .or. abs(dDOx_dt(k)) > 1.0d15 .or. DOx(k)+dDOx_dt(k)*dt*dz(k) < -100.0d0) then
-        write(*,*) 'yt_debug: mod_reef_ecosys.F dDOx_dt(k)    sediment      i =', i, '   j =', j, '   k =', k
-        write(*,*) 'yt_debug:     dDOx_dt(k) =', dDOx_dt(k)
-        write(*,*) 'yt_debug:     DOx(k) =', DOx(k)
-        write(*,*) 'yt_debug:     DOx(k)+dDOx_dt(k)*dt*dz(k) =', DOx(k)+dDOx_dt(k)*dt*dz(k)
-      endif
-#if defined ORGANIC_MATTER
-      DO yt_iter = 1, Ndom
+      DO k=1,N
         ! if (isnan() .or. abs() > huge()) then
-        if (isnan(dDOC_dt(k,yt_iter)) .or. abs(dDOC_dt(k,yt_iter)) > 1.0d15 .or. DOC(k,yt_iter)+dDOC_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
-          write(*,*) 'yt_debug: mod_reef_ecosys.F dDOC_dt(k,Ndom)    sediment      i =', i, '   j =', j, '   k =', k, '   Ndom =', yt_iter
-          write(*,*) 'yt_debug:     dDOC_dt(k,Ndom) =', dDOC_dt(k,yt_iter)
-          write(*,*) 'yt_debug:     DOC(k,Ndom) =', DOC(k,yt_iter)
-          write(*,*) 'yt_debug:     DOC(k,Ndom)+dDOC_dt(k,Ndom)*dt*dz(k) =', DOC(k,yt_iter)+dDOC_dt(k,yt_iter)*dt*dz(k)
-        endif
-      ENDDO
-      DO yt_iter = 1, Npom
-        ! if (isnan() .or. abs() > huge()) then
-        if (isnan(dPOC_dt(k,yt_iter)) .or. abs(dPOC_dt(k,yt_iter)) > 1.0d15 .or. POC(k,yt_iter)+dPOC_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
-          write(*,*) 'yt_debug: mod_reef_ecosys.F dPOC_dt(k,Npom)    sediment      i =', i, '   j =', j, '   k =', k, '   Npom =', yt_iter
-          write(*,*) 'yt_debug:     dPOC_dt(k,Npom) =', dPOC_dt(k,yt_iter)
-          write(*,*) 'yt_debug:     POC(k,Npom) =', POC(k,yt_iter)
-          write(*,*) 'yt_debug:     POC(k,Npom)+dPOC_dt(k,Npom)*dt*dz(k) =', POC(k,yt_iter)+dPOC_dt(k,yt_iter)*dt*dz(k)
-        endif
-      ENDDO
-      DO yt_iter = 1, Nphy
-        ! if (isnan() .or. abs() > huge()) then
-        if (isnan(dPHY_dt(k,yt_iter)) .or. abs(dPHY_dt(k,yt_iter)) > 1.0d15 .or. PHY(k,yt_iter)+dPHY_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
-          write(*,*) 'yt_debug: mod_reef_ecosys.F dPHY_dt(k,Nphy)    sediment      i =', i, '   j =', j, '   k =', k, '   Nphy =', yt_iter
-          write(*,*) 'yt_debug:     dPHY_dt(k,Nphy) =', dPHY_dt(k,yt_iter)
-          write(*,*) 'yt_debug:     PHY(k,Nphy) =', PHY(k,yt_iter)
-          write(*,*) 'yt_debug:     PHY(k,Nphy)+dPHY_dt(k,Nphy)*dt*dz(k) =', PHY(k,yt_iter)+dPHY_dt(k,yt_iter)*dt*dz(k)
-        endif
-      ENDDO
-      DO yt_iter = 1, Nzoo
-        ! if (isnan() .or. abs() > huge()) then
-        if (isnan(dZOO_dt(k,yt_iter)) .or. abs(dZOO_dt(k,yt_iter)) > 1.0d15 .or. ZOO(k,yt_iter)+dZOO_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
-          write(*,*) 'yt_debug: mod_reef_ecosys.F dZOO_dt(k,Nzoo)    sediment      i =', i, '   j =', j, '   k =', k, '   Nzoo =', yt_iter
-          write(*,*) 'yt_debug:     dZOO_dt(k,Nzoo) =', dZOO_dt(k,yt_iter)
-          write(*,*) 'yt_debug:     ZOO(k,Nzoo) =', ZOO(k,yt_iter)
-          write(*,*) 'yt_debug:     ZOO(k,Nzoo)+dZOO_dt(k,Nzoo)*dt*dz(k) =', ZOO(k,yt_iter)+dZOO_dt(k,yt_iter)*dt*dz(k)
-        endif
-      ENDDO
-      DO yt_iter = 1, Npim
-        ! if (isnan() .or. abs() > huge()) then
-        if (isnan(dPIC_dt(k,yt_iter)) .or. abs(dPIC_dt(k,yt_iter)) > 1.0d15 .or. PIC(k,yt_iter)+dPIC_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
-          write(*,*) 'yt_debug: mod_reef_ecosys.F dPIC_dt(k,Npim)    sediment      i =', i, '   j =', j, '   k =', k, '   Npim =', yt_iter
-          write(*,*) 'yt_debug:     dPIC_dt(k,Npim) =', dPIC_dt(k,yt_iter)
-          write(*,*) 'yt_debug:     PIC(k,Npim) =', PIC(k,yt_iter)
-          write(*,*) 'yt_debug:     PIC(k,Npim)+dPIC_dt(k,Npim)*dt*dz(k) =', PIC(k,yt_iter)+dPIC_dt(k,yt_iter)*dt*dz(k)
-        endif
-      ENDDO
-#endif
-#if defined NUTRIENTS           
-      ! if (isnan() .or. abs() > huge()) then
-      if (isnan(dNO3_dt(k)) .or. abs(dNO3_dt(k)) > 1.0d15 .or. NO3(k)+dNO3_dt(k)*dt*dz(k) < -100.0d0) then
-        write(*,*) 'yt_debug: mod_reef_ecosys.F dNO3_dt(k)    sediment      i =', i, '   j =', j, '   k =', k
-        write(*,*) 'yt_debug:     dNO3_dt(k) =', dNO3_dt(k)
-        write(*,*) 'yt_debug:     NO3(k) =', NO3(k)
-        write(*,*) 'yt_debug:     NO3(k)+dNO3_dt(k)*dt*dz(k) =', NO3(k)+dNO3_dt(k)*dt*dz(k)
-      endif
-      ! if (isnan() .or. abs() > huge()) then
-      if (isnan(dNH4_dt(k)) .or. abs(dNH4_dt(k)) > 1.0d15 .or. NH4(k)+dNH4_dt(k)*dt*dz(k) < -100.0d0) then
-        write(*,*) 'yt_debug: mod_reef_ecosys.F dNH4_dt(k)    sediment      i =', i, '   j =', j, '   k =', k
-        write(*,*) 'yt_debug:     dNH4_dt(k) =', dNH4_dt(k)
-        write(*,*) 'yt_debug:     NH4(k) =', NH4(k)
-        write(*,*) 'yt_debug:     NH4(k)+dNH4_dt(k)*dt*dz(k) =', NH4(k)+dNH4_dt(k)*dt*dz(k)
-      endif
-      ! if (isnan() .or. abs() > huge()) then
-      if (isnan(dPO4_dt(k)) .or. abs(dPO4_dt(k)) > 1.0d15 .or. PO4(k)+dPO4_dt(k)*dt*dz(k) < -100.0d0) then
-        write(*,*) 'yt_debug: mod_reef_ecosys.F dPO4_dt(k)    sediment      i =', i, '   j =', j, '   k =', k
-        write(*,*) 'yt_debug:     dPO4_dt(k) =', dPO4_dt(k)
-        write(*,*) 'yt_debug:     PO4(k) =', PO4(k)
-        write(*,*) 'yt_debug:     PO4(k)+dPO4_dt(k)*dt*dz(k) =', PO4(k)+dPO4_dt(k)*dt*dz(k)
-      endif
-# if defined ORGANIC_MATTER
-      DO yt_iter = 1, Ndom
-        ! if (isnan() .or. abs() > huge()) then
-        if (isnan(dDON_dt(k,yt_iter)) .or. abs(dDON_dt(k,yt_iter)) > 1.0d15 .or. DON(k,yt_iter)+dDON_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
-          write(*,*) 'yt_debug: mod_reef_ecosys.F dDON_dt(k,Ndom)    sediment      i =', i, '   j =', j, '   k =', k, '   Ndom =', yt_iter
-          write(*,*) 'yt_debug:     dDON_dt(k,Ndom) =', dDON_dt(k,yt_iter)
-          write(*,*) 'yt_debug:     DON(k,Ndom) =', DON(k,yt_iter)
-          write(*,*) 'yt_debug:     DON(k,Ndom)+dDON_dt(k,Ndom)*dt*dz(k) =', DON(k,yt_iter)+dDON_dt(k,yt_iter)*dt*dz(k)
+        if (isnan(dDIC_dt(k)) .or. abs(dDIC_dt(k)) > 1.0d15 .or. DIC(k)+dDIC_dt(k)*dt*dz(k) < -100.0d0) then
+          write(*,*) 'yt_debug: mod_reef_ecosys.F dDIC_dt(k)    sediment      i =', i, '   j =', j, '   k =', k
+          write(*,*) 'yt_debug:     dDIC_dt(k) =', dDIC_dt(k)
+          write(*,*) 'yt_debug:     DIC(k) =', DIC(k)
+          write(*,*) 'yt_debug:     DIC(k)+dDIC_dt(k)*dt*dz(k) =', DIC(k)+dDIC_dt(k)*dt*dz(k)
         endif
         ! if (isnan() .or. abs() > huge()) then
-        if (isnan(dDOP_dt(k,yt_iter)) .or. abs(dDOP_dt(k,yt_iter)) > 1.0d15 .or. DOP(k,yt_iter)+dDOP_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
-          write(*,*) 'yt_debug: mod_reef_ecosys.F dDOP_dt(k,Ndom)    sediment      i =', i, '   j =', j, '   k =', k, '   Ndom =', yt_iter
-          write(*,*) 'yt_debug:     dDOP_dt(k,Ndom) =', dDOP_dt(k,yt_iter)
-          write(*,*) 'yt_debug:     DOP(k,Ndom) =', DOP(k,yt_iter)
-          write(*,*) 'yt_debug:     DOP(k,Ndom)+dDOP_dt(k,Ndom)*dt*dz(k) =', DOP(k,yt_iter)+dDOP_dt(k,yt_iter)*dt*dz(k)
-        endif
-      ENDDO
-      DO yt_iter = 1, Npom
-        ! if (isnan() .or. abs() > huge()) then
-        if (isnan(dPON_dt(k,yt_iter)) .or. abs(dPON_dt(k,yt_iter)) > 1.0d15 .or. PON(k,yt_iter)+dPON_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
-          write(*,*) 'yt_debug: mod_reef_ecosys.F dPON_dt(k,Npom)    sediment      i =', i, '   j =', j, '   k =', k, '   Npom =', yt_iter
-          write(*,*) 'yt_debug:     dPON_dt(k,Npom) =', dPON_dt(k,yt_iter)
-          write(*,*) 'yt_debug:     PON(k,Npom) =', PON(k,yt_iter)
-          write(*,*) 'yt_debug:     PON(k,Npom)+dPON_dt(k,Npom)*dt*dz(k) =', PON(k,yt_iter)+dPON_dt(k,yt_iter)*dt*dz(k)
+        if (isnan(dTA_dt(k)) .or. abs(dTA_dt(k)) > 1.0d15 .or. TA(k)+dTA_dt(k)*dt*dz(k) < -100.0d0) then
+          write(*,*) 'yt_debug: mod_reef_ecosys.F dTA_dt(k)    sediment      i =', i, '   j =', j, '   k =', k
+          write(*,*) 'yt_debug:     dTA_dt(k) =', dTA_dt(k)
+          write(*,*) 'yt_debug:     TA(k) =', TA(k)
+          write(*,*) 'yt_debug:     TA(k)+dTA_dt(k)*dt*dz(k) =', TA(k)+dTA_dt(k)*dt*dz(k)
         endif
         ! if (isnan() .or. abs() > huge()) then
-        if (isnan(dPOP_dt(k,yt_iter)) .or. abs(dPOP_dt(k,yt_iter)) > 1.0d15 .or. POP(k,yt_iter)+dPOP_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
-          write(*,*) 'yt_debug: mod_reef_ecosys.F dPOP_dt(k,Npom)    sediment      i =', i, '   j =', j, '   k =', k, '   Npom =', yt_iter
-          write(*,*) 'yt_debug:     dPOP_dt(k,Npom) =', dPOP_dt(k,yt_iter)
-          write(*,*) 'yt_debug:     POP(k,Npom) =', POP(k,yt_iter)
-          write(*,*) 'yt_debug:     POP(k,Npom)+dPOP_dt(k,Npom)*dt*dz(k) =', POP(k,yt_iter)+dPOP_dt(k,yt_iter)*dt*dz(k)
+        if (isnan(dDOx_dt(k)) .or. abs(dDOx_dt(k)) > 1.0d15 .or. DOx(k)+dDOx_dt(k)*dt*dz(k) < -100.0d0) then
+          write(*,*) 'yt_debug: mod_reef_ecosys.F dDOx_dt(k)    sediment      i =', i, '   j =', j, '   k =', k
+          write(*,*) 'yt_debug:     dDOx_dt(k) =', dDOx_dt(k)
+          write(*,*) 'yt_debug:     DOx(k) =', DOx(k)
+          write(*,*) 'yt_debug:     DOx(k)+dDOx_dt(k)*dt*dz(k) =', DOx(k)+dDOx_dt(k)*dt*dz(k)
         endif
-      ENDDO
+#  if defined ORGANIC_MATTER
+        DO yt_iter = 1, Ndom
+          ! if (isnan() .or. abs() > huge()) then
+          if (isnan(dDOC_dt(k,yt_iter)) .or. abs(dDOC_dt(k,yt_iter)) > 1.0d15 .or. DOC(k,yt_iter)+dDOC_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
+            write(*,*) 'yt_debug: mod_reef_ecosys.F dDOC_dt(k,Ndom)    sediment      i =', i, '   j =', j, '   k =', k, '   Ndom =', yt_iter
+            write(*,*) 'yt_debug:     dDOC_dt(k,Ndom) =', dDOC_dt(k,yt_iter)
+            write(*,*) 'yt_debug:     DOC(k,Ndom) =', DOC(k,yt_iter)
+            write(*,*) 'yt_debug:     DOC(k,Ndom)+dDOC_dt(k,Ndom)*dt*dz(k) =', DOC(k,yt_iter)+dDOC_dt(k,yt_iter)*dt*dz(k)
+          endif
+        ENDDO
+        DO yt_iter = 1, Npom
+          ! if (isnan() .or. abs() > huge()) then
+          if (isnan(dPOC_dt(k,yt_iter)) .or. abs(dPOC_dt(k,yt_iter)) > 1.0d15 .or. POC(k,yt_iter)+dPOC_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
+            write(*,*) 'yt_debug: mod_reef_ecosys.F dPOC_dt(k,Npom)    sediment      i =', i, '   j =', j, '   k =', k, '   Npom =', yt_iter
+            write(*,*) 'yt_debug:     dPOC_dt(k,Npom) =', dPOC_dt(k,yt_iter)
+            write(*,*) 'yt_debug:     POC(k,Npom) =', POC(k,yt_iter)
+            write(*,*) 'yt_debug:     POC(k,Npom)+dPOC_dt(k,Npom)*dt*dz(k) =', POC(k,yt_iter)+dPOC_dt(k,yt_iter)*dt*dz(k)
+          endif
+        ENDDO
+        DO yt_iter = 1, Nphy
+          ! if (isnan() .or. abs() > huge()) then
+          if (isnan(dPHY_dt(k,yt_iter)) .or. abs(dPHY_dt(k,yt_iter)) > 1.0d15 .or. PHY(k,yt_iter)+dPHY_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
+            write(*,*) 'yt_debug: mod_reef_ecosys.F dPHY_dt(k,Nphy)    sediment      i =', i, '   j =', j, '   k =', k, '   Nphy =', yt_iter
+            write(*,*) 'yt_debug:     dPHY_dt(k,Nphy) =', dPHY_dt(k,yt_iter)
+            write(*,*) 'yt_debug:     PHY(k,Nphy) =', PHY(k,yt_iter)
+            write(*,*) 'yt_debug:     PHY(k,Nphy)+dPHY_dt(k,Nphy)*dt*dz(k) =', PHY(k,yt_iter)+dPHY_dt(k,yt_iter)*dt*dz(k)
+          endif
+        ENDDO
+        DO yt_iter = 1, Nzoo
+          ! if (isnan() .or. abs() > huge()) then
+          if (isnan(dZOO_dt(k,yt_iter)) .or. abs(dZOO_dt(k,yt_iter)) > 1.0d15 .or. ZOO(k,yt_iter)+dZOO_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
+            write(*,*) 'yt_debug: mod_reef_ecosys.F dZOO_dt(k,Nzoo)    sediment      i =', i, '   j =', j, '   k =', k, '   Nzoo =', yt_iter
+            write(*,*) 'yt_debug:     dZOO_dt(k,Nzoo) =', dZOO_dt(k,yt_iter)
+            write(*,*) 'yt_debug:     ZOO(k,Nzoo) =', ZOO(k,yt_iter)
+            write(*,*) 'yt_debug:     ZOO(k,Nzoo)+dZOO_dt(k,Nzoo)*dt*dz(k) =', ZOO(k,yt_iter)+dZOO_dt(k,yt_iter)*dt*dz(k)
+          endif
+        ENDDO
+        DO yt_iter = 1, Npim
+          ! if (isnan() .or. abs() > huge()) then
+          if (isnan(dPIC_dt(k,yt_iter)) .or. abs(dPIC_dt(k,yt_iter)) > 1.0d15 .or. PIC(k,yt_iter)+dPIC_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
+            write(*,*) 'yt_debug: mod_reef_ecosys.F dPIC_dt(k,Npim)    sediment      i =', i, '   j =', j, '   k =', k, '   Npim =', yt_iter
+            write(*,*) 'yt_debug:     dPIC_dt(k,Npim) =', dPIC_dt(k,yt_iter)
+            write(*,*) 'yt_debug:     PIC(k,Npim) =', PIC(k,yt_iter)
+            write(*,*) 'yt_debug:     PIC(k,Npim)+dPIC_dt(k,Npim)*dt*dz(k) =', PIC(k,yt_iter)+dPIC_dt(k,yt_iter)*dt*dz(k)
+          endif
+        ENDDO
+#  endif
+#  if defined NUTRIENTS           
+        ! if (isnan() .or. abs() > huge()) then
+        if (isnan(dNO3_dt(k)) .or. abs(dNO3_dt(k)) > 1.0d15 .or. NO3(k)+dNO3_dt(k)*dt*dz(k) < -100.0d0) then
+          write(*,*) 'yt_debug: mod_reef_ecosys.F dNO3_dt(k)    sediment      i =', i, '   j =', j, '   k =', k
+          write(*,*) 'yt_debug:     dNO3_dt(k) =', dNO3_dt(k)
+          write(*,*) 'yt_debug:     NO3(k) =', NO3(k)
+          write(*,*) 'yt_debug:     NO3(k)+dNO3_dt(k)*dt*dz(k) =', NO3(k)+dNO3_dt(k)*dt*dz(k)
+        endif
+        ! if (isnan() .or. abs() > huge()) then
+        if (isnan(dNH4_dt(k)) .or. abs(dNH4_dt(k)) > 1.0d15 .or. NH4(k)+dNH4_dt(k)*dt*dz(k) < -100.0d0) then
+          write(*,*) 'yt_debug: mod_reef_ecosys.F dNH4_dt(k)    sediment      i =', i, '   j =', j, '   k =', k
+          write(*,*) 'yt_debug:     dNH4_dt(k) =', dNH4_dt(k)
+          write(*,*) 'yt_debug:     NH4(k) =', NH4(k)
+          write(*,*) 'yt_debug:     NH4(k)+dNH4_dt(k)*dt*dz(k) =', NH4(k)+dNH4_dt(k)*dt*dz(k)
+        endif
+        ! if (isnan() .or. abs() > huge()) then
+        if (isnan(dPO4_dt(k)) .or. abs(dPO4_dt(k)) > 1.0d15 .or. PO4(k)+dPO4_dt(k)*dt*dz(k) < -100.0d0) then
+          write(*,*) 'yt_debug: mod_reef_ecosys.F dPO4_dt(k)    sediment      i =', i, '   j =', j, '   k =', k
+          write(*,*) 'yt_debug:     dPO4_dt(k) =', dPO4_dt(k)
+          write(*,*) 'yt_debug:     PO4(k) =', PO4(k)
+          write(*,*) 'yt_debug:     PO4(k)+dPO4_dt(k)*dt*dz(k) =', PO4(k)+dPO4_dt(k)*dt*dz(k)
+        endif
+#  if defined ORGANIC_MATTER
+        DO yt_iter = 1, Ndom
+          ! if (isnan() .or. abs() > huge()) then
+          if (isnan(dDON_dt(k,yt_iter)) .or. abs(dDON_dt(k,yt_iter)) > 1.0d15 .or. DON(k,yt_iter)+dDON_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
+            write(*,*) 'yt_debug: mod_reef_ecosys.F dDON_dt(k,Ndom)    sediment      i =', i, '   j =', j, '   k =', k, '   Ndom =', yt_iter
+            write(*,*) 'yt_debug:     dDON_dt(k,Ndom) =', dDON_dt(k,yt_iter)
+            write(*,*) 'yt_debug:     DON(k,Ndom) =', DON(k,yt_iter)
+            write(*,*) 'yt_debug:     DON(k,Ndom)+dDON_dt(k,Ndom)*dt*dz(k) =', DON(k,yt_iter)+dDON_dt(k,yt_iter)*dt*dz(k)
+          endif
+          ! if (isnan() .or. abs() > huge()) then
+          if (isnan(dDOP_dt(k,yt_iter)) .or. abs(dDOP_dt(k,yt_iter)) > 1.0d15 .or. DOP(k,yt_iter)+dDOP_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
+            write(*,*) 'yt_debug: mod_reef_ecosys.F dDOP_dt(k,Ndom)    sediment      i =', i, '   j =', j, '   k =', k, '   Ndom =', yt_iter
+            write(*,*) 'yt_debug:     dDOP_dt(k,Ndom) =', dDOP_dt(k,yt_iter)
+            write(*,*) 'yt_debug:     DOP(k,Ndom) =', DOP(k,yt_iter)
+            write(*,*) 'yt_debug:     DOP(k,Ndom)+dDOP_dt(k,Ndom)*dt*dz(k) =', DOP(k,yt_iter)+dDOP_dt(k,yt_iter)*dt*dz(k)
+          endif
+        ENDDO
+        DO yt_iter = 1, Npom
+          ! if (isnan() .or. abs() > huge()) then
+          if (isnan(dPON_dt(k,yt_iter)) .or. abs(dPON_dt(k,yt_iter)) > 1.0d15 .or. PON(k,yt_iter)+dPON_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
+            write(*,*) 'yt_debug: mod_reef_ecosys.F dPON_dt(k,Npom)    sediment      i =', i, '   j =', j, '   k =', k, '   Npom =', yt_iter
+            write(*,*) 'yt_debug:     dPON_dt(k,Npom) =', dPON_dt(k,yt_iter)
+            write(*,*) 'yt_debug:     PON(k,Npom) =', PON(k,yt_iter)
+            write(*,*) 'yt_debug:     PON(k,Npom)+dPON_dt(k,Npom)*dt*dz(k) =', PON(k,yt_iter)+dPON_dt(k,yt_iter)*dt*dz(k)
+          endif
+          ! if (isnan() .or. abs() > huge()) then
+          if (isnan(dPOP_dt(k,yt_iter)) .or. abs(dPOP_dt(k,yt_iter)) > 1.0d15 .or. POP(k,yt_iter)+dPOP_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
+            write(*,*) 'yt_debug: mod_reef_ecosys.F dPOP_dt(k,Npom)    sediment      i =', i, '   j =', j, '   k =', k, '   Npom =', yt_iter
+            write(*,*) 'yt_debug:     dPOP_dt(k,Npom) =', dPOP_dt(k,yt_iter)
+            write(*,*) 'yt_debug:     POP(k,Npom) =', POP(k,yt_iter)
+            write(*,*) 'yt_debug:     POP(k,Npom)+dPOP_dt(k,Npom)*dt*dz(k) =', POP(k,yt_iter)+dPOP_dt(k,yt_iter)*dt*dz(k)
+          endif
+        ENDDO
+#  endif
 # endif
-#endif
-    ENDDO
+      ENDDO
+      
       ! if (isnan() .or. abs() > huge()) then
       if (isnan(sspH) .or. abs(sspH) > 1.0d15) then
         write(*,*) 'yt_debug: mod_reef_ecosys.F sspH    sediment      i =', i, '   j =', j
@@ -1879,6 +1934,10 @@ contains
       endif
 !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
+# endif
+
+    END IF 
+#endif
 
 #if defined ECOSYS_TESTMODE
 !------------------------------------------------------------------------
