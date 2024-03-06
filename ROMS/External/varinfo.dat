@@ -11020,7 +11020,7 @@
 
   'sediment_PONf'                                             ! Input/Output
     'SedEco: particulate organic nitrogen (fast: labile)'
-    'umolN L-1'                                 ! (µmol l-1)
+    'umolN L-1'                                 ! (nmol g-1)
     'sediment_PONf, scalar, series'
     'ocean_time'
     'iHbiosed3(iSdPONf)'
@@ -11029,7 +11029,7 @@
 
   'sediment_PONs'                                             ! Input/Output
     'SedEco: particulate organic nitrogen (slow: refractory)'
-    'umolN L-1'                                 ! (µmol l-1)
+    'umolN L-1'                                 ! (nmol g-1)
     'sediment_PONs, scalar, series'
     'ocean_time'
     'iHbiosed3(iSdPONs)'
@@ -11038,7 +11038,7 @@
 
   'sediment_PONn'                                             ! Input/Output
     'SedEco: particulate organic nitrogen (non-degradable)'
-    'umolN L-1'                                 ! (µmol l-1)
+    'umolN L-1'                                 ! (nmol g-1)
     'sediment_PONn, scalar, series'
     'ocean_time'
     'iHbiosed3(iSdPONn)'
@@ -11065,7 +11065,7 @@
 
   'sediment_POPf'                                             ! Input/Output
     'SedEco: particulate organic phosphorus (fast: labile)'
-    'umolN L-1'                                 ! (µmol l-1)
+    'umolN L-1'                                 ! (nmol g-1)
     'sediment_POPf, scalar, series'
     'ocean_time'
     'iHbiosed3(iSdPOPf)'
@@ -11074,7 +11074,7 @@
 
   'sediment_POPs'                                             ! Input/Output
     'SedEco: particulate organic phosphorus (slow: refractory)'
-    'umolN L-1'                                 ! (µmol l-1)
+    'umolN L-1'                                 ! (nmol g-1)
     'sediment_POPs, scalar, series'
     'ocean_time'
     'iHbiosed3(iSdPOPs)'
@@ -11083,7 +11083,7 @@
 
   'sediment_POPn'                                             ! Input/Output
     'SedEco: particulate organic phosphorus (non-degradable)'
-    'umolN L-1'                                 ! (µmol l-1)
+    'umolN L-1'                                 ! (nmol g-1)
     'sediment_POPn, scalar, series'
     'ocean_time'
     'iHbiosed3(iSdPOPn)'
@@ -11101,7 +11101,7 @@
 
   'sediment_MnO2'                                             ! Input/Output
     'SedEco: manganese dioxide'
-    'umolMnO2 L-1'                                 ! (µmol l-1)
+    'umolMnO2 L-1'                                 ! (nmol g-1)
     'sediment_MnO2, scalar, series'
     'ocean_time'
     'iHbiosed3(iSdMnO2)'
