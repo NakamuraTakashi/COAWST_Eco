@@ -562,11 +562,7 @@ contains
 ! Rewrite inputs to replace negative values with zeros
 !-----------------------------------------------------------------------
 
-    where ( Tmp_in > 0.0d0 )
-      Tmp = Tmp_in
-    else where
-      Tmp = 0.0d0
-    end where
+    Tmp = Tmp_in
     where ( Sal_in > 0.0d0 )
       Sal = Sal_in
     else where
