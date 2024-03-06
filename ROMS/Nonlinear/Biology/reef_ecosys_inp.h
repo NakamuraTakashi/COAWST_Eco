@@ -415,37 +415,6 @@
               END DO
 
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
-            CASE ('Hout(idCrl1)')
-              IF (idCrl1.eq.0) THEN
-                IF (Master) WRITE (out,30) 'idCrl1'
-                exit_flag=5
-                RETURN
-              END IF
-              Npts=load_l(Nval, Cval, Ngrids, Hout(idCrl1,:))
-            CASE ('Hout(idCrl2)')
-              IF (idCrl2.eq.0) THEN
-                IF (Master) WRITE (out,30) 'idCrl2'
-                exit_flag=5
-                RETURN
-              END IF
-              Npts=load_l(Nval, Cval, Ngrids, Hout(idCrl2,:))
-
-            CASE ('Hout(idSgrs)')
-              IF (idSgrs.eq.0) THEN
-                IF (Master) WRITE (out,30) 'idSgrs'
-                exit_flag=5
-                RETURN
-              END IF
-              Npts=load_l(Nval, Cval, Ngrids, Hout(idSgrs,:))
-
-            CASE ('Hout(idAlga)')
-              IF (idAlga.eq.0) THEN
-                IF (Master) WRITE (out,30) 'idAlga'
-                exit_flag=5
-                RETURN
-              END IF
-              Npts=load_l(Nval, Cval, Ngrids, Hout(idAlga,:))
-
             CASE ('Hout(iHbio2)')
               Npts=load_l(Nval, Cval, NHbio2d*Ngrids, Hbio2)
               DO ng=1,Ngrids
@@ -521,6 +490,50 @@
                   Qout(i,ng)=Ltrc(itrc,ng)
                 END DO
               END DO
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+            CASE ('Qout(iHbio2)')
+              Npts=load_l(Nval, Cval, NHbio2d*Ngrids, Hbio2)
+              DO ng=1,Ngrids
+                DO itrc=1,NHbio2d
+                  i=iHbio2(itrc)
+                  IF (i.eq.0) THEN
+                    IF (Master) WRITE (out,30)                          &
+     &                                'iHbio2(', itrc, ')'
+                    exit_flag=5
+                    RETURN
+                  END IF
+                  Qout(i,ng)=Hbio2(itrc,ng)
+                END DO
+              END DO
+            CASE ('Qout(iHbio3)')
+              Npts=load_l(Nval, Cval, NHbio3d*Ngrids, Hbio3)
+              DO ng=1,Ngrids
+                DO itrc=1,NHbio3d
+                  i=iHbio3(itrc)
+                  IF (i.eq.0) THEN
+                    IF (Master) WRITE (out,30)                          &
+     &                                'iHbio3(', itrc, ')'
+                    exit_flag=5
+                    RETURN
+                  END IF
+                  Qout(i,ng)=Hbio3(itrc,ng)
+                END DO
+              END DO
+            CASE ('Qout(iHbiosed3)')
+              Npts=load_l(Nval, Cval, NHbiosed3d*Ngrids, Hbiosed3)
+              DO ng=1,Ngrids
+                DO itrc=1,NHbiosed3d
+                  i=iHbiosed3(itrc)
+                  IF (i.eq.0) THEN
+                    IF (Master) WRITE (out,30)                          &
+     &                                'iHbiosed3(', itrc, ')'
+                    exit_flag=5
+                    RETURN
+                  END IF
+                  Qout(i,ng)=Hbiosed3(itrc,ng)
+                END DO
+              END DO
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #if defined AVERAGES    || \
    (defined AD_AVERAGES && defined ADJOINT) || \
    (defined RP_AVERAGES && defined TL_IOMS) || \
@@ -667,6 +680,26 @@
       exit_flag=4
       RETURN
   20  CONTINUE
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+!
+!  Set various parameters.
+!
+      DO ng=1,Ngrids
+!
+!  Set switch to create history NetCDF file.
+!
+        IF ((nHIS(ng).gt.0).and.ANY(Hout(:,ng))) THEN
+          LdefHIS(ng)=.TRUE.
+        END IF
+!
+!  Set switch to create quicksave NetCDF file.
+!
+        IF ((nQCK(ng).gt.0).and.ANY(Qout(:,ng))) THEN
+          LdefQCK(ng)=.TRUE.
+        END IF
+      END DO
+
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
 !-----------------------------------------------------------------------
 !  Report input parameters.
@@ -899,20 +932,6 @@
      &            'Write out tracer flux ', i, TRIM(Vname(1,idTvar(i)))
             END DO
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
-
-            IF (Hout(idCrl1,ng)) WRITE (out,120) Hout(idCrl1,ng),         &
-     &         'Hout(idCrl1)',                                            &
-     &         'Write out time-dependent coral coverage.'
-            IF (Hout(idCrl2,ng)) WRITE (out,120) Hout(idCrl2,ng),         &
-     &         'Hout(idCrl2)',                                            &
-     &         'Write out time-dependent coral2 coverage.'
-            IF (Hout(idSgrs,ng)) WRITE (out,120) Hout(idSgrs,ng),         &
-     &         'Hout(idSgrs)',                                            &
-     &         'Write out time-dependent seagrass coverage.'
-            IF (Hout(idAlga,ng)) WRITE (out,120) Hout(idAlga,ng),         &
-     &         'Hout(idAlga)',                                            &
-     &         'Write out time-dependent algal coverage.'
-
             IF (NHbio2d.gt.0) THEN
               DO itrc=1,NHbio2d
                 i=iHbio2(itrc)
@@ -932,10 +951,45 @@
             DO itrc=1,NHbiosed3d
               i=iHbiosed3(itrc)
               IF (Hout(i,ng)) WRITE (out,130)                           &
-     &            Hout(i,ng), 'Hout(iHbiosed3)',                           &
+     &            Hout(i,ng), 'Hout(iHbiosed3)',                        &
      &            'Write out', TRIM(Vname(1,i))
             END DO
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+            DO itrc=1,NBT
+              i=idbio(itrc)
+              IF (Qout(idTvar(i),ng)) WRITE (out,120)                   &
+     &            Qout(idTvar(i),ng), 'Qout(idTvar)',                   &
+     &            'Write out tracer ', i, TRIM(Vname(1,idTvar(i)))
+            END DO
+            DO itrc=1,NBT
+              i=idbio(itrc)
+              IF (Qout(idTsur(i),ng)) WRITE (out,120)                   &
+     &            Qout(idTsur(i),ng), 'Qout(idTsur)',                   &
+     &            'Write out tracer flux ', i, TRIM(Vname(1,idTvar(i)))
+            END DO
+            IF (NHbio2d.gt.0) THEN
+              DO itrc=1,NHbio2d
+                i=iHbio2(itrc)
+                IF (Qout(i,ng)) WRITE (out,130)                         &
+     &              Qout(i,ng), 'Qout(iHbio2)',                         &
+     &              'Write out', TRIM(Vname(1,i))
+              END DO
+            END IF
+            DO itrc=1,NHbio3d
+              i=iHbio3(itrc)
+              IF (Qout(i,ng)) WRITE (out,130)                           &
+     &            Qout(i,ng), 'Qout(iHbio3)',                           &
+     &            'Write out', TRIM(Vname(1,i))
+            END DO
+            DO itrc=1,NHbiosed3d
+              i=iHbiosed3(itrc)
+              IF (Qout(i,ng)) WRITE (out,130)                           &
+     &            Qout(i,ng), 'Qout(iHbiosed3)',                        &
+     &            'Write out', TRIM(Vname(1,i))
+            END DO
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
+
 #if defined AVERAGES    || \
    (defined AD_AVERAGES && defined ADJOINT) || \
    (defined RP_AVERAGES && defined TL_IOMS) || \

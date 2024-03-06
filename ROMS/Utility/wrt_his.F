@@ -4988,96 +4988,6 @@
 #endif
 
 #if defined REEF_ECOSYS
-
-!!
-!!  Write out time-dependent coral coverage
-!!
-!      IF (Hout(idCrl1,ng)) THEN
-!        scale=1.0_r8
-!        gtype=gfactor*r2dvar
-!        status=nf_fwrite2d(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idCrl1), &
-!     &                     HIS(ng)%Rindex, gtype,                       &
-!     &                     LBi, UBi, LBj, UBj, scale,                   &
-!# ifdef MASKING
-!     &                     GRID(ng) % rmask,                            &
-!# endif
-!     &                     GRID(ng) % p_coral(:,:,1)                    &
-!     &                     SetFillVal = .FALSE.)
-!        IF (status.ne.nf90_noerr) THEN
-!          IF (Master) THEN
-!            WRITE (stdout,10) TRIM(Vname(1,idCrl1)), HIS(ng)%Rindex
-!          END IF
-!          exit_flag=3
-!          ioerror=status
-!          RETURN
-!        END IF
-!      END IF
-!      IF (Hout(idCrl2,ng)) THEN
-!        scale=1.0_r8
-!        gtype=gfactor*r2dvar
-!        status=nf_fwrite2d(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idCrl2), &
-!     &                     HIS(ng)%Rindex, gtype,                       &
-!     &                     LBi, UBi, LBj, UBj, scale,                   &
-!# ifdef MASKING
-!     &                     GRID(ng) % rmask,                            &
-!# endif
-!     &                     GRID(ng) % p_coral(:,:,2)                    &
-!     &                     SetFillVal = .FALSE.)
-!        IF (status.ne.nf90_noerr) THEN
-!          IF (Master) THEN
-!            WRITE (stdout,10) TRIM(Vname(1,idCrl2)), HIS(ng)%Rindex
-!          END IF
-!          exit_flag=3
-!          ioerror=status
-!          RETURN
-!        END IF
-!      END IF
-!!
-!!  Write out time-dependent seagrass coverage
-!!
-!      IF (Hout(idSgrs,ng)) THEN
-!        scale=1.0_r8
-!        gtype=gfactor*r2dvar
-!        status=nf_fwrite2d(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idSgrs), &
-!     &                     HIS(ng)%Rindex, gtype,                       &
-!     &                     LBi, UBi, LBj, UBj, scale,                   &
-!# ifdef MASKING
-!     &                     GRID(ng) % rmask,                            &
-!# endif
-!     &                     GRID(ng) % p_seagrass,                       &
-!     &                     SetFillVal = .FALSE.)
-!        IF (status.ne.nf90_noerr) THEN
-!          IF (Master) THEN
-!            WRITE (stdout,10) TRIM(Vname(1,idSgrs)), HIS(ng)%Rindex
-!          END IF
-!          exit_flag=3
-!          ioerror=status
-!          RETURN
-!        END IF
-!      END IF
-!!
-!!  Write out time-dependent algal coverage
-!!
-!      IF (Hout(idAlga,ng)) THEN
-!        scale=1.0_r8
-!        gtype=gfactor*r2dvar
-!        status=nf_fwrite2d(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idAlga), &
-!     &                     HIS(ng)%Rindex, gtype,                       &
-!     &                     LBi, UBi, LBj, UBj, scale,                   &
-!# ifdef MASKING
-!     &                     GRID(ng) % rmask,                            &
-!# endif
-!     &                     GRID(ng) % p_algae,                          &
-!     &                     SetFillVal = .FALSE.)
-!        IF (status.ne.nf90_noerr) THEN
-!          IF (Master) THEN
-!            WRITE (stdout,10) TRIM(Vname(1,idAlga)), HIS(ng)%Rindex
-!          END IF
-!          exit_flag=3
-!          ioerror=status
-!          RETURN
-!        END IF
-!      END IF
 !
 !  Write out time-dependent Biological 2D fields.
 !
@@ -5131,12 +5041,8 @@
         END IF
       END DO
 
-#endif
-
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
-
 !!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
-#ifdef SEDIMENT_ECOSYS
+# ifdef SEDIMENT_ECOSYS
 !
 !  Write out time-dependent Biological sediment 3D fields.
 !
@@ -5149,9 +5055,9 @@
      &                     HIS(ng)%Vid(ifield),                         &
      &                     HIS(ng)%Rindex, gtype,                       &
      &                     LBi, UBi, LBj, UBj, 1, Nsed(ng), scale,      &
-# ifdef MASKING
+#  ifdef MASKING
      &                     GRID(ng) % rmask,                            &
-# endif
+#  endif
      &                     OCEAN(ng) % HisBiosed3d(:,:,:,i))
           IF (status.ne.nf90_noerr) THEN
             IF (Master) THEN
@@ -5163,8 +5069,11 @@
           END IF
         END IF
       END DO
-#endif
+# endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
+
 
 
 !

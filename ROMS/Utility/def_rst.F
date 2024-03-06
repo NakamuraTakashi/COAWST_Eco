@@ -2528,151 +2528,70 @@
 
 #if defined REEF_ECOSYS
 !
-!  Define time-varying coral coverage.
-!
-        IF (Hout(idCrl1,ng)) THEN
-          Vinfo( 1)=Vname(1,idCrl1)
-          Vinfo( 2)=Vname(2,idCrl1)
-          Vinfo( 3)=Vname(3,idCrl1)
-          Vinfo(14)=Vname(4,idCrl1)
-          Vinfo(16)=Vname(1,idtime)
-# if defined WRITE_WATER && defined MASKING
-          Vinfo(20)='mask_rho'
-# endif
-          Vinfo(22)='coordinates'
-          Aval(5)=REAL(Iinfo(1,idCrl1,ng),r8)
-          status=def_var(ng, iNLM, RST(ng)%ncid, RST(ng)%Vid(idCrl1),   &
-     &                   NF_FOUT, nvd3, t2dgrd, Aval, Vinfo, ncname,    &
-     &                   SetFillVal = .FALSE.)
-          IF (exit_flag.ne.NoError) RETURN
-        END IF
-!
-!  Define time-varying coral2 coverage.
-!
-        IF (Hout(idCrl1,ng)) THEN
-          Vinfo( 1)=Vname(1,idCrl2)
-          Vinfo( 2)=Vname(2,idCrl2)
-          Vinfo( 3)=Vname(3,idCrl2)
-          Vinfo(14)=Vname(4,idCrl2)
-          Vinfo(16)=Vname(1,idtime)
-# if defined WRITE_WATER && defined MASKING
-          Vinfo(20)='mask_rho'
-# endif
-          Vinfo(22)='coordinates'
-          Aval(5)=REAL(Iinfo(1,idCrl2,ng),r8)
-          status=def_var(ng, iNLM, RST(ng)%ncid, RST(ng)%Vid(idCrl2),   &
-     &                   NF_FOUT, nvd3, t2dgrd, Aval, Vinfo, ncname,    &
-     &                   SetFillVal = .FALSE.)
-          IF (exit_flag.ne.NoError) RETURN
-        END IF
-!
-!  Define time-varying seagrass coverage.
-!
-        IF (Hout(idSgrs,ng)) THEN
-          Vinfo( 1)=Vname(1,idSgrs)
-          Vinfo( 2)=Vname(2,idSgrs)
-          Vinfo( 3)=Vname(3,idSgrs)
-          Vinfo(14)=Vname(4,idSgrs)
-          Vinfo(16)=Vname(1,idtime)
-# if defined WRITE_WATER && defined MASKING
-          Vinfo(20)='mask_rho'
-# endif
-          Vinfo(22)='coordinates'
-          Aval(5)=REAL(Iinfo(1,idSgrs,ng),r8)
-          status=def_var(ng, iNLM, RST(ng)%ncid, RST(ng)%Vid(idSgrs),   &
-     &                   NF_FOUT, nvd3, t2dgrd, Aval, Vinfo, ncname,    &
-     &                   SetFillVal = .FALSE.)
-          IF (exit_flag.ne.NoError) RETURN
-        END IF
-!
-!  Define time-varying algal coverage.
-!
-        IF (Hout(idAlga,ng)) THEN
-          Vinfo( 1)=Vname(1,idAlga)
-          Vinfo( 2)=Vname(2,idAlga)
-          Vinfo( 3)=Vname(3,idAlga)
-          Vinfo(14)=Vname(4,idAlga)
-          Vinfo(16)=Vname(1,idtime)
-# if defined WRITE_WATER && defined MASKING
-          Vinfo(20)='mask_rho'
-# endif
-          Vinfo(22)='coordinates'
-          Aval(5)=REAL(Iinfo(1,idAlga,ng),r8)
-          status=def_var(ng, iNLM, RST(ng)%ncid, RST(ng)%Vid(idAlga),   &
-     &                   NF_FOUT, nvd3, t2dgrd, Aval, Vinfo, ncname,    &
-     &                   SetFillVal = .FALSE.)
-          IF (exit_flag.ne.NoError) RETURN
-        END IF
-!
 !  Define time-varying Biological 2D field.
 !
         DO i=1,NHbio2d
           ifield=iHbio2(i)
-          IF (Hout(ifield,ng)) THEN
-            Vinfo( 1)=Vname(1,ifield)
-            Vinfo( 2)=Vname(2,ifield)
-            Vinfo( 3)=Vname(3,ifield)
-            Vinfo(14)=Vname(4,ifield)
-            Vinfo(16)=Vname(1,idtime)
+          Vinfo( 1)=Vname(1,ifield)
+          Vinfo( 2)=Vname(2,ifield)
+          Vinfo( 3)=Vname(3,ifield)
+          Vinfo(14)=Vname(4,ifield)
+          Vinfo(16)=Vname(1,idtime)
 # if defined WRITE_WATER && defined MASKING
-            Vinfo(20)='mask_rho'
+          Vinfo(20)='mask_rho'
 # endif
-            Vinfo(22)='coordinates'
-            Aval(5)=REAL(Iinfo(1,ifield,ng),r8)
-            status=def_var(ng, iNLM, RST(ng)%ncid, RST(ng)%Vid(ifield),   &
-     &                     NF_FOUT, nvd3, t2dgrd, Aval, Vinfo, ncname )
-            IF (exit_flag.ne.NoError) RETURN
-          END IF
+          Vinfo(22)='coordinates'
+          Aval(5)=REAL(Iinfo(1,ifield,ng),r8)
+          status=def_var(ng, iNLM, RST(ng)%ncid, RST(ng)%Vid(ifield),   &
+     &                   NF_FOUT, nvd3, t2dgrd, Aval, Vinfo, ncname )
+          IF (exit_flag.ne.NoError) RETURN
         END DO
 !
 !  Define time-varying Biological 3D field.
 !
         DO i=1,NHbio3d
           ifield=iHbio3(i)
-          IF (Hout(ifield,ng)) THEN
-            Vinfo( 1)=Vname(1,ifield)
-            Vinfo( 2)=Vname(2,ifield)
-            Vinfo( 3)=Vname(3,ifield)
-            Vinfo(14)=Vname(4,ifield)
-            Vinfo(16)=Vname(1,ifield)
+          Vinfo( 1)=Vname(1,ifield)
+          Vinfo( 2)=Vname(2,ifield)
+          Vinfo( 3)=Vname(3,ifield)
+          Vinfo(14)=Vname(4,ifield)
+          Vinfo(16)=Vname(1,ifield)
 #  if defined WRITE_WATER && defined MASKING
-            Vinfo(20)='mask_rho'
+          Vinfo(20)='mask_rho'
 #  endif
-            Vinfo(22)='coordinates'
-            Aval(5)=REAL(Iinfo(1,ifield,ng),r8)
-            status=def_var(ng, iNLM, RST(ng)%ncid, RST(ng)%Vid(ifield),   &
-     &                     NF_FOUT, nvd4, t3dgrd, Aval, Vinfo, ncname)
-            IF (exit_flag.ne.NoError) RETURN
-          END IF
+          Vinfo(22)='coordinates'
+          Aval(5)=REAL(Iinfo(1,ifield,ng),r8)
+          status=def_var(ng, iNLM, RST(ng)%ncid, RST(ng)%Vid(ifield),   &
+     &                   NF_FOUT, nvd4, t3dgrd, Aval, Vinfo, ncname)
+          IF (exit_flag.ne.NoError) RETURN
         END DO
 
-#endif
 !!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
-#if defined SEDIMENT_ECOSYS
+# if defined SEDIMENT_ECOSYS
 !
 !  Define time-varying Biological sediment 3D field.
 !
         DO i=1,NHbiosed3d
           ifield=iHbiosed3(i)
-          IF (Hout(ifield,ng)) THEN
-            Vinfo( 1)=Vname(1,ifield)
-            Vinfo( 2)=Vname(2,ifield)
-            Vinfo( 3)=Vname(3,ifield)
-            Vinfo(14)=Vname(4,ifield)
-            Vinfo(16)=Vname(1,idtime)
-# if defined WRITE_WATER && defined MASKING
-            Vinfo(20)='mask_rho'
-# endif
-            Vinfo(22)='coordinates'
-            Aval(5)=REAL(Iinfo(1,ifield,ng),r8)
-            status=def_var(ng, iNLM, RST(ng)%ncid, RST(ng)%Vid(ifield),   &
-      &                     NF_FOUT, 4, biosed3dgrd, Aval, Vinfo, ncname)
-            IF (exit_flag.ne.NoError) RETURN
-          END IF
+          Vinfo( 1)=Vname(1,ifield)
+          Vinfo( 2)=Vname(2,ifield)
+          Vinfo( 3)=Vname(3,ifield)
+          Vinfo(14)=Vname(4,ifield)
+          Vinfo(16)=Vname(1,idtime)
+#  if defined WRITE_WATER && defined MASKING
+          Vinfo(20)='mask_rho'
+#  endif
+          Vinfo(22)='coordinates'
+          Aval(5)=REAL(Iinfo(1,ifield,ng),r8)
+          status=def_var(ng, iNLM, RST(ng)%ncid, RST(ng)%Vid(ifield),   &
+      &                   NF_FOUT, 4, biosed3dgrd, Aval, Vinfo, ncname)
+          IF (exit_flag.ne.NoError) RETURN
         END DO
 
-#endif
+# endif
+
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+#endif
 
 
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
