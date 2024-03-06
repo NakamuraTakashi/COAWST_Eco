@@ -1664,7 +1664,7 @@ contains
 !         input parameters
           ( ng, i, j        &   ! ng: nested grid number; i,j: position
           , Nsed            &   ! Number of vertical biological sediment layers
-          , dt              &   ! Time step (sec)
+          , dtsed           &   ! Time step (sec)
           , Tmp(1)          &   ! Tmp: Temperature (oC)
           , Sal(1)          &   ! Sal: Salinity (PSU)
           , TA(1)*rho_sw(1) &   ! TA: Total alkalinity (umol L-1)
