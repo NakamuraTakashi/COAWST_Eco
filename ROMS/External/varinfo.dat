@@ -9542,8 +9542,8 @@
     'total scale'                 ! [total scale]
     'pH, scalar, series'
     'ocean_time'
-    'iHbio2(ipHt_)'
-    'r2dvar'
+    'iDbio3(ipHt_)'
+    'r3dvar'
     1.0d0
 
   'Omega_arg'                                       ! Input/Output
@@ -9551,8 +9551,8 @@
     'nodimension'                               ! []
     'Omega_arg, scalar, series'
     'ocean_time'
-    'iHbio2(iWarg)'
-    'r2dvar'
+    'iDbio3(iWarg)'
+    'r3dvar'
     1.0d0
 
   'CO2_airsea'                                       ! Input/Output
@@ -9560,7 +9560,7 @@
     'mmol m-2 s-1'                 ! [mmol m-2 s-1]
     'CO2_airsea, scalar, series'
     'ocean_time'
-    'iHbio2(iCOfx)'
+    'iDbio2(iCOfx)'
     'r2dvar'
     1.0d0
 
@@ -9569,7 +9569,7 @@
     'uatm'                                 ! [microatmosphere]
     'pCO2, scalar, series'
     'ocean_time'
-    'iHbio2(ipCO2)'
+    'iDbio2(ipCO2)'
     'r2dvar'
     1.0d0
 
@@ -9578,7 +9578,7 @@
     'mmol m-2 s-1'                 ! [mmol m-2 s-1]
     'O2_airsea, scalar, series'
     'ocean_time'
-    'iHbio2(iO2fx)'
+    'iDbio2(iO2fx)'
     'r2dvar'
     1.0d0
 
@@ -9587,7 +9587,7 @@
     'umol m-2 s-1'                               ! [umol m-2 s-1]
     'PARbot, scalar, series'
     'ocean_time'
-    'iHbio2(iPARb)'
+    'iDbio2(iPARb)'
     'r2dvar'
     1.0d0
 
@@ -9596,7 +9596,7 @@
     'N m-2'                               ! [N m-2]
     'Tau_ave, scalar, series'
     'ocean_time'
-    'iHbio2(iTau_)'
+    'iDbio2(iTau_)'
     'r2dvar'
     1.0d0
 

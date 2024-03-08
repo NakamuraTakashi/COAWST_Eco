@@ -51,11 +51,11 @@
 
       real(r8), dimension(100) :: Rval
 #if defined ORGANIC_MATTER
-      real(r8), dimension(N_phyt,Ngrids) :: Rphyt
-      real(r8), dimension(N_zoop,Ngrids) :: Rzoop
-      real(r8), dimension(N_dom,Ngrids) :: Rdom
-      real(r8), dimension(N_pom,Ngrids) :: Rpom
-      real(r8), dimension(N_pim,Ngrids) :: Rpim
+      real(r8), dimension(Nphy,Ngrids) :: Rphyt
+      real(r8), dimension(Nzoo,Ngrids) :: Rzoop
+      real(r8), dimension(Ndom,Ngrids) :: Rdom
+      real(r8), dimension(Npom,Ngrids) :: Rpom
+      real(r8), dimension(Npim,Ngrids) :: Rpim
 #endif
       character (len=40 ) :: KeyWord
       character (len=256) :: line
@@ -82,6 +82,8 @@
           SELECT CASE (TRIM(KeyWord))
             CASE ('Lbiology')
               Npts=load_l(Nval, Cval, Ngrids, Lbiology)
+            CASE ('LReadBioINI')
+              Npts=load_l(Nval, Cval, 2*Ngrids, LReadBioINI)
             CASE ('CrlIter')
               Npts=load_i(Nval, Rval, Ngrids, CrlIter)
             CASE ('SedIter')
@@ -99,37 +101,37 @@
               Npts=load_r(Nval, Rval, Ngrids, Oxyg0)
 #if defined ORGANIC_MATTER
             CASE ('DOC_0')
-              Npts=load_r(Nval, Rval, N_dom*Ngrids, Rdom)
+              Npts=load_r(Nval, Rval, Ndom*Ngrids, Rdom)
               DO ng=1,Ngrids
-                DO itrc=1,N_dom
+                DO itrc=1,Ndom
                   DOC_0(itrc,ng)=Rdom(itrc,ng)
                 END DO
               END DO
             CASE ('POC_0')
-              Npts=load_r(Nval, Rval, N_pom*Ngrids, Rpom)
+              Npts=load_r(Nval, Rval, Npom*Ngrids, Rpom)
               DO ng=1,Ngrids
-                DO itrc=1,N_pom
+                DO itrc=1,Npom
                   POC_0(itrc,ng)=Rpom(itrc,ng)
                 END DO
               END DO
             CASE ('Phyt_0')
-              Npts=load_r(Nval, Rval, N_phyt*Ngrids, Rphyt)
+              Npts=load_r(Nval, Rval, Nphy*Ngrids, Rphyt)
               DO ng=1,Ngrids
-                DO itrc=1,N_phyt
+                DO itrc=1,Nphy
                   Phyt_0(itrc,ng)=Rphyt(itrc,ng)
                 END DO
               END DO
             CASE ('Zoop_0')
-              Npts=load_r(Nval, Rval, N_zoop*Ngrids, Rzoop)
+              Npts=load_r(Nval, Rval, Nzoo*Ngrids, Rzoop)
               DO ng=1,Ngrids
-                DO itrc=1,N_zoop
+                DO itrc=1,Nzoo
                   Zoop_0(itrc,ng)=Rzoop(itrc,ng)
                 END DO
               END DO
             CASE ('PIC_0')
-              Npts=load_r(Nval, Rval, N_pim*Ngrids, Rpim)
+              Npts=load_r(Nval, Rval, Npim*Ngrids, Rpim)
               DO ng=1,Ngrids
-                DO itrc=1,N_pim
+                DO itrc=1,Npim
                   PIC_0(itrc,ng)=Rpim(itrc,ng)
                 END DO
               END DO
@@ -139,37 +141,37 @@
               Npts=load_r(Nval, Rval, Ngrids, d13C_TIC0)
 # if defined ORGANIC_MATTER
             CASE ('d13C_DOC_0')
-              Npts=load_r(Nval, Rval, N_dom*Ngrids, Rdom)
+              Npts=load_r(Nval, Rval, Ndom*Ngrids, Rdom)
               DO ng=1,Ngrids
-                DO itrc=1,N_dom
+                DO itrc=1,Ndom
                   d13C_DOC_0(itrc,ng)=Rdom(itrc,ng)
                 END DO
               END DO
             CASE ('d13C_POC_0')
-              Npts=load_r(Nval, Rval, N_pom*Ngrids, Rpom)
+              Npts=load_r(Nval, Rval, Npom*Ngrids, Rpom)
               DO ng=1,Ngrids
-                DO itrc=1,N_pom
+                DO itrc=1,Npom
                   d13C_POC_0(itrc,ng)=Rpom(itrc,ng)
                 END DO
               END DO
             CASE ('d13C_Phyt_0')
-              Npts=load_r(Nval, Rval, N_phyt*Ngrids, Rphyt)
+              Npts=load_r(Nval, Rval, Nphy*Ngrids, Rphyt)
               DO ng=1,Ngrids
-                DO itrc=1,N_phyt
+                DO itrc=1,Nphy
                   d13C_Phyt_0(itrc,ng)=Rphyt(itrc,ng)
                 END DO
               END DO
             CASE ('d13C_Zoop_0')
-              Npts=load_r(Nval, Rval, N_zoop*Ngrids, Rzoop)
+              Npts=load_r(Nval, Rval, Nzoo*Ngrids, Rzoop)
               DO ng=1,Ngrids
-                DO itrc=1,N_zoop
+                DO itrc=1,Nzoo
                   d13C_Zoop_0(itrc,ng)=Rzoop(itrc,ng)
                 END DO
               END DO
             CASE ('d13C_PIC_0')
-              Npts=load_r(Nval, Rval, N_pim*Ngrids, Rpom)
+              Npts=load_r(Nval, Rval, Npim*Ngrids, Rpom)
               DO ng=1,Ngrids
-                DO itrc=1,N_pim
+                DO itrc=1,Npim
                   d13C_PIC_0(itrc,ng)=Rpim(itrc,ng)
                 END DO
               END DO
@@ -186,30 +188,30 @@
               Npts=load_r(Nval, Rval, Ngrids, PO4_0)
 # if defined ORGANIC_MATTER
             CASE ('DON_0')
-              Npts=load_r(Nval, Rval, N_dom*Ngrids, Rdom)
+              Npts=load_r(Nval, Rval, Ndom*Ngrids, Rdom)
               DO ng=1,Ngrids
-                DO itrc=1,N_dom
+                DO itrc=1,Ndom
                   DON_0(itrc,ng)=Rdom(itrc,ng)
                 END DO
               END DO
             CASE ('PON_0')
-              Npts=load_r(Nval, Rval, N_pom*Ngrids, Rpom)
+              Npts=load_r(Nval, Rval, Npom*Ngrids, Rpom)
               DO ng=1,Ngrids
-                DO itrc=1,N_pom
+                DO itrc=1,Npom
                   PON_0(itrc,ng)=Rpom(itrc,ng)
                 END DO
               END DO
             CASE ('DOP_0')
-              Npts=load_r(Nval, Rval, N_dom*Ngrids, Rdom)
+              Npts=load_r(Nval, Rval, Ndom*Ngrids, Rdom)
               DO ng=1,Ngrids
-                DO itrc=1,N_dom
+                DO itrc=1,Ndom
                   DOP_0(itrc,ng)=Rdom(itrc,ng)
                 END DO
               END DO
             CASE ('POP_0')
-              Npts=load_r(Nval, Rval, N_pom*Ngrids, Rpom)
+              Npts=load_r(Nval, Rval, Npom*Ngrids, Rpom)
               DO ng=1,Ngrids
-                DO itrc=1,N_pom
+                DO itrc=1,Npom
                   POP_0(itrc,ng)=Rpom(itrc,ng)
                 END DO
               END DO
@@ -223,31 +225,31 @@
               Npts=load_r(Nval, Rval, Ngrids, d15N_NH4_0)
 #  if defined ORGANIC_MATTER
             CASE ('d15N_DON_0')
-              Npts=load_r(Nval, Rval, N_dom*Ngrids, Rdom)
+              Npts=load_r(Nval, Rval, Ndom*Ngrids, Rdom)
               DO ng=1,Ngrids
-                DO itrc=1,N_dom
+                DO itrc=1,Ndom
                   d15N_DON_0(itrc,ng)=Rdom(itrc,ng)
                 END DO
               END DO
             CASE ('d15N_PON_0')
-              Npts=load_r(Nval, Rval, N_pom*Ngrids, Rpom)
+              Npts=load_r(Nval, Rval, Npom*Ngrids, Rpom)
               DO ng=1,Ngrids
-                DO itrc=1,N_pom
+                DO itrc=1,Npom
                   d15N_PON_0(itrc,ng)=Rpom(itrc,ng)
                 END DO
               END DO
             CASE ('d15N_Phyt_0')
-              Npts=load_r(Nval, Rval, N_phyt*Ngrids, Rphyt)
+              Npts=load_r(Nval, Rval, Nphy*Ngrids, Rphyt)
               DO ng=1,Ngrids
-                DO itrc=1,N_phyt
+                DO itrc=1,Nphy
                   d15N_Phyt_0(itrc,ng)=Rphyt(itrc,ng)
                 END DO
               END DO
             CASE ('d15N_Zoop_0')
-              Npts=load_r(Nval, Rval, N_zoop*Ngrids, Rzoop)
+              Npts=load_r(Nval, Rval, Nzoo*Ngrids, Rzoop)
               DO ng=1,Ngrids
-                DO itrc=1,N_zoop
-                  d15N_Zoop_0(itrc,ng)=Rzoop(itrc,ng)
+                DO itrc=1,Nzoo
+                  d15Nzoo_0(itrc,ng)=Rzoop(itrc,ng)
                 END DO
               END DO
 #  endif
@@ -726,19 +728,19 @@
             WRITE (out,80) Oxyg0(ng), 'Oxyg0',                          &
      &            'Dissolved oxygen (umol/L).'
 #if defined ORGANIC_MATTER
-            DO itrc=1,N_dom
+            DO itrc=1,Ndom
               WRITE (out,140) DOC_0(itrc,ng), 'DOC_0', itrc,                          &
      &            'Dissolved organic carbon (umolC/L).'
             END DO
-            DO itrc=1,N_pom
+            DO itrc=1,Npom
               WRITE (out,140)  POC_0(itrc,ng), 'POC_0', itrc,                          &
      &            'Particulate organic carbon (umolC/L).'
             END DO
-            DO itrc=1,N_phyt
+            DO itrc=1,Nphy
               WRITE (out,140) Phyt_0(itrc,ng), 'Phyt_0', itrc,                          &
      &            'Phytoplankton (umolC/L).'
             END DO
-            DO itrc=1,N_zoop
+            DO itrc=1,Nzoo
               WRITE (out,140) Zoop_0(itrc,ng), 'Zoop_0', itrc,                          &
      &            'Zooplankton (umolC/L).'
             END DO
@@ -747,23 +749,23 @@
             WRITE (out,80) d13C_TIC0(ng), 'd13C_TIC0',                      &
      &            'd13C of DIC (permil VPDB).'
 # if defined ORGANIC_MATTER
-            DO itrc=1,N_dom
+            DO itrc=1,Ndom
               WRITE (out,140) d13C_DOC_0(itrc,ng), 'd13C_DOC_0', itrc,                      &
      &            'd13C of DOC (permil VPDB).'
             END DO
-            DO itrc=1,N_pom
+            DO itrc=1,Npom
               WRITE (out,140) d13C_POC_0(itrc,ng), 'd13C_POC_0', itrc,                      &
      &            'd13C of POC (permil VPDB).'
             END DO
-            DO itrc=1,N_phyt
+            DO itrc=1,Nphy
               WRITE (out,140) d13C_Phyt_0(itrc,ng), 'd13C_Phyt_0', itrc,                      &
      &            'd13C of phytoplankton (permil VPDB).'
             END DO
-            DO itrc=1,N_zoop
+            DO itrc=1,Nzoo
               WRITE (out,140) d13C_Zoop_0(itrc,ng), 'd13C_Zoop_0', itrc,                      &
      &            'd13C of zooplankton (permil VPDB).'
             END DO
-            DO itrc=1,N_pim
+            DO itrc=1,Npim
               WRITE (out,140) d13C_Zoop_0(itrc,ng), 'd13C_Zoop_0', itrc,                      &
      &            'd13C of zooplankton (permil VPDB).'
             END DO
@@ -779,19 +781,19 @@
             WRITE (out,80) PO4_0(ng), 'PO4_0',                          &
      &            'PO4 (umol/L).'
 # if defined ORGANIC_MATTER
-            DO itrc=1,N_dom
+            DO itrc=1,Ndom
               WRITE (out,140) DON_0(itrc,ng), 'DON_0', itrc,                          &
      &            'DON (umolN/L).'
             END DO
-            DO itrc=1,N_pom
+            DO itrc=1,Npom
               WRITE (out,140) PON_0(itrc,ng), 'PON_0', itrc,                          &
      &            'PON (umolN/L).'
             END DO
-            DO itrc=1,N_dom
+            DO itrc=1,Ndom
               WRITE (out,140) DOP_0(itrc,ng), 'DOP_0', itrc,                          &
      &            'DOP (umolP/L).'
             END DO
-            DO itrc=1,N_pom
+            DO itrc=1,Npom
               WRITE (out,140) POP_0(itrc,ng), 'POP_0', itrc,                          &
      &            'POP (umolP/L).'
             END DO
@@ -804,19 +806,19 @@
             WRITE (out,80) d15N_NH4_0(ng), 'd15N_NH4_0',                      &
      &            'd15N of NH4 (permil).'
 #  if defined ORGANIC_MATTER
-            DO itrc=1,N_dom
+            DO itrc=1,Ndom
               WRITE (out,140) d15N_DON_0(itrc,ng), 'd15N_DOC_0', itrc,                      &
      &            'd15N of DOC (permil).'
             END DO
-            DO itrc=1,N_pom
+            DO itrc=1,Npom
               WRITE (out,140) d15N_PON_0(itrc,ng), 'd15N_POC_0', itrc,                      &
      &            'd15N of POC (permil).'
             END DO
-            DO itrc=1,N_dom
+            DO itrc=1,Ndom
               WRITE (out,140) d15N_Phyt_0(itrc,ng), 'd15N_Phyt_0', itrc,                      &
      &            'd15N of phytoplankton (permil).'
             END DO
-            DO itrc=1,N_pom
+            DO itrc=1,Npom
               WRITE (out,140) d15N_Zoop_0(itrc,ng), 'd15N_Zoop_0', itrc,                      &
      &            'd15N of zooplankton (permil).'
             END DO

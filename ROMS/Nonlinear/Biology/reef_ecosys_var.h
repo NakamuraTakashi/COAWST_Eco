@@ -41,7 +41,7 @@
               CASE ('idTvar(iDOC(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_dom
+                DO i=1,Ndom
                   varid=varid+1
                   idTvar(iDOC(i))=varid
                   DO ng=1,Ngrids
@@ -63,7 +63,7 @@
               CASE ('idTvar(iPOC(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_pom
+                DO i=1,Npom
                   varid=varid+1
                   idTvar(iPOC(i))=varid
                   DO ng=1,Ngrids
@@ -85,7 +85,7 @@
               CASE ('idTvar(iPhyt(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_phyt
+                DO i=1,Nphy
                   varid=varid+1
                   idTvar(iPhyt(i))=varid
                   DO ng=1,Ngrids
@@ -107,7 +107,7 @@
               CASE ('idTvar(iZoop(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_zoop
+                DO i=1,Nzoo
                   varid=varid+1
                   idTvar(iZoop(i))=varid
                   DO ng=1,Ngrids
@@ -129,7 +129,7 @@
               CASE ('idTvar(iPIC(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_pim
+                DO i=1,Npim
                   varid=varid+1
                   idTvar(iPIC(i))=varid
                   DO ng=1,Ngrids
@@ -156,7 +156,7 @@
               CASE ('idTvar(iDO13C(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_dom
+                DO i=1,Ndom
                   varid=varid+1
                   idTvar(iDO13C(i))=varid
                   DO ng=1,Ngrids
@@ -178,7 +178,7 @@
               CASE ('idTvar(iPO13C(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_pom
+                DO i=1,Npom
                   varid=varid+1
                   idTvar(iPO13C(i))=varid
                   DO ng=1,Ngrids
@@ -200,7 +200,7 @@
               CASE ('idTvar(iPhyt13C(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_phyt
+                DO i=1,Nphy
                   varid=varid+1
                   idTvar(iPhyt13C(i))=varid
                   DO ng=1,Ngrids
@@ -222,7 +222,7 @@
               CASE ('idTvar(iZoop13C(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_zoop
+                DO i=1,Nzoo
                   varid=varid+1
                   idTvar(iZoop13C(i))=varid
                   DO ng=1,Ngrids
@@ -244,7 +244,7 @@
               CASE ('idTvar(iPI13C(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_pim
+                DO i=1,Npim
                   varid=varid+1
                   idTvar(iPI13C(i))=varid
                   DO ng=1,Ngrids
@@ -278,7 +278,7 @@
               CASE ('idTvar(iDON(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_dom
+                DO i=1,Ndom
                   varid=varid+1
                   idTvar(iDON(i))=varid
                   DO ng=1,Ngrids
@@ -300,7 +300,7 @@
               CASE ('idTvar(iPON(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_pom
+                DO i=1,Npom
                   varid=varid+1
                   idTvar(iPON(i))=varid
                   DO ng=1,Ngrids
@@ -322,7 +322,7 @@
               CASE ('idTvar(iDOP(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_dom
+                DO i=1,Ndom
                   varid=varid+1
                   idTvar(iDOP(i))=varid
                   DO ng=1,Ngrids
@@ -344,7 +344,7 @@
               CASE ('idTvar(iPOP(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_pom
+                DO i=1,Npom
                   varid=varid+1
                   idTvar(iPOP(i))=varid
                   DO ng=1,Ngrids
@@ -375,7 +375,7 @@
               CASE ('idTvar(iDO15N(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_dom
+                DO i=1,Ndom
                   varid=varid+1
                   idTvar(iDO15N(i))=varid
                   DO ng=1,Ngrids
@@ -397,7 +397,7 @@
               CASE ('idTvar(iPO15N(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_pom
+                DO i=1,Npom
                   varid=varid+1
                   idTvar(iPO15N(i))=varid
                   DO ng=1,Ngrids
@@ -419,7 +419,7 @@
               CASE ('idTvar(iPhyt15N(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_phyt
+                DO i=1,Nphy
                   varid=varid+1
                   idTvar(iPhyt15N(i))=varid
                   DO ng=1,Ngrids
@@ -441,7 +441,7 @@
               CASE ('idTvar(iZoop15N(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_zoop
+                DO i=1,Nzoo
                   varid=varid+1
                   idTvar(iZoop15N(i))=varid
                   DO ng=1,Ngrids
@@ -470,23 +470,23 @@
                 idTvar(iCOTl)=varid
 #endif
 
-              CASE ('iHbio2(ipHt_)')
-                iHbio2(ipHt_)=varid
-              CASE ('iHbio2(iWarg)')
-                iHbio2(iWarg)=varid
-
-              CASE ('iHbio2(iCOfx)')
-                iHbio2(iCOfx)=varid
-              CASE ('iHbio2(ipCO2)')
-                iHbio2(ipCO2)=varid
-              CASE ('iHbio2(iO2fx)')
-                iHbio2(iO2fx)=varid
-
-              CASE ('iHbio2(iPARb)')
-                iHbio2(iPARb)=varid
-
-              CASE ('iHbio2(iTau_)')
-                iHbio2(iTau_)=varid
+!              CASE ('iHbio2(ipHt_)')
+!                iHbio2(ipHt_)=varid
+!              CASE ('iHbio2(iWarg)')
+!                iHbio2(iWarg)=varid
+!
+!              CASE ('iHbio2(iCOfx)')
+!                iHbio2(iCOfx)=varid
+!              CASE ('iHbio2(ipCO2)')
+!                iHbio2(ipCO2)=varid
+!              CASE ('iHbio2(iO2fx)')
+!                iHbio2(iO2fx)=varid
+!
+!              CASE ('iHbio2(iPARb)')
+!                iHbio2(iPARb)=varid
+!
+!              CASE ('iHbio2(iTau_)')
+!                iHbio2(iTau_)=varid
 #ifdef CORAL_POLYP
               CASE ('iHbio2(iC1Pg)')
                 iHbio2(iC1Pg)=varid
@@ -677,7 +677,7 @@
               CASE ('idTbry(iwest,iDOC(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_dom
+                DO i=1,Ndom
                   varid=varid+1
                   idTbry(iwest,iDOC(i))=varid
                   DO ng=1,Ngrids
@@ -699,7 +699,7 @@
               CASE ('idTbry(ieast,iDOC(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_dom
+                DO i=1,Ndom
                   varid=varid+1
                   idTbry(ieast,iDOC(i))=varid
                   DO ng=1,Ngrids
@@ -721,7 +721,7 @@
               CASE ('idTbry(isouth,iDOC(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_dom
+                DO i=1,Ndom
                   varid=varid+1
                   idTbry(isouth,iDOC(i))=varid
                   DO ng=1,Ngrids
@@ -743,7 +743,7 @@
               CASE ('idTbry(inorth,iDOC(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_dom
+                DO i=1,Ndom
                   varid=varid+1
                   idTbry(inorth,iDOC(i))=varid
                   DO ng=1,Ngrids
@@ -766,7 +766,7 @@
               CASE ('idTbry(iwest,iPOC(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_pom
+                DO i=1,Npom
                   varid=varid+1
                   idTbry(iwest,iPOC(i))=varid
                   DO ng=1,Ngrids
@@ -788,7 +788,7 @@
               CASE ('idTbry(ieast,iPOC(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_pom
+                DO i=1,Npom
                   varid=varid+1
                   idTbry(ieast,iPOC(i))=varid
                   DO ng=1,Ngrids
@@ -810,7 +810,7 @@
               CASE ('idTbry(isouth,iPOC(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_pom
+                DO i=1,Npom
                   varid=varid+1
                   idTbry(isouth,iPOC(i))=varid
                   DO ng=1,Ngrids
@@ -832,7 +832,7 @@
               CASE ('idTbry(inorth,iPOC(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_pom
+                DO i=1,Npom
                   varid=varid+1
                   idTbry(inorth,iPOC(i))=varid
                   DO ng=1,Ngrids
@@ -855,7 +855,7 @@
               CASE ('idTbry(iwest,iPhyt(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_phyt
+                DO i=1,Nphy
                   varid=varid+1
                   idTbry(iwest,iPhyt(i))=varid
                   DO ng=1,Ngrids
@@ -877,7 +877,7 @@
               CASE ('idTbry(ieast,iPhyt(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_phyt
+                DO i=1,Nphy
                   varid=varid+1
                   idTbry(ieast,iPhyt(i))=varid
                   DO ng=1,Ngrids
@@ -899,7 +899,7 @@
               CASE ('idTbry(isouth,iPhyt(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_phyt
+                DO i=1,Nphy
                   varid=varid+1
                   idTbry(isouth,iPhyt(i))=varid
                   DO ng=1,Ngrids
@@ -921,7 +921,7 @@
               CASE ('idTbry(inorth,iPhyt(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_phyt
+                DO i=1,Nphy
                   varid=varid+1
                   idTbry(inorth,iPhyt(i))=varid
                   DO ng=1,Ngrids
@@ -944,7 +944,7 @@
               CASE ('idTbry(iwest,iZoop(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_zoop
+                DO i=1,Nzoo
                   varid=varid+1
                   idTbry(iwest,iZoop(i))=varid
                   DO ng=1,Ngrids
@@ -966,7 +966,7 @@
               CASE ('idTbry(ieast,iZoop(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_zoop
+                DO i=1,Nzoo
                   varid=varid+1
                   idTbry(ieast,iZoop(i))=varid
                   DO ng=1,Ngrids
@@ -988,7 +988,7 @@
               CASE ('idTbry(isouth,iZoop(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_zoop
+                DO i=1,Nzoo
                   varid=varid+1
                   idTbry(isouth,iZoop(i))=varid
                   DO ng=1,Ngrids
@@ -1010,7 +1010,7 @@
               CASE ('idTbry(inorth,iZoop(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_zoop
+                DO i=1,Nzoo
                   varid=varid+1
                   idTbry(inorth,iZoop(i))=varid
                   DO ng=1,Ngrids
@@ -1044,7 +1044,7 @@
               CASE ('idTbry(iwest,iDO13C(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_dom
+                DO i=1,Ndom
                   varid=varid+1
                   idTbry(iwest,iDO13C(i))=varid
                   DO ng=1,Ngrids
@@ -1066,7 +1066,7 @@
               CASE ('idTbry(ieast,iDO13C(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_dom
+                DO i=1,Ndom
                   varid=varid+1
                   idTbry(ieast,iDO13C(i))=varid
                   DO ng=1,Ngrids
@@ -1088,7 +1088,7 @@
               CASE ('idTbry(isouth,iDO13C(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_dom
+                DO i=1,Ndom
                   varid=varid+1
                   idTbry(isouth,iDO13C(i))=varid
                   DO ng=1,Ngrids
@@ -1110,7 +1110,7 @@
               CASE ('idTbry(inorth,iDO13C(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_dom
+                DO i=1,Ndom
                   varid=varid+1
                   idTbry(inorth,iDO13C(i))=varid
                   DO ng=1,Ngrids
@@ -1133,7 +1133,7 @@
               CASE ('idTbry(iwest,iPO13C(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_pom
+                DO i=1,Npom
                   varid=varid+1
                   idTbry(iwest,iPO13C(i))=varid
                   DO ng=1,Ngrids
@@ -1155,7 +1155,7 @@
               CASE ('idTbry(ieast,iPO13C(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_pom
+                DO i=1,Npom
                   varid=varid+1
                   idTbry(ieast,iPO13C(i))=varid
                   DO ng=1,Ngrids
@@ -1177,7 +1177,7 @@
               CASE ('idTbry(isouth,iPO13C(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_pom
+                DO i=1,Npom
                   varid=varid+1
                   idTbry(isouth,iPO13C(i))=varid
                   DO ng=1,Ngrids
@@ -1199,7 +1199,7 @@
               CASE ('idTbry(inorth,iPO13C(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_pom
+                DO i=1,Npom
                   varid=varid+1
                   idTbry(inorth,iPO13C(i))=varid
                   DO ng=1,Ngrids
@@ -1222,7 +1222,7 @@
               CASE ('idTbry(iwest,iPhyt13C(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_phyt
+                DO i=1,Nphy
                   varid=varid+1
                   idTbry(iwest,iPhyt13C(i))=varid
                   DO ng=1,Ngrids
@@ -1244,7 +1244,7 @@
               CASE ('idTbry(ieast,iPhyt13C(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_phyt
+                DO i=1,Nphy
                   varid=varid+1
                   idTbry(ieast,iPhyt13C(i))=varid
                   DO ng=1,Ngrids
@@ -1266,7 +1266,7 @@
               CASE ('idTbry(isouth,iPhyt13C(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_phyt
+                DO i=1,Nphy
                   varid=varid+1
                   idTbry(isouth,iPhyt13C(i))=varid
                   DO ng=1,Ngrids
@@ -1288,7 +1288,7 @@
               CASE ('idTbry(inorth,iPhyt13C(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_phyt
+                DO i=1,Nphy
                   varid=varid+1
                   idTbry(inorth,iPhyt13C(i))=varid
                   DO ng=1,Ngrids
@@ -1311,7 +1311,7 @@
               CASE ('idTbry(iwest,iZoop13C(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_zoop
+                DO i=1,Nzoo
                   varid=varid+1
                   idTbry(iwest,iZoop13C(i))=varid
                   DO ng=1,Ngrids
@@ -1333,7 +1333,7 @@
               CASE ('idTbry(ieast,iZoop13C(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_zoop
+                DO i=1,Nzoo
                   varid=varid+1
                   idTbry(ieast,iZoop13C(i))=varid
                   DO ng=1,Ngrids
@@ -1355,7 +1355,7 @@
               CASE ('idTbry(isouth,iZoop13C(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_zoop
+                DO i=1,Nzoo
                   varid=varid+1
                   idTbry(isouth,iZoop13C(i))=varid
                   DO ng=1,Ngrids
@@ -1377,7 +1377,7 @@
               CASE ('idTbry(inorth,iZoop13C(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_zoop
+                DO i=1,Nzoo
                   varid=varid+1
                   idTbry(inorth,iZoop13C(i))=varid
                   DO ng=1,Ngrids
@@ -1440,7 +1440,7 @@
               CASE ('idTbry(iwest,iDON(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_dom
+                DO i=1,Ndom
                   varid=varid+1
                   idTbry(iwest,iDON(i))=varid
                   DO ng=1,Ngrids
@@ -1462,7 +1462,7 @@
               CASE ('idTbry(ieast,iDON(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_dom
+                DO i=1,Ndom
                   varid=varid+1
                   idTbry(ieast,iDON(i))=varid
                   DO ng=1,Ngrids
@@ -1484,7 +1484,7 @@
               CASE ('idTbry(isouth,iDON(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_dom
+                DO i=1,Ndom
                   varid=varid+1
                   idTbry(isouth,iDON(i))=varid
                   DO ng=1,Ngrids
@@ -1506,7 +1506,7 @@
               CASE ('idTbry(inorth,iDON(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_dom
+                DO i=1,Ndom
                   varid=varid+1
                   idTbry(inorth,iDON(i))=varid
                   DO ng=1,Ngrids
@@ -1529,7 +1529,7 @@
               CASE ('idTbry(iwest,iPON(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_pom
+                DO i=1,Npom
                   varid=varid+1
                   idTbry(iwest,iPON(i))=varid
                   DO ng=1,Ngrids
@@ -1551,7 +1551,7 @@
               CASE ('idTbry(ieast,iPON(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_pom
+                DO i=1,Npom
                   varid=varid+1
                   idTbry(ieast,iPON(i))=varid
                   DO ng=1,Ngrids
@@ -1573,7 +1573,7 @@
               CASE ('idTbry(isouth,iPON(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_pom
+                DO i=1,Npom
                   varid=varid+1
                   idTbry(isouth,iPON(i))=varid
                   DO ng=1,Ngrids
@@ -1595,7 +1595,7 @@
               CASE ('idTbry(inorth,iPON(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_pom
+                DO i=1,Npom
                   varid=varid+1
                   idTbry(inorth,iPON(i))=varid
                   DO ng=1,Ngrids
@@ -1618,7 +1618,7 @@
               CASE ('idTbry(iwest,iDOP(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_dom
+                DO i=1,Ndom
                   varid=varid+1
                   idTbry(iwest,iDOP(i))=varid
                   DO ng=1,Ngrids
@@ -1640,7 +1640,7 @@
               CASE ('idTbry(ieast,iDOP(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_dom
+                DO i=1,Ndom
                   varid=varid+1
                   idTbry(ieast,iDOP(i))=varid
                   DO ng=1,Ngrids
@@ -1662,7 +1662,7 @@
               CASE ('idTbry(isouth,iDOP(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_dom
+                DO i=1,Ndom
                   varid=varid+1
                   idTbry(isouth,iDOP(i))=varid
                   DO ng=1,Ngrids
@@ -1684,7 +1684,7 @@
               CASE ('idTbry(inorth,iDOP(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_dom
+                DO i=1,Ndom
                   varid=varid+1
                   idTbry(inorth,iDOP(i))=varid
                   DO ng=1,Ngrids
@@ -1707,7 +1707,7 @@
               CASE ('idTbry(iwest,iPOP(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_pom
+                DO i=1,Npom
                   varid=varid+1
                   idTbry(iwest,iPOP(i))=varid
                   DO ng=1,Ngrids
@@ -1729,7 +1729,7 @@
               CASE ('idTbry(ieast,iPOP(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_pom
+                DO i=1,Npom
                   varid=varid+1
                   idTbry(ieast,iPOP(i))=varid
                   DO ng=1,Ngrids
@@ -1751,7 +1751,7 @@
               CASE ('idTbry(isouth,iPOP(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_pom
+                DO i=1,Npom
                   varid=varid+1
                   idTbry(isouth,iPOP(i))=varid
                   DO ng=1,Ngrids
@@ -1773,7 +1773,7 @@
               CASE ('idTbry(inorth,iPOP(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_pom
+                DO i=1,Npom
                   varid=varid+1
                   idTbry(inorth,iPOP(i))=varid
                   DO ng=1,Ngrids
@@ -1828,7 +1828,7 @@
               CASE ('idRtrc(iDOC(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_dom
+                DO i=1,Ndom
                   varid=varid+1
                   idRtrc(iDOC(i))=varid
                   DO ng=1,Ngrids
@@ -1850,7 +1850,7 @@
               CASE ('idRtrc(iPOC(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_pom
+                DO i=1,Npom
                   varid=varid+1
                   idRtrc(iPOC(i))=varid
                   DO ng=1,Ngrids
@@ -1872,7 +1872,7 @@
               CASE ('idRtrc(iPhyt(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_phyt
+                DO i=1,Nphy
                   varid=varid+1
                   idRtrc(iPhyt(i))=varid
                   DO ng=1,Ngrids
@@ -1894,7 +1894,7 @@
               CASE ('idRtrc(iZoop(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_zoop
+                DO i=1,Nzoo
                   varid=varid+1
                   idRtrc(iZoop(i))=varid
                   DO ng=1,Ngrids
@@ -1916,7 +1916,7 @@
               CASE ('idRtrc(iPIC(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_pim
+                DO i=1,Npim
                   varid=varid+1
                   idRtrc(iPIC(i))=varid
                   DO ng=1,Ngrids
@@ -1943,7 +1943,7 @@
               CASE ('idRtrc(iDO13C(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_dom
+                DO i=1,Ndom
                   varid=varid+1
                   idRtrc(iDO13C(i))=varid
                   DO ng=1,Ngrids
@@ -1965,7 +1965,7 @@
               CASE ('idRtrc(iPO13C(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_pom
+                DO i=1,Npom
                   varid=varid+1
                   idRtrc(iPO13C(i))=varid
                   DO ng=1,Ngrids
@@ -1987,7 +1987,7 @@
               CASE ('idRtrc(iPhyt13C(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_phyt
+                DO i=1,Nphy
                   varid=varid+1
                   idRtrc(iPhyt13C(i))=varid
                   DO ng=1,Ngrids
@@ -2009,7 +2009,7 @@
               CASE ('idRtrc(iZoop13C(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_zoop
+                DO i=1,Nzoo
                   varid=varid+1
                   idRtrc(iZoop13C(i))=varid
                   DO ng=1,Ngrids
@@ -2031,7 +2031,7 @@
               CASE ('idRtrc(iPI13C(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_pim
+                DO i=1,Npim
                   varid=varid+1
                   idRtrc(iPI13C(i))=varid
                   DO ng=1,Ngrids
@@ -2065,7 +2065,7 @@
               CASE ('idRtrc(iDON(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_dom
+                DO i=1,Ndom
                   varid=varid+1
                   idRtrc(iDON(i))=varid
                   DO ng=1,Ngrids
@@ -2087,7 +2087,7 @@
               CASE ('idRtrc(iPON(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_pom
+                DO i=1,Npom
                   varid=varid+1
                   idRtrc(iPON(i))=varid
                   DO ng=1,Ngrids
@@ -2109,7 +2109,7 @@
               CASE ('idRtrc(iDOP(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_dom
+                DO i=1,Ndom
                   varid=varid+1
                   idRtrc(iDOP(i))=varid
                   DO ng=1,Ngrids
@@ -2131,7 +2131,7 @@
               CASE ('idRtrc(iPOP(i))')
                 load=.FALSE.
                 varid=varid-1
-                DO i=1,N_pom
+                DO i=1,Npom
                   varid=varid+1
                   idRtrc(iPOP(i))=varid
                   DO ng=1,Ngrids

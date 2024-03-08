@@ -2555,7 +2555,8 @@ CONTAINS
                                                   R_FeOOH_PO4(k),dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k)) 
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%FeOOH_PO4(i,j,k)) .or. abs(SEDECO(ng)%FeOOH_PO4(i,j,k)) > huge(SEDECO(ng)%FeOOH_PO4(i,j,k))) then
-        if (isnan(SEDECO(ng)%FeOOH_PO4(i,j,k)) .or. SEDECO(ng)%FeOOH_PO4(i,j,k) > 1.0d15 .or. SEDECO(ng)%FeOOH_PO4(i,j,k) < 0.0d0) then
+        if (isnan(SEDECO(ng)%FeOOH_PO4(i,j,k)) .or. SEDECO(ng)%FeOOH_PO4(i,j,k) > 1.0d15 &
+            .or. SEDECO(ng)%FeOOH_PO4(i,j,k) < 0.0d0) then
           write(*,*) 'yt_debug: sedecosys SEDECO(ng)%FeOOH_PO4(i,j,k)      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     SEDECO(ng)%FeOOH_PO4(i,j,k) =', SEDECO(ng)%FeOOH_PO4(i,j,k)
           write(*,*) 'yt_debug:     FT_FeOOH_PO4(k) =', FT_FeOOH_PO4(k)

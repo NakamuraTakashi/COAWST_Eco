@@ -295,7 +295,7 @@
 !  Local variable declarations.
 !
       integer :: Iter, i, ibio, isink, itrc, ivar, j, k, ks
-
+      integer :: icl
       real(r8) :: PFDsurf    
       real(r8) :: tau, tau_u, tau_v        
       real(r8) :: u10        
@@ -322,12 +322,7 @@
         DO i=Istr,Iend
 ! Set initial zero 
           dtrc_dt(:,:)=0.0_r8
-!          DO k=1,N(ng)
-!            DO itrc=1,NBT
-!              ibio=idbio(itrc)
-!              dtrc_dt(k,ibio)=0.0_r8
-!            END DO
-!          END DO
+          
           sspH      = 8.0_r8         ! sea surface pH
           ssfCO2    = 380.0_r8         ! sea surface fCO2 (uatm)
           ssWarg    = 4.0_r8         ! sea surface aragonite saturation state
@@ -369,75 +364,6 @@
      &                          (bvstr(i,j)+bvstr(i,j+1))*         &
      &                          (bvstr(i,j)+bvstr(i,j+1))) *rho0
 #endif
-
-! ! yt_edit >>>>>>>>>>>>>>>>>>> replace negative values with zero
-!             where ( t(i,j,:,nstp,iTemp) < 0.0d0 )
-!               t(i,j,:,nstp,iTemp) = 0.0d0
-!             end where
-!             where ( t(i,j,:,nstp,iSalt) < 0.0d0 )
-!               t(i,j,:,nstp,iSalt) = 0.0d0
-!             end where
-!             where ( t(i,j,:,nstp,iTIC_) < 0.0d0 )
-!               t(i,j,:,nstp,iTIC_) = 0.0d0
-!             end where
-!             where ( t(i,j,:,nstp,iTAlk) < 0.0d0 )
-!               t(i,j,:,nstp,iTAlk) = 0.0d0
-!             end where
-!             where ( t(i,j,:,nstp,iOxyg) < 0.0d0 )
-!               t(i,j,:,nstp,iOxyg) = 0.0d0
-!             end where
-! #if defined ORGANIC_MATTER
-!             where ( t(i,j,:,nstp,iDOC(:)) < 0.0d0 )
-!               t(i,j,:,nstp,iDOC(:)) = 0.0d0
-!             end where
-!             where ( t(i,j,:,nstp,iPOC(:)) < 0.0d0 )
-!               t(i,j,:,nstp,iPOC(:)) = 0.0d0
-!             end where
-!             where ( t(i,j,:,nstp,iPhyt(:)) < 0.0d0 )
-!               t(i,j,:,nstp,iPhyt(:)) = 0.0d0
-!             end where
-!             where ( t(i,j,:,nstp,iZoop(:)) < 0.0d0 )
-!               t(i,j,:,nstp,iZoop(:)) = 0.0d0
-!             end where
-!             where ( t(i,j,:,nstp,iPIC(:)) < 0.0d0 )
-!               t(i,j,:,nstp,iPIC(:)) = 0.0d0
-!             end where
-! #endif
-! #if defined NUTRIENTS         
-!             where ( t(i,j,:,nstp,iNO3_) < 0.0d0 )
-!               t(i,j,:,nstp,iNO3_) = 0.0d0
-!             end where
-!             where ( t(i,j,:,nstp,iNH4_) < 0.0d0 )
-!               t(i,j,:,nstp,iNH4_) = 0.0d0
-!             end where
-!             where ( t(i,j,:,nstp,iPO4_) < 0.0d0 )
-!               t(i,j,:,nstp,iPO4_) = 0.0d0
-!             end where
-! # if defined ORGANIC_MATTER
-!             where ( t(i,j,:,nstp,iDON(:)) < 0.0d0 )
-!               t(i,j,:,nstp,iDON(:)) = 0.0d0
-!             end where
-!             where ( t(i,j,:,nstp,iPON(:)) < 0.0d0 )
-!               t(i,j,:,nstp,iPON(:)) = 0.0d0
-!             end where
-!             where ( t(i,j,:,nstp,iDOP(:)) < 0.0d0 )
-!               t(i,j,:,nstp,iDOP(:)) = 0.0d0
-!             end where
-!             where ( t(i,j,:,nstp,iPOP(:)) < 0.0d0 )
-!               t(i,j,:,nstp,iPOP(:)) = 0.0d0
-!             end where
-! # endif
-! #endif
-! #if defined COT_STARFISH         
-!             where ( t(i,j,:,nstp,iCOTe) < 0.0d0 )
-!               t(i,j,:,nstp,iCOTe) = 0.0d0
-!             end where
-!             where ( t(i,j,:,nstp,iCOTl) < 0.0d0 )
-!               t(i,j,:,nstp,iCOTl) = 0.0d0
-!             end where
-! #endif
-! ! yt_edit <<<<<<<<<<<<<<<<<<< 
-
 
 !----- Ecosystem model ----------------------------------------
             CALL reef_ecosys           &
@@ -503,14 +429,14 @@
      &            ,t(i,j,:,nstp,iPOP(:))   &   ! POP(N): Particulate organic phosporius (POP: umol L-1)
 # endif
 # if defined NITROGEN_ISOTOPE
-    &            ,t(i,j,:,nstp,i15NO3)     &   ! NO3_15N(N): 15N of NO3 (umol L-1)
-!    &            ,t(i,j,:,nstp,i15NO2)     &   ! NO2_15N(N): 15N of NO2 (umol L-1)
-    &            ,t(i,j,:,nstp,i15NH4)     &   ! NH4_15N(N): 15N of NH4 (umol L-1)
+     &            ,t(i,j,:,nstp,i15NO3)     &   ! NO3_15N(N): 15N of NO3 (umol L-1)
+!     &            ,t(i,j,:,nstp,i15NO2)     &   ! NO2_15N(N): 15N of NO2 (umol L-1)
+     &            ,t(i,j,:,nstp,i15NH4)     &   ! NH4_15N(N): 15N of NH4 (umol L-1)
 #  if defined ORGANIC_MATTER
-    &            ,t(i,j,:,nstp,iDO15N(:))     &   ! DO15N (N): 15N of Labile Dissolved organic nitrogen (LDON: umol L-1)
-    &            ,t(i,j,:,nstp,iPO15N(:))     &   ! PO15N (N): 15N of Particulate organic nitrogen (PON: umol L-1)
-    &            ,t(i,j,:,nstp,iPhyt15N(:))   &   ! PHY15N(N): 15N of phytoplankton1 (umol C L-1), dinoflagellate
-    &            ,t(i,j,:,nstp,iZoop15N(:))   &   ! ZOO15N(N): 15N of zooplankton (umol C L-1)
+     &            ,t(i,j,:,nstp,iDO15N(:))     &   ! DO15N (N): 15N of Labile Dissolved organic nitrogen (LDON: umol L-1)
+     &            ,t(i,j,:,nstp,iPO15N(:))     &   ! PO15N (N): 15N of Particulate organic nitrogen (PON: umol L-1)
+     &            ,t(i,j,:,nstp,iPhyt15N(:))   &   ! PHY15N(N): 15N of phytoplankton1 (umol C L-1), dinoflagellate
+     &            ,t(i,j,:,nstp,iZoop15N(:))   &   ! ZOO15N(N): 15N of zooplankton (umol C L-1)
 #  endif
 # endif
 #endif
@@ -523,20 +449,20 @@
      &            ,dtrc_dt(:,iTAlk)        &   ! dTA_dt (N): dTA/dt (umol kg-1 s-1)
      &            ,dtrc_dt(:,iOxyg)        &   ! dDOx_dt(N): dDO/dt (umol L-1 s-1)
 #if defined ORGANIC_MATTER     
-     &            ,dtrc_dt(:,iDOC(1):iDOC(N_dom))      &   ! dDOC_dt(N): dDOC/dt (umol L-1 s-1)
-     &            ,dtrc_dt(:,iPOC(1):iPOC(N_pom))      &   ! dPOC_dt(N): dPOC/dt (umol L-1 s-1)
-     &            ,dtrc_dt(:,iPhyt(1):iPhyt(N_phyt))   &   ! dPHY_dt(N): dPHY/dt (umol C L-1 s-1)
-     &            ,dtrc_dt(:,iZoop(1):iZoop(N_zoop))   &   ! dZOO_dt(N): dZOO/dt (umol C L-1 s-1)
-     &            ,dtrc_dt(:,iPIC(1):iPIC(N_pim))      &   ! dPIC_dt(N): dPIC/dt (umol L-1 s-1)
+     &            ,dtrc_dt(:,iDOC(1):iDOC(Ndom))      &   ! dDOC_dt(N): dDOC/dt (umol L-1 s-1)
+     &            ,dtrc_dt(:,iPOC(1):iPOC(Npom))      &   ! dPOC_dt(N): dPOC/dt (umol L-1 s-1)
+     &            ,dtrc_dt(:,iPhyt(1):iPhyt(Nphy))   &   ! dPHY_dt(N): dPHY/dt (umol C L-1 s-1)
+     &            ,dtrc_dt(:,iZoop(1):iZoop(Nzoo))   &   ! dZOO_dt(N): dZOO/dt (umol C L-1 s-1)
+     &            ,dtrc_dt(:,iPIC(1):iPIC(Npim))      &   ! dPIC_dt(N): dPIC/dt (umol L-1 s-1)
 #endif
 #if defined CARBON_ISOTOPE
      &            ,dtrc_dt(:,iT13C)        &   ! dDI13C_dt (N): dDI13C/dt (umol kg-1 s-1)
 # if defined ORGANIC_MATTER     
-     &            ,dtrc_dt(:,iDO13C(1):iDO13C(N_dom))    &   ! dDO13C_dt (N): dDO13C/dt  (umol L-1 s-1) 
-     &            ,dtrc_dt(:,iPO13C(1):iPO13C(N_pom))    &   ! dPO13C_dt (N): dPO13C/dt  (umol L-1 s-1) 
-     &            ,dtrc_dt(:,iPhyt13C(1):iPhyt13C(N_phyt))  &   ! dPHY13C_dt(N): dPHY13C/dt  (umol L-1 s-1)  
-     &            ,dtrc_dt(:,iZoop13C(1):iZoop13C(N_zoop))  &   ! dZOO13C_dt(N): dZOO13C/dt  (umol L-1 s-1)  
-     &            ,dtrc_dt(:,iPI13C(1):iPI13C(N_pim))    &   ! dPI13C_dt (N): dPI13C/dt  (umol L-1 s-1)  
+     &            ,dtrc_dt(:,iDO13C(1):iDO13C(Ndom))    &   ! dDO13C_dt (N): dDO13C/dt  (umol L-1 s-1) 
+     &            ,dtrc_dt(:,iPO13C(1):iPO13C(Npom))    &   ! dPO13C_dt (N): dPO13C/dt  (umol L-1 s-1) 
+     &            ,dtrc_dt(:,iPhyt13C(1):iPhyt13C(Nphy))  &   ! dPHY13C_dt(N): dPHY13C/dt  (umol L-1 s-1)  
+     &            ,dtrc_dt(:,iZoop13C(1):iZoop13C(Nzoo))  &   ! dZOO13C_dt(N): dZOO13C/dt  (umol L-1 s-1)  
+     &            ,dtrc_dt(:,iPI13C(1):iPI13C(Npim))    &   ! dPI13C_dt (N): dPI13C/dt  (umol L-1 s-1)  
 # endif
 #endif     
 #if defined NUTRIENTS      
@@ -545,20 +471,20 @@
      &            ,dtrc_dt(:,iNH4_)        &   ! dNH4_dt(N): dNH4/dt (umol L-1 s-1)
      &            ,dtrc_dt(:,iPO4_)        &   ! dPO4_dt(N): dPO4/dt (umol L-1 s-1)
 # if defined ORGANIC_MATTER     
-     &            ,dtrc_dt(:,iDON(1):iDON(N_dom))      &   ! dDON_dt(N): dDON/dt (umol L-1 s-1)
-     &            ,dtrc_dt(:,iPON(1):iPON(N_pom))      &   ! dPON_dt(N): dPON/dt (umol L-1 s-1)
-     &            ,dtrc_dt(:,iDOP(1):iDOP(N_dom))      &   ! dDOP_dt(N): dDOP/dt (umol L-1 s-1)
-     &            ,dtrc_dt(:,iPOP(1):iPOP(N_pom))      &   ! dPOP_dt(N): dPOP/dt (umol L-1 s-1)
+     &            ,dtrc_dt(:,iDON(1):iDON(Ndom))      &   ! dDON_dt(N): dDON/dt (umol L-1 s-1)
+     &            ,dtrc_dt(:,iPON(1):iPON(Npom))      &   ! dPON_dt(N): dPON/dt (umol L-1 s-1)
+     &            ,dtrc_dt(:,iDOP(1):iDOP(Ndom))      &   ! dDOP_dt(N): dDOP/dt (umol L-1 s-1)
+     &            ,dtrc_dt(:,iPOP(1):iPOP(Npom))      &   ! dPOP_dt(N): dPOP/dt (umol L-1 s-1)
 # endif     
 # if defined NITROGEN_ISOTOPE
-    &            ,dtrc_dt(:,i15NO3)        &   ! dNO3_15N_dt(N): dNO3_15N/dt (umol L-1 s-1)
-!    &            ,dtrc_dt(:,i15NO2)        &   ! dNO2_15N_dt(N): dNO2_15N/dt (umol L-1 s-1)
-    &            ,dtrc_dt(:,i15NH4)        &   ! dNH4_15N_dt(N): dNH4_15N/dt (umol L-1 s-1)
+     &            ,dtrc_dt(:,i15NO3)        &   ! dNO3_15N_dt(N): dNO3_15N/dt (umol L-1 s-1)
+!     &            ,dtrc_dt(:,i15NO2)        &   ! dNO2_15N_dt(N): dNO2_15N/dt (umol L-1 s-1)
+     &            ,dtrc_dt(:,i15NH4)        &   ! dNH4_15N_dt(N): dNH4_15N/dt (umol L-1 s-1)
 #  if defined ORGANIC_MATTER
-    &            ,dtrc_dt(:,iDO15N(1):iDO15N(N_dom))     &   ! dDO15N_dt (N): dDO15N/dt  (umol L-1 s-1) 
-    &            ,dtrc_dt(:,iPO15N(1):iPO15N(N_pom))     &   ! dPO15N_dt (N): dPO15N/dt  (umol L-1 s-1) 
-    &            ,dtrc_dt(:,iPhyt15N(1):iPhyt15N(N_phyt))   &   ! dPHY15N_dt(N): dPHY1_15N/dt  (umol L-1 s-1)  
-    &            ,dtrc_dt(:,iZoop15N(1):iZoop15N(N_zoop))   &   ! dZOO15N_dt(N): dZOO_15N/dt  (umol L-1 s-1)  
+     &            ,dtrc_dt(:,iDO15N(1):iDO15N(Ndom))     &   ! dDO15N_dt (N): dDO15N/dt  (umol L-1 s-1) 
+     &            ,dtrc_dt(:,iPO15N(1):iPO15N(Npom))     &   ! dPO15N_dt (N): dPO15N/dt  (umol L-1 s-1) 
+     &            ,dtrc_dt(:,iPhyt15N(1):iPhyt15N(Nphy))   &   ! dPHY15N_dt(N): dPHY1_15N/dt  (umol L-1 s-1)  
+     &            ,dtrc_dt(:,iZoop15N(1):iZoop15N(Nzoo))   &   ! dZOO15N_dt(N): dZOO_15N/dt  (umol L-1 s-1)  
 #  endif
 # endif
 #endif     
@@ -577,104 +503,6 @@
 #ifdef MASKING
           END IF
 #endif
-
-            HisBio2d(i,j,ipHt_) = sspH
-            HisBio2d(i,j,iWarg) = ssWarg
-            HisBio2d(i,j,iCOfx) = ssCO2flux
-            HisBio2d(i,j,ipCO2) = ssfCO2
-            HisBio2d(i,j,iO2fx) = ssO2flux
-            HisBio2d(i,j,iPARb) = PFDbott
-            HisBio2d(i,j,iTau_) = tau
-#ifdef CORAL_POLYP
-            HisBio2d(i,j,iC1Pg) = CORAL(ng)%Pg(1,i,j)
-            HisBio2d(i,j,iC1_R) = CORAL(ng)%R(1,i,j)
-            HisBio2d(i,j,iC1Pn) = CORAL(ng)%Pg(1,i,j)-CORAL(ng)%R(1,i,j)
-            HisBio2d(i,j,iC1_G) = CORAL(ng)%G(1,i,j)
-            HisBio2d(i,j,iC1OC) = CORAL(ng)%QC(1,i,j)
-            HisBio2d(i,j,iC2Pg) = CORAL(ng)%Pg(2,i,j)
-            HisBio2d(i,j,iC2_R) = CORAL(ng)%R(2,i,j)
-            HisBio2d(i,j,iC2Pn) = CORAL(ng)%Pg(2,i,j)-CORAL(ng)%R(2,i,j)
-            HisBio2d(i,j,iC2_G) = CORAL(ng)%G(2,i,j)
-            HisBio2d(i,j,iC2OC) = CORAL(ng)%QC(2,i,j)
-# ifdef CORAL_CARBON_ISOTOPE
-            R13CH2O = CORAL(ng)%Q13C(1,i,j) / CORAL(ng)%QC(1,i,j)   !coral organism
-            HisBio2d(i,j,iC113) = d13C_fromR13C(R13CH2O)
-            R13CH2O = CORAL(ng)%Q13C(2,i,j) / CORAL(ng)%QC(2,i,j)   !coral organism
-            HisBio2d(i,j,iC213) = d13C_fromR13C(R13CH2O)
-# endif
-# ifdef CORAL_ZOOXANTHELLAE
-            HisBio2d(i,j,iC1zx) = ZOOX(ng)%dens(1,i,j)
-            HisBio2d(i,j,iC2zx) = ZOOX(ng)%dens(2,i,j)
-            HisBio2d(i,j,iC1zchl) = ZOOX(ng)%Chl(1,i,j)  ! (pg/cell)
-            HisBio2d(i,j,iC2zchl) = ZOOX(ng)%Chl(2,i,j)  ! (pg/cell)
-# endif
-# ifdef CORAL_SIZE_DYNAMICS
-            HisBio2d(i,j,iC1mt) = CORAL(ng)%mort(1,i,j)
-            HisBio2d(i,j,iC1gr) = CORAL(ng)%growth(1,i,j)
-            HisBio2d(i,j,iC2mt) = CORAL(ng)%mort(2,i,j)
-            HisBio2d(i,j,iC2gr) = CORAL(ng)%growth(2,i,j)
-# endif
-#endif
-#ifdef SEAGRASS
-            HisBio2d(i,j,iSgPg) = SGRASS(ng)%Pg(1,i,j)
-            HisBio2d(i,j,iSg_R) = SGRASS(ng)%R (1,i,j)
-            HisBio2d(i,j,iSgPn) = SGRASS(ng)%Pg(1,i,j)-SGRASS(ng)%R (1,i,j)
-#endif
-#ifdef MACROALGAE
-            HisBio2d(i,j,iAgPg) = ALGAE(ng)%Pg(1,i,j)
-            HisBio2d(i,j,iAg_R) = ALGAE(ng)%R (1,i,j)
-            HisBio2d(i,j,iAgPn) = ALGAE(ng)%Pg(1,i,j)-ALGAE(ng)%R (1,i,j)
-#endif
-!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
-#ifdef SEDIMENT_ECOSYS  
-            HisBiosed3d(i,j,:,iSdporo) = SEDECO(ng)%poro(i,j,:)
-            HisBiosed3d(i,j,:,iSdTmp ) = SEDECO(ng)%Tmp (i,j,:)
-            HisBiosed3d(i,j,:,iSdSal ) = SEDECO(ng)%Sal (i,j,:)
-            ! HisBiosed3d(i,j,:,iSdpH  ) = SEDECO(ng)%pH  (i,j,:)
-            HisBiosed3d(i,j,:,iSdTA  ) = SEDECO(ng)%TA  (i,j,:)
-            ! HisBiosed3d(i,j,:,iSdDIC ) = SEDECO(ng)%DIC (i,j,:)
-            HisBiosed3d(i,j,:,iSdO2  ) = SEDECO(ng)%O2  (i,j,:)
-            HisBiosed3d(i,j,:,iSdCO2 ) = SEDECO(ng)%CO2 (i,j,:)
-            HisBiosed3d(i,j,:,iSdN2  ) = SEDECO(ng)%N2  (i,j,:)
-# if defined ORGANIC_MATTER
-            HisBiosed3d(i,j,:,iSdDOCf) = SEDECO(ng)%DOCf(i,j,:)
-            HisBiosed3d(i,j,:,iSdDOCs) = SEDECO(ng)%DOCs(i,j,:)
-            HisBiosed3d(i,j,:,iSdPOCf) = SEDECO(ng)%POCf(i,j,:)
-            HisBiosed3d(i,j,:,iSdPOCs) = SEDECO(ng)%POCs(i,j,:)
-            HisBiosed3d(i,j,:,iSdPOCn) = SEDECO(ng)%POCn(i,j,:)
-# endif
-# if defined NUTRIENTS
-            HisBiosed3d(i,j,:,iSdNO3 ) = SEDECO(ng)%NO3 (i,j,:)
-            HisBiosed3d(i,j,:,iSdNH4 ) = SEDECO(ng)%NH4 (i,j,:)
-            HisBiosed3d(i,j,:,iSdPO4 ) = SEDECO(ng)%PO4 (i,j,:)
-#  if defined ORGANIC_MATTER
-            HisBiosed3d(i,j,:,iSdDONf ) = SEDECO(ng)%DONf (i,j,:)
-            HisBiosed3d(i,j,:,iSdDONs ) = SEDECO(ng)%DONs (i,j,:)
-            HisBiosed3d(i,j,:,iSdPONf ) = SEDECO(ng)%PONf (i,j,:)
-            HisBiosed3d(i,j,:,iSdPONs ) = SEDECO(ng)%PONs (i,j,:)
-            HisBiosed3d(i,j,:,iSdPONn ) = SEDECO(ng)%PONn (i,j,:)
-            HisBiosed3d(i,j,:,iSdDOPf ) = SEDECO(ng)%DOPf (i,j,:)
-            HisBiosed3d(i,j,:,iSdDOPs ) = SEDECO(ng)%DOPs (i,j,:)
-            HisBiosed3d(i,j,:,iSdPOPf ) = SEDECO(ng)%POPf (i,j,:)
-            HisBiosed3d(i,j,:,iSdPOPs ) = SEDECO(ng)%POPs (i,j,:)
-            HisBiosed3d(i,j,:,iSdPOPn ) = SEDECO(ng)%POPn (i,j,:)
-#  endif
-# endif
-# if defined SULFATE
-            HisBiosed3d(i,j,:,iSdMn2 ) = SEDECO(ng)%Mn2 (i,j,:)
-            HisBiosed3d(i,j,:,iSdMnO2) = SEDECO(ng)%MnO2(i,j,:)
-            HisBiosed3d(i,j,:,iSdFe2 ) = SEDECO(ng)%Fe2 (i,j,:)
-            HisBiosed3d(i,j,:,iSdFeS ) = SEDECO(ng)%FeS (i,j,:)
-            HisBiosed3d(i,j,:,iSdFeS2) = SEDECO(ng)%FeS2(i,j,:)
-            HisBiosed3d(i,j,:,iSdFeOOH    ) = SEDECO(ng)%FeOOH    (i,j,:)
-            HisBiosed3d(i,j,:,iSdFeOOH_PO4) = SEDECO(ng)%FeOOH_PO4(i,j,:)
-            HisBiosed3d(i,j,:,iSdH2S ) = SEDECO(ng)%H2S (i,j,:)
-            HisBiosed3d(i,j,:,iSdSO4 ) = SEDECO(ng)%SO4 (i,j,:)
-            HisBiosed3d(i,j,:,iSdS0  ) = SEDECO(ng)%S0  (i,j,:)
-# endif
-#endif
-
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 
 !-----------------------------------------------------------------------
 !  Update global tracer variables: Add increment due to BGC processes
