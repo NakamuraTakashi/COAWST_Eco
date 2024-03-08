@@ -50,7 +50,7 @@
       integer :: i, j, recdim, stadim
       integer :: status
 
-      integer :: DimIDs(32), pgrd(2)
+      integer :: DimIDs(36), pgrd(2) !!! <<< TN: DimIDs(32)->DimIDs(36)
       integer :: Vsize(4)
 
       integer :: def_dim

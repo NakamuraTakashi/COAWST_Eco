@@ -84,28 +84,37 @@
 !
       integer, allocatable :: iHbio2(:)       ! 2D biological terms
 #ifdef CORAL_POLYP
-      integer  :: iClTAcal(Ncl)
-      integer  :: iClTAcoe(Ncl)
+      integer  :: iClTAcal (Ncl)
+      integer  :: iClTAcoe (Ncl)
       integer  :: iClDICcal(Ncl)
       integer  :: iClDICcoe(Ncl)
-      integer  :: iClDOcoe(Ncl)
+      integer  :: iClDOcoe (Ncl)
+      integer  :: iClQC    (Ncl)
+# if defined CORAL_NONE_CO2_EQ
       integer  :: iClCO2cal(Ncl)
       integer  :: iClCO2coe(Ncl)
+# endif
 # ifdef CORAL_CARBON_ISOTOPE
       integer  :: iClDI13Ccal(Ncl)
       integer  :: iClDI13Ccoe(Ncl)
+      integer  :: iClQ13C    (Ncl)
+#  if defined CORAL_NONE_CO2_EQ
       integer  :: iCl13CO2cal(Ncl)
       integer  :: iCl13CO2coe(Ncl)
+#  endif
 # endif
 # ifdef CORAL_ZOOXANTHELLAE
       integer  :: iClROS(Ncl)
-      integer  :: iZxDens(Ncl)
-      integer  :: iZxQC(Ncl)
+      integer  :: iZxDns(Ncl)
+      integer  :: iZxQC (Ncl)
       integer  :: iZxChl(Ncl)
       integer  :: iZxQAo(Ncl)
       integer  :: iZxQAr(Ncl)
       integer  :: iZxQAi(Ncl)
       integer  :: iZxQAid(Ncl)
+#  ifdef CORAL_CARBON_ISOTOPE
+      integer  :: iZxQ13C(Ncl)
+#  endif
 # endif
 # ifdef CORAL_SIZE_DYNAMICS
 
@@ -122,54 +131,56 @@
 !
       integer, allocatable :: iHbio3(:)       ! 3D biological terms
 #ifdef CARBON_ISOTOPE
-      integer  :: id13C                       ! d13C of total inorganic carbon
+      integer  :: id13C  ! d13C of total inorganic carbon  !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Remove??
 #endif
 
-#if defined DIAGNOSTICS && defined DIAGNOSTICS_BIO
+#if defined DIAGNOSTICS_BIO
 !
 !  Biological 2D Diagnostic variable IDs.
 !
       integer, allocatable :: iDbio2(:)       ! 2D biological terms
 
-      integer  :: iCOfx                       ! air-sea CO2 flux
+      integer  :: ipHt_                       ! sea surface pH (total scale)
+      integer  :: iWarg                       ! sea surface aragonite saturation state
+      integer  :: iCO2fx                      ! air-sea CO2 flux
       integer  :: ipCO2                       ! partial pressure of CO2
       integer  :: iO2fx                       ! air-sea O2 flux
       integer  :: iPARb                       ! bottom photon flux density (umol m-2 s-1)
       integer  :: iTau_                       ! bottom shear stress (N m-2)
 
-#ifdef CORAL_POLYP
+# ifdef CORAL_POLYP
       integer  :: iClPg(Ncl)
       integer  :: iCl_R(Ncl)
       integer  :: iCl_G(Ncl)
       integer  :: iClPn(Ncl)
-# ifdef CORAL_CARBON_ISOTOPE
-# endif
-# ifdef CORAL_ZOOXANTHELLAE
+#  ifdef CORAL_CARBON_ISOTOPE
+      integer  :: iClQCd13C(Ncl)
+#  endif
+#  ifdef CORAL_ZOOXANTHELLAE
       integer  :: iZxPg(Ncl)
       integer  :: iZx_R(Ncl)
-# endif
-# ifdef CORAL_SIZE_DYNAMICS
+      integer  :: iZxPn(Ncl)
+#  endif
+#  ifdef CORAL_SIZE_DYNAMICS
       integer  :: iClmt(Ncl)
       integer  :: iClgw(Ncl)
+#  endif
 # endif
-#endif
-#ifdef SEAGRASS
+# ifdef SEAGRASS
       integer  :: iSgPg(Nsg)                   ! seagrass gross photosynthesis rate
       integer  :: iSg_R(Nsg)                   ! seagrass respiration rate
       integer  :: iSgPn(Nsg)                   ! seagrass net photosynthesis rate
-#endif
-#ifdef MACROALGAE
+# endif
+# ifdef MACROALGAE
       integer  :: iAgPg(Nag)                  ! Algal gross photosynthesis rate
       integer  :: iAg_R(Nag)                  ! Algal respiration rate
       integer  :: iAgPn(Nag)                  ! Algal net photosynthesis rate
-#endif
+# endif
 !
 !  Biological 3D Diagnostic variable IDs.
 !
       integer, allocatable :: iDbio3(:)       ! 3D biological terms
 
-      integer  :: ipHt_                       ! sea surface pH (total scale)
-      integer  :: iWarg                       ! sea surface aragonite saturation state
 # ifdef CARBON_ISOTOPE
       integer  :: id13C                       ! d13C of total inorganic carbon
 # endif
@@ -460,8 +471,6 @@
         ic=ic+1
         iClTAcal(j)=ic
         ic=ic+1
-        iClTAcal(j)=ic
-        ic=ic+1
         iClTAcoe(j)=ic
         ic=ic+1
         iClDICcal(j)=ic
@@ -470,24 +479,32 @@
         ic=ic+1
         iClDOcoe(j)=ic
         ic=ic+1
+        iClQC(j)=ic
+#if defined CORAL_NONE_CO2_EQ
+        ic=ic+1
         iClCO2cal(j)=ic
         ic=ic+1
         iClCO2coe(j)=ic
+# endif
 # ifdef CORAL_CARBON_ISOTOPE
         ic=ic+1
         iClDI13Ccal(j)=ic
         ic=ic+1
         iClDI13Ccoe(j)=ic
         ic=ic+1
+        iClQ13C(j)=ic
+# if defined CORAL_NONE_CO2_EQ
+        ic=ic+1
         iCl13CO2cal(j)=ic
         ic=ic+1
         iCl13CO2coe(j)=ic
+#  endif
 # endif
 # ifdef CORAL_ZOOXANTHELLAE
         ic=ic+1
         iClROS(j)=ic
         ic=ic+1
-        iZxDens(j)=ic
+        iZxDns(j)=ic
         ic=ic+1
         iZxQC(j)=ic
         ic=ic+1
@@ -500,6 +517,10 @@
         iZxQAi(j)=ic
         ic=ic+1
         iZxQAid(j)=ic
+#  ifdef CORAL_CARBON_ISOTOPE
+        ic=ic+1
+        iZxQ13C(j)=ic
+#  endif
 # endif
       END DO
 #endif
@@ -644,7 +665,7 @@
 #endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 
-#if defined DIAGNOSTICS && defined DIAGNOSTICS_BIO
+#if defined DIAGNOSTICS_BIO
 !
 !-----------------------------------------------------------------------
 !  Set sources and sinks biology diagnostic parameters.
@@ -656,7 +677,12 @@
       ic=0     ! ic reset
 
       ic=ic+1
-      iCOfx=ic
+      ipHt_=ic
+      ic=ic+1
+      iWarg=ic
+
+      ic=ic+1
+      iCO2fx=ic
       ic=ic+1
       ipCO2=ic
       ic=ic+1
@@ -679,6 +705,8 @@
         ic=ic+1
         iClPn(j)=ic
 #  ifdef CORAL_CARBON_ISOTOPE
+        ic=ic+1
+        iClQCd13C(j)=ic
 #  endif
 #  ifdef CORAL_ZOOXANTHELLAE
         ic=ic+1
@@ -686,6 +714,7 @@
         ic=ic+1
         iZx_R(j)=ic
         ic=ic+1
+        iZxPn(j)=ic
 #  endif
 #  ifdef CORAL_SIZE_DYNAMICS
         ic=ic+1
@@ -731,14 +760,10 @@
 !
       ic=0     ! ic reset
 
-      ic=ic+1
-      ipHt_=ic
-      ic=ic+1
-      iWarg=ic
-#ifdef CARBON_ISOTOPE
+# ifdef CARBON_ISOTOPE
       ic=ic+1
       id13C=ic  ! +1
-#endif
+# endif
 !
 !  Set number of 3D diagnostic terms.
 !
@@ -911,53 +936,48 @@
 #ifdef CORAL_POLYP
           DO isp=1,Ncl
             !  :  (To be updated)
-            CORAL(ng)%TAcal(isp,i,j)     =
-            CORAL(ng)%TAcoe(isp,i,j)     =
-            CORAL(ng)%DICcal(isp,i,j)    =
-            CORAL(ng)%DICcoe(isp,i,j)    =
-            CORAL(ng)%DOcoe(isp,i,j)     =
-            CORAL(ng)%QC(isp,i,j)        =
-            CORAL(ng)%cCO2aqcal(isp,i,j) =
-            CORAL(ng)%cCO2aqcoe(isp,i,j) =
+            CORAL(ng)%TAcal(isp,i,j)     = OCEAN(ng)%HisBio2d(i,j, iClTAcal (isp) )
+            CORAL(ng)%TAcoe(isp,i,j)     = OCEAN(ng)%HisBio2d(i,j, iClTAcoe (isp) )
+            CORAL(ng)%DICcal(isp,i,j)    = OCEAN(ng)%HisBio2d(i,j, iClDICcal(isp) )
+            CORAL(ng)%DICcoe(isp,i,j)    = OCEAN(ng)%HisBio2d(i,j, iClDICcoe(isp) )
+            CORAL(ng)%DOcoe(isp,i,j)     = OCEAN(ng)%HisBio2d(i,j, iClDOcoe (isp) )
+            CORAL(ng)%QC(isp,i,j)        = OCEAN(ng)%HisBio2d(i,j, iClQC    (isp) )
+# if defined CORAL_NONE_CO2_EQ
+            CORAL(ng)%cCO2aqcal(isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iClCO2cal(isp) )
+            CORAL(ng)%cCO2aqcoe(isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iClCO2coe(isp) )
+# endif
 # if defined CORAL_CARBON_ISOTOPE
-            CORAL(ng)%DI13Ccal(isp,i,j)    =
-            CORAL(ng)%DI13Ccoe(isp,i,j)    =
-            CORAL(ng)%Q13C (isp,i,j)       =
-            CORAL(ng)%c13CO2aqcal(isp,i,j) =
-            CORAL(ng)%c13CO2aqcoe(isp,i,j) =
+            CORAL(ng)%DI13Ccal(isp,i,j)    = OCEAN(ng)%HisBio2d(i,j, iClDI13Ccal(isp) )
+            CORAL(ng)%DI13Ccoe(isp,i,j)    = OCEAN(ng)%HisBio2d(i,j, iClDI13Ccoe(isp) )
+            CORAL(ng)%Q13C (isp,i,j)       = OCEAN(ng)%HisBio2d(i,j, iClQ13C    (isp) )
+#  if defined CORAL_NONE_CO2_EQ
+            CORAL(ng)%c13CO2aqcal(isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iCl13CO2cal(isp) )
+            CORAL(ng)%c13CO2aqcoe(isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iCl13CO2coe(isp) )
+#  endif
+# endif
+# if defined CORAL_ZOOXANTHELLAE
+            CORAL(ng)%ROS(isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iClROS(isp) )
 # endif
 # if defined CORAL_NUTRIENTS
-            CORAL(ng)%NO3(isp,i,j) =
-            CORAL(ng)%NH4(isp,i,j) =
-            CORAL(ng)%PO4(isp,i,j) =
-            CORAL(ng)%QN(isp,i,j)  =
-            CORAL(ng)%QP(isp,i,j)  =
+            !  :  (To be updated)
 # endif     
-# if defined CORAL_ZOOXANTHELLAE
-            CORAL(ng)%ROS(isp,i,j) = 
-# endif
 # if defined CORAL_SIZE_DYNAMICS
-!            CORAL(ng)%growth(isp,i,j) =
-!            CORAL(ng)%mort(isp,i,j)   =
+            !  :  (To be updated)
 # endif
 
 # if defined CORAL_ZOOXANTHELLAE
-            ZOOX(ng)%dens(isp,i,j) =
-            ZOOX(ng)%QC(isp,i,j)   =
-            ZOOX(ng)%Chl(isp,i,j)  =
-            ZOOX(ng)%QAo(isp,i,j)  =
-            ZOOX(ng)%QAr(isp,i,j)  =
-            ZOOX(ng)%QAi(isp,i,j)  =
-            ZOOX(ng)%QAid(isp,i,j) =
+            ZOOX(ng)%dens(isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iZxDns(isp) )
+            ZOOX(ng)%QC(isp,i,j)   = OCEAN(ng)%HisBio2d(i,j, iZxQC (isp) )
+            ZOOX(ng)%Chl(isp,i,j)  = OCEAN(ng)%HisBio2d(i,j, iZxChl(isp) )
+            ZOOX(ng)%QAo(isp,i,j)  = OCEAN(ng)%HisBio2d(i,j, iZxQAo(isp) )
+            ZOOX(ng)%QAr(isp,i,j)  = OCEAN(ng)%HisBio2d(i,j, iZxQAr(isp) )
+            ZOOX(ng)%QAi(isp,i,j)  = OCEAN(ng)%HisBio2d(i,j, iZxQAi(isp) )
+            ZOOX(ng)%QAid(isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iZxQAid(isp) )
 #  if defined CORAL_CARBON_ISOTOPE
-            ZOOX(ng)%Q13C(isp,i,j) =
+            ZOOX(ng)%Q13C(isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iZxQ13C(isp) )
 #  endif
 #  if defined CORAL_NUTRIENTS
-            ZOOX(ng)%NO3(isp,i,j)  =
-            ZOOX(ng)%NH4(isp,i,j)  =
-            ZOOX(ng)%PO4(isp,i,j)  =
-            ZOOX(ng)%QN(isp,i,j)   =
-            ZOOX(ng)%QP(isp,i,j)   =
+            !  :  (To be updated)
 #  endif
 # endif
           END DO
@@ -973,8 +993,13 @@
           !  :  (To be updated)
           END DO
 #endif
+        END DO
+      END DO
+
 #ifdef SEDIMENT_ECOSYS  
-          DO k=1,Nsed(ng)
+      DO k=1,Nsed(ng)
+        DO j=LBj, UBj
+          DO i=LBi, UBi
             SEDECO(ng)%poro(i,j,k) = OCEAN(ng)%HisBiosed3d(i,j,k,iSdporo) 
             SEDECO(ng)%Tmp (i,j,k) = OCEAN(ng)%HisBiosed3d(i,j,k,iSdTmp ) 
             SEDECO(ng)%Sal (i,j,k) = OCEAN(ng)%HisBiosed3d(i,j,k,iSdSal ) 
@@ -1021,10 +1046,9 @@
             SEDECO(ng)%S0  (i,j,k) = OCEAN(ng)%HisBiosed3d(i,j,k,iSdS0  )
 # endif
           END DO
-#endif
         END DO
       END DO
-
+#endif
       END SUBROUTINE send_roms_his2reef_ecosys
 
 !***********************************************************************
@@ -1047,53 +1071,77 @@
 !  Local variable declarations.
 !
       integer :: i,j,k
+      integer :: isp
 
 !-----------------------------------------------------------------------
       DO j=LBj, UBj
         DO i=LBi, UBi
 #ifdef CORAL_POLYP
-            HisBio2d(i,j,iC1Pg) = CORAL(ng)%Pg(1,i,j)
-            HisBio2d(i,j,iC1_R) = CORAL(ng)%R(1,i,j)
-            HisBio2d(i,j,iC1Pn) = CORAL(ng)%Pg(1,i,j)-CORAL(ng)%R(1,i,j)
-            HisBio2d(i,j,iC1_G) = CORAL(ng)%G(1,i,j)
-            HisBio2d(i,j,iC1OC) = CORAL(ng)%QC(1,i,j)
-            HisBio2d(i,j,iC2Pg) = CORAL(ng)%Pg(2,i,j)
-            HisBio2d(i,j,iC2_R) = CORAL(ng)%R(2,i,j)
-            HisBio2d(i,j,iC2Pn) = CORAL(ng)%Pg(2,i,j)-CORAL(ng)%R(2,i,j)
-            HisBio2d(i,j,iC2_G) = CORAL(ng)%G(2,i,j)
-            HisBio2d(i,j,iC2OC) = CORAL(ng)%QC(2,i,j)
-# ifdef CORAL_CARBON_ISOTOPE
-            R13CH2O = CORAL(ng)%Q13C(1,i,j) / CORAL(ng)%QC(1,i,j)   !coral organism
-            HisBio2d(i,j,iC113) = d13C_fromR13C(R13CH2O)
-            R13CH2O = CORAL(ng)%Q13C(2,i,j) / CORAL(ng)%QC(2,i,j)   !coral organism
-            HisBio2d(i,j,iC213) = d13C_fromR13C(R13CH2O)
+          DO isp=1,Ncl
+            !  :  (To be updated)
+            OCEAN(ng)%HisBio2d(i,j, iClTAcal (isp) ) = CORAL(ng)%TAcal(isp,i,j) 
+            OCEAN(ng)%HisBio2d(i,j, iClTAcoe (isp) ) = CORAL(ng)%TAcoe(isp,i,j) 
+            OCEAN(ng)%HisBio2d(i,j, iClDICcal(isp) ) = CORAL(ng)%DICcal(isp,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iClDICcoe(isp) ) = CORAL(ng)%DICcoe(isp,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iClDOcoe (isp) ) = CORAL(ng)%DOcoe(isp,i,j) 
+            OCEAN(ng)%HisBio2d(i,j, iClQC    (isp) ) = CORAL(ng)%QC(isp,i,j)    
+# if defined CORAL_NONE_CO2_EQ
+            OCEAN(ng)%HisBio2d(i,j, iClCO2cal(isp) ) = CORAL(ng)%cCO2aqcal(isp,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iClCO2coe(isp) ) = CORAL(ng)%cCO2aqcoe(isp,i,j)
 # endif
-# ifdef CORAL_ZOOXANTHELLAE
-            HisBio2d(i,j,iC1zx) = ZOOX(ng)%dens(1,i,j)
-            HisBio2d(i,j,iC2zx) = ZOOX(ng)%dens(2,i,j)
-            HisBio2d(i,j,iC1zchl) = ZOOX(ng)%Chl(1,i,j)  ! (pg/cell)
-            HisBio2d(i,j,iC2zchl) = ZOOX(ng)%Chl(2,i,j)  ! (pg/cell)
+# if defined CORAL_CARBON_ISOTOPE
+            OCEAN(ng)%HisBio2d(i,j, iClDI13Ccal(isp) ) = CORAL(ng)%DI13Ccal(isp,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iClDI13Ccoe(isp) ) = CORAL(ng)%DI13Ccoe(isp,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iClQ13C    (isp) ) = CORAL(ng)%Q13C (isp,i,j)   
+#  if defined CORAL_NONE_CO2_EQ
+            OCEAN(ng)%HisBio2d(i,j, iCl13CO2cal(isp) ) = CORAL(ng)%c13CO2aqcal(isp,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iCl13CO2coe(isp) ) = CORAL(ng)%c13CO2aqcoe(isp,i,j)
+#  endif
 # endif
-# ifdef CORAL_SIZE_DYNAMICS
-            HisBio2d(i,j,iC1mt) = CORAL(ng)%mort(1,i,j)
-            HisBio2d(i,j,iC1gr) = CORAL(ng)%growth(1,i,j)
-            HisBio2d(i,j,iC2mt) = CORAL(ng)%mort(2,i,j)
-            HisBio2d(i,j,iC2gr) = CORAL(ng)%growth(2,i,j)
+# if defined CORAL_ZOOXANTHELLAE
+            OCEAN(ng)%HisBio2d(i,j, iClROS(isp) ) = CORAL(ng)%ROS(isp,i,j) 
 # endif
+# if defined CORAL_NUTRIENTS
+            !  :  (To be updated)
+# endif     
+# if defined CORAL_SIZE_DYNAMICS
+            !  :  (To be updated)
+# endif
+
+# if defined CORAL_ZOOXANTHELLAE
+            OCEAN(ng)%HisBio2d(i,j, iZxDns(isp) ) = ZOOX(ng)%dens(isp,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iZxQC (isp) ) = ZOOX(ng)%QC(isp,i,j)  
+            OCEAN(ng)%HisBio2d(i,j, iZxChl(isp) ) = ZOOX(ng)%Chl(isp,i,j) 
+            OCEAN(ng)%HisBio2d(i,j, iZxQAo(isp) ) = ZOOX(ng)%QAo(isp,i,j) 
+            OCEAN(ng)%HisBio2d(i,j, iZxQAr(isp) ) = ZOOX(ng)%QAr(isp,i,j) 
+            OCEAN(ng)%HisBio2d(i,j, iZxQAi(isp) ) = ZOOX(ng)%QAi(isp,i,j) 
+            OCEAN(ng)%HisBio2d(i,j, iZxQAid(isp) )= ZOOX(ng)%QAid(isp,i,j)
+#  if defined CORAL_CARBON_ISOTOPE
+            OCEAN(ng)%HisBio2d(i,j, iZxQ13C(isp) ) = ZOOX(ng)%Q13C(isp,i,j) 
+#  endif
+#  if defined CORAL_NUTRIENTS
+            !  :  (To be updated)
+#  endif
+# endif
+          END DO
 #endif
 #ifdef SEAGRASS
-            HisBio2d(i,j,iSgPg) = SGRASS(ng)%Pg(1,i,j)
-            HisBio2d(i,j,iSg_R) = SGRASS(ng)%R (1,i,j)
-            HisBio2d(i,j,iSgPn) = SGRASS(ng)%Pg(1,i,j)-SGRASS(ng)%R (1,i,j)
+          DO isp=1,Nsg
+          !  :  (To be updated)
+          END DO
 #endif
 #ifdef MACROALGAE
-            HisBio2d(i,j,iAgPg) = ALGAE(ng)%Pg(1,i,j)
-            HisBio2d(i,j,iAg_R) = ALGAE(ng)%R (1,i,j)
-            HisBio2d(i,j,iAgPn) = ALGAE(ng)%Pg(1,i,j)-ALGAE(ng)%R (1,i,j)
+          DO isp=1,Nag
+          !  :  (To be updated)
+          END DO
 #endif
-!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+        END DO
+      END DO
+
 #ifdef SEDIMENT_ECOSYS  
-          DO k=1,Nsed(ng)
+      DO k=1,Nsed(ng)
+        DO j=LBj, UBj
+          DO i=LBi, UBi
             OCEAN(ng)%HisBiosed3d(i,j,k,iSdporo) = SEDECO(ng)%poro(i,j,k)
             OCEAN(ng)%HisBiosed3d(i,j,k,iSdTmp ) = SEDECO(ng)%Tmp (i,j,k)
             OCEAN(ng)%HisBiosed3d(i,j,k,iSdSal ) = SEDECO(ng)%Sal (i,j,k)
@@ -1140,8 +1188,116 @@
             OCEAN(ng)%HisBiosed3d(i,j,k,iSdS0  ) = SEDECO(ng)%S0  (i,j,k)
 # endif
           END DO
+        END DO
+      END DO
 #endif
+      END SUBROUTINE send_reef_ecosys2roms_his
+
+!***********************************************************************
+#if defined DIAGNOSTICS_BIO
+
+      SUBROUTINE send_reef_ecosys2roms_dia(ng,LBi, UBi, LBj, UBj)
+!
+!=======================================================================
+!                                                                      !
+!  This routine sets reef_ecosys arraies to roms arralies for          !
+!  his nc output.                                                      !
+!  This routine is called in mod_arrays.F and only used for initial    !
+!  condotion setting.                                                  !
+!                                                                      !
+!=======================================================================
+
+      USE mod_geochem
+!
+!  Imported variable declarations.
+!
+      integer, intent(in) :: ng, LBi, UBi, LBj, UBj
+!
+!  Local variable declarations.
+!
+      integer :: i,j,k
+      integer :: isp
+      real(r8) :: tmp
+
+!-----------------------------------------------------------------------
+      DO j=LBj, UBj
+        DO i=LBi, UBi
+# ifdef CORAL_POLYP
+          DO isp=1,Ncl
+            !  :  (To be updated)
+            OCEAN(ng)%DiaBio2d(i,j, iClPg(isp) ) = CORAL(ng)%Pg(isp,i,j) 
+            OCEAN(ng)%DiaBio2d(i,j, iCl_R(isp) ) = CORAL(ng)%R (isp,i,j) 
+            OCEAN(ng)%DiaBio2d(i,j, iCl_G(isp) ) = CORAL(ng)%G (isp,i,j)
+            OCEAN(ng)%DiaBio2d(i,j, iClPn(isp) ) = CORAL(ng)%Pg(isp,i,j)-CORAL(ng)%R (isp,i,j)
+#  if defined CORAL_CARBON_ISOTOPE
+            tmp = CORAL(ng)%Q13C(isp,i,j) / CORAL(ng)%QC(isp,i,j)   !coral organism
+            OCEAN(ng)%DiaBio2d(i,j, iClQCd13C(isp) ) = d13C_fromR13C(tmp)
+#   if defined CORAL_NONE_CO2_EQ
+            !  :  (To be updated)
+#   endif
+#  endif
+#  if defined CORAL_ZOOXANTHELLAE
+            !  :  (To be updated)
+#  endif
+#  if defined CORAL_NUTRIENTS
+            !  :  (To be updated)
+#  endif     
+#  if defined CORAL_SIZE_DYNAMICS
+            OCEAN(ng)%DiaBio2d(i,j, iClmt(isp) ) = CORAL(ng)%mort(isp,i,j) 
+            OCEAN(ng)%DiaBio2d(i,j, iClgw(isp) ) = CORAL(ng)%growth(isp,i,j) 
+#  endif
+
+#  if defined CORAL_ZOOXANTHELLAE
+            !  :  (To be updated)
+#   if defined CORAL_CARBON_ISOTOPE
+            !  :  (To be updated)
+#   endif
+#   if defined CORAL_NUTRIENTS
+            !  :  (To be updated)
+#   endif
+#  endif
+          END DO
+# endif
+
+# ifdef SEAGRASS
+          DO isp=1,Nsg
+            OCEAN(ng)%DiaBio2d(i,j, iSgPg(isp) ) = SGRASS(ng)%Pg(isp,i,j)
+            OCEAN(ng)%DiaBio2d(i,j, iSg_R(isp) ) = SGRASS(ng)%R (isp,i,j)
+            OCEAN(ng)%DiaBio2d(i,j, iSgPn(isp) ) = SGRASS(ng)%Pg(isp,i,j)-SGRASS(ng)%R (isp,i,j)
+          END DO
+# endif
+
+# ifdef MACROALGAE
+          DO isp=1,Nsg
+            OCEAN(ng)%DiaBio2d(i,j, iAgPg(isp) ) = ALGAE(ng)%Pg(isp,i,j)
+            OCEAN(ng)%DiaBio2d(i,j, iAg_R(isp) ) = ALGAE(ng)%R (isp,i,j)
+            OCEAN(ng)%DiaBio2d(i,j, iAgPn(isp) ) = ALGAE(ng)%Pg(isp,i,j)-ALGAE(ng)%R (isp,i,j)
+          END DO
+# endif
         END DO
       END DO
 
-      END SUBROUTINE send_reef_ecosys2roms_his
+# ifdef SEDIMENT_ECOSYS  
+      DO k=1,Nsed(ng)
+        DO j=LBj, UBj
+          DO i=LBi, UBi
+            !  :  (To be updated)
+#  if defined ORGANIC_MATTER
+            !  :  (To be updated)
+#  endif
+#  if defined NUTRIENTS
+            !  :  (To be updated)
+#   if defined ORGANIC_MATTER
+            !  :  (To be updated)
+#   endif
+#  endif
+#  if defined SULFATE
+            !  :  (To be updated)
+#  endif
+          END DO
+        END DO
+      END DO
+# endif
+
+      END SUBROUTINE send_reef_ecosys2roms_dia
+#endif

@@ -25,6 +25,9 @@
 #ifdef BBL_MODEL
       USE mod_bbl
 #endif
+#if defined DIAGNOSTICS_BIO
+      USE mod_diags
+#endif
 
 
 !
@@ -56,9 +59,6 @@
      &                   nstp(ng), nnew(ng),                            &
 #ifdef MASKING
      &                   GRID(ng) % rmask,                              &
-# if defined WET_DRY && defined DIAGNOSTICS_BIO
-     &                   GRID(ng) % rmask_full,                         &
-# endif
 #endif
      &                   GRID(ng) % Hz,                                 &
      &                   GRID(ng) % z_r,                                &
@@ -71,13 +71,10 @@
      &                   FORCES(ng) % sustr,                            &
      &                   FORCES(ng) % svstr,                            &
 #endif
-     &                   OCEAN(ng) % HisBio2d,                          &
-     &                   OCEAN(ng) % HisBio3d,                          &
-!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
-#ifdef SEDIMENT_ECOSYS
-     &                   OCEAN(ng) % HisBiosed3d,                       &
+#if defined DIAGNOSTICS_BIO
+     &                   DIAGS(ng) % DiaBio2d,                          &
+     &                   DIAGS(ng) % DiaBio3d,                          &
 #endif
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 #ifdef CORAL_POLYP
      &                   GRID(ng) % p_coral,                            &
 #endif
@@ -121,9 +118,6 @@
      &                         nstp, nnew,                              &
 #ifdef MASKING
      &                         rmask,                                   &
-# if defined WET_DRY && defined DIAGNOSTICS_BIO
-     &                         rmask_full,                              &
-# endif
 #endif
      &                         Hz, z_r, z_w, srflx,                     &
 #ifdef BULK_FLUXES
@@ -131,9 +125,8 @@
 #else
      &                         sustr, svstr,                            &
 #endif
-     &                         HisBio2d, HisBio3d,                      &
-#ifdef SEDIMENT_ECOSYS
-     &                         HisBiosed3d,                             &   ! yuta_edits_for_masa
+#if defined DIAGNOSTICS_BIO
+     &                         DiaBio2d, DiaBio3d,                      &
 #endif
 #ifdef CORAL_POLYP
      &                         p_coral,                                 &
@@ -192,9 +185,6 @@
 #ifdef ASSUMED_SHAPE
 # ifdef MASKING
       real(r8), intent(in) :: rmask(LBi:,LBj:)
-#  if defined WET_DRY && defined DIAGNOSTICS_BIO
-      real(r8), intent(in) :: rmask_full(LBi:,LBj:)
-#  endif
 # endif
       real(r8), intent(in) :: Hz(LBi:,LBj:,:)
       real(r8), intent(in) :: z_r(LBi:,LBj:,:)
@@ -207,10 +197,9 @@
       real(r8), intent(in) :: sustr(LBi:,LBj:)
       real(r8), intent(in) :: svstr(LBi:,LBj:)
 # endif
-      real(r8), intent(inout) :: HisBio2d(LBi:,LBj:,:)
-      real(r8), intent(inout) :: HisBio3d(LBi:,LBj:,:,:)
-# ifdef SEDIMENT_ECOSYS
-      real(r8), intent(inout) :: HisBiosed3d(LBi:,LBj:,:,:)   ! yuta_edits_for_masa
+# if defined DIAGNOSTICS_BIO
+      real(r8), intent(inout) :: DiaBio2d(LBi:,LBj:,:)
+      real(r8), intent(inout) :: DiaBio3d(LBi:,LBj:,:,:)
 # endif
 # ifdef CORAL_POLYP
       real(r8), intent(inout) :: p_coral(2,LBi:UBi,LBj:UBj)
@@ -243,9 +232,6 @@
 #else
 # ifdef MASKING
       real(r8), intent(in) :: rmask(LBi:UBi,LBj:UBj)
-#  if defined WET_DRY && defined DIAGNOSTICS_BIO
-      real(r8), intent(in) :: rmask_full(LBi:UBi,LBj:UBj)
-#  endif
 # endif
       real(r8), intent(in) :: Hz(LBi:UBi,LBj:UBj,UBk)
       real(r8), intent(in) :: z_r(LBi:UBi,LBj:UBj,UBk)
@@ -258,10 +244,9 @@
       real(r8), intent(in) :: sustr(LBi:UBi,LBj:UBj)
       real(r8), intent(in) :: svstr(LBi:UBi,LBj:UBj)
 # endif
-      real(r8), intent(inout) :: HisBio2d(LBi:UBi,LBj:UBj,NHbio2d)
-      real(r8), intent(inout) :: HisBio3d(LBi:UBi,LBj:UBj,UBk,NHbio3d)
-# ifdef SEDIMENT_ECOSYS
-      real(r8), intent(inout) :: HisBiosed3d(LBi:UBi,LBj:UBj,Nsed(ng),NHbiosed3d)   ! yuta_edits_for_masa
+# if defined DIAGNOSTICS_BIO
+      real(r8), intent(inout) :: DiaBio2d(LBi:UBi,LBj:UBj,NHbio2d)
+      real(r8), intent(inout) :: DiaBio3d(LBi:UBi,LBj:UBj,UBk,NHbio3d)
 # endif
 # ifdef CORAL_POLYP
       real(r8), intent(inout) :: p_coral(2,LBi:UBi,LBj:UBj)
@@ -504,6 +489,16 @@
           END IF
 #endif
 
+#if defined DIAGNOSTICS_BIO
+            DiaBio2d(i,j,ipHt_) = sspH
+            DiaBio2d(i,j,iWarg) = ssWarg
+            DiaBio2d(i,j,iCOfx) = ssCO2flux
+            DiaBio2d(i,j,ipCO2) = ssfCO2
+            DiaBio2d(i,j,iO2fx) = ssO2flux
+            DiaBio2d(i,j,iPARb) = PFDbott
+            DiaBio2d(i,j,iTau_) = tau
+#endif
+
 !-----------------------------------------------------------------------
 !  Update global tracer variables: Add increment due to BGC processes
 !  to tracer array in time index "nnew". Index "nnew" is solution after
@@ -562,7 +557,7 @@
 
 #if defined CARBON_ISOTOPE
 ! Carbon isotope ratio calculation
-            HisBio3d(i,j,k,id13C)=d13C_fromR13C(t(i,j,k,nnew,iT13C)/t(i,j,k,nnew,iTIC_))
+            DiaBio3d(i,j,k,id13C)=d13C_fromR13C(t(i,j,k,nnew,iT13C)/t(i,j,k,nnew,iTIC_))
 #endif
           END DO
 

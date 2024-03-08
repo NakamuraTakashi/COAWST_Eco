@@ -56,7 +56,7 @@
       integer :: fltdim, i, itrc, j, l
       integer :: recdim, status
 
-      integer :: DimIDs(32), fgrd(2), start(2), total(2)
+      integer :: DimIDs(36), fgrd(2), start(2), total(2) !!! <<< TN: DimIDs(32)->DimIDs(36)
       integer :: Vsize(4)
 
       integer :: def_dim, varid

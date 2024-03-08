@@ -459,6 +459,7 @@
         END DO
 # endif
 # if defined DIAGNOSTICS_BIO
+#  if !defined REEF_ECOSYS /*!!!<<< TN:add !defined REEF_ECOSYS */
         DO idiag=1,NDbio2d
           IF (idiag.ne.ipCO2) THEN
             DO j=JstrR,JendR
@@ -479,6 +480,7 @@
             END DO
           END DO
         END DO
+#  endif  /*!!!<<< TN:add */
 # endif
 # ifdef DIAGNOSTICS_UV
         DO idiag=1,NDM2d

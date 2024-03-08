@@ -237,11 +237,19 @@
       DO ivar=1,NDbio2d
         ifield=iDbio2(ivar)
         IF (Dout(ifield,ng)) THEN
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN:add
+#  if defined REEF_ECOSYS
+          scale=1.0_r8
+#  else
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN:add
           IF (ivar.eq.ipCO2) THEN
             scale=1.0_r8
           ELSE
             scale=1.0_r8/dtBIO                       ! mmole m-2 day-1
           END IF
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN:add
+#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN:add
           gtype=gfactor*r2dvar
           status=nf_fwrite2d(ng, iNLM, DIA(ng)%ncid,                    &
      &                       DIA(ng)%Vid(ifield),                       &
@@ -269,7 +277,15 @@
       DO ivar=1,NDbio3d
         ifield=iDbio3(ivar)
         IF (Dout(ifield,ng)) THEN
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN:add
+#  if defined REEF_ECOSYS
+          scale=1.0_r8
+#  else
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN:add
           scale=1.0_r8/dtBIO                         ! mmole m-3 day-1
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN:add
+#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN:add
           gtype=gfactor*r3dvar
           status=nf_fwrite3d(ng, iNLM, DIA(ng)%ncid,                    &
      &                       DIA(ng)%Vid(ifield),                       &

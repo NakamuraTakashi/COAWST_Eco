@@ -88,9 +88,9 @@
 !
       integer, intent(in) :: ng, model, ncid
 #ifdef INWAVE_MODEL
-      integer, intent(in) :: DimIDs(33)
+      integer, intent(in) :: DimIDs(36) !!! <<< TN: DimIDs(33)->DimIDs(36)
 #else
-      integer, intent(in) :: DimIDs(32)
+      integer, intent(in) :: DimIDs(36) !!! <<< TN: DimIDs(32)->DimIDs(36)
 #endif
       character (*), intent(in) :: ncname
 !

@@ -2373,8 +2373,8 @@ contains
 
     DO k=1,N-1
       Courant = abs( w*dt/dz_r(k) )
-      if(Courant > 1 ) then
-        v(k) = sign( dz_r(k)/dt, w )
+      if(Courant > 0.4d0 ) then
+        v(k) = sign( dz_r(k)/dt*0.4d0, w )
       else
         v(k) = w
       endif

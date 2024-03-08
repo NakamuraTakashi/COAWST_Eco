@@ -49,7 +49,7 @@
       integer :: i, j, itrc, nvd3, nvd4
       integer :: recdim, status, varid
 
-      integer :: DimIDs(32)
+      integer :: DimIDs(36) !!! <<< TN: DimIDs(32)->DimIDs(36)
       integer :: t2dgrd(3), u2dgrd(3), v2dgrd(3)
 # ifdef SOLVE3D
       integer :: t3dgrd(4), u3dgrd(4), v3dgrd(4), w3dgrd(4)

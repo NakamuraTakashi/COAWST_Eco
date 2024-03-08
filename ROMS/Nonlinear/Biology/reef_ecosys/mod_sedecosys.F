@@ -433,8 +433,8 @@ CONTAINS
         SEDECO(ng)%Sal(:,:,:)  = 0.0d0
         SEDECO(ng)%TA(:,:,:)  = 2232.0d0 ! TA (umol kg-1)
 
-        SEDECO(ng)%O2 (:,:,:)  = 300.0d0        !DO  (µmol L-1)
-        SEDECO(ng)%CO2(:,:,:)  = 0.0d0        !CO2  (µmol L-1)
+        SEDECO(ng)%O2 (:,:,:)  = 0.0d0        !DO  (µmol L-1)
+        SEDECO(ng)%CO2(:,:,:)  = 2000.0d0        !CO2  (µmol L-1)
         SEDECO(ng)%N2 (:,:,:)  = 0.0d0        !N2  (µmol L-1)
         ! OM
 #  if defined ORGANIC_MATTER
@@ -472,14 +472,14 @@ CONTAINS
         ! Sulfur dynamics
 #  if defined SULFATE
         SEDECO(ng)%Mn2(:,:,:) = 60.0d0    !Mn2  (µmol L-1) 
-        SEDECO(ng)%MnO2(:,:,1:50) = 1.0d4   !MnO2  (nmol g-1) 
-        SEDECO(ng)%MnO2(:,:,51:Nsed) = 0.0d0   !MnO2  (nmol g-1) 
+        SEDECO(ng)%MnO2(:,:,1:10) = 1.0d4   !MnO2  (nmol g-1) 
+        SEDECO(ng)%MnO2(:,:,11:Nsed) = 0.0d0   !MnO2  (nmol g-1) 
 
         SEDECO(ng)%Fe2(:,:,:) = 0.0d0          !Fe2  (µmol L-1) 
         SEDECO(ng)%FeS(:,:,:) = 0.0d0          !FeS  (nmol g-1) 
         SEDECO(ng)%FeS2(:,:,:) = 1.0d4         !FeS2  (nmol g-1) 
-        SEDECO(ng)%FeOOH(:,:,1:50) = 1.0d5        !FeOOH  (nmol g-1)
-        SEDECO(ng)%FeOOH(:,:,51:Nsed) = 0.0d0        !FeOOH  (nmol g-1)
+        SEDECO(ng)%FeOOH(:,:,1:10) = 1.0d5        !FeOOH  (nmol g-1)
+        SEDECO(ng)%FeOOH(:,:,11:Nsed) = 0.0d0        !FeOOH  (nmol g-1)
         SEDECO(ng)%FeOOH_PO4(:,:,:) = 0.0d0    !FeOOH=PO4  (nmol g-1) 
 
         SEDECO(ng)%H2S(:,:,:) = 100.0d0     !H2S  (µmol L-1)
