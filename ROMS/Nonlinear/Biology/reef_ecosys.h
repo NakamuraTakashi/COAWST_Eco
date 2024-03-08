@@ -309,11 +309,11 @@
           dtrc_dt(:,:)=0.0_r8
           
           sspH      = 8.0_r8         ! sea surface pH
-          ssfCO2    = 380.0_r8         ! sea surface fCO2 (uatm)
-          ssWarg    = 4.0_r8         ! sea surface aragonite saturation state
+          ssfCO2    = 400.0_r8         ! sea surface fCO2 (uatm)
+          ssWarg    = 3.8_r8         ! sea surface aragonite saturation state
           ssCO2flux = 0.0_r8         ! sea surface CO2 flux (mmol m-2 s-1)
           ssO2flux  = 0.0_r8         ! sea surface O2 flux (mmol m-2 s-1)
-
+          PFDbott   = 0.0_r8
 #ifdef MASKING
           IF (rmask(i,j).eq.1.0_r8) THEN
 # endif
@@ -492,7 +492,7 @@
 #if defined DIAGNOSTICS_BIO
             DiaBio2d(i,j,ipHt_) = sspH
             DiaBio2d(i,j,iWarg) = ssWarg
-            DiaBio2d(i,j,iCOfx) = ssCO2flux
+            DiaBio2d(i,j,iCO2fx) = ssCO2flux
             DiaBio2d(i,j,ipCO2) = ssfCO2
             DiaBio2d(i,j,iO2fx) = ssO2flux
             DiaBio2d(i,j,iPARb) = PFDbott

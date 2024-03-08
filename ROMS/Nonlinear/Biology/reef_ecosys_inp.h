@@ -37,11 +37,13 @@
       logical, dimension(Ngrids) :: Lbio
       logical, dimension(NBT,Ngrids) :: Ltrc
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
-      logical, dimension(NHbio2d,Ngrids) :: Hbio2
-      logical, dimension(NHbio3d,Ngrids) :: Hbio3
+      logical, dimension(NHbio2d,Ngrids) :: LHbio2
+      logical, dimension(NHbio3d,Ngrids) :: LHbio3
+      logical, dimension(NDbio2d,Ngrids) :: LDbio2
+      logical, dimension(NDbio3d,Ngrids) :: LDbio3
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
-      logical, dimension(NHbiosed3d,Ngrids) :: Hbiosed3
+      logical, dimension(NHbiosed3d,Ngrids) :: LHbiosed3
       integer, dimension(Ngrids) :: NsedTemporary
       real(r8), allocatable :: SedEcoLayerDepthsTemporary(:)
       integer :: k
@@ -418,7 +420,7 @@
 
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
             CASE ('Hout(iHbio2)')
-              Npts=load_l(Nval, Cval, NHbio2d*Ngrids, Hbio2)
+              Npts=load_l(Nval, Cval, NHbio2d*Ngrids, LHbio2)
               DO ng=1,Ngrids
                 DO itrc=1,NHbio2d
                   i=iHbio2(itrc)
@@ -428,11 +430,11 @@
                     exit_flag=5
                     RETURN
                   END IF
-                  Hout(i,ng)=Hbio2(itrc,ng)
+                  Hout(i,ng)=LHbio2(itrc,ng)
                 END DO
               END DO
             CASE ('Hout(iHbio3)')
-              Npts=load_l(Nval, Cval, NHbio3d*Ngrids, Hbio3)
+              Npts=load_l(Nval, Cval, NHbio3d*Ngrids, LHbio3)
               DO ng=1,Ngrids
                 DO itrc=1,NHbio3d
                   i=iHbio3(itrc)
@@ -442,13 +444,13 @@
                     exit_flag=5
                     RETURN
                   END IF
-                  Hout(i,ng)=Hbio3(itrc,ng)
+                  Hout(i,ng)=LHbio3(itrc,ng)
                 END DO
               END DO
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
             CASE ('Hout(iHbiosed3)')
-              Npts=load_l(Nval, Cval, NHbiosed3d*Ngrids, Hbiosed3)
+              Npts=load_l(Nval, Cval, NHbiosed3d*Ngrids, LHbiosed3)
               DO ng=1,Ngrids
                 DO itrc=1,NHbiosed3d
                   i=iHbiosed3(itrc)
@@ -458,7 +460,7 @@
                     exit_flag=5
                     RETURN
                   END IF
-                  Hout(i,ng)=Hbiosed3(itrc,ng)
+                  Hout(i,ng)=LHbiosed3(itrc,ng)
                 END DO
               END DO
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
@@ -494,7 +496,7 @@
               END DO
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
             CASE ('Qout(iHbio2)')
-              Npts=load_l(Nval, Cval, NHbio2d*Ngrids, Hbio2)
+              Npts=load_l(Nval, Cval, NHbio2d*Ngrids, LHbio2)
               DO ng=1,Ngrids
                 DO itrc=1,NHbio2d
                   i=iHbio2(itrc)
@@ -504,11 +506,11 @@
                     exit_flag=5
                     RETURN
                   END IF
-                  Qout(i,ng)=Hbio2(itrc,ng)
+                  Qout(i,ng)=LHbio2(itrc,ng)
                 END DO
               END DO
             CASE ('Qout(iHbio3)')
-              Npts=load_l(Nval, Cval, NHbio3d*Ngrids, Hbio3)
+              Npts=load_l(Nval, Cval, NHbio3d*Ngrids, LHbio3)
               DO ng=1,Ngrids
                 DO itrc=1,NHbio3d
                   i=iHbio3(itrc)
@@ -518,11 +520,11 @@
                     exit_flag=5
                     RETURN
                   END IF
-                  Qout(i,ng)=Hbio3(itrc,ng)
+                  Qout(i,ng)=LHbio3(itrc,ng)
                 END DO
               END DO
             CASE ('Qout(iHbiosed3)')
-              Npts=load_l(Nval, Cval, NHbiosed3d*Ngrids, Hbiosed3)
+              Npts=load_l(Nval, Cval, NHbiosed3d*Ngrids, LHbiosed3)
               DO ng=1,Ngrids
                 DO itrc=1,NHbiosed3d
                   i=iHbiosed3(itrc)
@@ -532,7 +534,36 @@
                     exit_flag=5
                     RETURN
                   END IF
-                  Qout(i,ng)=Hbiosed3(itrc,ng)
+                  Qout(i,ng)=LHbiosed3(itrc,ng)
+                END DO
+              END DO
+
+            CASE ('Dout(iDbio2)')
+              Npts=load_l(Nval, Cval, NDbio2d*Ngrids, LDbio2)
+              DO ng=1,Ngrids
+                DO itrc=1,NDbio2d
+                  i=iDbio2(itrc)
+                  IF (i.eq.0) THEN
+                    IF (Master) WRITE (out,30)                          &
+     &                                'iDbio2(', itrc, ')'
+                    exit_flag=5
+                    RETURN
+                  END IF
+                  Dout(i,ng)=LDbio2(itrc,ng)
+                END DO
+              END DO
+            CASE ('Dout(iDbio3)')
+              Npts=load_l(Nval, Cval, NDbio3d*Ngrids, LDbio3)
+              DO ng=1,Ngrids
+                DO itrc=1,NDbio3d
+                  i=iDbio3(itrc)
+                  IF (i.eq.0) THEN
+                    IF (Master) WRITE (out,30)                          &
+     &                                'iDbio3(', itrc, ')'
+                    exit_flag=5
+                    RETURN
+                  END IF
+                  Dout(i,ng)=LDbio3(itrc,ng)
                 END DO
               END DO
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
@@ -988,6 +1019,21 @@
               i=iHbiosed3(itrc)
               IF (Qout(i,ng)) WRITE (out,130)                           &
      &            Qout(i,ng), 'Qout(iHbiosed3)',                        &
+     &            'Write out', TRIM(Vname(1,i))
+            END DO
+
+            IF (NDbio2d.gt.0) THEN
+              DO itrc=1,NDbio2d
+                i=iDbio2(itrc)
+                IF (Dout(i,ng)) WRITE (out,130)                         &
+     &              Dout(i,ng), 'Dout(iDbio2)',                         &
+     &              'Write out', TRIM(Vname(1,i))
+              END DO
+            END IF
+            DO itrc=1,NDbio3d
+              i=iDbio3(itrc)
+              IF (Dout(i,ng)) WRITE (out,130)                           &
+     &            Dout(i,ng), 'Dout(iDbio3)',                           &
      &            'Write out', TRIM(Vname(1,i))
             END DO
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add

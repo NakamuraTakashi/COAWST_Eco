@@ -1208,6 +1208,7 @@
 !=======================================================================
 
       USE mod_geochem
+      USE mod_diags
 !
 !  Imported variable declarations.
 !
@@ -1225,13 +1226,13 @@
 # ifdef CORAL_POLYP
           DO isp=1,Ncl
             !  :  (To be updated)
-            OCEAN(ng)%DiaBio2d(i,j, iClPg(isp) ) = CORAL(ng)%Pg(isp,i,j) 
-            OCEAN(ng)%DiaBio2d(i,j, iCl_R(isp) ) = CORAL(ng)%R (isp,i,j) 
-            OCEAN(ng)%DiaBio2d(i,j, iCl_G(isp) ) = CORAL(ng)%G (isp,i,j)
-            OCEAN(ng)%DiaBio2d(i,j, iClPn(isp) ) = CORAL(ng)%Pg(isp,i,j)-CORAL(ng)%R (isp,i,j)
+            DIAGS(ng)%DiaBio2d(i,j, iClPg(isp) ) = CORAL(ng)%Pg(isp,i,j) 
+            DIAGS(ng)%DiaBio2d(i,j, iCl_R(isp) ) = CORAL(ng)%R (isp,i,j) 
+            DIAGS(ng)%DiaBio2d(i,j, iCl_G(isp) ) = CORAL(ng)%G (isp,i,j)
+            DIAGS(ng)%DiaBio2d(i,j, iClPn(isp) ) = CORAL(ng)%Pg(isp,i,j)-CORAL(ng)%R (isp,i,j)
 #  if defined CORAL_CARBON_ISOTOPE
             tmp = CORAL(ng)%Q13C(isp,i,j) / CORAL(ng)%QC(isp,i,j)   !coral organism
-            OCEAN(ng)%DiaBio2d(i,j, iClQCd13C(isp) ) = d13C_fromR13C(tmp)
+            DIAGS(ng)%DiaBio2d(i,j, iClQCd13C(isp) ) = d13C_fromR13C(tmp)
 #   if defined CORAL_NONE_CO2_EQ
             !  :  (To be updated)
 #   endif
@@ -1243,8 +1244,8 @@
             !  :  (To be updated)
 #  endif     
 #  if defined CORAL_SIZE_DYNAMICS
-            OCEAN(ng)%DiaBio2d(i,j, iClmt(isp) ) = CORAL(ng)%mort(isp,i,j) 
-            OCEAN(ng)%DiaBio2d(i,j, iClgw(isp) ) = CORAL(ng)%growth(isp,i,j) 
+            DIAGS(ng)%DiaBio2d(i,j, iClmt(isp) ) = CORAL(ng)%mort(isp,i,j) 
+            DIAGS(ng)%DiaBio2d(i,j, iClgw(isp) ) = CORAL(ng)%growth(isp,i,j) 
 #  endif
 
 #  if defined CORAL_ZOOXANTHELLAE
@@ -1261,17 +1262,17 @@
 
 # ifdef SEAGRASS
           DO isp=1,Nsg
-            OCEAN(ng)%DiaBio2d(i,j, iSgPg(isp) ) = SGRASS(ng)%Pg(isp,i,j)
-            OCEAN(ng)%DiaBio2d(i,j, iSg_R(isp) ) = SGRASS(ng)%R (isp,i,j)
-            OCEAN(ng)%DiaBio2d(i,j, iSgPn(isp) ) = SGRASS(ng)%Pg(isp,i,j)-SGRASS(ng)%R (isp,i,j)
+            DIAGS(ng)%DiaBio2d(i,j, iSgPg(isp) ) = SGRASS(ng)%Pg(isp,i,j)
+            DIAGS(ng)%DiaBio2d(i,j, iSg_R(isp) ) = SGRASS(ng)%R (isp,i,j)
+            DIAGS(ng)%DiaBio2d(i,j, iSgPn(isp) ) = SGRASS(ng)%Pg(isp,i,j)-SGRASS(ng)%R (isp,i,j)
           END DO
 # endif
 
 # ifdef MACROALGAE
           DO isp=1,Nsg
-            OCEAN(ng)%DiaBio2d(i,j, iAgPg(isp) ) = ALGAE(ng)%Pg(isp,i,j)
-            OCEAN(ng)%DiaBio2d(i,j, iAg_R(isp) ) = ALGAE(ng)%R (isp,i,j)
-            OCEAN(ng)%DiaBio2d(i,j, iAgPn(isp) ) = ALGAE(ng)%Pg(isp,i,j)-ALGAE(ng)%R (isp,i,j)
+            DIAGS(ng)%DiaBio2d(i,j, iAgPg(isp) ) = ALGAE(ng)%Pg(isp,i,j)
+            DIAGS(ng)%DiaBio2d(i,j, iAg_R(isp) ) = ALGAE(ng)%R (isp,i,j)
+            DIAGS(ng)%DiaBio2d(i,j, iAgPn(isp) ) = ALGAE(ng)%Pg(isp,i,j)-ALGAE(ng)%R (isp,i,j)
           END DO
 # endif
         END DO
