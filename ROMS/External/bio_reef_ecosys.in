@@ -53,8 +53,8 @@
 !    2: coral, seagass, macroalgae, sediment, etc.
 !
 !               1 2   
-!LReadBioINI == F F
- LReadBioINI == T T
+ LReadBioINI == F F
+!LReadBioINI == T T
 
 ! Maximum number of iterations to achieve convergence of the nonlinear
 ! solution.
@@ -212,9 +212,9 @@ ad_LBC(isTvar) == Clo     Clo     RadNud  Clo   ! idbio(:), compact
 Hout(idTvar) == 45*T    ! NO3, ...           biological tracer
 Hout(idTsur) == 45*F    ! NO3_sflux, ...     surface tracer flux
 
-Hout(iHbio2) == 31*T ! yuta_edits_for_masa   !!!!!!!!!!!!!!!!!! Check number
-Hout(iHbio3) == 3*F                            !!!!!!!!!!!!!!!!!! Check number
-Hout(iHbiosed3) == 35*F ! yuta_edits_for_masa
+Hout(iHbio2) == 44*T
+Hout(iHbio3) == 3*F
+Hout(iHbiosed3) == 35*F
 
 ! Logical switches (TRUE/FALSE) to activate writing of biological fields
 ! into QUICK output file: [1:NBT,Ngrids].
@@ -222,9 +222,9 @@ Hout(iHbiosed3) == 35*F ! yuta_edits_for_masa
 Qout(idTvar) == 45*F    ! NO3, ...           biological tracer
 Qout(idTsur) == 45*F    ! NO3_sflux, ...     surface tracer flux
 
-Qout(iHbio2) == 31*F ! yuta_edits_for_masa   !!!!!!!!!!!!!!!!!! Check number
+Qout(iHbio2) == 44*F
 Qout(iHbio3) == 3*F
-Qout(iHbiosed3) == 35*T ! yuta_edits_for_masa  !!!!!!!!!!!!!!!!!! Check number
+Qout(iHbiosed3) == 35*T 
 
 ! Logical switches (TRUE/FALSE) to activate writing of time-averaged fields
 ! into AVERAGE output file: [1:NBT,Ngrids].
@@ -235,8 +235,8 @@ Aout(idTvar) == 45*F    ! NO3, ...           biological tracer
 ! biological tracer diagnostic terms into DIAGNOSTIC output file:
 ! [1:NBT,Ngrids].
 
-Dout(iDbio2) == 31*T  !!!!!!!!!!!!!!!!!! Check number
-Dout(iDbio3) == 3*F   !!!!!!!!!!!!!!!!!! Check number
+Dout(iDbio2) == 34*T  !!!!!!!!!!!!!!!!!! Check number
+Dout(iDbio3) == 2*F   !!!!!!!!!!!!!!!!!! Check number
 
 ! Logical switches (TRUE/FALSE) to activate writing of time-averaged,
 ! biological processes diagnostics terms into DIAGNOSTIC output file [Ngrids].
