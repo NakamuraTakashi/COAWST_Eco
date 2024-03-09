@@ -79,7 +79,7 @@
      &                   GRID(ng) % p_coral,                            &
 #endif
 #ifdef SEAGRASS
-     &                   GRID(ng) % p_seagrass,                         &
+     &                   GRID(ng) % p_sgrass,                           &
 #endif
 #ifdef MACROALGAE
      &                   GRID(ng) % p_algae,                            &
@@ -132,7 +132,7 @@
      &                         p_coral,                                 &
 #endif
 #ifdef SEAGRASS
-     &                         p_seagrass,                              &
+     &                         p_sgrass,                              &
 #endif
 #ifdef MACROALGAE
      &                         p_algae,                                 &
@@ -205,7 +205,7 @@
       real(r8), intent(inout) :: p_coral(2,LBi:UBi,LBj:UBj)
 # endif
 # ifdef SEAGRASS
-      real(r8), intent(inout) :: p_seagrass(LBi:UBi,LBj:UBj)
+      real(r8), intent(inout) :: p_sgrass(LBi:UBi,LBj:UBj)
 # endif
 # ifdef MACROALGAE
       real(r8), intent(inout) :: p_algae(LBi:UBi,LBj:UBj)
@@ -252,7 +252,7 @@
       real(r8), intent(inout) :: p_coral(2,LBi:UBi,LBj:UBj)
 # endif
 # ifdef SEAGRASS
-      real(r8), intent(inout) :: p_seagrass(LBi:UBi,LBj:UBj)
+      real(r8), intent(inout) :: p_sgrass(LBi:UBi,LBj:UBj)
 # endif
 # ifdef MACROALGAE
       real(r8), intent(inout) :: p_algae(LBi:UBi,LBj:UBj)
@@ -355,11 +355,6 @@
 !          input parameters
      &            (ng, i, j            &   ! ng: nested grid number; i,j: position
      &            ,N(ng)               &   ! Number of vertical grid (following ROMS vertical grid)
-!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
-# ifdef SEDIMENT_ECOSYS
-     &            ,Nsed(ng)            &   ! Number of vertical biological sediment layers
-# endif
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
      &            ,CrlIter(ng)         &   ! Internal loop counts of coral polyp model
      &            ,SedIter(ng)         &   ! Internal loop counts of sediment ecosystem model
      &            ,dt(ng)              &   ! Time step (sec)
@@ -372,7 +367,8 @@
      &            ,p_coral(:,i,j)      &   ! Coral coverage (0-1)
 #endif
 #ifdef SEAGRASS
-     &            ,p_seagrass(i,j)     &   ! seagrass coverage (0-1)
+     ! &            ,p_sgrass(:,i,j)     &   ! seagrass coverage (0-1)
+     &            ,p_sgrass(i,j)       &   ! seagrass coverage (0-1)
 #endif
 #ifdef MACROALGAE
      &            ,p_algae(i,j)        &   ! algal coverage (0-1)

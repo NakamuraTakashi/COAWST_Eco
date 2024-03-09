@@ -39,6 +39,11 @@
 #endif
       USE mod_forces, ONLY : allocate_forces, initialize_forces
       USE mod_grid, ONLY : allocate_grid, initialize_grid
+!!! yuta_seagrass >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+#ifdef SEAGRASS
+      USE mod_grid, ONLY : GRID
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
       USE mod_mixing, ONLY : allocate_mixing, initialize_mixing
 #ifdef NESTING
       USE mod_nesting, ONLY : allocate_nesting, initialize_nesting
@@ -78,8 +83,9 @@
 !!!  Initialize coral polyp model parameters
 !!!----------------------------------------------------------------------
 #ifdef REEF_ECOSYS
-      USE mod_reef_ecosys, ONLY : initialize_reef_ecosys
-      USE mod_biology, ONLY : send_reef_ecosys2roms_his
+      ! USE mod_reef_ecosys, ONLY : allocate_reef_ecosys, initialize_reef_ecosys
+      USE mod_reef_ecosys, ONLY : allocate_reef_ecosys
+      ! USE mod_biology, ONLY : send_reef_ecosys2roms_his
 #endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
@@ -188,17 +194,10 @@
 #endif
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
 !!!----------------------------------------------------------------------
-!!!  Initialize coral polyp model parameters
+!!!  Allocate reef ecosys model parameters  ! yt_edit I split allocation and initialization
 !!!----------------------------------------------------------------------
 #ifdef REEF_ECOSYS
-          CALL initialize_reef_ecosys(ng, Ngrids, LBi, UBi, LBj, UBj   &
-!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
-# ifdef SEDIMENT_ECOSYS
-          , Nsed(ng)                                  &   ! Number of vertical biological sediment layers
-# endif
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
-          )
-          CALL send_reef_ecosys2roms_his (ng, LBi, UBi, LBj, UBj)
+          CALL allocate_reef_ecosys(ng, LBi, UBi, LBj, UBj)
 #endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
           IF (LuvSrc(ng).or.LwSrc(ng).or.ANY(LtracerSrc(:,ng))) THEN
@@ -282,6 +281,15 @@
 #if defined SSH_TIDES || defined UV_TIDES || defined POT_TIDES
           CALL initialize_tides (ng, tile)
 #endif
+! !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+! !!!----------------------------------------------------------------------
+! !!!  Initialize reef ecosys model parameters ! yt_edit I split allocation and initialization
+! !!!----------------------------------------------------------------------
+! #ifdef REEF_ECOSYS
+!           CALL initialize_reef_ecosys(ng, tile)
+!           ! CALL send_reef_ecosys2roms_his (ng, LBi, UBi, LBj, UBj)
+! #endif
+! !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
        END DO
 !$OMP BARRIER
       END DO

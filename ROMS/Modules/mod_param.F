@@ -560,6 +560,11 @@
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
 #ifdef REEF_ECOSYS
 !
+!-----------------------------------------------------------------------
+!  Reef ecosys fields parameters.
+!-----------------------------------------------------------------------
+!
+!
 !  Number of biological history fields.  Currenly, only available for
 !  the Fennel model.
 !
@@ -570,6 +575,9 @@
       integer :: NHbiosed3d             ! 3D fields for the biological sediment layers in sedecosys
 # endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+      integer, parameter :: Ncl = 2     ! Number of coral types
+      ! integer, parameter :: Nzx = 1    !! Number of zooxanthellae clade types
+      integer, parameter :: Nsg = 1     ! Number of seagrass species
 #endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 

@@ -332,7 +332,7 @@
           real(r8), pointer :: p_coral(:,:,:)
 # endif
 # ifdef SEAGRASS
-          real(r8), pointer :: p_seagrass(:,:)
+          real(r8), pointer :: p_sgrass(:,:)
 # endif
 # ifdef MACROALGAE
           real(r8), pointer :: p_algae(:,:)
@@ -555,7 +555,7 @@
       allocate ( GRID(ng) % p_coral(2,LBi:UBi,LBj:UBj) )
 # endif
 # ifdef SEAGRASS
-      allocate ( GRID(ng) % p_seagrass(LBi:UBi,LBj:UBj) )
+      allocate ( GRID(ng) % p_sgrass(LBi:UBi,LBj:UBj) )
 # endif
 # ifdef MACROALGAE
       allocate ( GRID(ng) % p_algae(LBi:UBi,LBj:UBj) )
@@ -792,7 +792,7 @@
             GRID(ng) % p_coral(2,i,j) = IniVal
 # endif
 # ifdef SEAGRASS
-            GRID(ng) % p_seagrass(i,j) = IniVal
+            GRID(ng) % p_sgrass(i,j) = IniVal
 # endif
 # ifdef MACROALGAE
             GRID(ng) % p_algae(i,j) = IniVal

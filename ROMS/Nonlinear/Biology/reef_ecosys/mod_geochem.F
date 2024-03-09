@@ -1662,19 +1662,20 @@ contains
 
   !! Mass balance calculation in sediment column
   !! solutes (dissolved)
-  real(8) function massbalance_sed_d(C,FTin,FTout,R,dz,poro,dt)
+  real(8) function massbalance_sed_d(C,FTin,FTout,R,dz,poro,dt,misc_sources)
     implicit none
-    real(8),intent(in) :: C        ! concentration                   (µmol L-1 = nmol cm-3)
-    real(8),intent(in) :: FTin     ! total flux (IN)                 (nmol cm-2 s-1)
-    real(8),intent(in) :: FTout    ! total flux (OUT)                (nmol cm-2 s-1)
-    real(8),intent(in) :: R        ! Net prodution and consumption   (nmol cm-3 s-1)
-    real(8),intent(in) :: dz       ! layer thickness                 (cm)
-    real(8),intent(in) :: poro     ! porosity                        (cm_w3 cm_s-3)
-    real(8),intent(in) :: dt       ! time step                       (s)
+    real(8),intent(in) :: C             ! concentration                   (µmol L-1 = nmol cm-3)
+    real(8),intent(in) :: FTin          ! total flux (IN)                 (nmol cm-2 s-1)
+    real(8),intent(in) :: FTout         ! total flux (OUT)                (nmol cm-2 s-1)
+    real(8),intent(in) :: R             ! Net prodution and consumption   (nmol cm-3 s-1)
+    real(8),intent(in) :: dz            ! layer thickness                 (cm)
+    real(8),intent(in) :: poro          ! porosity                        (cm_w3 cm_s-3)
+    real(8),intent(in) :: dt            ! time step                       (s)
+    real(8),intent(in) :: misc_sources  ! other sources (like seagrass)   (µmol L-1 s-1)
     real(8) :: Ccal
 
-       Ccal    =      C      +  ((FTin - FTout) / dz    +        R       )/   poro        *  dt
-!  [nmol cm-3]    [nmol cm-3]   ([nmol cm-2 s-1]/(cm)   + [nmol cm-3 s-1])/[cm_w3 cm_s-3] * [s]
+       Ccal    =      C      +  ((FTin - FTout) / dz    +        R       )/   poro        *  dt + misc_sources * dt
+!  [nmol cm-3]    [nmol cm-3]   ([nmol cm-2 s-1]/(cm)   + [nmol cm-3 s-1])/[cm_w3 cm_s-3] * [s] + [nmol g-1 s-1] [s]
     Ccal = max(Ccal,0.0d0)
     ! Ccal = min(Ccal,3.0d4)
     ! Ccal = min(Ccal,1.0d4)
@@ -1685,20 +1686,21 @@ contains
   end function massbalance_sed_d
 
   !! solids (particulate)
-  real(8) function massbalance_sed_p(C,FTin,FTout,R,dz,poro,dt,rho_s)
+  real(8) function massbalance_sed_p(C,FTin,FTout,R,dz,poro,dt,rho_s,misc_sources)
     implicit none
-    real(8),intent(in) :: C        ! concentration                  (nmol g-1)
-    real(8),intent(in) :: FTin     ! total flux  (IN)               (nmol cm-2 s-1)
-    real(8),intent(in) :: FTout    ! total flux  (OUT)              (nmol cm-2 s-1)
-    real(8),intent(in) :: R        ! Net prodution and consumption  (nmol cm-3 s-1)
-    real(8),intent(in) :: dz       ! layer thickness                (cm)
-    real(8),intent(in) :: poro     ! porosity                       (cm_w3 cm_s-3)
-    real(8),intent(in) :: dt       ! time step                      (s)
-    real(8),intent(in) :: rho_s    ! soil(wet) density              (g cm_w-3)
+    real(8),intent(in) :: C             ! concentration                  (nmol g-1)
+    real(8),intent(in) :: FTin          ! total flux  (IN)               (nmol cm-2 s-1)
+    real(8),intent(in) :: FTout         ! total flux  (OUT)              (nmol cm-2 s-1)
+    real(8),intent(in) :: R             ! Net prodution and consumption  (nmol cm-3 s-1)
+    real(8),intent(in) :: dz            ! layer thickness                (cm)
+    real(8),intent(in) :: poro          ! porosity                       (cm_w3 cm_s-3)
+    real(8),intent(in) :: dt            ! time step                      (s)
+    real(8),intent(in) :: rho_s         ! soil(wet) density              (g cm_w-3)
+    real(8),intent(in) :: misc_sources  ! other sources (like seagrass)  (nmol g-1 s-1)
     real(8) :: Ccal
 
-       Ccal     =      C    +    ( (FTin -FTout)  /dz  +       R        )/(rho_s      *  (1d0 - poro) ) * dt
-  ! [nmol g-1]      [nmol g-1] + ([nmol cm-2 s-1]/[cm] + [nmol cm-3 s-1])/([g cm_w-3] * [cm_w3 cm_s-3]) * [s]
+       Ccal     =      C    +    ( (FTin -FTout)  /dz  +       R        )/(rho_s      *  (1d0 - poro) ) * dt  + misc_sources * dt
+  ! [nmol g-1]      [nmol g-1] + ([nmol cm-2 s-1]/[cm] + [nmol cm-3 s-1])/([g cm_w-3] * [cm_w3 cm_s-3]) * [s] + [nmol g-1 s-1] [s]
     Ccal = max(Ccal,0.0d0)
     ! Ccal = min(Ccal,1.0d4)
     ! Ccal = min(Ccal,1.0d7)

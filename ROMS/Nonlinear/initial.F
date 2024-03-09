@@ -84,6 +84,7 @@
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
 #if defined BIOLOGY && defined REEF_ECOSYS
       USE mod_biology,       ONLY : LReadBioINI
+      USE mod_reef_ecosys,   ONLY : initialize_reef_ecosys
 #endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
@@ -1153,6 +1154,22 @@
 !$OMP BARRIER
       END DO
 #endif
+
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+!
+!!!----------------------------------------------------------------------
+!!!  Initialize reef ecosys model parameters ! yt_edit I split allocation and initialization
+!!!----------------------------------------------------------------------
+!
+#ifdef REEF_ECOSYS
+      DO ng=1,Ngrids
+        DO tile=first_tile(ng),last_tile(ng),+1
+          CALL initialize_reef_ecosys(ng, tile)
+        END DO
+!$OMP BARRIER
+      END DO
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 
       RETURN
       END SUBROUTINE initial

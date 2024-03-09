@@ -39,8 +39,10 @@
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
       logical, dimension(NHbio2d,Ngrids) :: LHbio2
       logical, dimension(NHbio3d,Ngrids) :: LHbio3
+#if defined DIAGNOSTICS_BIO && defined REEF_ECOSYS /*!!!<<< TN:add REEF_ECOSYS*/
       logical, dimension(NDbio2d,Ngrids) :: LDbio2
       logical, dimension(NDbio3d,Ngrids) :: LDbio3
+#endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
       logical, dimension(NHbiosed3d,Ngrids) :: LHbiosed3
@@ -537,7 +539,7 @@
                   Qout(i,ng)=LHbiosed3(itrc,ng)
                 END DO
               END DO
-
+#if defined DIAGNOSTICS_BIO && defined REEF_ECOSYS /*!!!<<< TN:add REEF_ECOSYS*/
             CASE ('Dout(iDbio2)')
               Npts=load_l(Nval, Cval, NDbio2d*Ngrids, LDbio2)
               DO ng=1,Ngrids
@@ -566,6 +568,7 @@
                   Dout(i,ng)=LDbio3(itrc,ng)
                 END DO
               END DO
+#endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #if defined AVERAGES    || \
    (defined AD_AVERAGES && defined ADJOINT) || \
@@ -1021,7 +1024,7 @@
      &            Qout(i,ng), 'Qout(iHbiosed3)',                        &
      &            'Write out', TRIM(Vname(1,i))
             END DO
-
+#if defined DIAGNOSTICS_BIO && defined REEF_ECOSYS /*!!!<<< TN:add REEF_ECOSYS*/
             IF (NDbio2d.gt.0) THEN
               DO itrc=1,NDbio2d
                 i=iDbio2(itrc)
@@ -1036,6 +1039,7 @@
      &            Dout(i,ng), 'Dout(iDbio3)',                           &
      &            'Write out', TRIM(Vname(1,i))
             END DO
+#endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 
 #if defined AVERAGES    || \

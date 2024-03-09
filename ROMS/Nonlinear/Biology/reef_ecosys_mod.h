@@ -914,10 +914,10 @@
 !
 !=======================================================================
 !                                                                      !
-!  This routine sets reef_ecosys arraies to roms arralies for          !
-!  his nc output.                                                      !
-!  This routine is called in mod_arrays.F and only used for initial    !
-!  condotion setting.                                                  !
+!  This routine sets reef_ecosys arrays to roms arrays for             !
+!  his nc input.                                                       !
+!  This routine is called in get_state.F and only used for initial     !
+!  condition setting.                                                  !
 !                                                                      !
 !=======================================================================
 !
@@ -1057,10 +1057,10 @@
 !
 !=======================================================================
 !                                                                      !
-!  This routine sets reef_ecosys arraies to roms arralies for          !
+!  This routine sets reef_ecosys arrays to roms arrays for             !
 !  his nc output.                                                      !
 !  This routine is called in mod_arrays.F and only used for initial    !
-!  condotion setting.                                                  !
+!  condition setting.                                                  !
 !                                                                      !
 !=======================================================================
 !

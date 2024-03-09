@@ -1928,7 +1928,7 @@
 #   ifdef MASKING
      &                        GRID(ng) % rmask,                         &
 #   endif
-     &                        GRID(ng) % p_seagrass)
+     &                        GRID(ng) % p_sgrass)
             IF (status.ne.nf90_noerr) THEN
               exit_flag=2
               ioerror=status
@@ -1937,14 +1937,14 @@
             IF (EWperiodic(ng).or.NSperiodic(ng)) THEN
               CALL exchange_r2d_tile (ng, tile,                         &
      &                                LBi, UBi, LBj, UBj,               &
-     &                                GRID(ng) % p_seagrass)
+     &                                GRID(ng) % p_sgrass)
             END IF
 #   ifdef DISTRIBUTE
             CALL mp_exchange2d (ng, tile, model, 1,                     &
      &                          LBi, UBi, LBj, UBj,                     &
      &                          NghostPoints,                           &
      &                          EWperiodic(ng), NSperiodic(ng),         &
-     &                          GRID(ng) % p_seagrass)
+     &                          GRID(ng) % p_sgrass)
 #   endif
 #  endif
 #  ifdef MACROALGAE

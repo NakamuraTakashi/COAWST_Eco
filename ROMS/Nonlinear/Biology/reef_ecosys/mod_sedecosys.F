@@ -299,25 +299,138 @@ MODULE mod_sedecosys
     real(8), pointer :: SO4(:,:,:)      !! sulfate   (µmol l-1)
     real(8), pointer :: S0(:,:,:)       !! sulfur    (nmol g-1)
 # endif
+
+!!! yuta_seagrass >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+# if defined SEAGRASS
+#  if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE
+    real(8), pointer :: sg_dDIC_dt(:,:,:) ! (umol L-1 s-1) change in DIC due to flux from seagrass (positive means seagrass to sediment)
+    real(8), pointer :: sg_dO2_dt (:,:,:) ! (umol L-1 s-1) change in DO due to flux from seagrass (positive means seagrass to sediment)
+#  endif
+#  if defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
+    real(8), pointer :: sg_dNO3_dt(:,:,:) ! (umol L-1 s-1) change in NO3 due to flux from seagrass (positive means seagrass to sediment)
+    real(8), pointer :: sg_dNH4_dt(:,:,:) ! (umol L-1 s-1) change in NH4 due to flux from seagrass (positive means seagrass to sediment)
+    real(8), pointer :: sg_dPO4_dt(:,:,:) ! (umol L-1 s-1) change in PO4 due to flux from seagrass (positive means seagrass to sediment)
+#  endif
+#  if defined SEAGRASS_ROOT_POM
+    real(8), pointer :: sg_dPOC_dt(:,:,:) ! (nmol g-1 s-1) change in POC due to root death in sediment (positive means seagrass to sediment)
+    real(8), pointer :: sg_dPON_dt(:,:,:) ! (nmol g-1 s-1) change in PON due to root death in sediment (positive means seagrass to sediment)
+    real(8), pointer :: sg_dPOP_dt(:,:,:) ! (nmol g-1 s-1) change in POP due to root death in sediment (positive means seagrass to sediment)
+#  endif
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+
   END TYPE T_SEDECO
   TYPE (T_SEDECO), allocatable :: SEDECO(:)
 
 CONTAINS
 
+
 !!! **********************************************************************
 !!!  Initial conditions for sediment ecosystem model
 !!! **********************************************************************
 
-  SUBROUTINE initialize_sedecosys(ng, Ngrids, LBi, UBi, LBj, UBj, Nsed)
+  SUBROUTINE allocate_sedecosys(ng, LBi, UBi, LBj, UBj)
+    USE mod_param, ONLY : Ngrids, Nsed, SedEcoLayerDepths
 
     USE mod_geochem ! another module in a same folder (function list)
-    USE mod_param, ONLY : SedEcoLayerDepths
     ! USE mod_readinput
     
     implicit none
 
     ! input parameters
-    integer, intent(in) :: ng, Ngrids, LBi, UBi, LBj, UBj, Nsed ! numbers for grid
+    integer, intent(in) :: ng, LBi, UBi, LBj, UBj
+
+    ! allocate sizes of each parameters for (LBi:UBi, LBj:UBj)
+    IF (ng.eq.1) allocate( SEDECO(Ngrids) )
+    !! General
+    allocate( SEDECO(ng)%poro(LBi:UBi,LBj:UBj,Nsed(ng)) )
+    allocate( SEDECO(ng)%dz  (Nsed(ng)) )
+    allocate( SEDECO(ng)%z   (Nsed(ng)) )
+    allocate( SEDECO(ng)%Tmp (LBi:UBi,LBj:UBj,Nsed(ng)) )
+    allocate( SEDECO(ng)%Sal (LBi:UBi,LBj:UBj,Nsed(ng)) )
+    allocate( SEDECO(ng)%TA  (LBi:UBi,LBj:UBj,Nsed(ng)) )
+    
+    allocate( SEDECO(ng)%O2  (LBi:UBi,LBj:UBj,Nsed(ng)) )
+    allocate( SEDECO(ng)%CO2 (LBi:UBi,LBj:UBj,Nsed(ng)) )
+    allocate( SEDECO(ng)%N2  (LBi:UBi,LBj:UBj,Nsed(ng)) )
+    !! Organic Matter(Carbon)
+# if defined ORGANIC_MATTER
+    allocate( SEDECO(ng)%DOCf(LBi:UBi,LBj:UBj,Nsed(ng)) )
+    allocate( SEDECO(ng)%DOCs(LBi:UBi,LBj:UBj,Nsed(ng)) )
+    allocate( SEDECO(ng)%POCf(LBi:UBi,LBj:UBj,Nsed(ng)) )
+    allocate( SEDECO(ng)%POCs(LBi:UBi,LBj:UBj,Nsed(ng)) )
+    allocate( SEDECO(ng)%POCn(LBi:UBi,LBj:UBj,Nsed(ng)) )
+# endif
+    !! Nutrient dynamics
+# if defined NUTRIENTS
+    allocate( SEDECO(ng)%NO3(LBi:UBi,LBj:UBj,Nsed(ng)) )
+    allocate( SEDECO(ng)%NH4(LBi:UBi,LBj:UBj,Nsed(ng)) )
+    allocate( SEDECO(ng)%PO4(LBi:UBi,LBj:UBj,Nsed(ng)) )
+#  if defined ORGANIC_MATTER
+    allocate( SEDECO(ng)%DONf(LBi:UBi,LBj:UBj,Nsed(ng)) )
+    allocate( SEDECO(ng)%DONs(LBi:UBi,LBj:UBj,Nsed(ng)) )
+    allocate( SEDECO(ng)%PONf(LBi:UBi,LBj:UBj,Nsed(ng)) )
+    allocate( SEDECO(ng)%PONs(LBi:UBi,LBj:UBj,Nsed(ng)) )
+    allocate( SEDECO(ng)%PONn(LBi:UBi,LBj:UBj,Nsed(ng)) )
+    allocate( SEDECO(ng)%DOPf(LBi:UBi,LBj:UBj,Nsed(ng)) )
+    allocate( SEDECO(ng)%DOPs(LBi:UBi,LBj:UBj,Nsed(ng)) )
+    allocate( SEDECO(ng)%POPf(LBi:UBi,LBj:UBj,Nsed(ng)) )
+    allocate( SEDECO(ng)%POPs(LBi:UBi,LBj:UBj,Nsed(ng)) )
+    allocate( SEDECO(ng)%POPn(LBi:UBi,LBj:UBj,Nsed(ng)) )
+#  endif
+# endif     
+    !! Sulfur dynamics
+# if defined SULFATE
+    allocate( SEDECO(ng)%Mn2(LBi:UBi,LBj:UBj,Nsed(ng)) )
+    allocate( SEDECO(ng)%MnO2(LBi:UBi,LBj:UBj,Nsed(ng)) )
+
+    allocate( SEDECO(ng)%Fe2(LBi:UBi,LBj:UBj,Nsed(ng)) )
+    allocate( SEDECO(ng)%FeS(LBi:UBi,LBj:UBj,Nsed(ng)) )
+    allocate( SEDECO(ng)%FeS2(LBi:UBi,LBj:UBj,Nsed(ng)) )
+    allocate( SEDECO(ng)%FeOOH(LBi:UBi,LBj:UBj,Nsed(ng)) )
+    allocate( SEDECO(ng)%FeOOH_PO4(LBi:UBi,LBj:UBj,Nsed(ng)) )
+
+    allocate( SEDECO(ng)%H2S(LBi:UBi,LBj:UBj,Nsed(ng)) )
+    allocate( SEDECO(ng)%SO4(LBi:UBi,LBj:UBj,Nsed(ng)) )
+    allocate( SEDECO(ng)%S0(LBi:UBi,LBj:UBj,Nsed(ng)) )
+# endif
+
+!!! yuta_seagrass >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+# if defined SEAGRASS
+#  if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE
+    allocate( SEDECO(ng)%sg_dDIC_dt(LBi:UBi,LBj:UBj,Nsed(ng)) ) ! (µmol L-1 s-1) change in DIC due to flux from seagrass (positive means seagrass to sediment)
+    allocate( SEDECO(ng)%sg_dO2_dt (LBi:UBi,LBj:UBj,Nsed(ng)) ) ! (nmol g-1 s-1) change in DO due to flux from seagrass (positive means seagrass to sediment)
+#  endif
+#  if defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
+    allocate( SEDECO(ng)%sg_dNO3_dt(LBi:UBi,LBj:UBj,Nsed(ng)) ) ! (µmol L-1 s-1) change in NO3 due to flux from seagrass (positive means seagrass to sediment)
+    allocate( SEDECO(ng)%sg_dNH4_dt(LBi:UBi,LBj:UBj,Nsed(ng)) ) ! (µmol L-1 s-1) change in NH4 due to flux from seagrass (positive means seagrass to sediment)
+    allocate( SEDECO(ng)%sg_dPO4_dt(LBi:UBi,LBj:UBj,Nsed(ng)) ) ! (µmol L-1 s-1) change in PO4 due to flux from seagrass (positive means seagrass to sediment)
+#  endif    
+#  if defined SEAGRASS_ROOT_POM
+    allocate( SEDECO(ng)%sg_dPOC_dt(LBi:UBi,LBj:UBj,Nsed(ng)) ) ! (nmol g-1 s-1) change in POC due to root death in sediment (positive means seagrass to sediment)
+    allocate( SEDECO(ng)%sg_dPON_dt(LBi:UBi,LBj:UBj,Nsed(ng)) ) ! (nmol g-1 s-1) change in PON due to root death in sediment (positive means seagrass to sediment)
+    allocate( SEDECO(ng)%sg_dPOP_dt(LBi:UBi,LBj:UBj,Nsed(ng)) ) ! (nmol g-1 s-1) change in POP due to root death in sediment (positive means seagrass to sediment)
+#  endif  
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+
+    RETURN
+  END SUBROUTINE allocate_sedecosys
+
+
+!!! **********************************************************************
+!!!  Initial conditions for sediment ecosystem model
+!!! **********************************************************************
+
+  SUBROUTINE initialize_sedecosys(ng, LBi, UBi, LBj, UBj)
+    USE mod_param, ONLY : Nsed, SedEcoLayerDepths
+    USE mod_geochem ! another module in a same folder (function list)
+    ! USE mod_readinput
+    
+    implicit none
+
+    ! input parameters
+    integer, intent(in) :: ng, LBi, UBi, LBj, UBj
     integer i,j,k ! symbols for loop calculations
     !! depth : Diffusive Boundary Layer (DBL)
     real(8), parameter :: dbl = 0.03d0 ! DBL:difussive boundary layer (cm)
@@ -335,61 +448,6 @@ CONTAINS
     real(8), parameter :: rCPph = 106.0d0/1.0d0    ! (no dim.) algal C:P ratio (Redfield ratio)
     real(8), parameter :: rCNph = 11.0d0   ! (no dim.) algal C:N ratio (Redfield ratio)        from analysis
 
-    ! allocate sizes of each parameters for (LBi:UBi, LBj:UBj)
-    IF (ng.eq.1) allocate( SEDECO(Ngrids) )
-    !! General
-    allocate( SEDECO(ng)%poro(LBi:UBi,LBj:UBj,Nsed) )
-    allocate( SEDECO(ng)%dz  (Nsed) )
-    allocate( SEDECO(ng)%z   (Nsed) )
-    allocate( SEDECO(ng)%Tmp (LBi:UBi,LBj:UBj,Nsed) )
-    allocate( SEDECO(ng)%Sal (LBi:UBi,LBj:UBj,Nsed) )
-    allocate( SEDECO(ng)%TA  (LBi:UBi,LBj:UBj,Nsed) )
-    
-    allocate( SEDECO(ng)%O2  (LBi:UBi,LBj:UBj,Nsed) )
-    allocate( SEDECO(ng)%CO2 (LBi:UBi,LBj:UBj,Nsed) )
-    allocate( SEDECO(ng)%N2  (LBi:UBi,LBj:UBj,Nsed) )
-    !! Organic Matter(Carbon)
-# if defined ORGANIC_MATTER
-    allocate( SEDECO(ng)%DOCf(LBi:UBi,LBj:UBj,Nsed) )
-    allocate( SEDECO(ng)%DOCs(LBi:UBi,LBj:UBj,Nsed) )
-    allocate( SEDECO(ng)%POCf(LBi:UBi,LBj:UBj,Nsed) )
-    allocate( SEDECO(ng)%POCs(LBi:UBi,LBj:UBj,Nsed) )
-    allocate( SEDECO(ng)%POCn(LBi:UBi,LBj:UBj,Nsed) )
-# endif
-    !! Nutrient dynamics
-# if defined NUTRIENTS
-    allocate( SEDECO(ng)%NO3(LBi:UBi,LBj:UBj,Nsed) )
-    allocate( SEDECO(ng)%NH4(LBi:UBi,LBj:UBj,Nsed) )
-    allocate( SEDECO(ng)%PO4(LBi:UBi,LBj:UBj,Nsed) )
-#  if defined ORGANIC_MATTER
-    allocate( SEDECO(ng)%DONf(LBi:UBi,LBj:UBj,Nsed) )
-    allocate( SEDECO(ng)%DONs(LBi:UBi,LBj:UBj,Nsed) )
-    allocate( SEDECO(ng)%PONf(LBi:UBi,LBj:UBj,Nsed) )
-    allocate( SEDECO(ng)%PONs(LBi:UBi,LBj:UBj,Nsed) )
-    allocate( SEDECO(ng)%PONn(LBi:UBi,LBj:UBj,Nsed) )
-    allocate( SEDECO(ng)%DOPf(LBi:UBi,LBj:UBj,Nsed) )
-    allocate( SEDECO(ng)%DOPs(LBi:UBi,LBj:UBj,Nsed) )
-    allocate( SEDECO(ng)%POPf(LBi:UBi,LBj:UBj,Nsed) )
-    allocate( SEDECO(ng)%POPs(LBi:UBi,LBj:UBj,Nsed) )
-    allocate( SEDECO(ng)%POPn(LBi:UBi,LBj:UBj,Nsed) )
-#  endif
-# endif     
-    !! Sulfur dynamics
-# if defined SULFATE
-    allocate( SEDECO(ng)%Mn2(LBi:UBi,LBj:UBj,Nsed) )
-    allocate( SEDECO(ng)%MnO2(LBi:UBi,LBj:UBj,Nsed) )
-
-    allocate( SEDECO(ng)%Fe2(LBi:UBi,LBj:UBj,Nsed) )
-    allocate( SEDECO(ng)%FeS(LBi:UBi,LBj:UBj,Nsed) )
-    allocate( SEDECO(ng)%FeS2(LBi:UBi,LBj:UBj,Nsed) )
-    allocate( SEDECO(ng)%FeOOH(LBi:UBi,LBj:UBj,Nsed) )
-    allocate( SEDECO(ng)%FeOOH_PO4(LBi:UBi,LBj:UBj,Nsed) )
-
-    allocate( SEDECO(ng)%H2S(LBi:UBi,LBj:UBj,Nsed) )
-    allocate( SEDECO(ng)%SO4(LBi:UBi,LBj:UBj,Nsed) )
-    allocate( SEDECO(ng)%S0(LBi:UBi,LBj:UBj,Nsed) )
-# endif
-
 ! - - - - - - - - - - - - - - - - - - - - - - - -
     !  Set initial conditions
 
@@ -401,22 +459,22 @@ CONTAINS
     !     SEDECO(ng)%dz(k) = SEDECO(ng)%dz(1);
     !     SEDECO(ng)%z(k)  = SEDECO(ng)%z(k-1) + SEDECO(ng)%dz(k)
     ! enddo
-    ! do k = 42,Nsed                               ! dz exponentially increases until z=20cm (Nsed=100)
+    ! do k = 42,Nsed(ng)                               ! dz exponentially increases until z=20cm (Nsed=100)
     !     SEDECO(ng)%dz(k) = SEDECO(ng)%dz(2) * exp(0.06265 * (k -41))   ! 0.06265 is a tuned constant
     !     SEDECO(ng)%z(k)  = SEDECO(ng)%z(k-1) + SEDECO(ng)%dz(k)
     ! enddo
 
-    do k = 1, Nsed
+    do k = 1, Nsed(ng)
       SEDECO(ng)%z(k) = SedEcoLayerDepths(ng, k)
     enddo
     SEDECO(ng)%dz(1) = SedEcoLayerDepths(ng, 1)
-    do k = 2, Nsed
+    do k = 2, Nsed(ng)
       SEDECO(ng)%dz(k) = SedEcoLayerDepths(ng, k) - SedEcoLayerDepths(ng, k-1)
     enddo
 
     !!! porosity
     ! SEDECO(ng)%poro(:,:,1) = 1.0d0
-    do k = 1,Nsed
+    do k = 1,Nsed(ng)
         ! SEDECO(ng)%poro(:,:,k) = coefa_poro + coefb_poro * exp(coefc_poro * SEDECO(ng)%z(k))
         !! --- Shizugawa --- !!
         SEDECO(ng)%poro(:,:,k) = 0.6007d0 - 0.006d0 * log(SEDECO(ng)%z(k))
@@ -473,13 +531,13 @@ CONTAINS
 #  if defined SULFATE
         SEDECO(ng)%Mn2(:,:,:) = 60.0d0    !Mn2  (µmol L-1) 
         SEDECO(ng)%MnO2(:,:,1:10) = 1.0d4   !MnO2  (nmol g-1) 
-        SEDECO(ng)%MnO2(:,:,11:Nsed) = 0.0d0   !MnO2  (nmol g-1) 
+        SEDECO(ng)%MnO2(:,:,11:Nsed(ng)) = 0.0d0   !MnO2  (nmol g-1) 
 
         SEDECO(ng)%Fe2(:,:,:) = 0.0d0          !Fe2  (µmol L-1) 
         SEDECO(ng)%FeS(:,:,:) = 0.0d0          !FeS  (nmol g-1) 
         SEDECO(ng)%FeS2(:,:,:) = 1.0d4         !FeS2  (nmol g-1) 
         SEDECO(ng)%FeOOH(:,:,1:10) = 1.0d5        !FeOOH  (nmol g-1)
-        SEDECO(ng)%FeOOH(:,:,11:Nsed) = 0.0d0        !FeOOH  (nmol g-1)
+        SEDECO(ng)%FeOOH(:,:,11:Nsed(ng)) = 0.0d0        !FeOOH  (nmol g-1)
         SEDECO(ng)%FeOOH_PO4(:,:,:) = 0.0d0    !FeOOH=PO4  (nmol g-1) 
 
         SEDECO(ng)%H2S(:,:,:) = 100.0d0     !H2S  (µmol L-1)
@@ -1105,6 +1163,26 @@ CONTAINS
     real(8) :: R_Mn2(Nsed), R_MnO2(Nsed)
     real(8) :: R_Fe2(Nsed), R_FeS(Nsed), R_FeS2(Nsed), R_FeOOH(Nsed), R_FeOOH_PO4(Nsed)
     real(8) :: R_H2S(Nsed), R_S0(Nsed), R_SO4(Nsed)
+# endif
+
+!! Miscellaneous Sources  -------------------------------------------
+    !! unit: (µmol L-1 s-1 = nmol cm-3 s-1)
+    !! unit: (nmol g-1 s-1)
+    real(8) :: miscO2(Nsed), miscDIC(Nsed), miscN2(Nsed)
+# if defined ORGANIC_MATTER
+    real(8) :: miscDOC(Nsed,2), miscPOC(Nsed,3)    ! 1:labile, 2:refractory 3:non-degratable
+# endif
+# if defined NUTRIENTS
+    real(8) :: miscNO3(Nsed), miscNH4(Nsed), miscPO4(Nsed)
+#  if defined ORGANIC_MATTER
+    real(8) :: miscDON(Nsed,2), miscPON(Nsed,3)    ! 1:labile, 2:refractory 3:non-degratable
+    real(8) :: miscDOP(Nsed,2), miscPOP(Nsed,3)    ! 1:labile, 2:refractory 3:non-degratable
+#  endif
+# endif
+# if defined SULFATE
+    real(8) :: miscMn2(Nsed), miscMnO2(Nsed)
+    real(8) :: miscFe2(Nsed), miscFeS(Nsed), miscFeS2(Nsed), miscFeOOH(Nsed), miscFeOOH_PO4(Nsed)
+    real(8) :: miscH2S(Nsed), miscS0(Nsed), miscSO4(Nsed)
 # endif
 
 
@@ -1975,6 +2053,65 @@ CONTAINS
     ENDDO
 # endif
 
+! ***************************** !
+!!!   Miscellaneous other sources
+! ***************************** !
+    miscO2 (:) = 0;
+    miscDIC(:) = 0;
+    miscN2 (:) = 0;
+# if defined ORGANIC_MATTER
+    miscDOC(:,:) = 0;    ! 1:labile, 2:refractory
+    miscPOC(:,:) = 0;    ! 1:labile, 2:refractory 3:non-degratable
+# endif
+# if defined NUTRIENTS
+    miscNO3(:) = 0;
+    miscNH4(:) = 0;
+    miscPO4(:) = 0;
+#  if defined ORGANIC_MATTER
+    miscDON(:,:) = 0;    ! 1:labile, 2:refractory
+    miscPON(:,:) = 0;    ! 1:labile, 2:refractory 3:non-degratable
+    miscDOP(:,:) = 0;    ! 1:labile, 2:refractory
+    miscPOP(:,:) = 0;    ! 1:labile, 2:refractory 3:non-degratable
+#  endif
+# endif
+# if defined SULFATE
+    miscMn2 (:) = 0;
+    miscMnO2(:) = 0;
+    miscFe2 (:) = 0;
+    miscFeS (:) = 0;
+    miscFeS2(:) = 0;
+    miscFeOOH(:) = 0;
+    miscFeOOH_PO4(:) = 0;
+    miscH2S (:) = 0;
+    miscS0  (:) = 0;
+    miscSO4 (:) = 0;
+# endif
+
+!!! yuta_seagrass >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+# if defined SEAGRASS
+#  if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE
+    miscO2 (:) = miscO2 (:) + SEDECO(ng)%sg_dO2_dt (i,j,:) ! (umol L-1 s-1) change in DO  due to flux from seagrass (positive means seagrass to sediment)
+    miscDIC(:) = miscDIC(:) + SEDECO(ng)%sg_dDIC_dt(i,j,:) ! (umol L-1 s-1) change in DIC due to flux from seagrass (positive means seagrass to sediment)
+#  endif
+#  if defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
+    miscNO3(:) = miscNO3(:) + SEDECO(ng)%sg_dNO3_dt(i,j,:) ! (µmol L-1 s-1) change in NO3 due to flux from seagrass (positive means seagrass to sediment)
+    miscNH4(:) = miscNH4(:) + SEDECO(ng)%sg_dNH4_dt(i,j,:) ! (µmol L-1 s-1) change in NH4 due to flux from seagrass (positive means seagrass to sediment)
+    miscPO4(:) = miscPO4(:) + SEDECO(ng)%sg_dPO4_dt(i,j,:) ! (µmol L-1 s-1) change in PO4 due to flux from seagrass (positive means seagrass to sediment)
+#  endif    
+#  if defined SEAGRASS_ROOT_POM
+    miscPOC(:,1) = miscPOC(:,1) + OMFratio * SEDECO(ng)%sg_dPOC_dt(i,j,:) ! (nmol g-1 s-1) change in POC labile due to root death in sediment (positive means seagrass to sediment)
+    miscPOC(:,2) = miscPOC(:,2) + OMSratio * SEDECO(ng)%sg_dPOC_dt(i,j,:) ! (nmol g-1 s-1) change in POC refractory due to root death in sediment (positive means seagrass to sediment)
+    miscPOC(:,3) = miscPOC(:,3) + OMNratio * SEDECO(ng)%sg_dPOC_dt(i,j,:) ! (nmol g-1 s-1) change in POC non-degratable due to root death in sediment (positive means seagrass to sediment)
+    miscPON(:,1) = miscPON(:,1) + OMFratio * SEDECO(ng)%sg_dPON_dt(i,j,:) ! (nmol g-1 s-1) change in PON labile due to root death in sediment (positive means seagrass to sediment)
+    miscPON(:,2) = miscPON(:,2) + OMSratio * SEDECO(ng)%sg_dPON_dt(i,j,:) ! (nmol g-1 s-1) change in PON refractory due to root death in sediment (positive means seagrass to sediment)
+    miscPON(:,3) = miscPON(:,3) + OMNratio * SEDECO(ng)%sg_dPON_dt(i,j,:) ! (nmol g-1 s-1) change in PON non-degratable due to root death in sediment (positive means seagrass to sediment)
+    miscPOP(:,1) = miscPOP(:,1) + OMFratio * SEDECO(ng)%sg_dPOP_dt(i,j,:) ! (nmol g-1 s-1) change in POP labile due to root death in sediment (positive means seagrass to sediment)
+    miscPOP(:,2) = miscPOP(:,2) + OMSratio * SEDECO(ng)%sg_dPOP_dt(i,j,:) ! (nmol g-1 s-1) change in POP refractory due to root death in sediment (positive means seagrass to sediment)
+    miscPOP(:,3) = miscPOP(:,3) + OMNratio * SEDECO(ng)%sg_dPOP_dt(i,j,:) ! (nmol g-1 s-1) change in POP non-degratable due to root death in sediment (positive means seagrass to sediment)
+#  endif  
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+
 
 ! ***************************** !
 !!!   Mass balance equations
@@ -1984,7 +2121,7 @@ CONTAINS
     DO k = 1,Nsed-1
         ! -- O2 -- !
         SEDECO(ng)%O2(i,j,k)  = massbalance_sed_d(SEDECO(ng)%O2(i,j,k),FT_O2(k),FT_O2(k+1),R_O2(k), &
-                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt)
+                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,miscO2(k))
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%O2(i,j,k)) .or. abs(SEDECO(ng)%O2(i,j,k)) > huge(SEDECO(ng)%O2(i,j,k))) then
         if (isnan(SEDECO(ng)%O2(i,j,k)) .or. SEDECO(ng)%O2(i,j,k) > 1.0d15 .or. SEDECO(ng)%O2(i,j,k) < 0.0d0) then
@@ -2001,7 +2138,7 @@ CONTAINS
 
         ! -- CO2 -- !
         SEDECO(ng)%CO2(i,j,k) = massbalance_sed_d(SEDECO(ng)%CO2(i,j,k),FT_CO2(k),FT_CO2(k+1),R_CO2(k), &
-                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt)
+                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,miscDIC(k))
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%CO2(i,j,k)) .or. abs(SEDECO(ng)%CO2(i,j,k)) > huge(SEDECO(ng)%CO2(i,j,k))) then
         if (isnan(SEDECO(ng)%CO2(i,j,k)) .or. SEDECO(ng)%CO2(i,j,k) > 1.0d15 .or. SEDECO(ng)%CO2(i,j,k) < 0.0d0) then
@@ -2018,7 +2155,7 @@ CONTAINS
         
         ! -- N2 -- !
         SEDECO(ng)%N2(i,j,k)  = massbalance_sed_d(SEDECO(ng)%N2(i,j,k),FT_N2(k),FT_N2(k+1),R_N2(k), & 
-                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt)
+                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,miscN2(k))
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%N2(i,j,k)) .or. abs(SEDECO(ng)%N2(i,j,k)) > huge(SEDECO(ng)%N2(i,j,k))) then
         if (isnan(SEDECO(ng)%N2(i,j,k)) .or. SEDECO(ng)%N2(i,j,k) > 1.0d15 .or. SEDECO(ng)%N2(i,j,k) < 0.0d0) then
@@ -2036,7 +2173,7 @@ CONTAINS
 # if defined ORGANIC_MATTER
         ! -- DOC -- !
         SEDECO(ng)%DOCf(i,j,k) = massbalance_sed_d(SEDECO(ng)%DOCf(i,j,k),FT_DOC(k,1),FT_DOC(k+1,1),R_DOC(k,1), &
-                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt)  ! DOCf
+                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,miscDOC(k,1))  ! DOCf
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%DOCf(i,j,k)) .or. abs(SEDECO(ng)%DOCf(i,j,k)) > huge(SEDECO(ng)%DOCf(i,j,k))) then
         if (isnan(SEDECO(ng)%DOCf(i,j,k)) .or. SEDECO(ng)%DOCf(i,j,k) > 1.0d15 .or. SEDECO(ng)%DOCf(i,j,k) < 0.0d0) then
@@ -2052,7 +2189,7 @@ CONTAINS
         !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         
         SEDECO(ng)%DOCs(i,j,k) = massbalance_sed_d(SEDECO(ng)%DOCs(i,j,k),FT_DOC(k,2),FT_DOC(k+1,2),R_DOC(k,2), &
-                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt)  ! DOCs
+                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,miscDOC(k,2))  ! DOCs
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%DOCs(i,j,k)) .or. abs(SEDECO(ng)%DOCs(i,j,k)) > huge(SEDECO(ng)%DOCs(i,j,k))) then
         if (isnan(SEDECO(ng)%DOCs(i,j,k)) .or. SEDECO(ng)%DOCs(i,j,k) > 1.0d15 .or. SEDECO(ng)%DOCs(i,j,k) < 0.0d0) then
@@ -2069,7 +2206,7 @@ CONTAINS
         
         ! -- POC -- !
         SEDECO(ng)%POCf(i,j,k) = massbalance_sed_p(SEDECO(ng)%POCf(i,j,k),FT_POC(k,1),FT_POC(k+1,1),R_POC(k,1), &
-                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k))  ! POCf
+                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k),miscPOC(k,1))  ! POCf
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%POCf(i,j,k)) .or. abs(SEDECO(ng)%POCf(i,j,k)) > huge(SEDECO(ng)%POCf(i,j,k))) then
         if (isnan(SEDECO(ng)%POCf(i,j,k)) .or. SEDECO(ng)%POCf(i,j,k) > 1.0d15 .or. SEDECO(ng)%POCf(i,j,k) < 0.0d0) then
@@ -2086,7 +2223,7 @@ CONTAINS
         !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         
         SEDECO(ng)%POCs(i,j,k) = massbalance_sed_p(SEDECO(ng)%POCs(i,j,k),FT_POC(k,2),FT_POC(k+1,2),R_POC(k,2), &
-                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k))  ! POCs
+                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k),miscPOC(k,2))  ! POCs
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%POCs(i,j,k)) .or. abs(SEDECO(ng)%POCs(i,j,k)) > huge(SEDECO(ng)%POCs(i,j,k))) then
         if (isnan(SEDECO(ng)%POCs(i,j,k)) .or. SEDECO(ng)%POCs(i,j,k) > 1.0d15 .or. SEDECO(ng)%POCs(i,j,k) < 0.0d0) then
@@ -2103,7 +2240,7 @@ CONTAINS
         !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         
         SEDECO(ng)%POCn(i,j,k) = massbalance_sed_p(SEDECO(ng)%POCn(i,j,k),FT_POC(k,3),FT_POC(k+1,3),0d0, &
-                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k))  ! POCs
+                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k),miscPOC(k,3))  ! POCn
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%POCn(i,j,k)) .or. abs(SEDECO(ng)%POCn(i,j,k)) > huge(SEDECO(ng)%POCn(i,j,k))) then
         if (isnan(SEDECO(ng)%POCn(i,j,k)) .or. SEDECO(ng)%POCn(i,j,k) > 1.0d15 .or. SEDECO(ng)%POCn(i,j,k) < 0.0d0) then
@@ -2123,7 +2260,7 @@ CONTAINS
 #  if defined adsorption
         ! -- NO3 -- !
         SEDECO(ng)%NO3(i,j,k) = massbalance_sed_d(SEDECO(ng)%NO3(i,j,k),FT_NO3(k),FT_NO3(k+1),R_NO3(k), &
-                                            dz(k),(SEDECO(ng)%poro(i,j,k)+rhos_d(k)*(1d0 - SEDECO(ng)%poro(i,j,k))*Kad_NO3),dt) 
+                                            dz(k),(SEDECO(ng)%poro(i,j,k)+rhos_d(k)*(1d0 - SEDECO(ng)%poro(i,j,k))*Kad_NO3),dt,miscNO3(k)) 
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%NO3(i,j,k)) .or. abs(SEDECO(ng)%NO3(i,j,k)) > huge(SEDECO(ng)%NO3(i,j,k))) then
         if (isnan(SEDECO(ng)%NO3(i,j,k)) .or. SEDECO(ng)%NO3(i,j,k) > 1.0d15 .or. SEDECO(ng)%NO3(i,j,k) < 0.0d0) then
@@ -2142,7 +2279,7 @@ CONTAINS
 
         ! -- NH4 -- !
         SEDECO(ng)%NH4(i,j,k) = massbalance_sed_d(SEDECO(ng)%NH4(i,j,k),FT_NH4(k),FT_NH4(k+1),R_NH4(k), &
-                                            dz(k),(SEDECO(ng)%poro(i,j,k)+rhos_d(k)*(1d0 - SEDECO(ng)%poro(i,j,k))*Kad_NH4),dt) 
+                                            dz(k),(SEDECO(ng)%poro(i,j,k)+rhos_d(k)*(1d0 - SEDECO(ng)%poro(i,j,k))*Kad_NH4),dt,miscNH4(k)) 
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%NH4(i,j,k)) .or. abs(SEDECO(ng)%NH4(i,j,k)) > huge(SEDECO(ng)%NH4(i,j,k))) then
         if (isnan(SEDECO(ng)%NH4(i,j,k)) .or. SEDECO(ng)%NH4(i,j,k) > 1.0d15 .or. SEDECO(ng)%NH4(i,j,k) < 0.0d0) then
@@ -2161,7 +2298,7 @@ CONTAINS
 
         ! -- PO4 -- !
         SEDECO(ng)%PO4(i,j,k) = massbalance_sed_d(SEDECO(ng)%PO4(i,j,k),FT_PO4(k),FT_PO4(k+1),R_PO4(k), &
-                                            dz(k),(SEDECO(ng)%poro(i,j,k)+rhos_d(k)*(1d0 - SEDECO(ng)%poro(i,j,k))*Kad_PO4),dt)
+                                            dz(k),(SEDECO(ng)%poro(i,j,k)+rhos_d(k)*(1d0 - SEDECO(ng)%poro(i,j,k))*Kad_PO4),dt,miscPO4(k))
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%PO4(i,j,k)) .or. abs(SEDECO(ng)%PO4(i,j,k)) > huge(SEDECO(ng)%PO4(i,j,k))) then
         if (isnan(SEDECO(ng)%PO4(i,j,k)) .or. SEDECO(ng)%PO4(i,j,k) > 1.0d15 .or. SEDECO(ng)%PO4(i,j,k) < 0.0d0) then
@@ -2181,7 +2318,7 @@ CONTAINS
 #  else
             ! -- NO3 -- !
         SEDECO(ng)%NO3(i,j,k) = massbalance_sed_d(SEDECO(ng)%NO3(i,j,k),FT_NO3(k),FT_NO3(k+1),R_NO3(k), &
-                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt) 
+                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,miscNO3(k)) 
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%NO3(i,j,k)) .or. abs(SEDECO(ng)%NO3(i,j,k)) > huge(SEDECO(ng)%NO3(i,j,k))) then
         if (isnan(SEDECO(ng)%NO3(i,j,k)) .or. SEDECO(ng)%NO3(i,j,k) > 1.0d15 .or. SEDECO(ng)%NO3(i,j,k) < 0.0d0) then
@@ -2198,7 +2335,7 @@ CONTAINS
 
         ! -- NH4 -- !
         SEDECO(ng)%NH4(i,j,k) = massbalance_sed_d(SEDECO(ng)%NH4(i,j,k),FT_NH4(k),FT_NH4(k+1),R_NH4(k), &
-                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt) 
+                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,miscNH4(k)) 
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%NH4(i,j,k)) .or. abs(SEDECO(ng)%NH4(i,j,k)) > huge(SEDECO(ng)%NH4(i,j,k))) then
         if (isnan(SEDECO(ng)%NH4(i,j,k)) .or. SEDECO(ng)%NH4(i,j,k) > 1.0d15 .or. SEDECO(ng)%NH4(i,j,k) < 0.0d0) then
@@ -2215,7 +2352,7 @@ CONTAINS
 
         ! -- PO4 -- !
         SEDECO(ng)%PO4(i,j,k) = massbalance_sed_d(SEDECO(ng)%PO4(i,j,k),FT_PO4(k),FT_PO4(k+1),R_PO4(k), &
-                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt)
+                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,miscPO4(k))
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%PO4(i,j,k)) .or. abs(SEDECO(ng)%PO4(i,j,k)) > huge(SEDECO(ng)%PO4(i,j,k))) then
         if (isnan(SEDECO(ng)%PO4(i,j,k)) .or. SEDECO(ng)%PO4(i,j,k) > 1.0d15 .or. SEDECO(ng)%PO4(i,j,k) < 0.0d0) then
@@ -2235,7 +2372,7 @@ CONTAINS
 
         ! -- DON -- !
         SEDECO(ng)%DONf(i,j,k) = massbalance_sed_d(SEDECO(ng)%DONf(i,j,k),FT_DON(k,1),FT_DON(k+1,1),R_DON(k,1), &
-                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt)  ! DONf
+                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,miscDON(k,1))  ! DONf
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%DONf(i,j,k)) .or. abs(SEDECO(ng)%DONf(i,j,k)) > huge(SEDECO(ng)%DONf(i,j,k))) then
         if (isnan(SEDECO(ng)%DONf(i,j,k)) .or. SEDECO(ng)%DONf(i,j,k) > 1.0d15 .or. SEDECO(ng)%DONf(i,j,k) < 0.0d0) then
@@ -2251,7 +2388,7 @@ CONTAINS
         !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
         SEDECO(ng)%DONs(i,j,k) = massbalance_sed_d(SEDECO(ng)%DONs(i,j,k),FT_DON(k,2),FT_DON(k+1,2),R_DON(k,2), &
-                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt)  ! DONs
+                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,miscDON(k,2))  ! DONs
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%DONs(i,j,k)) .or. abs(SEDECO(ng)%DONs(i,j,k)) > huge(SEDECO(ng)%DONs(i,j,k))) then
         if (isnan(SEDECO(ng)%DONs(i,j,k)) .or. SEDECO(ng)%DONs(i,j,k) > 1.0d15 .or. SEDECO(ng)%DONs(i,j,k) < 0.0d0) then
@@ -2268,7 +2405,7 @@ CONTAINS
 
         ! -- PON -- !
         SEDECO(ng)%PONf(i,j,k) = massbalance_sed_p(SEDECO(ng)%PONf(i,j,k),FT_PON(k,1),FT_PON(k+1,1),R_PON(k,1), &
-                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k))  ! PONf
+                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k),miscPON(k,1))  ! PONf
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%PONf(i,j,k)) .or. abs(SEDECO(ng)%PONf(i,j,k)) > huge(SEDECO(ng)%PONf(i,j,k))) then
         if (isnan(SEDECO(ng)%PONf(i,j,k)) .or. SEDECO(ng)%PONf(i,j,k) > 1.0d15 .or. SEDECO(ng)%PONf(i,j,k) < 0.0d0) then
@@ -2285,7 +2422,7 @@ CONTAINS
         !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
         SEDECO(ng)%PONs(i,j,k) = massbalance_sed_p(SEDECO(ng)%PONs(i,j,k),FT_PON(k,2),FT_PON(k+1,2),R_PON(k,2), &
-                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k))  ! PONs
+                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k),miscPON(k,2))  ! PONs
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%PONs(i,j,k)) .or. abs(SEDECO(ng)%PONs(i,j,k)) > huge(SEDECO(ng)%PONs(i,j,k))) then
         if (isnan(SEDECO(ng)%PONs(i,j,k)) .or. SEDECO(ng)%PONs(i,j,k) > 1.0d15 .or. SEDECO(ng)%PONs(i,j,k) < 0.0d0) then
@@ -2302,7 +2439,7 @@ CONTAINS
         !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
         SEDECO(ng)%PONn(i,j,k) = massbalance_sed_p(SEDECO(ng)%PONn(i,j,k),FT_PON(k,3),FT_PON(k+1,3),0d0, &
-                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k))  ! PONs
+                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k),miscPON(k,3))  ! PONn
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%PONn(i,j,k)) .or. abs(SEDECO(ng)%PONn(i,j,k)) > huge(SEDECO(ng)%PONn(i,j,k))) then
         if (isnan(SEDECO(ng)%PONn(i,j,k)) .or. SEDECO(ng)%PONn(i,j,k) > 1.0d15 .or. SEDECO(ng)%PONn(i,j,k) < 0.0d0) then
@@ -2319,7 +2456,7 @@ CONTAINS
 
         ! -- DOP -- !
         SEDECO(ng)%DOPf(i,j,k) = massbalance_sed_d(SEDECO(ng)%DOPf(i,j,k),FT_DOP(k,1),FT_DOP(k+1,1),R_DOP(k,1), &
-                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt)  ! DOPf
+                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,miscDOP(k,1))  ! DOPf
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%DOPf(i,j,k)) .or. abs(SEDECO(ng)%DOPf(i,j,k)) > huge(SEDECO(ng)%DOPf(i,j,k))) then
         if (isnan(SEDECO(ng)%DOPf(i,j,k)) .or. SEDECO(ng)%DOPf(i,j,k) > 1.0d15 .or. SEDECO(ng)%DOPf(i,j,k) < 0.0d0) then
@@ -2335,7 +2472,7 @@ CONTAINS
         !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
         SEDECO(ng)%DOPs(i,j,k) = massbalance_sed_d(SEDECO(ng)%DOPs(i,j,k),FT_DOP(k,2),FT_DOP(k+1,2),R_DOP(k,2), &
-                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt)  ! DOPs
+                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,miscDOP(k,2))  ! DOPs
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%DOPs(i,j,k)) .or. abs(SEDECO(ng)%DOPs(i,j,k)) > huge(SEDECO(ng)%DOPs(i,j,k))) then
         if (isnan(SEDECO(ng)%DOPs(i,j,k)) .or. SEDECO(ng)%DOPs(i,j,k) > 1.0d15 .or. SEDECO(ng)%DOPs(i,j,k) < 0.0d0) then
@@ -2352,7 +2489,7 @@ CONTAINS
 
         ! -- POP -- !
         SEDECO(ng)%POPf(i,j,k) = massbalance_sed_p(SEDECO(ng)%POPf(i,j,k),FT_POP(k,1),FT_POP(k+1,1),R_POP(k,1), &
-                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k))  ! POPf
+                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k),miscPOP(k,1))  ! POPf
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%POPf(i,j,k)) .or. abs(SEDECO(ng)%POPf(i,j,k)) > huge(SEDECO(ng)%POPf(i,j,k))) then
         if (isnan(SEDECO(ng)%POPf(i,j,k)) .or. SEDECO(ng)%POPf(i,j,k) > 1.0d15 .or. SEDECO(ng)%POPf(i,j,k) < 0.0d0) then
@@ -2369,7 +2506,7 @@ CONTAINS
         !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
         SEDECO(ng)%POPs(i,j,k) = massbalance_sed_p(SEDECO(ng)%POPs(i,j,k),FT_POP(k,2),FT_POP(k+1,2),R_POP(k,2), &
-                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k))  ! POPs
+                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k),miscPOP(k,2))  ! POPs
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%POPs(i,j,k)) .or. abs(SEDECO(ng)%POPs(i,j,k)) > huge(SEDECO(ng)%POPs(i,j,k))) then
         if (isnan(SEDECO(ng)%POPs(i,j,k)) .or. SEDECO(ng)%POPs(i,j,k) > 1.0d15 .or. SEDECO(ng)%POPs(i,j,k) < 0.0d0) then
@@ -2386,7 +2523,7 @@ CONTAINS
         !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
         SEDECO(ng)%POPn(i,j,k) = massbalance_sed_p(SEDECO(ng)%POPn(i,j,k),FT_POP(k,3),FT_POP(k+1,3),0d0, &
-                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k))  ! POPs
+                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k),miscPOP(k,3))  ! POPn
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%POPn(i,j,k)) .or. abs(SEDECO(ng)%POPn(i,j,k)) > huge(SEDECO(ng)%POPn(i,j,k))) then
         if (isnan(SEDECO(ng)%POPn(i,j,k)) .or. SEDECO(ng)%POPn(i,j,k) > 1.0d15 .or. SEDECO(ng)%POPn(i,j,k) < 0.0d0) then
@@ -2406,7 +2543,7 @@ CONTAINS
 #  if defined adsorption
         ! -- Mn2 -- !
         SEDECO(ng)%Mn2(i,j,k) = massbalance_sed_d(SEDECO(ng)%Mn2(i,j,k),FT_Mn2(k),FT_Mn2(k+1),R_Mn2(k), &
-                                            dz(k),(SEDECO(ng)%poro(i,j,k)+rhos_d(k)*(1d0 - SEDECO(ng)%poro(i,j,k))*Kad_Mn2),dt) 
+                                            dz(k),(SEDECO(ng)%poro(i,j,k)+rhos_d(k)*(1d0 - SEDECO(ng)%poro(i,j,k))*Kad_Mn2),dt,miscMn2(k)) 
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%Mn2(i,j,k)) .or. abs(SEDECO(ng)%Mn2(i,j,k)) > huge(SEDECO(ng)%Mn2(i,j,k))) then
         if (isnan(SEDECO(ng)%Mn2(i,j,k)) .or. SEDECO(ng)%Mn2(i,j,k) > 1.0d15 .or. SEDECO(ng)%Mn2(i,j,k) < 0.0d0) then
@@ -2425,7 +2562,7 @@ CONTAINS
 
         ! -- Fe2 -- !
         SEDECO(ng)%Fe2(i,j,k) = massbalance_sed_d(SEDECO(ng)%Fe2(i,j,k),FT_Fe2(k),FT_Fe2(k+1),R_Fe2(k), &
-                                            dz(k),(SEDECO(ng)%poro(i,j,k)+rhos_d(k)*(1d0 - SEDECO(ng)%poro(i,j,k))*Kad_Fe2),dt) 
+                                            dz(k),(SEDECO(ng)%poro(i,j,k)+rhos_d(k)*(1d0 - SEDECO(ng)%poro(i,j,k))*Kad_Fe2),dt,miscFe2(k)) 
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%Fe2(i,j,k)) .or. abs(SEDECO(ng)%Fe2(i,j,k)) > huge(SEDECO(ng)%Fe2(i,j,k))) then
         if (isnan(SEDECO(ng)%Fe2(i,j,k)) .or. SEDECO(ng)%Fe2(i,j,k) > 1.0d15 .or. SEDECO(ng)%Fe2(i,j,k) < 0.0d0) then
@@ -2445,7 +2582,7 @@ CONTAINS
 #  else
         ! -- Mn2 -- !
         SEDECO(ng)%Mn2(i,j,k) = massbalance_sed_d(SEDECO(ng)%Mn2(i,j,k),FT_Mn2(k),FT_Mn2(k+1),R_Mn2(k), &
-                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt) 
+                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,miscMn2(k)) 
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%Mn2(i,j,k)) .or. abs(SEDECO(ng)%Mn2(i,j,k)) > huge(SEDECO(ng)%Mn2(i,j,k))) then
         if (isnan(SEDECO(ng)%Mn2(i,j,k)) .or. SEDECO(ng)%Mn2(i,j,k) > 1.0d15 .or. SEDECO(ng)%Mn2(i,j,k) < 0.0d0) then
@@ -2462,7 +2599,7 @@ CONTAINS
         
         ! -- Fe2 -- !
         SEDECO(ng)%Fe2(i,j,k) = massbalance_sed_d(SEDECO(ng)%Fe2(i,j,k),FT_Fe2(k),FT_Fe2(k+1),R_Fe2(k), &
-                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt) 
+                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,miscFe2(k)) 
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%Fe2(i,j,k)) .or. abs(SEDECO(ng)%Fe2(i,j,k)) > huge(SEDECO(ng)%Fe2(i,j,k))) then
         if (isnan(SEDECO(ng)%Fe2(i,j,k)) .or. SEDECO(ng)%Fe2(i,j,k) > 1.0d15 .or. SEDECO(ng)%Fe2(i,j,k) < 0.0d0) then
@@ -2480,7 +2617,7 @@ CONTAINS
 #  endif
         ! -- MnO2 -- !
         SEDECO(ng)%MnO2(i,j,k) = massbalance_sed_p(SEDECO(ng)%MnO2(i,j,k),FT_MnO2(k),FT_MnO2(k+1),R_MnO2(k), &
-                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k)) 
+                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k),miscMnO2(k)) 
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%MnO2(i,j,k)) .or. abs(SEDECO(ng)%MnO2(i,j,k)) > huge(SEDECO(ng)%MnO2(i,j,k))) then
         if (isnan(SEDECO(ng)%MnO2(i,j,k)) .or. SEDECO(ng)%MnO2(i,j,k) > 1.0d15 .or. SEDECO(ng)%MnO2(i,j,k) < 0.0d0) then
@@ -2498,7 +2635,7 @@ CONTAINS
         
         ! -- FeS -- !
         SEDECO(ng)%FeS(i,j,k) = massbalance_sed_p(SEDECO(ng)%FeS(i,j,k),FT_FeS(k),FT_FeS(k+1),R_FeS(k),  &
-                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k)) 
+                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k),miscFeS(k)) 
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%FeS(i,j,k)) .or. abs(SEDECO(ng)%FeS(i,j,k)) > huge(SEDECO(ng)%FeS(i,j,k))) then
         if (isnan(SEDECO(ng)%FeS(i,j,k)) .or. SEDECO(ng)%FeS(i,j,k) > 1.0d15 .or. SEDECO(ng)%FeS(i,j,k) < 0.0d0) then
@@ -2516,7 +2653,7 @@ CONTAINS
 
         ! -- FeS2 -- !
         SEDECO(ng)%FeS2(i,j,k) = massbalance_sed_p(SEDECO(ng)%FeS2(i,j,k),FT_FeS2(k),FT_FeS2(k+1),R_FeS2(k), &
-                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k)) 
+                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k),miscFeS2(k)) 
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%FeS2(i,j,k)) .or. abs(SEDECO(ng)%FeS2(i,j,k)) > huge(SEDECO(ng)%FeS2(i,j,k))) then
         if (isnan(SEDECO(ng)%FeS2(i,j,k)) .or. SEDECO(ng)%FeS2(i,j,k) > 1.0d15 .or. SEDECO(ng)%FeS2(i,j,k) < 0.0d0) then
@@ -2534,7 +2671,7 @@ CONTAINS
 
         ! -- FeOOH -- !
         SEDECO(ng)%FeOOH(i,j,k) = massbalance_sed_p(SEDECO(ng)%FeOOH(i,j,k),FT_FeOOH(k),FT_FeOOH(k+1),R_FeOOH(k), &
-                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k)) 
+                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k),miscFeOOH(k)) 
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%FeOOH(i,j,k)) .or. abs(SEDECO(ng)%FeOOH(i,j,k)) > huge(SEDECO(ng)%FeOOH(i,j,k))) then
         if (isnan(SEDECO(ng)%FeOOH(i,j,k)) .or. SEDECO(ng)%FeOOH(i,j,k) > 1.0d15 .or. SEDECO(ng)%FeOOH(i,j,k) < 0.0d0) then
@@ -2552,11 +2689,11 @@ CONTAINS
 
         ! -- FeOOH=PO4 -- !
         SEDECO(ng)%FeOOH_PO4(i,j,k) = massbalance_sed_p(SEDECO(ng)%FeOOH_PO4(i,j,k),FT_FeOOH_PO4(k),FT_FeOOH_PO4(k+1), & 
-                                                  R_FeOOH_PO4(k),dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k)) 
+                                                  R_FeOOH_PO4(k),dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k),miscFeOOH_PO4(k)) 
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%FeOOH_PO4(i,j,k)) .or. abs(SEDECO(ng)%FeOOH_PO4(i,j,k)) > huge(SEDECO(ng)%FeOOH_PO4(i,j,k))) then
         if (isnan(SEDECO(ng)%FeOOH_PO4(i,j,k)) .or. SEDECO(ng)%FeOOH_PO4(i,j,k) > 1.0d15 &
-            .or. SEDECO(ng)%FeOOH_PO4(i,j,k) < 0.0d0) then
+          .or. SEDECO(ng)%FeOOH_PO4(i,j,k) < 0.0d0) then
           write(*,*) 'yt_debug: sedecosys SEDECO(ng)%FeOOH_PO4(i,j,k)      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     SEDECO(ng)%FeOOH_PO4(i,j,k) =', SEDECO(ng)%FeOOH_PO4(i,j,k)
           write(*,*) 'yt_debug:     FT_FeOOH_PO4(k) =', FT_FeOOH_PO4(k)
@@ -2571,7 +2708,7 @@ CONTAINS
 
         ! -- H2S -- !
         SEDECO(ng)%H2S(i,j,k) = massbalance_sed_d(SEDECO(ng)%H2S(i,j,k),FT_H2S(k),FT_H2S(k+1),R_H2S(k), &
-                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt) 
+                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,miscH2S(k)) 
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%H2S(i,j,k)) .or. abs(SEDECO(ng)%H2S(i,j,k)) > huge(SEDECO(ng)%H2S(i,j,k))) then
         if (isnan(SEDECO(ng)%H2S(i,j,k)) .or. SEDECO(ng)%H2S(i,j,k) > 1.0d15 .or. SEDECO(ng)%H2S(i,j,k) < 0.0d0) then
@@ -2589,7 +2726,7 @@ CONTAINS
 
         ! -- S0 -- !
         SEDECO(ng)%S0(i,j,k) = massbalance_sed_p(SEDECO(ng)%S0(i,j,k),FT_S0(k),FT_S0(k+1),R_S0(k), &
-                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k)) 
+                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k),miscS0(k)) 
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%S0(i,j,k)) .or. abs(SEDECO(ng)%S0(i,j,k)) > huge(SEDECO(ng)%S0(i,j,k))) then
         if (isnan(SEDECO(ng)%S0(i,j,k)) .or. SEDECO(ng)%S0(i,j,k) > 1.0d15 .or. SEDECO(ng)%S0(i,j,k) < 0.0d0) then
@@ -2607,7 +2744,7 @@ CONTAINS
 
         ! -- SO4 -- !
         SEDECO(ng)%SO4(i,j,k) = massbalance_sed_d(SEDECO(ng)%SO4(i,j,k),FT_SO4(k),FT_SO4(k+1),R_SO4(k), &
-                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt)
+                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,miscSO4(k))
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%SO4(i,j,k)) .or. abs(SEDECO(ng)%SO4(i,j,k)) > huge(SEDECO(ng)%SO4(i,j,k))) then
         if (isnan(SEDECO(ng)%SO4(i,j,k)) .or. SEDECO(ng)%SO4(i,j,k) > 1.0d15 .or. SEDECO(ng)%SO4(i,j,k) < 0.0d0) then

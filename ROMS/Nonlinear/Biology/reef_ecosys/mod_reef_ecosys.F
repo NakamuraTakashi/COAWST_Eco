@@ -8,17 +8,54 @@
 
 MODULE mod_reef_ecosys
 contains
+
+!!! **********************************************************************
+!!!  Allocate module variables of reef ecosystem model
+!!! **********************************************************************
+SUBROUTINE allocate_reef_ecosys(ng, LBi, UBi, LBj, UBj)
+#ifdef CORAL_POLYP
+  USE mod_coral
+#endif
+#ifdef SEAGRASS
+  USE mod_seagrass
+#endif
+#ifdef MACROALGAE
+  USE mod_macroalgae
+#endif
+#ifdef SEDIMENT_ECOSYS
+  USE mod_sedecosys
+#endif
+    
+  implicit none
+
+  integer, intent(in) :: ng, LBi, UBi, LBj, UBj
+
+#ifdef CORAL_POLYP
+  CALL allocate_coral(ng, LBi, UBi, LBj, UBj)
+  write(*,*) 'yt_debug: mod_reef_ecosys.F allocate_reef_ecosys() finished coral aloc'
+#endif
+#ifdef SEAGRASS
+  CALL allocate_seagrass(ng, LBi, UBi, LBj, UBj)
+  write(*,*) 'yt_debug: mod_reef_ecosys.F allocate_reef_ecosys() finished seagrass aloc'
+#endif
+#ifdef MACROALGAE
+  CALL allocate_macroalgae(ng, LBi, UBi, LBj, UBj)
+  write(*,*) 'yt_debug: mod_reef_ecosys.F allocate_reef_ecosys() finished macroalgae aloc'
+#endif
+#ifdef SEDIMENT_ECOSYS
+  CALL allocate_sedecosys(ng, LBi, UBi, LBj, UBj)
+  write(*,*) 'yt_debug: mod_reef_ecosys.F allocate_reef_ecosys() finished sediment aloc'
+#endif
+    
+  RETURN
+END SUBROUTINE allocate_reef_ecosys
+
+
 !!! **********************************************************************
 !!!  Set initial conditions for reef ecosystem model
 !!! **********************************************************************
-  SUBROUTINE initialize_reef_ecosys         &
-    (ng, Ngrids, LBi, UBi, LBj, UBj         &
-!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
-#ifdef SEDIMENT_ECOSYS
-    , Nsed                                  &   ! Number of vertical biological sediment layers
-#endif
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
-    )
+  SUBROUTINE initialize_reef_ecosys(ng, tile)
+    USE mod_param
 #ifdef CORAL_POLYP
     USE mod_coral
 #endif
@@ -31,29 +68,67 @@ contains
 #ifdef SEDIMENT_ECOSYS
     USE mod_sedecosys
 #endif
-      
-    implicit none
+    USE mod_biology, ONLY : send_reef_ecosys2roms_his
 
-    integer, intent(in) :: ng, Ngrids, LBi, UBi, LBj, UBj
-!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
-#ifdef SEDIMENT_ECOSYS
-    integer, intent(in) :: Nsed                            ! Number of vertical biological sediment layers
+
+    implicit none
+    integer, intent(in) :: ng, tile
+    integer :: i, j
+    integer :: Imin, Imax, Jmin, Jmax
+
+!
+# include "tile.h"
+!
+!  Set array initialization range.
+!
+#ifdef _OPENMP
+    IF (DOMAIN(ng)%Western_Edge(tile)) THEN
+      Imin=BOUNDS(ng)%LBi(tile)
+    ELSE
+      Imin=Istr
+    END IF
+    IF (DOMAIN(ng)%Eastern_Edge(tile)) THEN
+      Imax=BOUNDS(ng)%UBi(tile)
+    ELSE
+      Imax=Iend
+    END IF
+    IF (DOMAIN(ng)%Southern_Edge(tile)) THEN
+      Jmin=BOUNDS(ng)%LBj(tile)
+    ELSE
+      Jmin=Jstr
+    END IF
+    IF (DOMAIN(ng)%Northern_Edge(tile)) THEN
+      Jmax=BOUNDS(ng)%UBj(tile)
+    ELSE
+      Jmax=Jend
+    END IF
+#else
+    Imin=LBi
+    Imax=UBi
+    Jmin=LBj
+    Jmax=UBj
 #endif
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+
 
 #ifdef CORAL_POLYP
-    CALL initialize_coral(ng, Ngrids, LBi, UBi, LBj, UBj)
+    CALL initialize_coral(ng, Imin, Imax, Jmin, Jmax)
+    ! write(*,*) 'yt_debug: mod_reef_ecosys.F initialize_reef_ecosys() finished coral init'
 #endif
 #ifdef SEAGRASS
-    CALL initialize_seagrass(ng, Ngrids, LBi, UBi, LBj, UBj)
+    CALL initialize_seagrass(ng, Imin, Imax, Jmin, Jmax)
+    ! write(*,*) 'yt_debug: mod_reef_ecosys.F initialize_reef_ecosys() finished seagrass init'
 #endif
 #ifdef MACROALGAE
-    CALL initialize_macroalgae(ng, Ngrids, LBi, UBi, LBj, UBj)
+    CALL initialize_macroalgae(ng, Imin, Imax, Jmin, Jmax)
+    ! write(*,*) 'yt_debug: mod_reef_ecosys.F initialize_reef_ecosys() finished macroalgae init'
 #endif
 #ifdef SEDIMENT_ECOSYS
-    CALL initialize_sedecosys(ng, Ngrids, LBi, UBi, LBj, UBj, Nsed) ! yuta_edits_for_masa
+    CALL initialize_sedecosys(ng, Imin, Imax, Jmin, Jmax) ! yuta_edits_for_masa
+    ! write(*,*) 'yt_debug: mod_reef_ecosys.F initialize_reef_ecosys() finished sediment init'
 #endif
       
+    CALL send_reef_ecosys2roms_his (ng, Imin, Imax, Jmin, Jmax)
+
     RETURN
   END SUBROUTINE initialize_reef_ecosys
 
@@ -66,11 +141,6 @@ contains
 !        input parameters
     ( ng, i, j       &   ! ng: nested grid number; i,j: position
     , N              &   ! Number of vertical grid (following ROMS vertical grid)
-!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
-#ifdef SEDIMENT_ECOSYS
-    , Nsed           &   ! Number of vertical biological sediment layers
-#endif
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
     , isplitc        &   ! Internal loop counts of coral polyp model
     , isplitsed      &   ! Internal loop counts of sediment ecosystem model
     , dt             &   ! Time step (sec)
@@ -228,15 +298,18 @@ contains
     USE mod_geochem
 #ifdef CORAL_POLYP
     USE mod_coral
+    USE mod_param, ONLY : Ncl
 #endif
 #ifdef SEAGRASS
     USE mod_seagrass
+    USE mod_param, ONLY : Nsg
 #endif
 #ifdef MACROALGAE
     USE mod_macroalgae
 #endif
 #ifdef SEDIMENT_ECOSYS
     USE mod_sedecosys
+    USE mod_param, ONLY : Nsed
 #endif
 #ifdef FOODWEB
     USE mod_foodweb
@@ -247,12 +320,6 @@ contains
 ! input parameters
     integer, intent(in) :: ng,i,j     
     integer, intent(in) :: N
-!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
-#ifdef SEDIMENT_ECOSYS
-    integer, intent(in) :: Nsed
-#endif
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
-
     integer, intent(in) :: isplitc     
     integer, intent(in) :: isplitsed     
     real(8), intent(in) :: dt         
@@ -265,7 +332,8 @@ contains
     real(8), intent(in) :: p_coral(Ncl)
 #endif
 #ifdef SEAGRASS
-    real(8), intent(in) :: p_sgrass   
+    ! real(8), intent(inout) :: p_sgrass(Nsg)   ! yt_edit fix me! make coverage writeable
+    real(8), intent(inout) :: p_sgrass   ! yt_edit fix me! make coverage writeable
 #endif
 #ifdef MACROALGAE
     real(8), intent(in) :: p_algae    
@@ -557,6 +625,8 @@ contains
 #endif
 
 
+! write(*,*) 'yt_debug: start of mod_reef_ecosys.F reef_ecosys()'
+
 
 !-----------------------------------------------------------------------
 ! Rewrite inputs to replace negative values with zeros
@@ -799,135 +869,144 @@ contains
     ssO2flux  = 0.0d0   ! sea surface O2 flux (mmol m-2 s-1)
     PFDbott   = 0.0d0   ! Bottom photon flux density (umol m-2 s-1)
 
-! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-!     DO k=1,N
-!       ! if (isnan() .or. abs() > huge()) then
-!       if (isnan(DIC(k)) .or. abs(DIC(k)) > 1.0d15 .or. DIC(k) < 0.0d0) then
-!         write(*,*) 'yt_debug: mod_reef_ecosys.F DIC(k)    input      i =', i, '   j =', j, '   k =', k
-!         write(*,*) 'yt_debug:     DIC(k) =', DIC(k)
-!       endif
-!       ! if (isnan() .or. abs() > huge()) then
-!       if (isnan(TA(k)) .or. abs(TA(k)) > 1.0d15 .or. TA(k) < 0.0d0) then
-!         write(*,*) 'yt_debug: mod_reef_ecosys.F TA(k)    input      i =', i, '   j =', j, '   k =', k
-!         write(*,*) 'yt_debug:     TA(k) =', TA(k)
-!       endif
-!       ! if (isnan() .or. abs() > huge()) then
-!       if (isnan(DOx(k)) .or. abs(DOx(k)) > 1.0d15 .or. DOx(k) < 0.0d0) then
-!         write(*,*) 'yt_debug: mod_reef_ecosys.F DOx(k)    input      i =', i, '   j =', j, '   k =', k
-!         write(*,*) 'yt_debug:     DOx(k) =', DOx(k)
-!       endif
-! #if defined ORGANIC_MATTER
-!       DO yt_iter = 1, Ndom
-!         ! if (isnan() .or. abs() > huge()) then
-!         if (isnan(DOC(k,yt_iter)) .or. abs(DOC(k,yt_iter)) > 1.0d15 .or. DOC(k,yt_iter) < 0.0d0) then
-!           write(*,*) 'yt_debug: mod_reef_ecosys.F DOC(k,Ndom)    input      i =', i, '   j =', j, '   k =', k, '   Ndom =', yt_iter
-!           write(*,*) 'yt_debug:     DOC(k,Ndom) =', DOC(k,yt_iter)
-!         endif
-!       ENDDO
-!       DO yt_iter = 1, Npom
-!         ! if (isnan() .or. abs() > huge()) then
-!         if (isnan(POC(k,yt_iter)) .or. abs(POC(k,yt_iter)) > 1.0d15 .or. POC(k,yt_iter) < 0.0d0) then
-!           write(*,*) 'yt_debug: mod_reef_ecosys.F POC(k,Npom)    input      i =', i, '   j =', j, '   k =', k, '   Npom =', yt_iter
-!           write(*,*) 'yt_debug:     POC(k,Npom) =', POC(k,yt_iter)
-!         endif
-!       ENDDO
-!       DO yt_iter = 1, Nphy
-!         ! if (isnan() .or. abs() > huge()) then
-!         if (isnan(PHY(k,yt_iter)) .or. abs(PHY(k,yt_iter)) > 1.0d15 .or. PHY(k,yt_iter) < 0.0d0) then
-!           write(*,*) 'yt_debug: mod_reef_ecosys.F PHY(k,Nphy)    input      i =', i, '   j =', j, '   k =', k, '   Nphy =', yt_iter
-!           write(*,*) 'yt_debug:     PHY(k,Nphy) =', PHY(k,yt_iter)
-!         endif
-!       ENDDO
-!       DO yt_iter = 1, Nzoo
-!         ! if (isnan() .or. abs() > huge()) then
-!         if (isnan(ZOO(k,yt_iter)) .or. abs(ZOO(k,yt_iter)) > 1.0d15 .or. ZOO(k,yt_iter) < 0.0d0) then
-!           write(*,*) 'yt_debug: mod_reef_ecosys.F ZOO(k,Nzoo)    input      i =', i, '   j =', j, '   k =', k, '   Nzoo =', yt_iter
-!           write(*,*) 'yt_debug:     ZOO(k,Nzoo) =', ZOO(k,yt_iter)
-!         endif
-!       ENDDO
-!       DO yt_iter = 1, Npim
-!         ! if (isnan() .or. abs() > huge()) then
-!         if (isnan(PIC(k,yt_iter)) .or. abs(PIC(k,yt_iter)) > 1.0d15 .or. PIC(k,yt_iter) < 0.0d0) then
-!           write(*,*) 'yt_debug: mod_reef_ecosys.F PIC(k,Npim)    input      i =', i, '   j =', j, '   k =', k, '   Npim =', yt_iter
-!           write(*,*) 'yt_debug:     PIC(k,Npim) =', PIC(k,yt_iter)
-!         endif
-!       ENDDO
-! #endif
-! #if defined NUTRIENTS           
-!       ! if (isnan() .or. abs() > huge()) then
-!       if (isnan(NO3(k)) .or. abs(NO3(k)) > 1.0d15 .or. NO3(k) < 0.0d0) then
-!         write(*,*) 'yt_debug: mod_reef_ecosys.F NO3(k)    input      i =', i, '   j =', j, '   k =', k
-!         write(*,*) 'yt_debug:     NO3(k) =', NO3(k)
-!       endif
-!       ! if (isnan() .or. abs() > huge()) then
-!       if (isnan(NH4(k)) .or. abs(NH4(k)) > 1.0d15 .or. NH4(k) < 0.0d0) then
-!         write(*,*) 'yt_debug: mod_reef_ecosys.F NH4(k)    input      i =', i, '   j =', j, '   k =', k
-!         write(*,*) 'yt_debug:     NH4(k) =', NH4(k)
-!       endif
-!       ! if (isnan() .or. abs() > huge()) then
-!       if (isnan(PO4(k)) .or. abs(PO4(k)) > 1.0d15 .or. PO4(k) < 0.0d0) then
-!         write(*,*) 'yt_debug: mod_reef_ecosys.F PO4(k)    input      i =', i, '   j =', j, '   k =', k
-!         write(*,*) 'yt_debug:     PO4(k) =', PO4(k)
-!       endif
-! # if defined ORGANIC_MATTER
-!       DO yt_iter = 1, Ndom
-!         ! if (isnan() .or. abs() > huge()) then
-!         if (isnan(DON(k,yt_iter)) .or. abs(DON(k,yt_iter)) > 1.0d15 .or. DON(k,yt_iter) < 0.0d0) then
-!           write(*,*) 'yt_debug: mod_reef_ecosys.F DON(k,Ndom)    input      i =', i, '   j =', j, '   k =', k, '   Ndom =', yt_iter
-!           write(*,*) 'yt_debug:     DON(k,Ndom) =', DON(k,yt_iter)
-!         endif
-!         ! if (isnan() .or. abs() > huge()) then
-!         if (isnan(DOP(k,yt_iter)) .or. abs(DOP(k,yt_iter)) > 1.0d15 .or. DOP(k,yt_iter) < 0.0d0) then
-!           write(*,*) 'yt_debug: mod_reef_ecosys.F DOP(k,Ndom)    input      i =', i, '   j =', j, '   k =', k, '   Ndom =', yt_iter
-!           write(*,*) 'yt_debug:     DOP(k,Ndom) =', DOP(k,yt_iter)
-!         endif
-!       ENDDO
-!       DO yt_iter = 1, Npom
-!         ! if (isnan() .or. abs() > huge()) then
-!         if (isnan(PON(k,yt_iter)) .or. abs(PON(k,yt_iter)) > 1.0d15 .or. PON(k,yt_iter) < 0.0d0) then
-!           write(*,*) 'yt_debug: mod_reef_ecosys.F PON(k,Npom)    input      i =', i, '   j =', j, '   k =', k, '   Npom =', yt_iter
-!           write(*,*) 'yt_debug:     PON(k,Npom) =', PON(k,yt_iter)
-!         endif
-!         ! if (isnan() .or. abs() > huge()) then
-!         if (isnan(POP(k,yt_iter)) .or. abs(POP(k,yt_iter)) > 1.0d15 .or. POP(k,yt_iter) < 0.0d0) then
-!           write(*,*) 'yt_debug: mod_reef_ecosys.F POP(k,Npom)    input      i =', i, '   j =', j, '   k =', k, '   Npom =', yt_iter
-!           write(*,*) 'yt_debug:     POP(k,Npom) =', POP(k,yt_iter)
-!         endif
-!       ENDDO
-! # endif
-! #endif
-!     ENDDO
-!     ! if (isnan() .or. abs() > huge()) then
-!     if (isnan(sspH) .or. abs(sspH) > 1.0d15) then
-!       write(*,*) 'yt_debug: mod_reef_ecosys.F sspH    input      i =', i, '   j =', j
-!       write(*,*) 'yt_debug:     sspH =', sspH
-!     endif
-!     ! if (isnan() .or. abs() > huge()) then
-!     if (isnan(ssfCO2) .or. abs(ssfCO2) > 1.0d15) then
-!       write(*,*) 'yt_debug: mod_reef_ecosys.F ssfCO2    input      i =', i, '   j =', j
-!       write(*,*) 'yt_debug:     ssfCO2 =', ssfCO2
-!     endif
-!     ! if (isnan() .or. abs() > huge()) then
-!     if (isnan(ssWarg) .or. abs(ssWarg) > 1.0d15) then
-!       write(*,*) 'yt_debug: mod_reef_ecosys.F ssWarg    input      i =', i, '   j =', j
-!       write(*,*) 'yt_debug:     ssWarg =', ssWarg
-!     endif
-!     ! if (isnan() .or. abs() > huge()) then
-!     if (isnan(ssCO2flux) .or. abs(ssCO2flux) > 1.0d15) then
-!       write(*,*) 'yt_debug: mod_reef_ecosys.F ssCO2flux    input      i =', i, '   j =', j
-!       write(*,*) 'yt_debug:     ssCO2flux =', ssCO2flux
-!     endif
-!     ! if (isnan() .or. abs() > huge()) then
-!     if (isnan(ssO2flux) .or. abs(ssO2flux) > 1.0d15) then
-!       write(*,*) 'yt_debug: mod_reef_ecosys.F ssO2flux    input      i =', i, '   j =', j
-!       write(*,*) 'yt_debug:     ssO2flux =', ssO2flux
-!     endif
-!     ! if (isnan() .or. abs() > huge()) then
-!     if (isnan(PFDbott) .or. abs(PFDbott) > 1.0d15) then
-!       write(*,*) 'yt_debug: mod_reef_ecosys.F PFDbott    input      i =', i, '   j =', j
-!       write(*,*) 'yt_debug:     PFDbott =', PFDbott
-!     endif
-! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+!!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    DO k=1,N
+      ! if (isnan() .or. abs() > huge()) then
+      if (isnan(DIC(k)) .or. abs(DIC(k)) > 1.0d15 .or. DIC(k) < 0.0d0) then
+        write(*,*) 'yt_debug: mod_reef_ecosys.F DIC(k)    input      i =', i, '   j =', j, '   k =', k
+        write(*,*) 'yt_debug:     DIC(k) =', DIC(k)
+      endif
+      ! if (isnan() .or. abs() > huge()) then
+      if (isnan(TA(k)) .or. abs(TA(k)) > 1.0d15 .or. TA(k) < 0.0d0) then
+        write(*,*) 'yt_debug: mod_reef_ecosys.F TA(k)    input      i =', i, '   j =', j, '   k =', k
+        write(*,*) 'yt_debug:     TA(k) =', TA(k)
+      endif
+      ! if (isnan() .or. abs() > huge()) then
+      if (isnan(DOx(k)) .or. abs(DOx(k)) > 1.0d15 .or. DOx(k) < 0.0d0) then
+        write(*,*) 'yt_debug: mod_reef_ecosys.F DOx(k)    input      i =', i, '   j =', j, '   k =', k
+        write(*,*) 'yt_debug:     DOx(k) =', DOx(k)
+      endif
+#if defined ORGANIC_MATTER
+      DO yt_iter = 1, Ndom
+        ! if (isnan() .or. abs() > huge()) then
+        if (isnan(DOC(k,yt_iter)) .or. abs(DOC(k,yt_iter)) > 1.0d15 .or. DOC(k,yt_iter) < 0.0d0) then
+          write(*,*) 'yt_debug: mod_reef_ecosys.F DOC(k,Ndom)    input      i =', i, '   j =', j, '   k =', k &
+            , '   Ndom =', yt_iter
+          write(*,*) 'yt_debug:     DOC(k,Ndom) =', DOC(k,yt_iter)
+        endif
+      ENDDO
+      DO yt_iter = 1, Npom
+        ! if (isnan() .or. abs() > huge()) then
+        if (isnan(POC(k,yt_iter)) .or. abs(POC(k,yt_iter)) > 1.0d15 .or. POC(k,yt_iter) < 0.0d0) then
+          write(*,*) 'yt_debug: mod_reef_ecosys.F POC(k,Npom)    input      i =', i, '   j =', j, '   k =', k &
+            , '   Npom =', yt_iter
+          write(*,*) 'yt_debug:     POC(k,Npom) =', POC(k,yt_iter)
+        endif
+      ENDDO
+      DO yt_iter = 1, Nphy
+        ! if (isnan() .or. abs() > huge()) then
+        if (isnan(PHY(k,yt_iter)) .or. abs(PHY(k,yt_iter)) > 1.0d15 .or. PHY(k,yt_iter) < 0.0d0) then
+          write(*,*) 'yt_debug: mod_reef_ecosys.F PHY(k,Nphy)    input      i =', i, '   j =', j, '   k =', k &
+            , '   Nphy =', yt_iter
+          write(*,*) 'yt_debug:     PHY(k,Nphy) =', PHY(k,yt_iter)
+        endif
+      ENDDO
+      DO yt_iter = 1, Nzoo
+        ! if (isnan() .or. abs() > huge()) then
+        if (isnan(ZOO(k,yt_iter)) .or. abs(ZOO(k,yt_iter)) > 1.0d15 .or. ZOO(k,yt_iter) < 0.0d0) then
+          write(*,*) 'yt_debug: mod_reef_ecosys.F ZOO(k,Nzoo)    input      i =', i, '   j =', j, '   k =', k &
+            , '   Nzoo =', yt_iter
+          write(*,*) 'yt_debug:     ZOO(k,Nzoo) =', ZOO(k,yt_iter)
+        endif
+      ENDDO
+      DO yt_iter = 1, Npim
+        ! if (isnan() .or. abs() > huge()) then
+        if (isnan(PIC(k,yt_iter)) .or. abs(PIC(k,yt_iter)) > 1.0d15 .or. PIC(k,yt_iter) < 0.0d0) then
+          write(*,*) 'yt_debug: mod_reef_ecosys.F PIC(k,Npim)    input      i =', i, '   j =', j, '   k =', k &
+            , '   Npim =', yt_iter
+          write(*,*) 'yt_debug:     PIC(k,Npim) =', PIC(k,yt_iter)
+        endif
+      ENDDO
+#endif
+#if defined NUTRIENTS           
+      ! if (isnan() .or. abs() > huge()) then
+      if (isnan(NO3(k)) .or. abs(NO3(k)) > 1.0d15 .or. NO3(k) < 0.0d0) then
+        write(*,*) 'yt_debug: mod_reef_ecosys.F NO3(k)    input      i =', i, '   j =', j, '   k =', k
+        write(*,*) 'yt_debug:     NO3(k) =', NO3(k)
+      endif
+      ! if (isnan() .or. abs() > huge()) then
+      if (isnan(NH4(k)) .or. abs(NH4(k)) > 1.0d15 .or. NH4(k) < 0.0d0) then
+        write(*,*) 'yt_debug: mod_reef_ecosys.F NH4(k)    input      i =', i, '   j =', j, '   k =', k
+        write(*,*) 'yt_debug:     NH4(k) =', NH4(k)
+      endif
+      ! if (isnan() .or. abs() > huge()) then
+      if (isnan(PO4(k)) .or. abs(PO4(k)) > 1.0d15 .or. PO4(k) < 0.0d0) then
+        write(*,*) 'yt_debug: mod_reef_ecosys.F PO4(k)    input      i =', i, '   j =', j, '   k =', k
+        write(*,*) 'yt_debug:     PO4(k) =', PO4(k)
+      endif
+# if defined ORGANIC_MATTER
+      DO yt_iter = 1, Ndom
+        ! if (isnan() .or. abs() > huge()) then
+        if (isnan(DON(k,yt_iter)) .or. abs(DON(k,yt_iter)) > 1.0d15 .or. DON(k,yt_iter) < 0.0d0) then
+          write(*,*) 'yt_debug: mod_reef_ecosys.F DON(k,Ndom)    input      i =', i, '   j =', j, '   k =', k &
+            , '   Ndom =', yt_iter
+          write(*,*) 'yt_debug:     DON(k,Ndom) =', DON(k,yt_iter)
+        endif
+        ! if (isnan() .or. abs() > huge()) then
+        if (isnan(DOP(k,yt_iter)) .or. abs(DOP(k,yt_iter)) > 1.0d15 .or. DOP(k,yt_iter) < 0.0d0) then
+          write(*,*) 'yt_debug: mod_reef_ecosys.F DOP(k,Ndom)    input      i =', i, '   j =', j, '   k =', k &
+            , '   Ndom =', yt_iter
+          write(*,*) 'yt_debug:     DOP(k,Ndom) =', DOP(k,yt_iter)
+        endif
+      ENDDO
+      DO yt_iter = 1, Npom
+        ! if (isnan() .or. abs() > huge()) then
+        if (isnan(PON(k,yt_iter)) .or. abs(PON(k,yt_iter)) > 1.0d15 .or. PON(k,yt_iter) < 0.0d0) then
+          write(*,*) 'yt_debug: mod_reef_ecosys.F PON(k,Npom)    input      i =', i, '   j =', j, '   k =', k &
+            , '   Npom =', yt_iter
+          write(*,*) 'yt_debug:     PON(k,Npom) =', PON(k,yt_iter)
+        endif
+        ! if (isnan() .or. abs() > huge()) then
+        if (isnan(POP(k,yt_iter)) .or. abs(POP(k,yt_iter)) > 1.0d15 .or. POP(k,yt_iter) < 0.0d0) then
+          write(*,*) 'yt_debug: mod_reef_ecosys.F POP(k,Npom)    input      i =', i, '   j =', j, '   k =', k &
+            , '   Npom =', yt_iter
+          write(*,*) 'yt_debug:     POP(k,Npom) =', POP(k,yt_iter)
+        endif
+      ENDDO
+# endif
+#endif
+    ENDDO
+    ! if (isnan() .or. abs() > huge()) then
+    if (isnan(sspH) .or. abs(sspH) > 1.0d15) then
+      write(*,*) 'yt_debug: mod_reef_ecosys.F sspH    input      i =', i, '   j =', j
+      write(*,*) 'yt_debug:     sspH =', sspH
+    endif
+    ! if (isnan() .or. abs() > huge()) then
+    if (isnan(ssfCO2) .or. abs(ssfCO2) > 1.0d15) then
+      write(*,*) 'yt_debug: mod_reef_ecosys.F ssfCO2    input      i =', i, '   j =', j
+      write(*,*) 'yt_debug:     ssfCO2 =', ssfCO2
+    endif
+    ! if (isnan() .or. abs() > huge()) then
+    if (isnan(ssWarg) .or. abs(ssWarg) > 1.0d15) then
+      write(*,*) 'yt_debug: mod_reef_ecosys.F ssWarg    input      i =', i, '   j =', j
+      write(*,*) 'yt_debug:     ssWarg =', ssWarg
+    endif
+    ! if (isnan() .or. abs() > huge()) then
+    if (isnan(ssCO2flux) .or. abs(ssCO2flux) > 1.0d15) then
+      write(*,*) 'yt_debug: mod_reef_ecosys.F ssCO2flux    input      i =', i, '   j =', j
+      write(*,*) 'yt_debug:     ssCO2flux =', ssCO2flux
+    endif
+    ! if (isnan() .or. abs() > huge()) then
+    if (isnan(ssO2flux) .or. abs(ssO2flux) > 1.0d15) then
+      write(*,*) 'yt_debug: mod_reef_ecosys.F ssO2flux    input      i =', i, '   j =', j
+      write(*,*) 'yt_debug:     ssO2flux =', ssO2flux
+    endif
+    ! if (isnan() .or. abs() > huge()) then
+    if (isnan(PFDbott) .or. abs(PFDbott) > 1.0d15) then
+      write(*,*) 'yt_debug: mod_reef_ecosys.F PFDbott    input      i =', i, '   j =', j
+      write(*,*) 'yt_debug:     PFDbott =', PFDbott
+    endif
+!!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
 !!!---------------------------------------------------------------------
@@ -1135,12 +1214,6 @@ contains
       dPHY_dt(k,:) = dPHY_dt(k,:) + dPHY(k,:)
       dZOO_dt(k,:) = dZOO_dt(k,:) + dZOO(k,:)
       dPIC_dt(k,:) = dPIC_dt(k,:) + dPIC(k,:)
-      ! yt_edit >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-      ! if dPIC_dt would remove over 90% of PIC in one time step, limit to 90%
-      IF (0.9*PIC(k,1)+dPIC_dt(k,1)*dt*dz(k) < 0.0d0) THEN
-        dPIC_dt(k,1) = -0.9*PIC(k,1)/dt/dz(k)
-      ENDIF
-      ! yt_edit <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 # if defined FOODWEB_TESTMODE
       dDeadPHY_dt(k,:) = dDeadPHY_dt(k,:) + dDeadPHY(k,:)
 # endif
@@ -1175,163 +1248,190 @@ contains
 # endif
 #endif
                              
-! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-!       ! if (isnan() .or. abs() > huge()) then
-!       if (isnan(dDIC_dt(k)) .or. abs(dDIC_dt(k)) > 1.0d15 .or. DIC(k)+dDIC_dt(k)*dt*dz(k) < -100.0d0) then
-!         write(*,*) 'yt_debug: mod_reef_ecosys.F dDIC_dt(k)    foodweb      i =', i, '   j =', j, '   k =', k
-!         write(*,*) 'yt_debug:     dDIC_dt(k) =', dDIC_dt(k)
-!         write(*,*) 'yt_debug:     DIC(k) =', DIC(k)
-!         write(*,*) 'yt_debug:     DIC(k)+dDIC_dt(k)*dt*dz(k) =', DIC(k)+dDIC_dt(k)*dt*dz(k)
-!       endif
-!       ! if (isnan() .or. abs() > huge()) then
-!       if (isnan(dTA_dt(k)) .or. abs(dTA_dt(k)) > 1.0d15 .or. TA(k)+dTA_dt(k)*dt*dz(k) < -100.0d0) then
-!         write(*,*) 'yt_debug: mod_reef_ecosys.F dTA_dt(k)    foodweb      i =', i, '   j =', j, '   k =', k
-!         write(*,*) 'yt_debug:     dTA_dt(k) =', dTA_dt(k)
-!         write(*,*) 'yt_debug:     TA(k) =', TA(k)
-!         write(*,*) 'yt_debug:     TA(k)+dTA_dt(k)*dt*dz(k) =', TA(k)+dTA_dt(k)*dt*dz(k)
-!       endif
-!       ! if (isnan() .or. abs() > huge()) then
-!       if (isnan(dDOx_dt(k)) .or. abs(dDOx_dt(k)) > 1.0d15 .or. DOx(k)+dDOx_dt(k)*dt*dz(k) < -100.0d0) then
-!         write(*,*) 'yt_debug: mod_reef_ecosys.F dDOx_dt(k)    foodweb      i =', i, '   j =', j, '   k =', k
-!         write(*,*) 'yt_debug:     dDOx_dt(k) =', dDOx_dt(k)
-!         write(*,*) 'yt_debug:     DOx(k) =', DOx(k)
-!         write(*,*) 'yt_debug:     DOx(k)+dDOx_dt(k)*dt*dz(k) =', DOx(k)+dDOx_dt(k)*dt*dz(k)
-!       endif
-! #if defined ORGANIC_MATTER
-!       DO yt_iter = 1, Ndom
-!         ! if (isnan() .or. abs() > huge()) then
-!         if (isnan(dDOC_dt(k,yt_iter)) .or. abs(dDOC_dt(k,yt_iter)) > 1.0d15 .or. DOC(k,yt_iter)+dDOC_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
-!           write(*,*) 'yt_debug: mod_reef_ecosys.F dDOC_dt(k,Ndom)    foodweb      i =', i, '   j =', j, '   k =', k, '   Ndom =', yt_iter
-!           write(*,*) 'yt_debug:     dDOC_dt(k,Ndom) =', dDOC_dt(k,yt_iter)
-!           write(*,*) 'yt_debug:     DOC(k,Ndom) =', DOC(k,yt_iter)
-!           write(*,*) 'yt_debug:     DOC(k,Ndom)+dDOC_dt(k,Ndom)*dt*dz(k) =', DOC(k,yt_iter)+dDOC_dt(k,yt_iter)*dt*dz(k)
-!         endif
-!       ENDDO
-!       DO yt_iter = 1, Npom
-!         ! if (isnan() .or. abs() > huge()) then
-!         if (isnan(dPOC_dt(k,yt_iter)) .or. abs(dPOC_dt(k,yt_iter)) > 1.0d15 .or. POC(k,yt_iter)+dPOC_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
-!           write(*,*) 'yt_debug: mod_reef_ecosys.F dPOC_dt(k,Npom)    foodweb      i =', i, '   j =', j, '   k =', k, '   Npom =', yt_iter
-!           write(*,*) 'yt_debug:     dPOC_dt(k,Npom) =', dPOC_dt(k,yt_iter)
-!           write(*,*) 'yt_debug:     POC(k,Npom) =', POC(k,yt_iter)
-!           write(*,*) 'yt_debug:     POC(k,Npom)+dPOC_dt(k,Npom)*dt*dz(k) =', POC(k,yt_iter)+dPOC_dt(k,yt_iter)*dt*dz(k)
-!         endif
-!       ENDDO
-!       DO yt_iter = 1, Nphy
-!         ! if (isnan() .or. abs() > huge()) then
-!         if (isnan(dPHY_dt(k,yt_iter)) .or. abs(dPHY_dt(k,yt_iter)) > 1.0d15 .or. PHY(k,yt_iter)+dPHY_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
-!           write(*,*) 'yt_debug: mod_reef_ecosys.F dPHY_dt(k,Nphy)    foodweb      i =', i, '   j =', j, '   k =', k, '   Nphy =', yt_iter
-!           write(*,*) 'yt_debug:     dPHY_dt(k,Nphy) =', dPHY_dt(k,yt_iter)
-!           write(*,*) 'yt_debug:     PHY(k,Nphy) =', PHY(k,yt_iter)
-!           write(*,*) 'yt_debug:     PHY(k,Nphy)+dPHY_dt(k,Nphy)*dt*dz(k) =', PHY(k,yt_iter)+dPHY_dt(k,yt_iter)*dt*dz(k)
-!         endif
-!       ENDDO
-!       DO yt_iter = 1, Nzoo
-!         ! if (isnan() .or. abs() > huge()) then
-!         if (isnan(dZOO_dt(k,yt_iter)) .or. abs(dZOO_dt(k,yt_iter)) > 1.0d15 .or. ZOO(k,yt_iter)+dZOO_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
-!           write(*,*) 'yt_debug: mod_reef_ecosys.F dZOO_dt(k,Nzoo)    foodweb      i =', i, '   j =', j, '   k =', k, '   Nzoo =', yt_iter
-!           write(*,*) 'yt_debug:     dZOO_dt(k,Nzoo) =', dZOO_dt(k,yt_iter)
-!           write(*,*) 'yt_debug:     ZOO(k,Nzoo) =', ZOO(k,yt_iter)
-!           write(*,*) 'yt_debug:     ZOO(k,Nzoo)+dZOO_dt(k,Nzoo)*dt*dz(k) =', ZOO(k,yt_iter)+dZOO_dt(k,yt_iter)*dt*dz(k)
-!         endif
-!       ENDDO
-!       DO yt_iter = 1, Npim
-!         ! if (isnan() .or. abs() > huge()) then
-!         if (isnan(dPIC_dt(k,yt_iter)) .or. abs(dPIC_dt(k,yt_iter)) > 1.0d15 .or. PIC(k,yt_iter)+dPIC_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
-!           write(*,*) 'yt_debug: mod_reef_ecosys.F dPIC_dt(k,Npim)    foodweb      i =', i, '   j =', j, '   k =', k, '   Npim =', yt_iter
-!           write(*,*) 'yt_debug:     dPIC_dt(k,Npim) =', dPIC_dt(k,yt_iter)
-!           write(*,*) 'yt_debug:     PIC(k,Npim) =', PIC(k,yt_iter)
-!           write(*,*) 'yt_debug:     PIC(k,Npim)+dPIC_dt(k,Npim)*dt*dz(k) =', PIC(k,yt_iter)+dPIC_dt(k,yt_iter)*dt*dz(k)
-!         endif
-!       ENDDO
-! #endif
-! #if defined NUTRIENTS           
-!       ! if (isnan() .or. abs() > huge()) then
-!       if (isnan(dNO3_dt(k)) .or. abs(dNO3_dt(k)) > 1.0d15 .or. NO3(k)+dNO3_dt(k)*dt*dz(k) < -100.0d0) then
-!         write(*,*) 'yt_debug: mod_reef_ecosys.F dNO3_dt(k)    foodweb      i =', i, '   j =', j, '   k =', k
-!         write(*,*) 'yt_debug:     dNO3_dt(k) =', dNO3_dt(k)
-!         write(*,*) 'yt_debug:     NO3(k) =', NO3(k)
-!         write(*,*) 'yt_debug:     NO3(k)+dNO3_dt(k)*dt*dz(k) =', NO3(k)+dNO3_dt(k)*dt*dz(k)
-!       endif
-!       ! if (isnan() .or. abs() > huge()) then
-!       if (isnan(dNH4_dt(k)) .or. abs(dNH4_dt(k)) > 1.0d15 .or. NH4(k)+dNH4_dt(k)*dt*dz(k) < -100.0d0) then
-!         write(*,*) 'yt_debug: mod_reef_ecosys.F dNH4_dt(k)    foodweb      i =', i, '   j =', j, '   k =', k
-!         write(*,*) 'yt_debug:     dNH4_dt(k) =', dNH4_dt(k)
-!         write(*,*) 'yt_debug:     NH4(k) =', NH4(k)
-!         write(*,*) 'yt_debug:     NH4(k)+dNH4_dt(k)*dt*dz(k) =', NH4(k)+dNH4_dt(k)*dt*dz(k)
-!       endif
-!       ! if (isnan() .or. abs() > huge()) then
-!       if (isnan(dPO4_dt(k)) .or. abs(dPO4_dt(k)) > 1.0d15 .or. PO4(k)+dPO4_dt(k)*dt*dz(k) < -100.0d0) then
-!         write(*,*) 'yt_debug: mod_reef_ecosys.F dPO4_dt(k)    foodweb      i =', i, '   j =', j, '   k =', k
-!         write(*,*) 'yt_debug:     dPO4_dt(k) =', dPO4_dt(k)
-!         write(*,*) 'yt_debug:     PO4(k) =', PO4(k)
-!         write(*,*) 'yt_debug:     PO4(k)+dPO4_dt(k)*dt*dz(k) =', PO4(k)+dPO4_dt(k)*dt*dz(k)
-!       endif
-! # if defined ORGANIC_MATTER
-!       DO yt_iter = 1, Ndom
-!         ! if (isnan() .or. abs() > huge()) then
-!         if (isnan(dDON_dt(k,yt_iter)) .or. abs(dDON_dt(k,yt_iter)) > 1.0d15 .or. DON(k,yt_iter)+dDON_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
-!           write(*,*) 'yt_debug: mod_reef_ecosys.F dDON_dt(k,Ndom)    foodweb      i =', i, '   j =', j, '   k =', k, '   Ndom =', yt_iter
-!           write(*,*) 'yt_debug:     dDON_dt(k,Ndom) =', dDON_dt(k,yt_iter)
-!           write(*,*) 'yt_debug:     DON(k,Ndom) =', DON(k,yt_iter)
-!           write(*,*) 'yt_debug:     DON(k,Ndom)+dDON_dt(k,Ndom)*dt*dz(k) =', DON(k,yt_iter)+dDON_dt(k,yt_iter)*dt*dz(k)
-!         endif
-!         ! if (isnan() .or. abs() > huge()) then
-!         if (isnan(dDOP_dt(k,yt_iter)) .or. abs(dDOP_dt(k,yt_iter)) > 1.0d15 .or. DOP(k,yt_iter)+dDOP_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
-!           write(*,*) 'yt_debug: mod_reef_ecosys.F dDOP_dt(k,Ndom)    foodweb      i =', i, '   j =', j, '   k =', k, '   Ndom =', yt_iter
-!           write(*,*) 'yt_debug:     dDOP_dt(k,Ndom) =', dDOP_dt(k,yt_iter)
-!           write(*,*) 'yt_debug:     DOP(k,Ndom) =', DOP(k,yt_iter)
-!           write(*,*) 'yt_debug:     DOP(k,Ndom)+dDOP_dt(k,Ndom)*dt*dz(k) =', DOP(k,yt_iter)+dDOP_dt(k,yt_iter)*dt*dz(k)
-!         endif
-!       ENDDO
-!       DO yt_iter = 1, Npom
-!         ! if (isnan() .or. abs() > huge()) then
-!         if (isnan(dPON_dt(k,yt_iter)) .or. abs(dPON_dt(k,yt_iter)) > 1.0d15 .or. PON(k,yt_iter)+dPON_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
-!           write(*,*) 'yt_debug: mod_reef_ecosys.F dPON_dt(k,Npom)    foodweb      i =', i, '   j =', j, '   k =', k, '   Npom =', yt_iter
-!           write(*,*) 'yt_debug:     dPON_dt(k,Npom) =', dPON_dt(k,yt_iter)
-!           write(*,*) 'yt_debug:     PON(k,Npom) =', PON(k,yt_iter)
-!           write(*,*) 'yt_debug:     PON(k,Npom)+dPON_dt(k,Npom)*dt*dz(k) =', PON(k,yt_iter)+dPON_dt(k,yt_iter)*dt*dz(k)
-!         endif
-!         ! if (isnan() .or. abs() > huge()) then
-!         if (isnan(dPOP_dt(k,yt_iter)) .or. abs(dPOP_dt(k,yt_iter)) > 1.0d15 .or. POP(k,yt_iter)+dPOP_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
-!           write(*,*) 'yt_debug: mod_reef_ecosys.F dPOP_dt(k,Npom)    foodweb      i =', i, '   j =', j, '   k =', k, '   Npom =', yt_iter
-!           write(*,*) 'yt_debug:     dPOP_dt(k,Npom) =', dPOP_dt(k,yt_iter)
-!           write(*,*) 'yt_debug:     POP(k,Npom) =', POP(k,yt_iter)
-!           write(*,*) 'yt_debug:     POP(k,Npom)+dPOP_dt(k,Npom)*dt*dz(k) =', POP(k,yt_iter)+dPOP_dt(k,yt_iter)*dt*dz(k)
-!         endif
-!       ENDDO
-! # endif
-! #endif
-!       ! if (isnan() .or. abs() > huge()) then
-!       if (isnan(sspH) .or. abs(sspH) > 1.0d15) then
-!         write(*,*) 'yt_debug: mod_reef_ecosys.F sspH    foodweb      i =', i, '   j =', j
-!         write(*,*) 'yt_debug:     sspH =', sspH
-!       endif
-!       ! if (isnan() .or. abs() > huge()) then
-!       if (isnan(ssfCO2) .or. abs(ssfCO2) > 1.0d15) then
-!         write(*,*) 'yt_debug: mod_reef_ecosys.F ssfCO2    foodweb      i =', i, '   j =', j
-!         write(*,*) 'yt_debug:     ssfCO2 =', ssfCO2
-!       endif
-!       ! if (isnan() .or. abs() > huge()) then
-!       if (isnan(ssWarg) .or. abs(ssWarg) > 1.0d15) then
-!         write(*,*) 'yt_debug: mod_reef_ecosys.F ssWarg    foodweb      i =', i, '   j =', j
-!         write(*,*) 'yt_debug:     ssWarg =', ssWarg
-!       endif
-!       ! if (isnan() .or. abs() > huge()) then
-!       if (isnan(ssCO2flux) .or. abs(ssCO2flux) > 1.0d15) then
-!         write(*,*) 'yt_debug: mod_reef_ecosys.F ssCO2flux    foodweb      i =', i, '   j =', j
-!         write(*,*) 'yt_debug:     ssCO2flux =', ssCO2flux
-!       endif
-!       ! if (isnan() .or. abs() > huge()) then
-!       if (isnan(ssO2flux) .or. abs(ssO2flux) > 1.0d15) then
-!         write(*,*) 'yt_debug: mod_reef_ecosys.F ssO2flux    foodweb      i =', i, '   j =', j
-!         write(*,*) 'yt_debug:     ssO2flux =', ssO2flux
-!       endif
-!       ! if (isnan() .or. abs() > huge()) then
-!       if (isnan(PFDbott) .or. abs(PFDbott) > 1.0d15) then
-!         write(*,*) 'yt_debug: mod_reef_ecosys.F PFDbott    foodweb      i =', i, '   j =', j
-!         write(*,*) 'yt_debug:     PFDbott =', PFDbott
-!       endif
-! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+!!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+      ! if (isnan() .or. abs() > huge()) then
+      if (isnan(dDIC_dt(k)) .or. abs(dDIC_dt(k)) > 1.0d15 .or. DIC(k)+dDIC_dt(k)*dt*dz(k) < -100.0d0) then
+        write(*,*) 'yt_debug: mod_reef_ecosys.F dDIC_dt(k)    foodweb      i =', i, '   j =', j, '   k =', k
+        write(*,*) 'yt_debug:     dDIC_dt(k) =', dDIC_dt(k)
+        write(*,*) 'yt_debug:     DIC(k) =', DIC(k)
+        write(*,*) 'yt_debug:     DIC(k)+dDIC_dt(k)*dt*dz(k) =', DIC(k)+dDIC_dt(k)*dt*dz(k)
+      endif
+      ! if (isnan() .or. abs() > huge()) then
+      if (isnan(dTA_dt(k)) .or. abs(dTA_dt(k)) > 1.0d15 .or. TA(k)+dTA_dt(k)*dt*dz(k) < -100.0d0) then
+        write(*,*) 'yt_debug: mod_reef_ecosys.F dTA_dt(k)    foodweb      i =', i, '   j =', j, '   k =', k
+        write(*,*) 'yt_debug:     dTA_dt(k) =', dTA_dt(k)
+        write(*,*) 'yt_debug:     TA(k) =', TA(k)
+        write(*,*) 'yt_debug:     TA(k)+dTA_dt(k)*dt*dz(k) =', TA(k)+dTA_dt(k)*dt*dz(k)
+      endif
+      ! if (isnan() .or. abs() > huge()) then
+      if (isnan(dDOx_dt(k)) .or. abs(dDOx_dt(k)) > 1.0d15 .or. DOx(k)+dDOx_dt(k)*dt*dz(k) < -100.0d0) then
+        write(*,*) 'yt_debug: mod_reef_ecosys.F dDOx_dt(k)    foodweb      i =', i, '   j =', j, '   k =', k
+        write(*,*) 'yt_debug:     dDOx_dt(k) =', dDOx_dt(k)
+        write(*,*) 'yt_debug:     DOx(k) =', DOx(k)
+        write(*,*) 'yt_debug:     DOx(k)+dDOx_dt(k)*dt*dz(k) =', DOx(k)+dDOx_dt(k)*dt*dz(k)
+      endif
+#if defined ORGANIC_MATTER
+      DO yt_iter = 1, Ndom
+        ! if (isnan() .or. abs() > huge()) then
+        if (isnan(dDOC_dt(k,yt_iter)) .or. abs(dDOC_dt(k,yt_iter)) > 1.0d15 &
+          .or. DOC(k,yt_iter)+dDOC_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
+          write(*,*) 'yt_debug: mod_reef_ecosys.F dDOC_dt(k,Ndom)    foodweb      i =', i, '   j =', j &
+            , '   k =', k, '   Ndom =', yt_iter
+          write(*,*) 'yt_debug:     dDOC_dt(k,Ndom) =', dDOC_dt(k,yt_iter)
+          write(*,*) 'yt_debug:     DOC(k,Ndom) =', DOC(k,yt_iter)
+          write(*,*) 'yt_debug:     DOC(k,Ndom)+dDOC_dt(k,Ndom)*dt*dz(k) =' &
+            , DOC(k,yt_iter)+dDOC_dt(k,yt_iter)*dt*dz(k)
+        endif
+      ENDDO
+      DO yt_iter = 1, Npom
+        ! if (isnan() .or. abs() > huge()) then
+        if (isnan(dPOC_dt(k,yt_iter)) .or. abs(dPOC_dt(k,yt_iter)) > 1.0d15 &
+          .or. POC(k,yt_iter)+dPOC_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
+          write(*,*) 'yt_debug: mod_reef_ecosys.F dPOC_dt(k,Npom)    foodweb      i =', i, '   j =', j &
+            , '   k =', k, '   Npom =', yt_iter
+          write(*,*) 'yt_debug:     dPOC_dt(k,Npom) =', dPOC_dt(k,yt_iter)
+          write(*,*) 'yt_debug:     POC(k,Npom) =', POC(k,yt_iter)
+          write(*,*) 'yt_debug:     POC(k,Npom)+dPOC_dt(k,Npom)*dt*dz(k) =' &
+            , POC(k,yt_iter)+dPOC_dt(k,yt_iter)*dt*dz(k)
+        endif
+      ENDDO
+      DO yt_iter = 1, Nphy
+        ! if (isnan() .or. abs() > huge()) then
+        if (isnan(dPHY_dt(k,yt_iter)) .or. abs(dPHY_dt(k,yt_iter)) > 1.0d15 &
+          .or. PHY(k,yt_iter)+dPHY_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
+          write(*,*) 'yt_debug: mod_reef_ecosys.F dPHY_dt(k,Nphy)    foodweb      i =', i &
+            , '   j =', j, '   k =', k, '   Nphy =', yt_iter
+          write(*,*) 'yt_debug:     dPHY_dt(k,Nphy) =', dPHY_dt(k,yt_iter)
+          write(*,*) 'yt_debug:     PHY(k,Nphy) =', PHY(k,yt_iter)
+          write(*,*) 'yt_debug:     PHY(k,Nphy)+dPHY_dt(k,Nphy)*dt*dz(k) =' &
+            , PHY(k,yt_iter)+dPHY_dt(k,yt_iter)*dt*dz(k)
+        endif
+      ENDDO
+      DO yt_iter = 1, Nzoo
+        ! if (isnan() .or. abs() > huge()) then
+        if (isnan(dZOO_dt(k,yt_iter)) .or. abs(dZOO_dt(k,yt_iter)) > 1.0d15 &
+          .or. ZOO(k,yt_iter)+dZOO_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
+          write(*,*) 'yt_debug: mod_reef_ecosys.F dZOO_dt(k,Nzoo)    foodweb      i =', i, '   j =', j &
+            , '   k =', k, '   Nzoo =', yt_iter
+          write(*,*) 'yt_debug:     dZOO_dt(k,Nzoo) =', dZOO_dt(k,yt_iter)
+          write(*,*) 'yt_debug:     ZOO(k,Nzoo) =', ZOO(k,yt_iter)
+          write(*,*) 'yt_debug:     ZOO(k,Nzoo)+dZOO_dt(k,Nzoo)*dt*dz(k) =' &
+            , ZOO(k,yt_iter)+dZOO_dt(k,yt_iter)*dt*dz(k)
+        endif
+      ENDDO
+      DO yt_iter = 1, Npim
+        ! if (isnan() .or. abs() > huge()) then
+        if (isnan(dPIC_dt(k,yt_iter)) .or. abs(dPIC_dt(k,yt_iter)) > 1.0d15 &
+          .or. PIC(k,yt_iter)+dPIC_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
+          write(*,*) 'yt_debug: mod_reef_ecosys.F dPIC_dt(k,Npim)    foodweb      i =', i, '   j =', j &
+            , '   k =', k, '   Npim =', yt_iter
+          write(*,*) 'yt_debug:     dPIC_dt(k,Npim) =', dPIC_dt(k,yt_iter)
+          write(*,*) 'yt_debug:     PIC(k,Npim) =', PIC(k,yt_iter)
+          write(*,*) 'yt_debug:     PIC(k,Npim)+dPIC_dt(k,Npim)*dt*dz(k) =' &
+            , PIC(k,yt_iter)+dPIC_dt(k,yt_iter)*dt*dz(k)
+        endif
+      ENDDO
+#endif
+#if defined NUTRIENTS           
+      ! if (isnan() .or. abs() > huge()) then
+      if (isnan(dNO3_dt(k)) .or. abs(dNO3_dt(k)) > 1.0d15 .or. NO3(k)+dNO3_dt(k)*dt*dz(k) < -100.0d0) then
+        write(*,*) 'yt_debug: mod_reef_ecosys.F dNO3_dt(k)    foodweb      i =', i, '   j =', j, '   k =', k
+        write(*,*) 'yt_debug:     dNO3_dt(k) =', dNO3_dt(k)
+        write(*,*) 'yt_debug:     NO3(k) =', NO3(k)
+        write(*,*) 'yt_debug:     NO3(k)+dNO3_dt(k)*dt*dz(k) =', NO3(k)+dNO3_dt(k)*dt*dz(k)
+      endif
+      ! if (isnan() .or. abs() > huge()) then
+      if (isnan(dNH4_dt(k)) .or. abs(dNH4_dt(k)) > 1.0d15 .or. NH4(k)+dNH4_dt(k)*dt*dz(k) < -100.0d0) then
+        write(*,*) 'yt_debug: mod_reef_ecosys.F dNH4_dt(k)    foodweb      i =', i, '   j =', j, '   k =', k
+        write(*,*) 'yt_debug:     dNH4_dt(k) =', dNH4_dt(k)
+        write(*,*) 'yt_debug:     NH4(k) =', NH4(k)
+        write(*,*) 'yt_debug:     NH4(k)+dNH4_dt(k)*dt*dz(k) =', NH4(k)+dNH4_dt(k)*dt*dz(k)
+      endif
+      ! if (isnan() .or. abs() > huge()) then
+      if (isnan(dPO4_dt(k)) .or. abs(dPO4_dt(k)) > 1.0d15 .or. PO4(k)+dPO4_dt(k)*dt*dz(k) < -100.0d0) then
+        write(*,*) 'yt_debug: mod_reef_ecosys.F dPO4_dt(k)    foodweb      i =', i, '   j =', j, '   k =', k
+        write(*,*) 'yt_debug:     dPO4_dt(k) =', dPO4_dt(k)
+        write(*,*) 'yt_debug:     PO4(k) =', PO4(k)
+        write(*,*) 'yt_debug:     PO4(k)+dPO4_dt(k)*dt*dz(k) =', PO4(k)+dPO4_dt(k)*dt*dz(k)
+      endif
+# if defined ORGANIC_MATTER
+      DO yt_iter = 1, Ndom
+        ! if (isnan() .or. abs() > huge()) then
+        if (isnan(dDON_dt(k,yt_iter)) .or. abs(dDON_dt(k,yt_iter)) > 1.0d15 &
+          .or. DON(k,yt_iter)+dDON_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
+          write(*,*) 'yt_debug: mod_reef_ecosys.F dDON_dt(k,Ndom)    foodweb      i =', i, '   j =', j &
+            , '   k =', k, '   Ndom =', yt_iter
+          write(*,*) 'yt_debug:     dDON_dt(k,Ndom) =', dDON_dt(k,yt_iter)
+          write(*,*) 'yt_debug:     DON(k,Ndom) =', DON(k,yt_iter)
+          write(*,*) 'yt_debug:     DON(k,Ndom)+dDON_dt(k,Ndom)*dt*dz(k) =' &
+            , DON(k,yt_iter)+dDON_dt(k,yt_iter)*dt*dz(k)
+        endif
+        ! if (isnan() .or. abs() > huge()) then
+        if (isnan(dDOP_dt(k,yt_iter)) .or. abs(dDOP_dt(k,yt_iter)) > 1.0d15 &
+          .or. DOP(k,yt_iter)+dDOP_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
+          write(*,*) 'yt_debug: mod_reef_ecosys.F dDOP_dt(k,Ndom)    foodweb      i =', i, '   j =', j &
+            , '   k =', k, '   Ndom =', yt_iter
+          write(*,*) 'yt_debug:     dDOP_dt(k,Ndom) =', dDOP_dt(k,yt_iter)
+          write(*,*) 'yt_debug:     DOP(k,Ndom) =', DOP(k,yt_iter)
+          write(*,*) 'yt_debug:     DOP(k,Ndom)+dDOP_dt(k,Ndom)*dt*dz(k) =' &
+            , DOP(k,yt_iter)+dDOP_dt(k,yt_iter)*dt*dz(k)
+        endif
+      ENDDO
+      DO yt_iter = 1, Npom
+        ! if (isnan() .or. abs() > huge()) then
+        if (isnan(dPON_dt(k,yt_iter)) .or. abs(dPON_dt(k,yt_iter)) > 1.0d15 &
+          .or. PON(k,yt_iter)+dPON_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
+          write(*,*) 'yt_debug: mod_reef_ecosys.F dPON_dt(k,Npom)    foodweb      i =', i, '   j =', j &
+            , '   k =', k, '   Npom =', yt_iter
+          write(*,*) 'yt_debug:     dPON_dt(k,Npom) =', dPON_dt(k,yt_iter)
+          write(*,*) 'yt_debug:     PON(k,Npom) =', PON(k,yt_iter)
+          write(*,*) 'yt_debug:     PON(k,Npom)+dPON_dt(k,Npom)*dt*dz(k) =' &
+            , PON(k,yt_iter)+dPON_dt(k,yt_iter)*dt*dz(k)
+        endif
+        ! if (isnan() .or. abs() > huge()) then
+        if (isnan(dPOP_dt(k,yt_iter)) .or. abs(dPOP_dt(k,yt_iter)) > 1.0d15 &
+          .or. POP(k,yt_iter)+dPOP_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
+          write(*,*) 'yt_debug: mod_reef_ecosys.F dPOP_dt(k,Npom)    foodweb      i =', i, '   j =', j &
+            , '   k =', k, '   Npom =', yt_iter
+          write(*,*) 'yt_debug:     dPOP_dt(k,Npom) =', dPOP_dt(k,yt_iter)
+          write(*,*) 'yt_debug:     POP(k,Npom) =', POP(k,yt_iter)
+          write(*,*) 'yt_debug:     POP(k,Npom)+dPOP_dt(k,Npom)*dt*dz(k) =' &
+            , POP(k,yt_iter)+dPOP_dt(k,yt_iter)*dt*dz(k)
+        endif
+      ENDDO
+# endif
+#endif
+      ! if (isnan() .or. abs() > huge()) then
+      if (isnan(sspH) .or. abs(sspH) > 1.0d15) then
+        write(*,*) 'yt_debug: mod_reef_ecosys.F sspH    foodweb      i =', i, '   j =', j
+        write(*,*) 'yt_debug:     sspH =', sspH
+      endif
+      ! if (isnan() .or. abs() > huge()) then
+      if (isnan(ssfCO2) .or. abs(ssfCO2) > 1.0d15) then
+        write(*,*) 'yt_debug: mod_reef_ecosys.F ssfCO2    foodweb      i =', i, '   j =', j
+        write(*,*) 'yt_debug:     ssfCO2 =', ssfCO2
+      endif
+      ! if (isnan() .or. abs() > huge()) then
+      if (isnan(ssWarg) .or. abs(ssWarg) > 1.0d15) then
+        write(*,*) 'yt_debug: mod_reef_ecosys.F ssWarg    foodweb      i =', i, '   j =', j
+        write(*,*) 'yt_debug:     ssWarg =', ssWarg
+      endif
+      ! if (isnan() .or. abs() > huge()) then
+      if (isnan(ssCO2flux) .or. abs(ssCO2flux) > 1.0d15) then
+        write(*,*) 'yt_debug: mod_reef_ecosys.F ssCO2flux    foodweb      i =', i, '   j =', j
+        write(*,*) 'yt_debug:     ssCO2flux =', ssCO2flux
+      endif
+      ! if (isnan() .or. abs() > huge()) then
+      if (isnan(ssO2flux) .or. abs(ssO2flux) > 1.0d15) then
+        write(*,*) 'yt_debug: mod_reef_ecosys.F ssO2flux    foodweb      i =', i, '   j =', j
+        write(*,*) 'yt_debug:     ssO2flux =', ssO2flux
+      endif
+      ! if (isnan() .or. abs() > huge()) then
+      if (isnan(PFDbott) .or. abs(PFDbott) > 1.0d15) then
+        write(*,*) 'yt_debug: mod_reef_ecosys.F PFDbott    foodweb      i =', i, '   j =', j
+        write(*,*) 'yt_debug:     PFDbott =', PFDbott
+      endif
+!!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
 !  Light attenuation at the bottom of the grid cell. It is the starting
@@ -1406,165 +1506,183 @@ contains
 
 #endif
 
-! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-!     DO k=1,N
-!       ! if (isnan() .or. abs() > huge()) then
-!       if (isnan(dDIC_dt(k)) .or. abs(dDIC_dt(k)) > 1.0d15 .or. DIC(k)+dDIC_dt(k)*dt*dz(k) < -100.0d0) then
-!         write(*,*) 'yt_debug: mod_reef_ecosys.F dDIC_dt(k)    advection      i =', i, '   j =', j, '   k =', k
-!         write(*,*) 'yt_debug:     dDIC_dt(k) =', dDIC_dt(k)
-!         write(*,*) 'yt_debug:     DIC(k) =', DIC(k)
-!         write(*,*) 'yt_debug:     DIC(k)+dDIC_dt(k)*dt*dz(k) =', DIC(k)+dDIC_dt(k)*dt*dz(k)
-!       endif
-!       ! if (isnan() .or. abs() > huge()) then
-!       if (isnan(dTA_dt(k)) .or. abs(dTA_dt(k)) > 1.0d15 .or. TA(k)+dTA_dt(k)*dt*dz(k) < -100.0d0) then
-!         write(*,*) 'yt_debug: mod_reef_ecosys.F dTA_dt(k)    advection      i =', i, '   j =', j, '   k =', k
-!         write(*,*) 'yt_debug:     dTA_dt(k) =', dTA_dt(k)
-!         write(*,*) 'yt_debug:     TA(k) =', TA(k)
-!         write(*,*) 'yt_debug:     TA(k)+dTA_dt(k)*dt*dz(k) =', TA(k)+dTA_dt(k)*dt*dz(k)
-!       endif
-!       ! if (isnan() .or. abs() > huge()) then
-!       if (isnan(dDOx_dt(k)) .or. abs(dDOx_dt(k)) > 1.0d15 .or. DOx(k)+dDOx_dt(k)*dt*dz(k) < -100.0d0) then
-!         write(*,*) 'yt_debug: mod_reef_ecosys.F dDOx_dt(k)    advection      i =', i, '   j =', j, '   k =', k
-!         write(*,*) 'yt_debug:     dDOx_dt(k) =', dDOx_dt(k)
-!         write(*,*) 'yt_debug:     DOx(k) =', DOx(k)
-!         write(*,*) 'yt_debug:     DOx(k)+dDOx_dt(k)*dt*dz(k) =', DOx(k)+dDOx_dt(k)*dt*dz(k)
-!       endif
-! #if defined ORGANIC_MATTER
-!       DO yt_iter = 1, Ndom
-!         ! if (isnan() .or. abs() > huge()) then
-!         if (isnan(dDOC_dt(k,yt_iter)) .or. abs(dDOC_dt(k,yt_iter)) > 1.0d15 .or. DOC(k,yt_iter)+dDOC_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
-!           write(*,*) 'yt_debug: mod_reef_ecosys.F dDOC_dt(k,Ndom)    advection      i =', i, '   j =', j, '   k =', k, '   Ndom =', yt_iter
-!           write(*,*) 'yt_debug:     dDOC_dt(k,Ndom) =', dDOC_dt(k,yt_iter)
-!           write(*,*) 'yt_debug:     DOC(k,Ndom) =', DOC(k,yt_iter)
-!           write(*,*) 'yt_debug:     DOC(k,Ndom)+dDOC_dt(k,Ndom)*dt*dz(k) =', DOC(k,yt_iter)+dDOC_dt(k,yt_iter)*dt*dz(k)
-!         endif
-!       ENDDO
-!       DO yt_iter = 1, Npom
-!         ! if (isnan() .or. abs() > huge()) then
-!         if (isnan(dPOC_dt(k,yt_iter)) .or. abs(dPOC_dt(k,yt_iter)) > 1.0d15 .or. POC(k,yt_iter)+dPOC_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
-!           write(*,*) 'yt_debug: mod_reef_ecosys.F dPOC_dt(k,Npom)    advection      i =', i, '   j =', j, '   k =', k, '   Npom =', yt_iter
-!           write(*,*) 'yt_debug:     dPOC_dt(k,Npom) =', dPOC_dt(k,yt_iter)
-!           write(*,*) 'yt_debug:     POC(k,Npom) =', POC(k,yt_iter)
-!           write(*,*) 'yt_debug:     POC(k,Npom)+dPOC_dt(k,Npom)*dt*dz(k) =', POC(k,yt_iter)+dPOC_dt(k,yt_iter)*dt*dz(k)
-!         endif
-!       ENDDO
-!       DO yt_iter = 1, Nphy
-!         ! if (isnan() .or. abs() > huge()) then
-!         if (isnan(dPHY_dt(k,yt_iter)) .or. abs(dPHY_dt(k,yt_iter)) > 1.0d15 .or. PHY(k,yt_iter)+dPHY_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
-!           write(*,*) 'yt_debug: mod_reef_ecosys.F dPHY_dt(k,Nphy)    advection      i =', i, '   j =', j, '   k =', k, '   Nphy =', yt_iter
-!           write(*,*) 'yt_debug:     dPHY_dt(k,Nphy) =', dPHY_dt(k,yt_iter)
-!           write(*,*) 'yt_debug:     PHY(k,Nphy) =', PHY(k,yt_iter)
-!           write(*,*) 'yt_debug:     PHY(k,Nphy)+dPHY_dt(k,Nphy)*dt*dz(k) =', PHY(k,yt_iter)+dPHY_dt(k,yt_iter)*dt*dz(k)
-!         endif
-!       ENDDO
-!       DO yt_iter = 1, Nzoo
-!         ! if (isnan() .or. abs() > huge()) then
-!         if (isnan(dZOO_dt(k,yt_iter)) .or. abs(dZOO_dt(k,yt_iter)) > 1.0d15 .or. ZOO(k,yt_iter)+dZOO_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
-!           write(*,*) 'yt_debug: mod_reef_ecosys.F dZOO_dt(k,Nzoo)    advection      i =', i, '   j =', j, '   k =', k, '   Nzoo =', yt_iter
-!           write(*,*) 'yt_debug:     dZOO_dt(k,Nzoo) =', dZOO_dt(k,yt_iter)
-!           write(*,*) 'yt_debug:     ZOO(k,Nzoo) =', ZOO(k,yt_iter)
-!           write(*,*) 'yt_debug:     ZOO(k,Nzoo)+dZOO_dt(k,Nzoo)*dt*dz(k) =', ZOO(k,yt_iter)+dZOO_dt(k,yt_iter)*dt*dz(k)
-!         endif
-!       ENDDO
-!       DO yt_iter = 1, Npim
-!         ! if (isnan() .or. abs() > huge()) then
-!         if (isnan(dPIC_dt(k,yt_iter)) .or. abs(dPIC_dt(k,yt_iter)) > 1.0d15 .or. PIC(k,yt_iter)+dPIC_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
-!           write(*,*) 'yt_debug: mod_reef_ecosys.F dPIC_dt(k,Npim)    advection      i =', i, '   j =', j, '   k =', k, '   Npim =', yt_iter
-!           write(*,*) 'yt_debug:     dPIC_dt(k,Npim) =', dPIC_dt(k,yt_iter)
-!           write(*,*) 'yt_debug:     PIC(k,Npim) =', PIC(k,yt_iter)
-!           write(*,*) 'yt_debug:     PIC(k,Npim)+dPIC_dt(k,Npim)*dt*dz(k) =', PIC(k,yt_iter)+dPIC_dt(k,yt_iter)*dt*dz(k)
-!         endif
-!       ENDDO
-! #endif
-! #if defined NUTRIENTS           
-!       ! if (isnan() .or. abs() > huge()) then
-!       if (isnan(dNO3_dt(k)) .or. abs(dNO3_dt(k)) > 1.0d15 .or. NO3(k)+dNO3_dt(k)*dt*dz(k) < -100.0d0) then
-!         write(*,*) 'yt_debug: mod_reef_ecosys.F dNO3_dt(k)    advection      i =', i, '   j =', j, '   k =', k
-!         write(*,*) 'yt_debug:     dNO3_dt(k) =', dNO3_dt(k)
-!         write(*,*) 'yt_debug:     NO3(k) =', NO3(k)
-!         write(*,*) 'yt_debug:     NO3(k)+dNO3_dt(k)*dt*dz(k) =', NO3(k)+dNO3_dt(k)*dt*dz(k)
-!       endif
-!       ! if (isnan() .or. abs() > huge()) then
-!       if (isnan(dNH4_dt(k)) .or. abs(dNH4_dt(k)) > 1.0d15 .or. NH4(k)+dNH4_dt(k)*dt*dz(k) < -100.0d0) then
-!         write(*,*) 'yt_debug: mod_reef_ecosys.F dNH4_dt(k)    advection      i =', i, '   j =', j, '   k =', k
-!         write(*,*) 'yt_debug:     dNH4_dt(k) =', dNH4_dt(k)
-!         write(*,*) 'yt_debug:     NH4(k) =', NH4(k)
-!         write(*,*) 'yt_debug:     NH4(k)+dNH4_dt(k)*dt*dz(k) =', NH4(k)+dNH4_dt(k)*dt*dz(k)
-!       endif
-!       ! if (isnan() .or. abs() > huge()) then
-!       if (isnan(dPO4_dt(k)) .or. abs(dPO4_dt(k)) > 1.0d15 .or. PO4(k)+dPO4_dt(k)*dt*dz(k) < -100.0d0) then
-!         write(*,*) 'yt_debug: mod_reef_ecosys.F dPO4_dt(k)    advection      i =', i, '   j =', j, '   k =', k
-!         write(*,*) 'yt_debug:     dPO4_dt(k) =', dPO4_dt(k)
-!         write(*,*) 'yt_debug:     PO4(k) =', PO4(k)
-!         write(*,*) 'yt_debug:     PO4(k)+dPO4_dt(k)*dt*dz(k) =', PO4(k)+dPO4_dt(k)*dt*dz(k)
-!       endif
-! # if defined ORGANIC_MATTER
-!       DO yt_iter = 1, Ndom
-!         ! if (isnan() .or. abs() > huge()) then
-!         if (isnan(dDON_dt(k,yt_iter)) .or. abs(dDON_dt(k,yt_iter)) > 1.0d15 .or. DON(k,yt_iter)+dDON_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
-!           write(*,*) 'yt_debug: mod_reef_ecosys.F dDON_dt(k,Ndom)    advection      i =', i, '   j =', j, '   k =', k, '   Ndom =', yt_iter
-!           write(*,*) 'yt_debug:     dDON_dt(k,Ndom) =', dDON_dt(k,yt_iter)
-!           write(*,*) 'yt_debug:     DON(k,Ndom) =', DON(k,yt_iter)
-!           write(*,*) 'yt_debug:     DON(k,Ndom)+dDON_dt(k,Ndom)*dt*dz(k) =', DON(k,yt_iter)+dDON_dt(k,yt_iter)*dt*dz(k)
-!         endif
-!         ! if (isnan() .or. abs() > huge()) then
-!         if (isnan(dDOP_dt(k,yt_iter)) .or. abs(dDOP_dt(k,yt_iter)) > 1.0d15 .or. DOP(k,yt_iter)+dDOP_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
-!           write(*,*) 'yt_debug: mod_reef_ecosys.F dDOP_dt(k,Ndom)    advection      i =', i, '   j =', j, '   k =', k, '   Ndom =', yt_iter
-!           write(*,*) 'yt_debug:     dDOP_dt(k,Ndom) =', dDOP_dt(k,yt_iter)
-!           write(*,*) 'yt_debug:     DOP(k,Ndom) =', DOP(k,yt_iter)
-!           write(*,*) 'yt_debug:     DOP(k,Ndom)+dDOP_dt(k,Ndom)*dt*dz(k) =', DOP(k,yt_iter)+dDOP_dt(k,yt_iter)*dt*dz(k)
-!         endif
-!       ENDDO
-!       DO yt_iter = 1, Npom
-!         ! if (isnan() .or. abs() > huge()) then
-!         if (isnan(dPON_dt(k,yt_iter)) .or. abs(dPON_dt(k,yt_iter)) > 1.0d15 .or. PON(k,yt_iter)+dPON_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
-!           write(*,*) 'yt_debug: mod_reef_ecosys.F dPON_dt(k,Npom)    advection      i =', i, '   j =', j, '   k =', k, '   Npom =', yt_iter
-!           write(*,*) 'yt_debug:     dPON_dt(k,Npom) =', dPON_dt(k,yt_iter)
-!           write(*,*) 'yt_debug:     PON(k,Npom) =', PON(k,yt_iter)
-!           write(*,*) 'yt_debug:     PON(k,Npom)+dPON_dt(k,Npom)*dt*dz(k) =', PON(k,yt_iter)+dPON_dt(k,yt_iter)*dt*dz(k)
-!         endif
-!         ! if (isnan() .or. abs() > huge()) then
-!         if (isnan(dPOP_dt(k,yt_iter)) .or. abs(dPOP_dt(k,yt_iter)) > 1.0d15 .or. POP(k,yt_iter)+dPOP_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
-!           write(*,*) 'yt_debug: mod_reef_ecosys.F dPOP_dt(k,Npom)    advection      i =', i, '   j =', j, '   k =', k, '   Npom =', yt_iter
-!           write(*,*) 'yt_debug:     dPOP_dt(k,Npom) =', dPOP_dt(k,yt_iter)
-!           write(*,*) 'yt_debug:     POP(k,Npom) =', POP(k,yt_iter)
-!           write(*,*) 'yt_debug:     POP(k,Npom)+dPOP_dt(k,Npom)*dt*dz(k) =', POP(k,yt_iter)+dPOP_dt(k,yt_iter)*dt*dz(k)
-!         endif
-!       ENDDO
-! # endif
-! #endif
-!     ENDDO
-!       ! if (isnan() .or. abs() > huge()) then
-!       if (isnan(sspH) .or. abs(sspH) > 1.0d15) then
-!         write(*,*) 'yt_debug: mod_reef_ecosys.F sspH    advection      i =', i, '   j =', j
-!         write(*,*) 'yt_debug:     sspH =', sspH
-!       endif
-!       ! if (isnan() .or. abs() > huge()) then
-!       if (isnan(ssfCO2) .or. abs(ssfCO2) > 1.0d15) then
-!         write(*,*) 'yt_debug: mod_reef_ecosys.F ssfCO2    advection      i =', i, '   j =', j
-!         write(*,*) 'yt_debug:     ssfCO2 =', ssfCO2
-!       endif
-!       ! if (isnan() .or. abs() > huge()) then
-!       if (isnan(ssWarg) .or. abs(ssWarg) > 1.0d15) then
-!         write(*,*) 'yt_debug: mod_reef_ecosys.F ssWarg    advection      i =', i, '   j =', j
-!         write(*,*) 'yt_debug:     ssWarg =', ssWarg
-!       endif
-!       ! if (isnan() .or. abs() > huge()) then
-!       if (isnan(ssCO2flux) .or. abs(ssCO2flux) > 1.0d15) then
-!         write(*,*) 'yt_debug: mod_reef_ecosys.F ssCO2flux    advection      i =', i, '   j =', j
-!         write(*,*) 'yt_debug:     ssCO2flux =', ssCO2flux
-!       endif
-!       ! if (isnan() .or. abs() > huge()) then
-!       if (isnan(ssO2flux) .or. abs(ssO2flux) > 1.0d15) then
-!         write(*,*) 'yt_debug: mod_reef_ecosys.F ssO2flux    advection      i =', i, '   j =', j
-!         write(*,*) 'yt_debug:     ssO2flux =', ssO2flux
-!       endif
-!       ! if (isnan() .or. abs() > huge()) then
-!       if (isnan(PFDbott) .or. abs(PFDbott) > 1.0d15) then
-!         write(*,*) 'yt_debug: mod_reef_ecosys.F PFDbott    advection      i =', i, '   j =', j
-!         write(*,*) 'yt_debug:     PFDbott =', PFDbott
-!       endif
-! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+!!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    DO k=1,N
+      ! if (isnan() .or. abs() > huge()) then
+      if (isnan(dDIC_dt(k)) .or. abs(dDIC_dt(k)) > 1.0d15 .or. DIC(k)+dDIC_dt(k)*dt*dz(k) < -100.0d0) then
+        write(*,*) 'yt_debug: mod_reef_ecosys.F dDIC_dt(k)    advection      i =', i, '   j =', j, '   k =', k
+        write(*,*) 'yt_debug:     dDIC_dt(k) =', dDIC_dt(k)
+        write(*,*) 'yt_debug:     DIC(k) =', DIC(k)
+        write(*,*) 'yt_debug:     DIC(k)+dDIC_dt(k)*dt*dz(k) =', DIC(k)+dDIC_dt(k)*dt*dz(k)
+      endif
+      ! if (isnan() .or. abs() > huge()) then
+      if (isnan(dTA_dt(k)) .or. abs(dTA_dt(k)) > 1.0d15 .or. TA(k)+dTA_dt(k)*dt*dz(k) < -100.0d0) then
+        write(*,*) 'yt_debug: mod_reef_ecosys.F dTA_dt(k)    advection      i =', i, '   j =', j, '   k =', k
+        write(*,*) 'yt_debug:     dTA_dt(k) =', dTA_dt(k)
+        write(*,*) 'yt_debug:     TA(k) =', TA(k)
+        write(*,*) 'yt_debug:     TA(k)+dTA_dt(k)*dt*dz(k) =', TA(k)+dTA_dt(k)*dt*dz(k)
+      endif
+      ! if (isnan() .or. abs() > huge()) then
+      if (isnan(dDOx_dt(k)) .or. abs(dDOx_dt(k)) > 1.0d15 .or. DOx(k)+dDOx_dt(k)*dt*dz(k) < -100.0d0) then
+        write(*,*) 'yt_debug: mod_reef_ecosys.F dDOx_dt(k)    advection      i =', i, '   j =', j, '   k =', k
+        write(*,*) 'yt_debug:     dDOx_dt(k) =', dDOx_dt(k)
+        write(*,*) 'yt_debug:     DOx(k) =', DOx(k)
+        write(*,*) 'yt_debug:     DOx(k)+dDOx_dt(k)*dt*dz(k) =', DOx(k)+dDOx_dt(k)*dt*dz(k)
+      endif
+#if defined ORGANIC_MATTER
+      DO yt_iter = 1, Ndom
+        ! if (isnan() .or. abs() > huge()) then
+        if (isnan(dDOC_dt(k,yt_iter)) .or. abs(dDOC_dt(k,yt_iter)) > 1.0d15 &
+          .or. DOC(k,yt_iter)+dDOC_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
+          write(*,*) 'yt_debug: mod_reef_ecosys.F dDOC_dt(k,Ndom)    advection      i =', i, '   j =', j, '   k =', k &
+            , '   Ndom =', yt_iter
+          write(*,*) 'yt_debug:     dDOC_dt(k,Ndom) =', dDOC_dt(k,yt_iter)
+          write(*,*) 'yt_debug:     DOC(k,Ndom) =', DOC(k,yt_iter)
+          write(*,*) 'yt_debug:     DOC(k,Ndom)+dDOC_dt(k,Ndom)*dt*dz(k) =', DOC(k,yt_iter)+dDOC_dt(k,yt_iter)*dt*dz(k)
+        endif
+      ENDDO
+      DO yt_iter = 1, Npom
+        ! if (isnan() .or. abs() > huge()) then
+        if (isnan(dPOC_dt(k,yt_iter)) .or. abs(dPOC_dt(k,yt_iter)) > 1.0d15 &
+          .or. POC(k,yt_iter)+dPOC_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
+          write(*,*) 'yt_debug: mod_reef_ecosys.F dPOC_dt(k,Npom)    advection      i =', i, '   j =', j, '   k =', k &
+            , '   Npom =', yt_iter
+          write(*,*) 'yt_debug:     dPOC_dt(k,Npom) =', dPOC_dt(k,yt_iter)
+          write(*,*) 'yt_debug:     POC(k,Npom) =', POC(k,yt_iter)
+          write(*,*) 'yt_debug:     POC(k,Npom)+dPOC_dt(k,Npom)*dt*dz(k) =', POC(k,yt_iter)+dPOC_dt(k,yt_iter)*dt*dz(k)
+        endif
+      ENDDO
+      DO yt_iter = 1, Nphy
+        ! if (isnan() .or. abs() > huge()) then
+        if (isnan(dPHY_dt(k,yt_iter)) .or. abs(dPHY_dt(k,yt_iter)) > 1.0d15 &
+          .or. PHY(k,yt_iter)+dPHY_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
+          write(*,*) 'yt_debug: mod_reef_ecosys.F dPHY_dt(k,Nphy)    advection      i =', i, '   j =', j, '   k =', k &
+            , '   Nphy =', yt_iter
+          write(*,*) 'yt_debug:     dPHY_dt(k,Nphy) =', dPHY_dt(k,yt_iter)
+          write(*,*) 'yt_debug:     PHY(k,Nphy) =', PHY(k,yt_iter)
+          write(*,*) 'yt_debug:     PHY(k,Nphy)+dPHY_dt(k,Nphy)*dt*dz(k) =', PHY(k,yt_iter)+dPHY_dt(k,yt_iter)*dt*dz(k)
+        endif
+      ENDDO
+      DO yt_iter = 1, Nzoo
+        ! if (isnan() .or. abs() > huge()) then
+        if (isnan(dZOO_dt(k,yt_iter)) .or. abs(dZOO_dt(k,yt_iter)) > 1.0d15 &
+          .or. ZOO(k,yt_iter)+dZOO_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
+          write(*,*) 'yt_debug: mod_reef_ecosys.F dZOO_dt(k,Nzoo)    advection      i =', i, '   j =', j, '   k =', k &
+            , '   Nzoo =', yt_iter
+          write(*,*) 'yt_debug:     dZOO_dt(k,Nzoo) =', dZOO_dt(k,yt_iter)
+          write(*,*) 'yt_debug:     ZOO(k,Nzoo) =', ZOO(k,yt_iter)
+          write(*,*) 'yt_debug:     ZOO(k,Nzoo)+dZOO_dt(k,Nzoo)*dt*dz(k) =', ZOO(k,yt_iter)+dZOO_dt(k,yt_iter)*dt*dz(k)
+        endif
+      ENDDO
+      DO yt_iter = 1, Npim
+        ! if (isnan() .or. abs() > huge()) then
+        if (isnan(dPIC_dt(k,yt_iter)) .or. abs(dPIC_dt(k,yt_iter)) > 1.0d15 &
+          .or. PIC(k,yt_iter)+dPIC_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
+          write(*,*) 'yt_debug: mod_reef_ecosys.F dPIC_dt(k,Npim)    advection      i =', i, '   j =', j, '   k =', k &
+            , '   Npim =', yt_iter
+          write(*,*) 'yt_debug:     dPIC_dt(k,Npim) =', dPIC_dt(k,yt_iter)
+          write(*,*) 'yt_debug:     PIC(k,Npim) =', PIC(k,yt_iter)
+          write(*,*) 'yt_debug:     PIC(k,Npim)+dPIC_dt(k,Npim)*dt*dz(k) =', PIC(k,yt_iter)+dPIC_dt(k,yt_iter)*dt*dz(k)
+        endif
+      ENDDO
+#endif
+#if defined NUTRIENTS           
+      ! if (isnan() .or. abs() > huge()) then
+      if (isnan(dNO3_dt(k)) .or. abs(dNO3_dt(k)) > 1.0d15 .or. NO3(k)+dNO3_dt(k)*dt*dz(k) < -100.0d0) then
+        write(*,*) 'yt_debug: mod_reef_ecosys.F dNO3_dt(k)    advection      i =', i, '   j =', j, '   k =', k
+        write(*,*) 'yt_debug:     dNO3_dt(k) =', dNO3_dt(k)
+        write(*,*) 'yt_debug:     NO3(k) =', NO3(k)
+        write(*,*) 'yt_debug:     NO3(k)+dNO3_dt(k)*dt*dz(k) =', NO3(k)+dNO3_dt(k)*dt*dz(k)
+      endif
+      ! if (isnan() .or. abs() > huge()) then
+      if (isnan(dNH4_dt(k)) .or. abs(dNH4_dt(k)) > 1.0d15 .or. NH4(k)+dNH4_dt(k)*dt*dz(k) < -100.0d0) then
+        write(*,*) 'yt_debug: mod_reef_ecosys.F dNH4_dt(k)    advection      i =', i, '   j =', j, '   k =', k
+        write(*,*) 'yt_debug:     dNH4_dt(k) =', dNH4_dt(k)
+        write(*,*) 'yt_debug:     NH4(k) =', NH4(k)
+        write(*,*) 'yt_debug:     NH4(k)+dNH4_dt(k)*dt*dz(k) =', NH4(k)+dNH4_dt(k)*dt*dz(k)
+      endif
+      ! if (isnan() .or. abs() > huge()) then
+      if (isnan(dPO4_dt(k)) .or. abs(dPO4_dt(k)) > 1.0d15 .or. PO4(k)+dPO4_dt(k)*dt*dz(k) < -100.0d0) then
+        write(*,*) 'yt_debug: mod_reef_ecosys.F dPO4_dt(k)    advection      i =', i, '   j =', j, '   k =', k
+        write(*,*) 'yt_debug:     dPO4_dt(k) =', dPO4_dt(k)
+        write(*,*) 'yt_debug:     PO4(k) =', PO4(k)
+        write(*,*) 'yt_debug:     PO4(k)+dPO4_dt(k)*dt*dz(k) =', PO4(k)+dPO4_dt(k)*dt*dz(k)
+      endif
+# if defined ORGANIC_MATTER
+      DO yt_iter = 1, Ndom
+        ! if (isnan() .or. abs() > huge()) then
+        if (isnan(dDON_dt(k,yt_iter)) .or. abs(dDON_dt(k,yt_iter)) > 1.0d15 &
+          .or. DON(k,yt_iter)+dDON_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
+          write(*,*) 'yt_debug: mod_reef_ecosys.F dDON_dt(k,Ndom)    advection      i =', i, '   j =', j, '   k =', k &
+            , '   Ndom =', yt_iter
+          write(*,*) 'yt_debug:     dDON_dt(k,Ndom) =', dDON_dt(k,yt_iter)
+          write(*,*) 'yt_debug:     DON(k,Ndom) =', DON(k,yt_iter)
+          write(*,*) 'yt_debug:     DON(k,Ndom)+dDON_dt(k,Ndom)*dt*dz(k) =', DON(k,yt_iter)+dDON_dt(k,yt_iter)*dt*dz(k)
+        endif
+        ! if (isnan() .or. abs() > huge()) then
+        if (isnan(dDOP_dt(k,yt_iter)) .or. abs(dDOP_dt(k,yt_iter)) > 1.0d15 &
+          .or. DOP(k,yt_iter)+dDOP_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
+          write(*,*) 'yt_debug: mod_reef_ecosys.F dDOP_dt(k,Ndom)    advection      i =', i, '   j =', j, '   k =', k &
+            , '   Ndom =', yt_iter
+          write(*,*) 'yt_debug:     dDOP_dt(k,Ndom) =', dDOP_dt(k,yt_iter)
+          write(*,*) 'yt_debug:     DOP(k,Ndom) =', DOP(k,yt_iter)
+          write(*,*) 'yt_debug:     DOP(k,Ndom)+dDOP_dt(k,Ndom)*dt*dz(k) =', DOP(k,yt_iter)+dDOP_dt(k,yt_iter)*dt*dz(k)
+        endif
+      ENDDO
+      DO yt_iter = 1, Npom
+        ! if (isnan() .or. abs() > huge()) then
+        if (isnan(dPON_dt(k,yt_iter)) .or. abs(dPON_dt(k,yt_iter)) > 1.0d15 &
+          .or. PON(k,yt_iter)+dPON_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
+          write(*,*) 'yt_debug: mod_reef_ecosys.F dPON_dt(k,Npom)    advection      i =', i, '   j =', j, '   k =', k &
+            , '   Npom =', yt_iter
+          write(*,*) 'yt_debug:     dPON_dt(k,Npom) =', dPON_dt(k,yt_iter)
+          write(*,*) 'yt_debug:     PON(k,Npom) =', PON(k,yt_iter)
+          write(*,*) 'yt_debug:     PON(k,Npom)+dPON_dt(k,Npom)*dt*dz(k) =', PON(k,yt_iter)+dPON_dt(k,yt_iter)*dt*dz(k)
+        endif
+        ! if (isnan() .or. abs() > huge()) then
+        if (isnan(dPOP_dt(k,yt_iter)) .or. abs(dPOP_dt(k,yt_iter)) > 1.0d15 &
+          .or. POP(k,yt_iter)+dPOP_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
+          write(*,*) 'yt_debug: mod_reef_ecosys.F dPOP_dt(k,Npom)    advection      i =', i, '   j =', j, '   k =', k &
+            , '   Npom =', yt_iter
+          write(*,*) 'yt_debug:     dPOP_dt(k,Npom) =', dPOP_dt(k,yt_iter)
+          write(*,*) 'yt_debug:     POP(k,Npom) =', POP(k,yt_iter)
+          write(*,*) 'yt_debug:     POP(k,Npom)+dPOP_dt(k,Npom)*dt*dz(k) =', POP(k,yt_iter)+dPOP_dt(k,yt_iter)*dt*dz(k)
+        endif
+      ENDDO
+# endif
+#endif
+    ENDDO
+      ! if (isnan() .or. abs() > huge()) then
+      if (isnan(sspH) .or. abs(sspH) > 1.0d15) then
+        write(*,*) 'yt_debug: mod_reef_ecosys.F sspH    advection      i =', i, '   j =', j
+        write(*,*) 'yt_debug:     sspH =', sspH
+      endif
+      ! if (isnan() .or. abs() > huge()) then
+      if (isnan(ssfCO2) .or. abs(ssfCO2) > 1.0d15) then
+        write(*,*) 'yt_debug: mod_reef_ecosys.F ssfCO2    advection      i =', i, '   j =', j
+        write(*,*) 'yt_debug:     ssfCO2 =', ssfCO2
+      endif
+      ! if (isnan() .or. abs() > huge()) then
+      if (isnan(ssWarg) .or. abs(ssWarg) > 1.0d15) then
+        write(*,*) 'yt_debug: mod_reef_ecosys.F ssWarg    advection      i =', i, '   j =', j
+        write(*,*) 'yt_debug:     ssWarg =', ssWarg
+      endif
+      ! if (isnan() .or. abs() > huge()) then
+      if (isnan(ssCO2flux) .or. abs(ssCO2flux) > 1.0d15) then
+        write(*,*) 'yt_debug: mod_reef_ecosys.F ssCO2flux    advection      i =', i, '   j =', j
+        write(*,*) 'yt_debug:     ssCO2flux =', ssCO2flux
+      endif
+      ! if (isnan() .or. abs() > huge()) then
+      if (isnan(ssO2flux) .or. abs(ssO2flux) > 1.0d15) then
+        write(*,*) 'yt_debug: mod_reef_ecosys.F ssO2flux    advection      i =', i, '   j =', j
+        write(*,*) 'yt_debug:     ssO2flux =', ssO2flux
+      endif
+      ! if (isnan() .or. abs() > huge()) then
+      if (isnan(PFDbott) .or. abs(PFDbott) > 1.0d15) then
+        write(*,*) 'yt_debug: mod_reef_ecosys.F PFDbott    advection      i =', i, '   j =', j
+        write(*,*) 'yt_debug:     PFDbott =', PFDbott
+      endif
+!!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
 
@@ -1731,39 +1849,62 @@ contains
 ! Compute seagrass model.
 !-----------------------------------------------------------------------
 !
-    IF(p_sgrass .gt. 0.0d0) THEN
+
+!!! yuta_seagrass >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+	! write(*,*) 'yt_debug: PFD = ', PFD, 'PFDbott = ', PFDbott
+  DO icl=1,Nsg    
+  !   IF(p_sgrass(icl) .gt. 0.0d0) THEN 
+    IF(p_sgrass .gt. 0.0d0) THEN 
 
       CALL seagrass              &
 !       input parameters
-        ( ng, 1, i, j    &   ! ng: nested grid number; n: seagrass compartment; i,j: position
-        , PFDbott        &   ! Photon flux density (umol m-2 s-1)
+        ( ng             &   ! ng: nested grid number; 
+        , icl            &   ! icl: seagrass species id
+        , i, j           &   ! i,j: position
+# if defined SEDIMENT_ECOSYS
+        , Nsed(ng)       &   ! Number of sediment layers
+# endif
+        , dz(1)          &   ! vertical layer thickness (m)
+        , dt             &   ! Time step (sec)
+        ! , p_sgrass(:)    &   ! seagrass coverage (every species)
+        , p_sgrass       &   ! seagrass coverage (every species)
+        , PFD            &   ! Photon flux density (umol m-2 s-1)
         , rho_sw(1)      &   ! Density of seawater (g cm-3)
-        , DIC(1)         &   ! DIC (umol kg-1)
+        , DIC(1)*rho_sw(1)&   ! DIC (umol l-1)            ! [umol/L] = [umol/kg] [g/cm3] (kg/1000g)(1000cm3/L)
         , DOx(1)         &   ! DO  (umol L-1)
-# if defined NUTRIENTS         
+# if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE         
+        , NO3(1)         &   ! NO3 concentration (umol L-1)
         , NH4(1)         &   ! NH4 concentration (umol L-1)
+        , PO4(1)         &   ! PO4 concentration (umol L-1)
 # endif
-# if defined CARBON_ISOTOPE
-        , DI13C(1)       &   ! 13C of DIC (umol kg-1)
+!       output parameters 
+        , Flux_DIC      &   ! DIC uptake rate (mmol m-2 s-1)  * direction of ocean to seagrass is positive
+        , Flux_DO       &   ! DO  uptake rate (mmol m-2 s-1)  * direction of ocean to seagrass is positive
+# if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE         
+        , Flux_NO3      &   ! NO3 uptake rate (mmol m-2 s-1)  * direction of ocean to seagrass is positive
+        , Flux_NH4      &   ! NH4 uptake rate (mmol m-2 s-1)  * direction of ocean to seagrass is positive
+        , Flux_PO4      &   ! PO4 uptake rate (mmol m-2 s-1)  * direction of ocean to seagrass is positive
 # endif
-!       output parameters
-        , Flux_DIC      &   ! DIC uptake rate (mmol m-2 s-1)  * direction of water column to coral is positive
-        , Flux_DO       &   ! DO  uptake rate (mmol m-2 s-1)  * direction of water column to coral is positive
-# if defined NUTRIENTS         
-        , Flux_NO3      &   ! NO3 uptake rate (mmol m-2 s-1)  * direction of water column to coral is positive
-        , Flux_NH4      &   ! NH4 uptake rate (mmol m-2 s-1)  * direction of water column to coral is positive
-        , Flux_PO4      &   ! PO4 uptake rate (mmol m-2 s-1)  * direction of water column to coral is positive
-# endif
-# if defined CARBON_ISOTOPE
-        , Flux_DI13C    &   ! DI13C uptake rate (mmol m-2 s-1)  * direction of water column to coral is positive
+# if defined SEAGRASS_LEAF_POM
+        , Flux_POC(iDtr)&   ! POC uptake rate (mmol m-2 s-1)  * direction of ocean to seagrass is positive
+#  if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
+        , Flux_PON(iDtr)&   ! PON uptake rate (mmol m-2 s-1)  * direction of ocean to seagrass is positive
+        , Flux_POP(iDtr)&   ! POP uptake rate (mmol m-2 s-1)  * direction of ocean to seagrass is positive
+#  endif
 # endif
         )
+    !   write(*,*) "yt_debug: finished seagrass call"
 
-      ! 1 mmol m-2 s-1, 1 mmol m-3 = 1 umol L-1 = 1/1.024 umol kg-1
-      ! cff: convert [mmol m-2 s-1] to [umol L-1 s-1]
 
+      ! dDIC_dt         = Flux_CHEM      / height * coverage_area_fraction / density  * unit_conversion_factor
+      ! [umol kg-1 s-1] = [mmol m-2 s-1] / [m]    * []                     / [g cm-3] * [ (1000 umol/mmol) (0.000001 m3/cm3) (1000 g/kg) = 1]
+
+      ! dCHEM_dt        = Flux_CHEM      / height * coverage_area_fraction * unit_conversion_factor
+      ! [umol L-1 s-1]  = [mmol m-2 s-1] / [m]    * []                     * [ (1000 umol/mmol) (0.001 m3/L) = 1]
+
+      ! cff = unit_conversion_factor / height * coverage_area_fraction
+      ! cff = 1.0d0/dz(1) * p_sgrass(icl)
       cff = 1.0d0/dz(1) * p_sgrass
-
       dDIC_dt(1) = dDIC_dt(1) - Flux_DIC * cff/rho_sw(1)
       dDOx_dt(1) = dDOx_dt(1) - Flux_DO  * cff
 # if defined NUTRIENTS
@@ -1771,12 +1912,33 @@ contains
       dNH4_dt(1) = dNH4_dt(1) - Flux_NH4 * cff
       dPO4_dt(1) = dPO4_dt(1) - Flux_PO4 * cff
 # endif
-# if defined CARBON_ISOTOPE
-      dDI13C_dt(1) = dDI13C_dt(1) - Flux_DI13C * cff/rho_sw(1)
+# if defined SEAGRASS_LEAF_POM
+      dPOC_dt(1,iDtr) = dPOC_dt(1,iDtr) - Flux_POC(iDtr) * cff
+#  if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
+      dPON_dt(1,iDtr) = dPON_dt(1,iDtr) - Flux_PON(iDtr) * cff
+      dPOP_dt(1,iDtr) = dPOP_dt(1,iDtr) - Flux_POP(iDtr) * cff
+#  endif
 # endif
 
+    ELSE
+      CALL no_seagrass              &
+!       input parameters
+        ( ng             &   ! ng: nested grid number; 
+        , icl            &   ! icl: seagrass species id
+        , i, j           &   ! i,j: position
+# if defined SEDIMENT_ECOSYS
+        , Nsed(ng)       &   ! Number of sediment layers
+# endif
+        , dz(1)          &   ! vertical layer thickness (m)
+        , dt             &   ! Time step (sec)
+        ! , p_sgrass(:)    &   ! seagrass coverage (every species)
+        , p_sgrass       &   ! seagrass coverage (every species)
+        )
     END IF
+  END DO
 #endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+
 
 #ifdef MACROALGAE
 !-----------------------------------------------------------------------
@@ -1901,7 +2063,7 @@ contains
         CALL sedecosys      &
 !         input parameters
           ( ng, i, j        &   ! ng: nested grid number; i,j: position
-          , Nsed            &   ! Number of vertical biological sediment layers
+          , Nsed(ng)        &   ! Number of vertical biological sediment layers
           , dtsed           &   ! Time step (sec)
           , Tmp(1)          &   ! Tmp: Temperature (oC)
           , Sal(1)          &   ! Sal: Salinity (PSU)
@@ -1910,15 +2072,15 @@ contains
           , DIC(1)*rho_sw(1)&   ! CO2: Dissolved CO2    (µmol L-1)   ! DIC(umol kg-1) * rho(kg L-1) = (umol L-1)
           , 0.0d0           &   ! N2: Dissolved Nitrogen(µmol L-1)
 #  if defined ORGANIC_MATTER
-          , POC(1,1)         &   ! POC: Particulate organic carbon (DOC: umol L-1)
+          , POC(1,iDtr)     &   ! POC: Particulate organic carbon (DOC: umol L-1)
 #  endif
 #  if defined NUTRIENTS            
           , NO3(1)         &   ! NO3: NO3 (umol L-1)
           , NH4(1)         &   ! NH4: NH4 (umol L-1)
           , PO4(1)         &   ! PO4: PO4 (umol L-1)
 #   if defined ORGANIC_MATTER
-          , PON(1,1)         &   ! PON: Particulate organic nitrogen (PON: umol L-1)
-          , POP(1,1)         &   ! POP: Particulate organic phosporius (POP: umol L-1)
+          , PON(1,iDtr)      &   ! PON: Particulate organic nitrogen (PON: umol L-1)
+          , POP(1,iDtr)      &   ! POP: Particulate organic phosporius (POP: umol L-1)
 #   endif
 #  endif
 #  if defined SULFATE
@@ -1930,10 +2092,10 @@ contains
           , 100d0 / 86400d0  &  ! FeOOH depositoin flux (nmol cm-2 s-1)    
 #  endif
 #  if defined ORGANIC_MATTER
-          , -Fdep_POC(1)      &   ! POC deposition flux (nmol cm-2 s-1)  * direction of water column to sediment is positive ! yt_edit POC deposition flux   ! double check advection scheme
+          , -Fdep_POC(iDtr)  &   ! POC deposition flux (nmol cm-2 s-1)  * direction of water column to sediment is positive ! yt_edit POC deposition flux   ! double check advection scheme
 #   if defined NUTRIENTS
-          , -Fdep_PON(1)  &   ! PON deposition flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
-          , -Fdep_POP(1)  &   ! POP deposition flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
+          , -Fdep_PON(iDtr)  &   ! PON deposition flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
+          , -Fdep_POP(iDtr)  &   ! POP deposition flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
 #   endif
 #  endif
 !         output parameters
@@ -1985,7 +2147,7 @@ contains
       dDIC_dt(1) = dDIC_dt(1) - Flux_CO2sed * cff/rho_sw(1)
 
 #  if defined ORGANIC_MATTER
-      dPOC_dt(1,1) = dPOC_dt(1,1) - (Flux_POCf + Flux_POCs) * cff
+      dPOC_dt(1,iDtr) = dPOC_dt(1,iDtr) - (Flux_POCf + Flux_POCs) * cff
 #  endif
 
 #  if defined NUTRIENTS
@@ -1993,8 +2155,8 @@ contains
       dNH4_dt(1) = dNH4_dt(1) - Flux_NH4 * cff
       dPO4_dt(1) = dPO4_dt(1) - Flux_PO4 * cff
 #   if defined ORGANIC_MATTER
-      dPON_dt(1,1) = dPON_dt(1,1) - (Flux_PONf + Flux_PONs) * cff
-      dPOP_dt(1,1) = dPOP_dt(1,1) - (Flux_POPf + Flux_POPs) * cff
+      dPON_dt(1,iDtr) = dPON_dt(1,iDtr) - (Flux_PONf + Flux_PONs) * cff
+      dPOP_dt(1,iDtr) = dPOP_dt(1,iDtr) - (Flux_POPf + Flux_POPs) * cff
 #   endif
 #  endif
 !#  if defined SULFATE
@@ -2012,166 +2174,184 @@ contains
 !      Flux_SO4         ! SO4 flux   (nmol cm-2 s-1) * direction of water column to sediment is positive
 !#  endif
 
-! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-!       DO k=1,N
-!         ! if (isnan() .or. abs() > huge()) then
-!         if (isnan(dDIC_dt(k)) .or. abs(dDIC_dt(k)) > 1.0d15 .or. DIC(k)+dDIC_dt(k)*dt*dz(k) < -100.0d0) then
-!           write(*,*) 'yt_debug: mod_reef_ecosys.F dDIC_dt(k)    sediment      i =', i, '   j =', j, '   k =', k
-!           write(*,*) 'yt_debug:     dDIC_dt(k) =', dDIC_dt(k)
-!           write(*,*) 'yt_debug:     DIC(k) =', DIC(k)
-!           write(*,*) 'yt_debug:     DIC(k)+dDIC_dt(k)*dt*dz(k) =', DIC(k)+dDIC_dt(k)*dt*dz(k)
-!         endif
-!         ! if (isnan() .or. abs() > huge()) then
-!         if (isnan(dTA_dt(k)) .or. abs(dTA_dt(k)) > 1.0d15 .or. TA(k)+dTA_dt(k)*dt*dz(k) < -100.0d0) then
-!           write(*,*) 'yt_debug: mod_reef_ecosys.F dTA_dt(k)    sediment      i =', i, '   j =', j, '   k =', k
-!           write(*,*) 'yt_debug:     dTA_dt(k) =', dTA_dt(k)
-!           write(*,*) 'yt_debug:     TA(k) =', TA(k)
-!           write(*,*) 'yt_debug:     TA(k)+dTA_dt(k)*dt*dz(k) =', TA(k)+dTA_dt(k)*dt*dz(k)
-!         endif
-!         ! if (isnan() .or. abs() > huge()) then
-!         if (isnan(dDOx_dt(k)) .or. abs(dDOx_dt(k)) > 1.0d15 .or. DOx(k)+dDOx_dt(k)*dt*dz(k) < -100.0d0) then
-!           write(*,*) 'yt_debug: mod_reef_ecosys.F dDOx_dt(k)    sediment      i =', i, '   j =', j, '   k =', k
-!           write(*,*) 'yt_debug:     dDOx_dt(k) =', dDOx_dt(k)
-!           write(*,*) 'yt_debug:     DOx(k) =', DOx(k)
-!           write(*,*) 'yt_debug:     DOx(k)+dDOx_dt(k)*dt*dz(k) =', DOx(k)+dDOx_dt(k)*dt*dz(k)
-!         endif
-! #  if defined ORGANIC_MATTER
-!         DO yt_iter = 1, Ndom
-!           ! if (isnan() .or. abs() > huge()) then
-!           if (isnan(dDOC_dt(k,yt_iter)) .or. abs(dDOC_dt(k,yt_iter)) > 1.0d15 .or. DOC(k,yt_iter)+dDOC_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
-!             write(*,*) 'yt_debug: mod_reef_ecosys.F dDOC_dt(k,Ndom)    sediment      i =', i, '   j =', j, '   k =', k, '   Ndom =', yt_iter
-!             write(*,*) 'yt_debug:     dDOC_dt(k,Ndom) =', dDOC_dt(k,yt_iter)
-!             write(*,*) 'yt_debug:     DOC(k,Ndom) =', DOC(k,yt_iter)
-!             write(*,*) 'yt_debug:     DOC(k,Ndom)+dDOC_dt(k,Ndom)*dt*dz(k) =', DOC(k,yt_iter)+dDOC_dt(k,yt_iter)*dt*dz(k)
-!           endif
-!         ENDDO
-!         DO yt_iter = 1, Npom
-!           ! if (isnan() .or. abs() > huge()) then
-!           if (isnan(dPOC_dt(k,yt_iter)) .or. abs(dPOC_dt(k,yt_iter)) > 1.0d15 .or. POC(k,yt_iter)+dPOC_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
-!             write(*,*) 'yt_debug: mod_reef_ecosys.F dPOC_dt(k,Npom)    sediment      i =', i, '   j =', j, '   k =', k, '   Npom =', yt_iter
-!             write(*,*) 'yt_debug:     dPOC_dt(k,Npom) =', dPOC_dt(k,yt_iter)
-!             write(*,*) 'yt_debug:     POC(k,Npom) =', POC(k,yt_iter)
-!             write(*,*) 'yt_debug:     POC(k,Npom)+dPOC_dt(k,Npom)*dt*dz(k) =', POC(k,yt_iter)+dPOC_dt(k,yt_iter)*dt*dz(k)
-!           endif
-!         ENDDO
-!         DO yt_iter = 1, Nphy
-!           ! if (isnan() .or. abs() > huge()) then
-!           if (isnan(dPHY_dt(k,yt_iter)) .or. abs(dPHY_dt(k,yt_iter)) > 1.0d15 .or. PHY(k,yt_iter)+dPHY_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
-!             write(*,*) 'yt_debug: mod_reef_ecosys.F dPHY_dt(k,Nphy)    sediment      i =', i, '   j =', j, '   k =', k, '   Nphy =', yt_iter
-!             write(*,*) 'yt_debug:     dPHY_dt(k,Nphy) =', dPHY_dt(k,yt_iter)
-!             write(*,*) 'yt_debug:     PHY(k,Nphy) =', PHY(k,yt_iter)
-!             write(*,*) 'yt_debug:     PHY(k,Nphy)+dPHY_dt(k,Nphy)*dt*dz(k) =', PHY(k,yt_iter)+dPHY_dt(k,yt_iter)*dt*dz(k)
-!           endif
-!         ENDDO
-!         DO yt_iter = 1, Nzoo
-!           ! if (isnan() .or. abs() > huge()) then
-!           if (isnan(dZOO_dt(k,yt_iter)) .or. abs(dZOO_dt(k,yt_iter)) > 1.0d15 .or. ZOO(k,yt_iter)+dZOO_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
-!             write(*,*) 'yt_debug: mod_reef_ecosys.F dZOO_dt(k,Nzoo)    sediment      i =', i, '   j =', j, '   k =', k, '   Nzoo =', yt_iter
-!             write(*,*) 'yt_debug:     dZOO_dt(k,Nzoo) =', dZOO_dt(k,yt_iter)
-!             write(*,*) 'yt_debug:     ZOO(k,Nzoo) =', ZOO(k,yt_iter)
-!             write(*,*) 'yt_debug:     ZOO(k,Nzoo)+dZOO_dt(k,Nzoo)*dt*dz(k) =', ZOO(k,yt_iter)+dZOO_dt(k,yt_iter)*dt*dz(k)
-!           endif
-!         ENDDO
-!         DO yt_iter = 1, Npim
-!           ! if (isnan() .or. abs() > huge()) then
-!           if (isnan(dPIC_dt(k,yt_iter)) .or. abs(dPIC_dt(k,yt_iter)) > 1.0d15 .or. PIC(k,yt_iter)+dPIC_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
-!             write(*,*) 'yt_debug: mod_reef_ecosys.F dPIC_dt(k,Npim)    sediment      i =', i, '   j =', j, '   k =', k, '   Npim =', yt_iter
-!             write(*,*) 'yt_debug:     dPIC_dt(k,Npim) =', dPIC_dt(k,yt_iter)
-!             write(*,*) 'yt_debug:     PIC(k,Npim) =', PIC(k,yt_iter)
-!             write(*,*) 'yt_debug:     PIC(k,Npim)+dPIC_dt(k,Npim)*dt*dz(k) =', PIC(k,yt_iter)+dPIC_dt(k,yt_iter)*dt*dz(k)
-!           endif
-!         ENDDO
-! #  endif
-! #  if defined NUTRIENTS           
-!         ! if (isnan() .or. abs() > huge()) then
-!         if (isnan(dNO3_dt(k)) .or. abs(dNO3_dt(k)) > 1.0d15 .or. NO3(k)+dNO3_dt(k)*dt*dz(k) < -100.0d0) then
-!           write(*,*) 'yt_debug: mod_reef_ecosys.F dNO3_dt(k)    sediment      i =', i, '   j =', j, '   k =', k
-!           write(*,*) 'yt_debug:     dNO3_dt(k) =', dNO3_dt(k)
-!           write(*,*) 'yt_debug:     NO3(k) =', NO3(k)
-!           write(*,*) 'yt_debug:     NO3(k)+dNO3_dt(k)*dt*dz(k) =', NO3(k)+dNO3_dt(k)*dt*dz(k)
-!         endif
-!         ! if (isnan() .or. abs() > huge()) then
-!         if (isnan(dNH4_dt(k)) .or. abs(dNH4_dt(k)) > 1.0d15 .or. NH4(k)+dNH4_dt(k)*dt*dz(k) < -100.0d0) then
-!           write(*,*) 'yt_debug: mod_reef_ecosys.F dNH4_dt(k)    sediment      i =', i, '   j =', j, '   k =', k
-!           write(*,*) 'yt_debug:     dNH4_dt(k) =', dNH4_dt(k)
-!           write(*,*) 'yt_debug:     NH4(k) =', NH4(k)
-!           write(*,*) 'yt_debug:     NH4(k)+dNH4_dt(k)*dt*dz(k) =', NH4(k)+dNH4_dt(k)*dt*dz(k)
-!         endif
-!         ! if (isnan() .or. abs() > huge()) then
-!         if (isnan(dPO4_dt(k)) .or. abs(dPO4_dt(k)) > 1.0d15 .or. PO4(k)+dPO4_dt(k)*dt*dz(k) < -100.0d0) then
-!           write(*,*) 'yt_debug: mod_reef_ecosys.F dPO4_dt(k)    sediment      i =', i, '   j =', j, '   k =', k
-!           write(*,*) 'yt_debug:     dPO4_dt(k) =', dPO4_dt(k)
-!           write(*,*) 'yt_debug:     PO4(k) =', PO4(k)
-!           write(*,*) 'yt_debug:     PO4(k)+dPO4_dt(k)*dt*dz(k) =', PO4(k)+dPO4_dt(k)*dt*dz(k)
-!         endif
-! #  if defined ORGANIC_MATTER
-!         DO yt_iter = 1, Ndom
-!           ! if (isnan() .or. abs() > huge()) then
-!           if (isnan(dDON_dt(k,yt_iter)) .or. abs(dDON_dt(k,yt_iter)) > 1.0d15 .or. DON(k,yt_iter)+dDON_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
-!             write(*,*) 'yt_debug: mod_reef_ecosys.F dDON_dt(k,Ndom)    sediment      i =', i, '   j =', j, '   k =', k, '   Ndom =', yt_iter
-!             write(*,*) 'yt_debug:     dDON_dt(k,Ndom) =', dDON_dt(k,yt_iter)
-!             write(*,*) 'yt_debug:     DON(k,Ndom) =', DON(k,yt_iter)
-!             write(*,*) 'yt_debug:     DON(k,Ndom)+dDON_dt(k,Ndom)*dt*dz(k) =', DON(k,yt_iter)+dDON_dt(k,yt_iter)*dt*dz(k)
-!           endif
-!           ! if (isnan() .or. abs() > huge()) then
-!           if (isnan(dDOP_dt(k,yt_iter)) .or. abs(dDOP_dt(k,yt_iter)) > 1.0d15 .or. DOP(k,yt_iter)+dDOP_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
-!             write(*,*) 'yt_debug: mod_reef_ecosys.F dDOP_dt(k,Ndom)    sediment      i =', i, '   j =', j, '   k =', k, '   Ndom =', yt_iter
-!             write(*,*) 'yt_debug:     dDOP_dt(k,Ndom) =', dDOP_dt(k,yt_iter)
-!             write(*,*) 'yt_debug:     DOP(k,Ndom) =', DOP(k,yt_iter)
-!             write(*,*) 'yt_debug:     DOP(k,Ndom)+dDOP_dt(k,Ndom)*dt*dz(k) =', DOP(k,yt_iter)+dDOP_dt(k,yt_iter)*dt*dz(k)
-!           endif
-!         ENDDO
-!         DO yt_iter = 1, Npom
-!           ! if (isnan() .or. abs() > huge()) then
-!           if (isnan(dPON_dt(k,yt_iter)) .or. abs(dPON_dt(k,yt_iter)) > 1.0d15 .or. PON(k,yt_iter)+dPON_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
-!             write(*,*) 'yt_debug: mod_reef_ecosys.F dPON_dt(k,Npom)    sediment      i =', i, '   j =', j, '   k =', k, '   Npom =', yt_iter
-!             write(*,*) 'yt_debug:     dPON_dt(k,Npom) =', dPON_dt(k,yt_iter)
-!             write(*,*) 'yt_debug:     PON(k,Npom) =', PON(k,yt_iter)
-!             write(*,*) 'yt_debug:     PON(k,Npom)+dPON_dt(k,Npom)*dt*dz(k) =', PON(k,yt_iter)+dPON_dt(k,yt_iter)*dt*dz(k)
-!           endif
-!           ! if (isnan() .or. abs() > huge()) then
-!           if (isnan(dPOP_dt(k,yt_iter)) .or. abs(dPOP_dt(k,yt_iter)) > 1.0d15 .or. POP(k,yt_iter)+dPOP_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
-!             write(*,*) 'yt_debug: mod_reef_ecosys.F dPOP_dt(k,Npom)    sediment      i =', i, '   j =', j, '   k =', k, '   Npom =', yt_iter
-!             write(*,*) 'yt_debug:     dPOP_dt(k,Npom) =', dPOP_dt(k,yt_iter)
-!             write(*,*) 'yt_debug:     POP(k,Npom) =', POP(k,yt_iter)
-!             write(*,*) 'yt_debug:     POP(k,Npom)+dPOP_dt(k,Npom)*dt*dz(k) =', POP(k,yt_iter)+dPOP_dt(k,yt_iter)*dt*dz(k)
-!           endif
-!         ENDDO
-! #  endif
-! # endif
-!       ENDDO
+!!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+      DO k=1,N
+        ! if (isnan() .or. abs() > huge()) then
+        if (isnan(dDIC_dt(k)) .or. abs(dDIC_dt(k)) > 1.0d15 .or. DIC(k)+dDIC_dt(k)*dt*dz(k) < -100.0d0) then
+          write(*,*) 'yt_debug: mod_reef_ecosys.F dDIC_dt(k)    sediment      i =', i, '   j =', j, '   k =', k
+          write(*,*) 'yt_debug:     dDIC_dt(k) =', dDIC_dt(k)
+          write(*,*) 'yt_debug:     DIC(k) =', DIC(k)
+          write(*,*) 'yt_debug:     DIC(k)+dDIC_dt(k)*dt*dz(k) =', DIC(k)+dDIC_dt(k)*dt*dz(k)
+        endif
+        ! if (isnan() .or. abs() > huge()) then
+        if (isnan(dTA_dt(k)) .or. abs(dTA_dt(k)) > 1.0d15 .or. TA(k)+dTA_dt(k)*dt*dz(k) < -100.0d0) then
+          write(*,*) 'yt_debug: mod_reef_ecosys.F dTA_dt(k)    sediment      i =', i, '   j =', j, '   k =', k
+          write(*,*) 'yt_debug:     dTA_dt(k) =', dTA_dt(k)
+          write(*,*) 'yt_debug:     TA(k) =', TA(k)
+          write(*,*) 'yt_debug:     TA(k)+dTA_dt(k)*dt*dz(k) =', TA(k)+dTA_dt(k)*dt*dz(k)
+        endif
+        ! if (isnan() .or. abs() > huge()) then
+        if (isnan(dDOx_dt(k)) .or. abs(dDOx_dt(k)) > 1.0d15 .or. DOx(k)+dDOx_dt(k)*dt*dz(k) < -100.0d0) then
+          write(*,*) 'yt_debug: mod_reef_ecosys.F dDOx_dt(k)    sediment      i =', i, '   j =', j, '   k =', k
+          write(*,*) 'yt_debug:     dDOx_dt(k) =', dDOx_dt(k)
+          write(*,*) 'yt_debug:     DOx(k) =', DOx(k)
+          write(*,*) 'yt_debug:     DOx(k)+dDOx_dt(k)*dt*dz(k) =', DOx(k)+dDOx_dt(k)*dt*dz(k)
+        endif
+#  if defined ORGANIC_MATTER
+        DO yt_iter = 1, Ndom
+          ! if (isnan() .or. abs() > huge()) then
+          if (isnan(dDOC_dt(k,yt_iter)) .or. abs(dDOC_dt(k,yt_iter)) > 1.0d15 &
+            .or. DOC(k,yt_iter)+dDOC_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
+            write(*,*) 'yt_debug: mod_reef_ecosys.F dDOC_dt(k,Ndom)    sediment      i =', i, '   j =', j, '   k =', k &
+              , '   Ndom =', yt_iter
+            write(*,*) 'yt_debug:     dDOC_dt(k,Ndom) =', dDOC_dt(k,yt_iter)
+            write(*,*) 'yt_debug:     DOC(k,Ndom) =', DOC(k,yt_iter)
+            write(*,*) 'yt_debug:     DOC(k,Ndom)+dDOC_dt(k,Ndom)*dt*dz(k) =', DOC(k,yt_iter)+dDOC_dt(k,yt_iter)*dt*dz(k)
+          endif
+        ENDDO
+        DO yt_iter = 1, Npom
+          ! if (isnan() .or. abs() > huge()) then
+          if (isnan(dPOC_dt(k,yt_iter)) .or. abs(dPOC_dt(k,yt_iter)) > 1.0d15 &
+            .or. POC(k,yt_iter)+dPOC_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
+            write(*,*) 'yt_debug: mod_reef_ecosys.F dPOC_dt(k,Npom)    sediment      i =', i, '   j =', j, '   k =', k &
+              , '   Npom =', yt_iter
+            write(*,*) 'yt_debug:     dPOC_dt(k,Npom) =', dPOC_dt(k,yt_iter)
+            write(*,*) 'yt_debug:     POC(k,Npom) =', POC(k,yt_iter)
+            write(*,*) 'yt_debug:     POC(k,Npom)+dPOC_dt(k,Npom)*dt*dz(k) =', POC(k,yt_iter)+dPOC_dt(k,yt_iter)*dt*dz(k)
+          endif
+        ENDDO
+        DO yt_iter = 1, Nphy
+          ! if (isnan() .or. abs() > huge()) then
+          if (isnan(dPHY_dt(k,yt_iter)) .or. abs(dPHY_dt(k,yt_iter)) > 1.0d15 &
+            .or. PHY(k,yt_iter)+dPHY_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
+            write(*,*) 'yt_debug: mod_reef_ecosys.F dPHY_dt(k,Nphy)    sediment      i =', i, '   j =', j, '   k =', k &
+              , '   Nphy =', yt_iter
+            write(*,*) 'yt_debug:     dPHY_dt(k,Nphy) =', dPHY_dt(k,yt_iter)
+            write(*,*) 'yt_debug:     PHY(k,Nphy) =', PHY(k,yt_iter)
+            write(*,*) 'yt_debug:     PHY(k,Nphy)+dPHY_dt(k,Nphy)*dt*dz(k) =', PHY(k,yt_iter)+dPHY_dt(k,yt_iter)*dt*dz(k)
+          endif
+        ENDDO
+        DO yt_iter = 1, Nzoo
+          ! if (isnan() .or. abs() > huge()) then
+          if (isnan(dZOO_dt(k,yt_iter)) .or. abs(dZOO_dt(k,yt_iter)) > 1.0d15 &
+            .or. ZOO(k,yt_iter)+dZOO_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
+            write(*,*) 'yt_debug: mod_reef_ecosys.F dZOO_dt(k,Nzoo)    sediment      i =', i, '   j =', j, '   k =', k &
+              , '   Nzoo =', yt_iter
+            write(*,*) 'yt_debug:     dZOO_dt(k,Nzoo) =', dZOO_dt(k,yt_iter)
+            write(*,*) 'yt_debug:     ZOO(k,Nzoo) =', ZOO(k,yt_iter)
+            write(*,*) 'yt_debug:     ZOO(k,Nzoo)+dZOO_dt(k,Nzoo)*dt*dz(k) =', ZOO(k,yt_iter)+dZOO_dt(k,yt_iter)*dt*dz(k)
+          endif
+        ENDDO
+        DO yt_iter = 1, Npim
+          ! if (isnan() .or. abs() > huge()) then
+          if (isnan(dPIC_dt(k,yt_iter)) .or. abs(dPIC_dt(k,yt_iter)) > 1.0d15 &
+            .or. PIC(k,yt_iter)+dPIC_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
+            write(*,*) 'yt_debug: mod_reef_ecosys.F dPIC_dt(k,Npim)    sediment      i =', i, '   j =', j, '   k =', k &
+              , '   Npim =', yt_iter
+            write(*,*) 'yt_debug:     dPIC_dt(k,Npim) =', dPIC_dt(k,yt_iter)
+            write(*,*) 'yt_debug:     PIC(k,Npim) =', PIC(k,yt_iter)
+            write(*,*) 'yt_debug:     PIC(k,Npim)+dPIC_dt(k,Npim)*dt*dz(k) =', PIC(k,yt_iter)+dPIC_dt(k,yt_iter)*dt*dz(k)
+          endif
+        ENDDO
+#  endif
+#  if defined NUTRIENTS           
+        ! if (isnan() .or. abs() > huge()) then
+        if (isnan(dNO3_dt(k)) .or. abs(dNO3_dt(k)) > 1.0d15 .or. NO3(k)+dNO3_dt(k)*dt*dz(k) < -100.0d0) then
+          write(*,*) 'yt_debug: mod_reef_ecosys.F dNO3_dt(k)    sediment      i =', i, '   j =', j, '   k =', k
+          write(*,*) 'yt_debug:     dNO3_dt(k) =', dNO3_dt(k)
+          write(*,*) 'yt_debug:     NO3(k) =', NO3(k)
+          write(*,*) 'yt_debug:     NO3(k)+dNO3_dt(k)*dt*dz(k) =', NO3(k)+dNO3_dt(k)*dt*dz(k)
+        endif
+        ! if (isnan() .or. abs() > huge()) then
+        if (isnan(dNH4_dt(k)) .or. abs(dNH4_dt(k)) > 1.0d15 .or. NH4(k)+dNH4_dt(k)*dt*dz(k) < -100.0d0) then
+          write(*,*) 'yt_debug: mod_reef_ecosys.F dNH4_dt(k)    sediment      i =', i, '   j =', j, '   k =', k
+          write(*,*) 'yt_debug:     dNH4_dt(k) =', dNH4_dt(k)
+          write(*,*) 'yt_debug:     NH4(k) =', NH4(k)
+          write(*,*) 'yt_debug:     NH4(k)+dNH4_dt(k)*dt*dz(k) =', NH4(k)+dNH4_dt(k)*dt*dz(k)
+        endif
+        ! if (isnan() .or. abs() > huge()) then
+        if (isnan(dPO4_dt(k)) .or. abs(dPO4_dt(k)) > 1.0d15 .or. PO4(k)+dPO4_dt(k)*dt*dz(k) < -100.0d0) then
+          write(*,*) 'yt_debug: mod_reef_ecosys.F dPO4_dt(k)    sediment      i =', i, '   j =', j, '   k =', k
+          write(*,*) 'yt_debug:     dPO4_dt(k) =', dPO4_dt(k)
+          write(*,*) 'yt_debug:     PO4(k) =', PO4(k)
+          write(*,*) 'yt_debug:     PO4(k)+dPO4_dt(k)*dt*dz(k) =', PO4(k)+dPO4_dt(k)*dt*dz(k)
+        endif
+#  if defined ORGANIC_MATTER
+        DO yt_iter = 1, Ndom
+          ! if (isnan() .or. abs() > huge()) then
+          if (isnan(dDON_dt(k,yt_iter)) .or. abs(dDON_dt(k,yt_iter)) > 1.0d15 &
+            .or. DON(k,yt_iter)+dDON_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
+            write(*,*) 'yt_debug: mod_reef_ecosys.F dDON_dt(k,Ndom)    sediment      i =', i, '   j =', j, '   k =', k &
+              , '   Ndom =', yt_iter
+            write(*,*) 'yt_debug:     dDON_dt(k,Ndom) =', dDON_dt(k,yt_iter)
+            write(*,*) 'yt_debug:     DON(k,Ndom) =', DON(k,yt_iter)
+            write(*,*) 'yt_debug:     DON(k,Ndom)+dDON_dt(k,Ndom)*dt*dz(k) =', DON(k,yt_iter)+dDON_dt(k,yt_iter)*dt*dz(k)
+          endif
+          ! if (isnan() .or. abs() > huge()) then
+          if (isnan(dDOP_dt(k,yt_iter)) .or. abs(dDOP_dt(k,yt_iter)) > 1.0d15 &
+            .or. DOP(k,yt_iter)+dDOP_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
+            write(*,*) 'yt_debug: mod_reef_ecosys.F dDOP_dt(k,Ndom)    sediment      i =', i, '   j =', j, '   k =', k &
+              , '   Ndom =', yt_iter
+            write(*,*) 'yt_debug:     dDOP_dt(k,Ndom) =', dDOP_dt(k,yt_iter)
+            write(*,*) 'yt_debug:     DOP(k,Ndom) =', DOP(k,yt_iter)
+            write(*,*) 'yt_debug:     DOP(k,Ndom)+dDOP_dt(k,Ndom)*dt*dz(k) =', DOP(k,yt_iter)+dDOP_dt(k,yt_iter)*dt*dz(k)
+          endif
+        ENDDO
+        DO yt_iter = 1, Npom
+          ! if (isnan() .or. abs() > huge()) then
+          if (isnan(dPON_dt(k,yt_iter)) .or. abs(dPON_dt(k,yt_iter)) > 1.0d15 &
+            .or. PON(k,yt_iter)+dPON_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
+            write(*,*) 'yt_debug: mod_reef_ecosys.F dPON_dt(k,Npom)    sediment      i =', i, '   j =', j, '   k =', k &
+              , '   Npom =', yt_iter
+            write(*,*) 'yt_debug:     dPON_dt(k,Npom) =', dPON_dt(k,yt_iter)
+            write(*,*) 'yt_debug:     PON(k,Npom) =', PON(k,yt_iter)
+            write(*,*) 'yt_debug:     PON(k,Npom)+dPON_dt(k,Npom)*dt*dz(k) =', PON(k,yt_iter)+dPON_dt(k,yt_iter)*dt*dz(k)
+          endif
+          ! if (isnan() .or. abs() > huge()) then
+          if (isnan(dPOP_dt(k,yt_iter)) .or. abs(dPOP_dt(k,yt_iter)) > 1.0d15 &
+            .or. POP(k,yt_iter)+dPOP_dt(k,yt_iter)*dt*dz(k) < -100.0d0) then
+            write(*,*) 'yt_debug: mod_reef_ecosys.F dPOP_dt(k,Npom)    sediment      i =', i, '   j =', j, '   k =', k &
+              , '   Npom =', yt_iter
+            write(*,*) 'yt_debug:     dPOP_dt(k,Npom) =', dPOP_dt(k,yt_iter)
+            write(*,*) 'yt_debug:     POP(k,Npom) =', POP(k,yt_iter)
+            write(*,*) 'yt_debug:     POP(k,Npom)+dPOP_dt(k,Npom)*dt*dz(k) =', POP(k,yt_iter)+dPOP_dt(k,yt_iter)*dt*dz(k)
+          endif
+        ENDDO
+#  endif
+# endif
+      ENDDO
       
-!       ! if (isnan() .or. abs() > huge()) then
-!       if (isnan(sspH) .or. abs(sspH) > 1.0d15) then
-!         write(*,*) 'yt_debug: mod_reef_ecosys.F sspH    sediment      i =', i, '   j =', j
-!         write(*,*) 'yt_debug:     sspH =', sspH
-!       endif
-!       ! if (isnan() .or. abs() > huge()) then
-!       if (isnan(ssfCO2) .or. abs(ssfCO2) > 1.0d15) then
-!         write(*,*) 'yt_debug: mod_reef_ecosys.F ssfCO2    sediment      i =', i, '   j =', j
-!         write(*,*) 'yt_debug:     ssfCO2 =', ssfCO2
-!       endif
-!       ! if (isnan() .or. abs() > huge()) then
-!       if (isnan(ssWarg) .or. abs(ssWarg) > 1.0d15) then
-!         write(*,*) 'yt_debug: mod_reef_ecosys.F ssWarg    sediment      i =', i, '   j =', j
-!         write(*,*) 'yt_debug:     ssWarg =', ssWarg
-!       endif
-!       ! if (isnan() .or. abs() > huge()) then
-!       if (isnan(ssCO2flux) .or. abs(ssCO2flux) > 1.0d15) then
-!         write(*,*) 'yt_debug: mod_reef_ecosys.F ssCO2flux    sediment      i =', i, '   j =', j
-!         write(*,*) 'yt_debug:     ssCO2flux =', ssCO2flux
-!       endif
-!       ! if (isnan() .or. abs() > huge()) then
-!       if (isnan(ssO2flux) .or. abs(ssO2flux) > 1.0d15) then
-!         write(*,*) 'yt_debug: mod_reef_ecosys.F ssO2flux    sediment      i =', i, '   j =', j
-!         write(*,*) 'yt_debug:     ssO2flux =', ssO2flux
-!       endif
-!       ! if (isnan() .or. abs() > huge()) then
-!       if (isnan(PFDbott) .or. abs(PFDbott) > 1.0d15) then
-!         write(*,*) 'yt_debug: mod_reef_ecosys.F PFDbott    sediment      i =', i, '   j =', j
-!         write(*,*) 'yt_debug:     PFDbott =', PFDbott
-!       endif
-! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      ! if (isnan() .or. abs() > huge()) then
+      if (isnan(sspH) .or. abs(sspH) > 1.0d15) then
+        write(*,*) 'yt_debug: mod_reef_ecosys.F sspH    sediment      i =', i, '   j =', j
+        write(*,*) 'yt_debug:     sspH =', sspH
+      endif
+      ! if (isnan() .or. abs() > huge()) then
+      if (isnan(ssfCO2) .or. abs(ssfCO2) > 1.0d15) then
+        write(*,*) 'yt_debug: mod_reef_ecosys.F ssfCO2    sediment      i =', i, '   j =', j
+        write(*,*) 'yt_debug:     ssfCO2 =', ssfCO2
+      endif
+      ! if (isnan() .or. abs() > huge()) then
+      if (isnan(ssWarg) .or. abs(ssWarg) > 1.0d15) then
+        write(*,*) 'yt_debug: mod_reef_ecosys.F ssWarg    sediment      i =', i, '   j =', j
+        write(*,*) 'yt_debug:     ssWarg =', ssWarg
+      endif
+      ! if (isnan() .or. abs() > huge()) then
+      if (isnan(ssCO2flux) .or. abs(ssCO2flux) > 1.0d15) then
+        write(*,*) 'yt_debug: mod_reef_ecosys.F ssCO2flux    sediment      i =', i, '   j =', j
+        write(*,*) 'yt_debug:     ssCO2flux =', ssCO2flux
+      endif
+      ! if (isnan() .or. abs() > huge()) then
+      if (isnan(ssO2flux) .or. abs(ssO2flux) > 1.0d15) then
+        write(*,*) 'yt_debug: mod_reef_ecosys.F ssO2flux    sediment      i =', i, '   j =', j
+        write(*,*) 'yt_debug:     ssO2flux =', ssO2flux
+      endif
+      ! if (isnan() .or. abs() > huge()) then
+      if (isnan(PFDbott) .or. abs(PFDbott) > 1.0d15) then
+        write(*,*) 'yt_debug: mod_reef_ecosys.F PFDbott    sediment      i =', i, '   j =', j
+        write(*,*) 'yt_debug:     PFDbott =', PFDbott
+      endif
+!!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 # endif
 

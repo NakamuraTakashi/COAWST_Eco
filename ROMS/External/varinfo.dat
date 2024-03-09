@@ -9218,7 +9218,7 @@
     'r2dvar'
     1.0d0
 
-  'p_seagrass'                                          ! Input/Output
+  'p_seagrass'                                        ! Input/Output
     'seagrass coverage'
     'nondimensional'                                          ! []
     'coverage, scalar, series'
