@@ -1,0 +1,499 @@
+!  Coral reef ecosystem Model Parameters by Takashi Nakamura.
+!
+!svn $Id: bio_Fennel.in 589 2012-01-03 22:42:10Z arango $
+!========================================================= Hernan G. Arango ===
+!  Copyright (c) 2002-2012 The ROMS/TOMS Group                                !
+!    Licensed under a MIT/X style license                                     !
+!    See License_ROMS.txt                                                     !
+!==============================================================================
+!========================================================= Takashi Nakamura ===
+!                                                                             !
+! Input parameters can be entered in ANY order, provided that the parameter   !
+! KEYWORD (usually, upper case) is typed correctly followed by "="  or "=="   !
+! symbols. Any comment lines are allowed and must begin with an exclamation   !
+! mark (!) in column one.  Comments may  appear to the right of a parameter   !
+! specification to improve documentation.  Comments will be ignored  during   !
+! reading.  Blank lines are also allowed and ignored. Continuation lines in   !
+! a parameter specification are allowed and must be preceded by a backslash   !
+! (\).  In some instances, more than one value is required for a parameter.   !
+! If fewer values are provided, the  last value  is assigned for the entire   !
+! parameter array.  The multiplication symbol (*),  without blank spaces in   !
+! between, is allowed for a parameter specification.  For example, in a two   !
+! grids nested application:                                                   !
+!                                                                             !
+!    AKT_BAK == 2*1.0d-6  2*5.0d-6              ! m2/s                        !
+!                                                                             !
+! indicates that the first two entries of array AKT_BAK,  in fortran column-  !
+! major order, will have the same value of "1.0d-6" for grid 1,  whereas the  !
+! next two entries will have the same value of "5.0d-6" for grid 2.           !
+!                                                                             !
+! In multiple levels of nesting and/or multiple connected domains  step-ups,  !
+! "Ngrids" entries are expected for some of these parameters.  In such case,  !
+! the order of the entries for a parameter is extremely important.  It  must  !
+! follow the same order (1:Ngrids) as in the state variable declaration. The  !
+! USER may follow the above guidelines for specifying his/her values.  These  !
+! parameters are marked by "==" plural symbol after the KEYWORD.              !
+!                                                                             !
+!==============================================================================
+!
+! NOTICE: Input parameter units are specified within brackets and default
+! ******  values are specified within braces.
+!
+! Switch to control the computation of biology within nested and/or multiple
+! connected grids.
+
+    Lbiology == T
+
+! Switch to control reading of initial conditions from initial/restart nc file.
+! The order indicates the ecosystem compartments as follows [1:2,Ngrids]:
+!   *NOTE: It will try to read the ininial/restart nc file if the flag is True
+!          even if the ANA_BIOLOGY is activated.
+!
+!    1: foodweb (tracer variables)
+!    2: coral, seagass, macroalgae, sediment, etc.
+!
+!               1 2   
+ LReadBioINI == F F
+!LReadBioINI == T T
+
+! Maximum number of iterations to achieve convergence of the nonlinear
+! solution.
+
+     CrlIter == 100 !!!!!!!!!
+
+! Maximum number of iterations to achieve convergence of the nonlinear
+! solution.
+
+     SedIter == 5   !!!!!!!!!
+
+! Fraction of shortwave radiation that is photosynthetically active
+! (nondimensional), {0.43d0}.
+!!!! convert radiation (W m-2) to photon flux density (umol m-2 s-1)  1 W m-2 = 4.24 umol m-2 s-1 <<<TN
+!!!! Thus convert solar radiation (W m-2) to photosynthetic photon flux density: 0.43*4.24 = 1.82
+
+     PARfrac == 1.82d0
+
+! CO2 partial pressure in the air (parts per million by volume),
+! {377.0d0}.
+
+     pCO2air == 400.0d0  !!! 700.0d0 (uatm)
+
+! Linear equation of State parameters: !!! Initial and boundary conditions
+
+       TAlk0 == 2232.0d0     ! DIC  (umol kg-1) 
+       TIC_0 == 1915.0d0     ! TA  (umol kg-1)  !!! 2050.0d0 @ fCO2=800uatm;  2030.0d0 @ fCO2=700uatm 
+       Oxyg0 == 200.0d0      ! DO  (umol L-1)
+
+       DOC_0 == 0.1d0 50.0d0          ! DOC  (umol L-1) 
+       POC_0 == 0.0d0  0.0d0          ! POC  (umol L-1) 
+      Phyt_0 == 0.3d0  0.1d0  0.1d0   ! Phytoplankton1 (umolC L-1) 
+      Zoop_0 == 0.05d0                 ! Zooplankton (umol L-1)
+       PIC_0 == 0.0d0                 ! PIC  (umol L-1) 
+
+   d13C_TIC0 == 0.7d0                ! d13C_TIC (permill VPDB)
+  d13C_DOC_0 == -15.0d0 -15.0d0      ! d13C_DOC (permill VPDB)
+  d13C_POC_0 == -15.0d0 -15.0d0      ! d13C_POC (permill VPDB)
+ d13C_Phyt_0 == -15.0d0 -15.0d0 -15.0d0   ! d13C_phytoplankton (permill VPDB)
+ d13C_Zoop_0 == -20.0d0              ! d13C_zooplankton (permill VPDB)
+  d13C_PIC_0 == -5.0d0               ! d13C_PIC (permill VPDB)
+
+       NO3_0 == 0.1d0        ! NO3  (umol L-1)  0.5d0, 10.0d0 
+       NO2_0 == 0.02d0       ! NO2  (umol L-1) 
+       NH4_0 == 0.26d0       ! NH4  (umol L-1) 
+       PO4_0 == 0.04d0       ! PO4  (umol L-1) 0.05d0, 2.0d0 
+
+       DON_0 == 0.015d0  5.0d0   ! DON  (umol L-1) 
+       PON_0 == 0.0d0   0.0d0   ! PON  (umol L-1) 
+       DOP_0 == 0.001d0  0.6d0   ! DOP  (umol L-1) 
+       POP_0 == 0.00d0  0.0d0   ! POP  (umol L-1) 
+
+  d15N_NO3_0 == 0.7d0                ! d15N_NO3 (permill)
+!  d15N_NO2_0 == 0.7d0                ! d15N_TIC (permill)
+  d15N_NH4_0 == 0.7d0                ! d15N_TIC (permill)
+  d15N_DON_0 == -15.0d0 -15.0d0      ! d15N_DOC (permill)
+  d15N_PON_0 == -15.0d0 -15.0d0      ! d15N_POC (permill)
+ d15N_Phyt_0 == -15.0d0 -15.0d0 -15.0d0   ! d15N_phytoplankton (permill)
+ d15N_Zoop_0 == -20.0d0              ! d15N_zooplankton (permill)
+
+       COTe0 == 0.0d0        ! COTS eggs (umol L-1) 
+       COTl0 == 0.0d0        ! COTS larvae (umol L-1) 
+
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+! Nsed is the number of biological sediment layers. Ex. Nsed == 5
+! SedEcoLayerDepths is the list of depths in cm (bottom of the layer) of each layer from the surface towards deeper. Ex. SedEcoLayerDepths == 0.5d0 1.0d0 2.0d0 3.0d0 5.0d0
+! you can use different number of layers for each Ngrid (might not work though, haven't debugged yet) Ex. Nsed == 5 3
+! add the next set of depths to the list (make sure the totals match) Ex. SedEcoLayerDepths == 0.5d0 1.0d0 2.0d0 3.0d0 5.0d0 0.1d0 1.0d0 10.0d0
+
+            !  Nsed == 101         ! Number of vertical biological sediment layers for SEDIMENT_ECOSYS
+             Nsed == 19          ! Number of vertical biological sediment layers for SEDIMENT_ECOSYS
+SedEcoLayerDepths == 0.1d0 0.2d0 0.3d0 0.4d0 0.5d0 0.6d0 0.7d0 0.8d0 0.9d0 1.0d0 2.0d0 3.0d0 4.0d0 5.0d0 6.0d0 7.0d0 8.0d0 9.0d0 10.0d0  ! depth (cm) from surface at bottom of each biological sediment layer
+
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+
+! Harmonic/biharmonic horizontal diffusion of biological tracer for
+! nonlinear model and adjoint-based algorithms: [1:NBT,Ngrids].
+
+        TNU2 == 34*0.0d0                        ! m2/s
+        TNU4 == 34*0.0d0                        ! m4/s
+
+     ad_TNU2 == 34*0.0d0                        ! m2/s
+     ad_TNU4 == 34*0.0d0                        ! m4/s
+
+! Vertical mixing coefficients for biological tracers for nonlinear
+! model and basic state scale factor in adjoint-based algorithms:
+! [1:NBT,Ngrids].
+
+     AKT_BAK == 34*1.0d-6                       ! m2/s
+
+  ad_AKT_fac == 34*1.0d0                        ! nondimensional
+
+! Nudging/relaxation time scales, inverse scales will be computed
+! internally: [1:NBT,Ngrids].
+
+       TNUDG == 34*1.0d0                        ! days
+
+! Set lateral boundary conditions keyword. Notice that a value is expected
+! for each boundary segment per nested grid for each state variable.
+!
+! The biological tracer variables require [1:4,1:NBT,Ngrids] values. The
+! boundary order is: 1=west, 2=south, 3=east, and 4=north. That is,
+! anticlockwise starting at the western boundary.
+!
+! The keyword is case insensitive and usually has three characters. However,
+! it is possible to have compound keywords, if applicable. For example, the
+! keyword "RadNud" implies radiation boundary condition with nudging. This
+! combination is usually used in active/passive radiation conditions.
+! 
+! NOTICE: It is possible to specify the lateral boundary conditions for
+! ======  all biological tracers in a compact form with a single entry.
+! If so, all the biological tracers are assumed to have the same boundary
+! condition as in the single entry.
+!
+!   Keyword    Lateral Boundary Condition Type
+!
+!   Cla        Clamped                                _____N_____     j=Mm
+!   Clo        Closed                                |     4     |
+!   Gra        Gradient                              |           |
+!   Nes        Nested                              1 W           E 3
+!   Nud        Nudging                               |           |
+!   Per        Periodic                              |_____S_____|
+!   Rad        Radiation                                   2          j=1
+!                                                   i=1         i=Lm
+!                   W       S       E       N     
+!                   e       o       a       o     
+!                   s       u       s       r     
+!                   t       t       t       t     
+!                           h               h     
+!                                                 
+!                   1       2       3       4     
+
+   LBC(isTvar) == Clo     Clo      RadNud   Clo   ! idbio(:), compact
+
+! Adjoint-based algorithms can have different lateral boundary
+! conditions keywords.
+
+ad_LBC(isTvar) == Clo     Clo     RadNud  Clo   ! idbio(:), compact
+
+! Logical switches (TRUE/FALSE) to specify which variables to consider on
+! tracers point Sources/Sinks (like river runoff): [NBT,Ngrids] values are
+! expected. See glossary below for details.
+
+!                                 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 3 3 3 3
+!               1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3
+!
+!  LtracerSrc == 34*F
+!  LtracerSrc == 45*T
+  LtracerSrc == T T T T T T T F F F F F T T T T T T T T T T T ! For no d13C version
+!  LtracerSrc == T T T T T T T F F F F F T T T T T F F F F F T T T T T T T T T T T ! For d13C version
+
+! Logical switches (TRUE/FALSE) to activate writing of biological fields
+! into HISTORY output file: [1:NBT,Ngrids].
+
+Hout(idTvar) == 45*T    ! NO3, ...           biological tracer
+Hout(idTsur) == 45*F    ! NO3_sflux, ...     surface tracer flux
+
+Hout(iHbio2) == 44*T
+Hout(iHbio3) == 3*F
+Hout(iHbiosed3) == 35*F
+
+! Logical switches (TRUE/FALSE) to activate writing of biological fields
+! into QUICK output file: [1:NBT,Ngrids].
+
+Qout(idTvar) == 45*F    ! NO3, ...           biological tracer
+Qout(idTsur) == 45*F    ! NO3_sflux, ...     surface tracer flux
+
+Qout(iHbio2) == 44*F
+Qout(iHbio3) == 3*F
+Qout(iHbiosed3) == 35*T 
+
+! Logical switches (TRUE/FALSE) to activate writing of time-averaged fields
+! into AVERAGE output file: [1:NBT,Ngrids].
+
+Aout(idTvar) == 45*F    ! NO3, ...           biological tracer
+
+! Logical switches (TRUE/FALSE) to activate writing of time-averaged,
+! biological tracer diagnostic terms into DIAGNOSTIC output file:
+! [1:NBT,Ngrids].
+
+Dout(iDbio2) == 34*T  !!!!!!!!!!!!!!!!!! Check number
+Dout(iDbio3) == 2*F   !!!!!!!!!!!!!!!!!! Check number
+
+! Logical switches (TRUE/FALSE) to activate writing of time-averaged,
+! biological processes diagnostics terms into DIAGNOSTIC output file [Ngrids].
+
+!
+!  GLOSSARY:
+!  =========
+!
+!------------------------------------------------------------------------------
+! Coral Reef Ecosystem Model Parameters. Currently,
+! it can be configured with 45 biological tracers:
+!
+! idbio( 1), idbio( 1), idbio( 1), idbio( 1),   alkalinity
+! idbio( 2), idbio( 2), idbio( 2), idbio( 2),   TIC
+! idbio( 3), idbio( 3), idbio( 3), idbio( 3),   oxygen
+! idbio( 4), idbio( 4), idbio( 4), idbio( 4),   DOC_01
+! idbio( 5), idbio( 5), idbio( 5), idbio( 5),   DOC_02
+! idbio( 6), idbio( 6), idbio( 6), idbio( 6),   POC_01
+! idbio( 7), idbio( 7), idbio( 7), idbio( 7),   POC_02
+! idbio( 8), idbio( 8), idbio( 8), idbio( 8),   Phytoplankton_01
+! idbio( 9), idbio( 9), idbio( 9), idbio( 9),   Phytoplankton_02
+! idbio(10), idbio(10), idbio(10), idbio(10),   phytoplankton_03
+! idbio(11), idbio(11), idbio(11), idbio(11),   zooplankton_01
+! idbio(12), idbio(12), idbio(12), idbio(12),   PIC_01
+! idbio(13), idbio(13), idbio(13),              TI13C
+! idbio(14), idbio(14), idbio(14),              DO13C_01
+! idbio(15), idbio(15), idbio(15),              DO13C_02
+! idbio(16), idbio(16), idbio(16),              PO13C_01
+! idbio(17), idbio(17), idbio(17),              PO13C_02
+! idbio(18), idbio(18), idbio(18),              Phyt13C_01
+! idbio(19), idbio(19), idbio(19),              Phyt13C_02
+! idbio(20), idbio(20), idbio(20),              phyt13C_03
+! idbio(21), idbio(21), idbio(21),              zoop13C_01
+! idbio(22), idbio(22), idbio(22),              PI13C_01
+! idbio(23), idbio(23), idbio(23), idbio(13),   NO3
+! idbio(24), idbio(24), idbio(24), idbio(14),   NH4
+! idbio(25), idbio(25), idbio(25), idbio(15),   PO4
+! idbio(26), idbio(26), idbio(26), idbio(16),   DON_01
+! idbio(27), idbio(27), idbio(27), idbio(17),   DON_02
+! idbio(28), idbio(28), idbio(28), idbio(18),   PON_01
+! idbio(29), idbio(29), idbio(29), idbio(19),   PON_02
+! idbio(30), idbio(30), idbio(30), idbio(20),   DOP_01
+! idbio(31), idbio(31), idbio(31), idbio(21),   DOP_02
+! idbio(32), idbio(32), idbio(32), idbio(22),   POP_01
+! idbio(33), idbio(33), idbio(33), idbio(23),   POP_02
+! idbio(34), idbio(34),                         NO3_15N
+! idbio(35), idbio(35),                         NH4_15N
+! idbio(36), idbio(36),                         DO15N_01
+! idbio(37), idbio(37),                         DO15N_02
+! idbio(38), idbio(38),                         PO15N_01
+! idbio(39), idbio(39),                         PO15N_02
+! idbio(40), idbio(40),                         Phyt15N_01
+! idbio(41), idbio(41),                         Phyt15N_02
+! idbio(42), idbio(42),                         phyt15N_03
+! idbio(43), idbio(43),                         zoop15N_01
+! idbio(44),                                    COTS eggs
+! idbio(45),                                    COTS larvae
+!------------------------------------------------------------------------------
+!
+!  Lbiology       Switch to control the computation of a particular module
+!                   within nested and/or multiple connected grids. By default
+!                   this switch is set to TRUE in "mod_scalars" for all grids.
+!                   Ngrids values are expected. The USER has the option, for
+!                   example, to compute the biology in just one of the nested
+!                   grids. If so, this switch needs to be consistent with the
+!                   dimension parameter NBT in "mod_param".  In order to make
+!                   the model more efficient in memory usage, NBT(:) should
+!                   be zero in such grids.
+!
+!  BioIter        Maximum number of iterations to achieve convergence of
+!                   the nonlinear solution.
+!
+!  PARfrac        Fraction of shortwave radiation that is photosynthetically
+!                   active (nondimensional).
+!  pCO2air        CO2 partial pressure in the air (parts per million by
+!                   volume).
+!
+!------------------------------------------------------------------------------
+! Physical parameters. This file is configured for NBT=12.
+!------------------------------------------------------------------------------
+!
+!  TNU2           Nonlinear model lateral, harmonic, constant, mixing
+!                   coefficient (m2/s) for biological tracer variables;
+!                   [1:NBT,1:Ngrids] values are expected. If variable
+!                   horizontal diffusion is activated, TNU2 is the mixing
+!                   coefficient for the largest grid-cell in the domain.
+!
+!  TNU4           Nonlinear model lateral, biharmonic, constant, mixing
+!                   coefficient (m4/s) for biological tracer variables;
+!                   [1:NBT,1:Ngrids] values are expected. If variable
+!                   horizontal diffusion is activated, TNU4 is the mixing
+!                   coefficient for the largest grid-cell in the domain.
+!
+!  ad_TNU2        Adjoint-based algorithms lateral, harmonic, constant,
+!                   mixing coefficient (m2/s) for biological tracer variables;
+!                   [1:NBT,1:Ngrids] values are expected. If variable
+!                   horizontal diffusion is activated, ad_TNU2 is the mixing
+!                   coefficient for the largest grid-cell in the domain.
+!
+!  ad_TNU4        Adjoint-based algorithms lateral, biharmonic, constant,
+!                   mixing coefficient (m4/s) for biological tracer variables;
+!                   [1:NBT,1:Ngrids] values are expected. If variable
+!                   horizontal diffusion is activated, ad_TNU4 is the mixing
+!                   coefficient for the largest grid-cell in the domain.
+!
+!  AKT_BAK        Background vertical mixing coefficient (m2/s) for biological
+!                   tracer variables, [1:NBT,1:Ngrids] values are expected.
+!
+!
+!  ad_AKT_fac     Adjoint-based algorithms vertical mixing, basic state,
+!                   scale factor (nondimensional) for biological tracer
+!                   variables; [1:NBT,1:Ngrids] values are expected. In
+!                   some applications, a smaller/larger values of vertical
+!                   mixing are necessary for stability. It is only used
+!                   when FORWARD_MIXING is activated.
+!
+!  TNUDG          Nudging time scale (days), [1:NBT,1:Ngrids].  Inverse scale
+!                   will be computed internally.
+!
+!------------------------------------------------------------------------------
+! Lateral boundary conditions parameters.
+!------------------------------------------------------------------------------
+!
+! The lateral boundary conditions are now specified with logical switches
+! instead of CPP flags to allow nested grid configurations. Their values are
+! load into structured array:
+!
+!    LBC(1:4, nLBCvar, Ngrids)
+!
+! where 1:4 are the number of boundary edges, nLBCvar are the number LBC state
+! variables, and Ngrids is the number of nested grids. For Example, to apply
+! gradient boundary conditions to any tracer we use:
+!
+!    LBC(iwest,  isTvar(itrc), ng) % gradient
+!    LBC(ieast,  isTvar(itrc), ng) % gradient
+!    LBC(isouth, isTvar(itrc), ng) % gradient
+!    LBC(inorth, isTvar(itrc), ng) % gradient
+!
+! The lateral boundary conditions for biological tracers are entered with
+! a keyword. This keyword is case insensitive and usually has three characters.
+! However, it is possible to have compound keywords, if applicable. For example,
+! the keyword "RadNud" implies radiation boundary condition with nudging. This
+! combination is usually used in active/passive radiation conditions.
+!
+! It is possible to specify the lateral boundary conditions for all biological
+! tracers in a compact form with a single entry.  For example, in a East-West
+! periodic application we can just have:
+!
+!                   W       S       E       N     
+!                   e       o       a       o     
+!                   s       u       s       r     
+!                   t       t       t       t     
+!                           h               h     
+!                                                 
+!                   1       2       3       4     
+!
+!  LBC(isTvar) ==   Per     Clo     Per     Clo
+!
+! Then, the standard input processing routine will assume that all the
+! biological tracers have the same lateral boundary condition specified by
+! the single entry.
+!
+!   Keyword    Lateral Boundary Condition Type
+!
+!   Cla        Clamped                                _____N_____     j=Mm
+!   Clo        Closed                                |     4     |
+!   Gra        Gradient                              |           |
+!   Nes        Nested                              1 W           E 3
+!   Nud        Nudging                               |           |
+!   Per        Periodic                              |_____S_____|
+!   Rad        Radiation                                   2          j=1
+!                                                   i=1         i=Lm
+!
+!  LBC(isTvar)    Biological Tracers, [1:4, 1:NBT, Ngrids] values are expected.
+!
+! Similarly, the adjoint-based algorithms (ADM, TLM, RPM) can have different
+! lateral boundary conditions keywords:
+!
+!  ad_LBC(isTvar) Biological Tracers, [1:4, 1:NBT, Ngrids] values are expected.
+!
+!------------------------------------------------------------------------------
+!  Tracer point Sources/Sink sources switches.
+!------------------------------------------------------------------------------
+!
+!  LtracerSrc     Logical switches (T/F) to specify which tracer variables
+!                   to consider when the option TS_PSOURCE is activated;
+!                   [1:NBT,1:Ngrids] values are expected.
+!
+!                     LtracerSrc(idbio( 1),ng)    alkalinity
+!                     LtracerSrc(idbio( 2),ng)    TIC
+!                                  :               :
+!
+!                   Recall that TS_PSOURCE is usually activated to add river
+!                   runoff as a point source. At minimum, it is necessary to
+!                   specify both temperature and salinity for all rivers. The
+!                   other tracers are optional. The user needs to know the
+!                   correspondence between biological variables and indices
+!                   idbio(1:NBT) when activating one or more of these switches.
+!
+!------------------------------------------------------------------------------
+! Logical switches (T/F) to activate writing of fields into HISTORY file.
+!------------------------------------------------------------------------------
+!
+!  Hout           Logical switches to write out biological fields into
+!                   output HISTORY NetCDF file, [1:NBT,1:Ngrids] values
+!                   are expected:
+!
+!                   Hout(idTvar)               biological tracers
+!                   Hout(idTsur)               biological tracers surface flux
+!
+!                   idTvar(idbio( 1))=iTAlk    Alkalinity
+!                   idTvar(idbio( 2))=iTIC_    Total inorganic carbon
+!                           :                      :
+!
+!------------------------------------------------------------------------------
+! Logical switches (T/F) to activate writing of fields into AVERAGE file.
+!------------------------------------------------------------------------------
+!
+!  Aout           Logical switches to write out biological fields into
+!                   output AVERAGE NetCDF file, [1:NBT,1:Ngrids] values
+!                   are expected:
+!
+!                   Aout(idTvar)               biological tracers
+!
+!                   The idTvar(idbio(:)) are the same to those in the HISTORY
+!                   file.
+!
+!------------------------------------------------------------------------------
+! Logical switches (T/F) to activate writing of time-averaged fields into
+! DIAGNOSTIC file.
+!------------------------------------------------------------------------------
+!
+!  Time-averaged, biological tracers  diagnostic terms, [1:NBT,Ngrids] values
+!  expected: (if DIAGNOSTICS_TS)
+!
+!                 Dout(idDtrc(idbio(1:NBT),iT....),1:Ngrids)
+!
+!  Dout(iTrate)   Write out time rate of change.
+!  Dout(iThadv)   Write out horizontal total advection.
+!  Dout(iTxadv)   Write out horizontal  XI-advection.
+!  Dout(iTyadv)   Write out horizontal ETA-advection.
+!  Dout(iTvadv)   Write out vertical advection.
+!  Dout(iThdif)   Write out horizontal total diffusion, if TS_DIF2 or TS_DIF4.
+!  Dout(iTxdif)   Write out horizonta1  XI-diffusion, if TS_DIF2 or TS_DIF4.
+!  Dout(iTydif)   Write out horizontal ETA-diffusion, if TS_DIF2 or TS_DIF4.
+!  Dout(iTsdif)   Write out horizontal   S-diffusion, if TS_DIF2 or TS_DIF4 and
+!                   rotated tensor (MIX_GEO_TS or MIX_ISO_TS).
+!  Dout(iTvdif)   Write out vertical diffusion.
+!
+!
+!  Time-accumulated biological processes diagnostics fields, [Ngrids] values
+!  are expected:
+!
+!  Dout(iCOfx)    Write out air-sea CO2 flux.
+!  Dout(iDNIT)    Write out denitrification flux.
+!  Dout(ipCO2)    Write out CO2 partial pressure.
+!  Dout(iO2fx)    Write out air-sea O2 flux.
+!  Dout(iPPro)    Write out primary production.
+!  Dout(iNO3u)    Write out NO3 uptake.
+!

@@ -51,6 +51,7 @@
 !                DimIDs(32) => Number of sediment tracers.             !
 !                DimIDs(33) => Number of wave directions.              !
 !                DimIDs(35) => Number of vegetation properties.        !
+!                DimIDs(36) => Dimenstion Biological sediment layer    ! ! yuta_edits_for_masa
 !                                                                      !
 !  On Output:                                                          !
 !                                                                      !
@@ -87,9 +88,9 @@
 !
       integer, intent(in) :: ng, model, ncid
 #ifdef INWAVE_MODEL
-      integer, intent(in) :: DimIDs(33)
+      integer, intent(in) :: DimIDs(36) !!! <<< TN: DimIDs(33)->DimIDs(36)
 #else
-      integer, intent(in) :: DimIDs(32)
+      integer, intent(in) :: DimIDs(36) !!! <<< TN: DimIDs(32)->DimIDs(36)
 #endif
       character (*), intent(in) :: ncname
 !
@@ -116,6 +117,11 @@
 # if defined VARIABLE_CDOM && defined SPECTRAL_LIGHT
       integer :: domdim
 #endif
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+# ifdef SEDIMENT_ECOSYS
+      integer :: sedecodim
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 #if !defined PARALLEL_OUT  && defined DISTRIBUTE
       integer :: ibuffer(2)
 #endif
@@ -179,6 +185,12 @@
 # if defined VARIABLE_CDOM && defined SPECTRAL_LIGHT
       domdim=DimIDs(27)
 #endif
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+# ifdef SEDIMENT_ECOSYS
+      sedecodim=DimIDs(36)
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+
 !
 !  Set dimension for generic user parameters.
 !
@@ -3156,6 +3168,23 @@
      &               SetParAccess = .FALSE.)
       IF (FoundError(exit_flag, NoError, __LINE__,                      &
      &               __FILE__)) RETURN
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+# ifdef SEDIMENT_ECOSYS
+!
+!  Biological sediment layer vertical dimension
+!
+      Vinfo( 1)='sed_eco_layer'
+      Vinfo( 2)='Biological sediment layer vertical position'
+      Vinfo( 3)='centimeter'
+      Vinfo(14)='sed_eco_layer, scalar'
+      vinfo(25)='down'
+      status=def_var(ng, model, ncid, varid, NF_TYPE,                   &
+     &               1, (/sedecodim/), Aval, Vinfo, ncname,                 &
+     &               SetParAccess = .FALSE.)
+      IF (FoundError(exit_flag, NoError, __LINE__,                      &
+     &               __FILE__)) RETURN
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 !
 !  S-coordinate non-dimensional independent variable at W-points.
 !

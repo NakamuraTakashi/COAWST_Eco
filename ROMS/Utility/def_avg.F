@@ -59,7 +59,7 @@
 # endif
       integer :: recdim, status
 
-      integer :: DimIDs(32), p2dgrd(3), t2dgrd(3), u2dgrd(3), v2dgrd(3)
+      integer :: DimIDs(36), p2dgrd(3), t2dgrd(3), u2dgrd(3), v2dgrd(3)  !!! <<< TN: 32->36
       integer :: Vsize(4)
 
       integer :: def_dim

@@ -232,6 +232,64 @@
 !
 !  Write out 2D biological diagnostic fields.
 !
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN:add
+#  if defined REEF_ECOSYS
+!     Send diagnostic fields from reef_ecosys to roms dia.
+      CALL send_reef_ecosys2roms_dia(ng,LBi, UBi, LBj, UBj)
+
+      DO ivar=1,NDbio2d
+        ifield=iDbio2(ivar)
+        IF (Dout(ifield,ng)) THEN
+          scale=1.0_r8
+          gtype=gfactor*r2dvar
+          status=nf_fwrite2d(ng, iNLM, DIA(ng)%ncid,                    &
+     &                       DIA(ng)%Vid(ifield),                       &
+     &                       DIA(ng)%Rindex, gtype,                     &
+     &                       LBi, UBi, LBj, UBj, scale,                 &
+#  ifdef MASKING
+     &                       GRID(ng) % rmask,                          &
+#  endif
+     &                       DIAGS(ng) % DiaBio2d(:,:,ivar) )
+          IF (FoundError(status, nf90_noerr, __LINE__,                  &
+     &                   __FILE__)) THEN
+            IF (Master) THEN
+              WRITE (stdout,10) TRIM(Vname(1,ifield)), DIA(ng)%Rindex
+            END IF
+            exit_flag=3
+            ioerror=status
+            RETURN
+          END IF
+        END IF
+      END DO
+!
+!  Write out 3D biological diagnostic fields.
+!
+      DO ivar=1,NDbio3d
+        ifield=iDbio3(ivar)
+        IF (Dout(ifield,ng)) THEN
+          scale=1.0_r8
+          gtype=gfactor*r3dvar
+          status=nf_fwrite3d(ng, iNLM, DIA(ng)%ncid,                    &
+     &                       DIA(ng)%Vid(ifield),                       &
+     &                       DIA(ng)%Rindex, gtype,                     &
+     &                       LBi, UBi, LBj, UBj, 1, N(ng), scale,       &
+#  ifdef MASKING
+     &                       GRID(ng) % rmask,                          &
+#  endif
+     &                       DIAGS(ng) % DiaBio3d(:,:,:,ivar) )
+          IF (FoundError(status, nf90_noerr, __LINE__,                  &
+     &                   __FILE__)) THEN
+            IF (Master) THEN
+              WRITE (stdout,10) TRIM(Vname(1,ifield)), DIA(ng)%Rindex
+            END IF
+            exit_flag=3
+            ioerror=status
+            RETURN
+          END IF
+        END IF
+      END DO
+#  else
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN:add
       dtBIO=dt(ng)*sec2day/REAL(BioIter(ng),r8)
 
       DO ivar=1,NDbio2d
@@ -291,6 +349,9 @@
           END IF
         END IF
       END DO
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN:add
+#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN:add
 # endif
 !
 !  Synchronize time-average NetCDF file to disk to allow other processes

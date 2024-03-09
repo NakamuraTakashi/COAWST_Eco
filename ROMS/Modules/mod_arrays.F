@@ -78,7 +78,8 @@
 !!!  Initialize coral polyp model parameters
 !!!----------------------------------------------------------------------
 #ifdef REEF_ECOSYS
-      USE mod_reef_ecosys
+      USE mod_reef_ecosys, ONLY : initialize_reef_ecosys
+      USE mod_biology, ONLY : send_reef_ecosys2roms_his
 #endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
@@ -190,7 +191,14 @@
 !!!  Initialize coral polyp model parameters
 !!!----------------------------------------------------------------------
 #ifdef REEF_ECOSYS
-          CALL initialize_reef_ecosys(ng, Ngrids, LBi, UBi, LBj, UBj)
+          CALL initialize_reef_ecosys(ng, Ngrids, LBi, UBi, LBj, UBj   &
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+# ifdef SEDIMENT_ECOSYS
+          , Nsed(ng)                                  &   ! Number of vertical biological sediment layers
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+          )
+          CALL send_reef_ecosys2roms_his (ng, LBi, UBi, LBj, UBj)
 #endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
           IF (LuvSrc(ng).or.LwSrc(ng).or.ANY(LtracerSrc(:,ng))) THEN
@@ -274,7 +282,7 @@
 #if defined SSH_TIDES || defined UV_TIDES || defined POT_TIDES
           CALL initialize_tides (ng, tile)
 #endif
-        END DO
+       END DO
 !$OMP BARRIER
       END DO
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add

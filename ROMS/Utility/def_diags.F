@@ -52,7 +52,7 @@
 # if defined WRITE_WATER && defined MASKING
       integer :: xy_pdim, xyz_pdim
 # endif
-      integer :: DimIDs(32), t2dgrd(3), u2dgrd(3), v2dgrd(3)
+      integer :: DimIDs(36), t2dgrd(3), u2dgrd(3), v2dgrd(3) !!! <<< TN: DimIDs(32)->DimIDs(36)
       integer :: Vsize(4)
 
       integer :: def_dim
@@ -531,7 +531,7 @@
 # endif
 
 # ifdef DIAGNOSTICS_BIO
-#  if defined BIO_FENNEL || defined HYPOXIA_SRM
+#  if defined BIO_FENNEL || defined HYPOXIA_SRM || defined REEF_ECOSYS /*!!!<<< TN:add REEF_ECOSYS */
 !
 !  Define 2D biological diagnostic fields.
 !
@@ -556,7 +556,7 @@
           END IF
         END DO
 #  endif
-#  if defined BIO_FENNEL
+#  if defined BIO_FENNEL || defined REEF_ECOSYS /*!!!<<< TN:add REEF_ECOSYS */
 !
 !  Define 3D biological diagnostic fields.
 !
@@ -683,7 +683,7 @@
           END DO
 # endif
 # ifdef DIAGNOSTICS_BIO
-#  if defined BIO_FENNEL || defined HYPOXIA_SRM
+#  if defined BIO_FENNEL || defined HYPOXIA_SRM || defined REEF_ECOSYS /*!!!<<< TN:add REEF_ECOSYS */
           DO ivar=1,NDbio2d
             ifield=iDbio2(ivar)
             IF (TRIM(var_name(i)).eq.TRIM(Vname(1,ifield))) THEN
@@ -692,7 +692,7 @@
             END IF
           END DO
 #  endif
-#  if defined BIO_FENNEL
+#  if defined BIO_FENNEL || defined REEF_ECOSYS /*!!!<<< TN:add REEF_ECOSYS */
           DO ivar=1,NDbio3d
             ifield=iDbio3(ivar)
             IF (TRIM(var_name(i)).eq.TRIM(Vname(1,ifield))) THEN
@@ -762,7 +762,7 @@
         END DO
 # endif
 # ifdef DIAGNOSTICS_BIO
-#  if defined BIO_FENNEL || defined HYPOXIA_SRM
+#  if defined BIO_FENNEL || defined HYPOXIA_SRM || defined REEF_ECOSYS /*!!!<<< TN:add REEF_ECOSYS */
         DO ivar=1,NDbio2d
           ifield=iDbio2(ivar)
           IF (.not.got_var(ifield).and.Dout(ifield,ng)) THEN
@@ -773,7 +773,7 @@
           END IF
         END DO
 #  endif
-#  if defined BIO_FENNEL
+#  if defined BIO_FENNEL || defined REEF_ECOSYS /*!!!<<< TN:add REEF_ECOSYS */
         DO ivar=1,NDbio3d
           ifield=iDbio3(ivar)
           IF (.not.got_var(ifield).and.Dout(ifield,ng)) THEN

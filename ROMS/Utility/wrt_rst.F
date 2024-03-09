@@ -36,6 +36,11 @@
       USE mod_vegetation
       USE mod_vegarr
 #endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#if defined BIOLOGY
+      USE mod_biology
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #if (defined PERFECT_RESTART && defined ICE_MODEL) || defined NCEP_FLUXES
       USE mod_forces
 #endif
@@ -67,6 +72,11 @@
 #if defined PERFECT_RESTART || defined SOLVE3D
       integer :: ntmp(1)
 #endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# ifdef REEF_ECOSYS
+      integer :: ifield
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
       real(r8) :: scale
 !
       LBi=LBOUND(GRID(ng)%h,DIM=1)
@@ -2028,6 +2038,86 @@
         END IF
 # endif
 #endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#if defined REEF_ECOSYS
+!
+!  Write out time-dependent Biological 2D fields.
+!
+      DO i=1,NHbio2d
+        ifield=iHbio2(i)
+        scale=1.0_r8
+        gtype=gfactor*r2dvar
+        status=nf_fwrite2d(ng, iNLM, RST(ng)%ncid,                    &
+     &                   RST(ng)%Vid(ifield),                         &
+     &                   RST(ng)%Rindex, gtype,                       &
+     &                   LBi, UBi, LBj, UBj, scale,                   &
+# ifdef MASKING
+     &                   GRID(ng) % rmask,                            &
+# endif
+     &                   OCEAN(ng) % HisBio2d(:,:,i))
+        IF (status.ne.nf90_noerr) THEN
+          IF (Master) THEN
+            WRITE (stdout,10) TRIM(Vname(1,ifield)), RST(ng)%Rindex
+          END IF
+          exit_flag=3
+          ioerror=status
+          RETURN
+        END IF
+      END DO
+!
+!  Write out time-dependent Biological 3D fields.
+!
+      DO i=1,NHbio3d
+        ifield=iHbio3(i)
+        scale=1.0_r8
+        gtype=gfactor*r3dvar
+        status=nf_fwrite3d(ng, iNLM, RST(ng)%ncid,                    &
+     &                   RST(ng)%Vid(ifield),                         &
+     &                   RST(ng)%Rindex, gtype,                       &
+     &                   LBi, UBi, LBj, UBj, 1, N(ng), scale,         &
+# ifdef MASKING
+     &                   GRID(ng) % rmask,                            &
+# endif
+     &                   OCEAN(ng) % HisBio3d(:,:,:,i))
+        IF (status.ne.nf90_noerr) THEN
+          IF (Master) THEN
+            WRITE (stdout,10) TRIM(Vname(1,ifield)), RST(ng)%Rindex
+          END IF
+          exit_flag=3
+          ioerror=status
+          RETURN
+        END IF
+      END DO
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+# ifdef SEDIMENT_ECOSYS
+!
+!  Write out time-dependent Biological sediment 3D fields.
+!
+      DO i=1,NHbiosed3d
+        ifield=iHbiosed3(i)
+        scale=1.0_r8
+        gtype=gfactor*d3dvar
+        status=nf_fwrite3d(ng, iNLM, RST(ng)%ncid,                    &
+     &                   RST(ng)%Vid(ifield),                         &
+     &                   RST(ng)%Rindex, gtype,                       &
+     &                   LBi, UBi, LBj, UBj, 1, Nsed(ng), scale,      &
+#  ifdef MASKING
+     &                   GRID(ng) % rmask,                            &
+#  endif
+     &                   OCEAN(ng) % HisBiosed3d(:,:,:,i))
+        IF (status.ne.nf90_noerr) THEN
+          IF (Master) THEN
+            WRITE (stdout,10) TRIM(Vname(1,ifield)), RST(ng)%Rindex
+          END IF
+          exit_flag=3
+          ioerror=status
+          RETURN
+        END IF
+      END DO
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
 !-----------------------------------------------------------------------
 !  Synchronize restart NetCDF file to disk.

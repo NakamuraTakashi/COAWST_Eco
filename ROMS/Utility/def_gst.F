@@ -41,7 +41,7 @@
       integer :: iparamdim, ipntrdim, laitrdim, laup2dim, raitrdim
       integer :: raup2dim
       integer :: i, j, status, varid
-      integer :: DimIDs(32), vardim(2)
+      integer :: DimIDs(36), vardim(2) !!! <<< TN: DimIDs(32)->DimIDs(36)
 
       integer :: def_dim
 

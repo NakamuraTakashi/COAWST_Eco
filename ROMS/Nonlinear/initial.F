@@ -81,6 +81,11 @@
 #ifdef INWAVE_MODEL
       USE driver_inwave_mod, ONLY : inwave_init
 #endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#if defined BIOLOGY && defined REEF_ECOSYS
+      USE mod_biology,       ONLY : LReadBioINI
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
       implicit none
 !
@@ -616,12 +621,20 @@
 !  Analytical initial conditions for biology tracers.
 !
       DO ng=1,Ngrids
-!        IF (nrrec(ng).eq.0) THEN   !!!>>>>>>>>>>>>>>>>>>> TN:rm
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# if defined REEF_ECOSYS
+        IF ( LReadBioINI(1,ng) .EQV. .FALSE. ) THEN
+# else
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
+        IF (nrrec(ng).eq.0) THEN
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
           DO tile=first_tile(ng),last_tile(ng),+1
             CALL ana_biology (ng, tile, iNLM)
           END DO
 !$OMP BARRIER
-!        END IF  !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: rm
+        END IF
       END DO
 #endif
 !<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< FA: MOVED

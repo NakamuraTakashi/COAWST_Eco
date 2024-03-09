@@ -37,19 +37,27 @@
       logical, dimension(Ngrids) :: Lbio
       logical, dimension(NBT,Ngrids) :: Ltrc
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
-      logical, dimension(NHbio2d,Ngrids) :: Hbio2
-      logical, dimension(NHbio3d,Ngrids) :: Hbio3
+      logical, dimension(NHbio2d,Ngrids) :: LHbio2
+      logical, dimension(NHbio3d,Ngrids) :: LHbio3
+      logical, dimension(NDbio2d,Ngrids) :: LDbio2
+      logical, dimension(NDbio3d,Ngrids) :: LDbio3
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+      logical, dimension(NHbiosed3d,Ngrids) :: LHbiosed3
+      integer, dimension(Ngrids) :: NsedTemporary
+      real(r8), allocatable :: SedEcoLayerDepthsTemporary(:)
+      integer :: k
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 
       real(r8), dimension(NBT,Ngrids) :: Rbio
 
       real(r8), dimension(100) :: Rval
 #if defined ORGANIC_MATTER
-      real(r8), dimension(N_phyt,Ngrids) :: Rphyt
-      real(r8), dimension(N_zoop,Ngrids) :: Rzoop
-      real(r8), dimension(N_dom,Ngrids) :: Rdom
-      real(r8), dimension(N_pom,Ngrids) :: Rpom
-      real(r8), dimension(N_pim,Ngrids) :: Rpim
+      real(r8), dimension(Nphy,Ngrids) :: Rphyt
+      real(r8), dimension(Nzoo,Ngrids) :: Rzoop
+      real(r8), dimension(Ndom,Ngrids) :: Rdom
+      real(r8), dimension(Npom,Ngrids) :: Rpom
+      real(r8), dimension(Npim,Ngrids) :: Rpim
 #endif
       character (len=40 ) :: KeyWord
       character (len=256) :: line
@@ -76,6 +84,8 @@
           SELECT CASE (TRIM(KeyWord))
             CASE ('Lbiology')
               Npts=load_l(Nval, Cval, Ngrids, Lbiology)
+            CASE ('LReadBioINI')
+              Npts=load_l(Nval, Cval, 2*Ngrids, LReadBioINI)
             CASE ('CrlIter')
               Npts=load_i(Nval, Rval, Ngrids, CrlIter)
             CASE ('SedIter')
@@ -93,37 +103,37 @@
               Npts=load_r(Nval, Rval, Ngrids, Oxyg0)
 #if defined ORGANIC_MATTER
             CASE ('DOC_0')
-              Npts=load_r(Nval, Rval, N_dom*Ngrids, Rdom)
+              Npts=load_r(Nval, Rval, Ndom*Ngrids, Rdom)
               DO ng=1,Ngrids
-                DO itrc=1,N_dom
+                DO itrc=1,Ndom
                   DOC_0(itrc,ng)=Rdom(itrc,ng)
                 END DO
               END DO
             CASE ('POC_0')
-              Npts=load_r(Nval, Rval, N_pom*Ngrids, Rpom)
+              Npts=load_r(Nval, Rval, Npom*Ngrids, Rpom)
               DO ng=1,Ngrids
-                DO itrc=1,N_pom
+                DO itrc=1,Npom
                   POC_0(itrc,ng)=Rpom(itrc,ng)
                 END DO
               END DO
             CASE ('Phyt_0')
-              Npts=load_r(Nval, Rval, N_phyt*Ngrids, Rphyt)
+              Npts=load_r(Nval, Rval, Nphy*Ngrids, Rphyt)
               DO ng=1,Ngrids
-                DO itrc=1,N_phyt
+                DO itrc=1,Nphy
                   Phyt_0(itrc,ng)=Rphyt(itrc,ng)
                 END DO
               END DO
             CASE ('Zoop_0')
-              Npts=load_r(Nval, Rval, N_zoop*Ngrids, Rzoop)
+              Npts=load_r(Nval, Rval, Nzoo*Ngrids, Rzoop)
               DO ng=1,Ngrids
-                DO itrc=1,N_zoop
+                DO itrc=1,Nzoo
                   Zoop_0(itrc,ng)=Rzoop(itrc,ng)
                 END DO
               END DO
             CASE ('PIC_0')
-              Npts=load_r(Nval, Rval, N_pim*Ngrids, Rpim)
+              Npts=load_r(Nval, Rval, Npim*Ngrids, Rpim)
               DO ng=1,Ngrids
-                DO itrc=1,N_pim
+                DO itrc=1,Npim
                   PIC_0(itrc,ng)=Rpim(itrc,ng)
                 END DO
               END DO
@@ -133,37 +143,37 @@
               Npts=load_r(Nval, Rval, Ngrids, d13C_TIC0)
 # if defined ORGANIC_MATTER
             CASE ('d13C_DOC_0')
-              Npts=load_r(Nval, Rval, N_dom*Ngrids, Rdom)
+              Npts=load_r(Nval, Rval, Ndom*Ngrids, Rdom)
               DO ng=1,Ngrids
-                DO itrc=1,N_dom
+                DO itrc=1,Ndom
                   d13C_DOC_0(itrc,ng)=Rdom(itrc,ng)
                 END DO
               END DO
             CASE ('d13C_POC_0')
-              Npts=load_r(Nval, Rval, N_pom*Ngrids, Rpom)
+              Npts=load_r(Nval, Rval, Npom*Ngrids, Rpom)
               DO ng=1,Ngrids
-                DO itrc=1,N_pom
+                DO itrc=1,Npom
                   d13C_POC_0(itrc,ng)=Rpom(itrc,ng)
                 END DO
               END DO
             CASE ('d13C_Phyt_0')
-              Npts=load_r(Nval, Rval, N_phyt*Ngrids, Rphyt)
+              Npts=load_r(Nval, Rval, Nphy*Ngrids, Rphyt)
               DO ng=1,Ngrids
-                DO itrc=1,N_phyt
+                DO itrc=1,Nphy
                   d13C_Phyt_0(itrc,ng)=Rphyt(itrc,ng)
                 END DO
               END DO
             CASE ('d13C_Zoop_0')
-              Npts=load_r(Nval, Rval, N_zoop*Ngrids, Rzoop)
+              Npts=load_r(Nval, Rval, Nzoo*Ngrids, Rzoop)
               DO ng=1,Ngrids
-                DO itrc=1,N_zoop
+                DO itrc=1,Nzoo
                   d13C_Zoop_0(itrc,ng)=Rzoop(itrc,ng)
                 END DO
               END DO
             CASE ('d13C_PIC_0')
-              Npts=load_r(Nval, Rval, N_pim*Ngrids, Rpom)
+              Npts=load_r(Nval, Rval, Npim*Ngrids, Rpom)
               DO ng=1,Ngrids
-                DO itrc=1,N_pim
+                DO itrc=1,Npim
                   d13C_PIC_0(itrc,ng)=Rpim(itrc,ng)
                 END DO
               END DO
@@ -180,30 +190,30 @@
               Npts=load_r(Nval, Rval, Ngrids, PO4_0)
 # if defined ORGANIC_MATTER
             CASE ('DON_0')
-              Npts=load_r(Nval, Rval, N_dom*Ngrids, Rdom)
+              Npts=load_r(Nval, Rval, Ndom*Ngrids, Rdom)
               DO ng=1,Ngrids
-                DO itrc=1,N_dom
+                DO itrc=1,Ndom
                   DON_0(itrc,ng)=Rdom(itrc,ng)
                 END DO
               END DO
             CASE ('PON_0')
-              Npts=load_r(Nval, Rval, N_pom*Ngrids, Rpom)
+              Npts=load_r(Nval, Rval, Npom*Ngrids, Rpom)
               DO ng=1,Ngrids
-                DO itrc=1,N_pom
+                DO itrc=1,Npom
                   PON_0(itrc,ng)=Rpom(itrc,ng)
                 END DO
               END DO
             CASE ('DOP_0')
-              Npts=load_r(Nval, Rval, N_dom*Ngrids, Rdom)
+              Npts=load_r(Nval, Rval, Ndom*Ngrids, Rdom)
               DO ng=1,Ngrids
-                DO itrc=1,N_dom
+                DO itrc=1,Ndom
                   DOP_0(itrc,ng)=Rdom(itrc,ng)
                 END DO
               END DO
             CASE ('POP_0')
-              Npts=load_r(Nval, Rval, N_pom*Ngrids, Rpom)
+              Npts=load_r(Nval, Rval, Npom*Ngrids, Rpom)
               DO ng=1,Ngrids
-                DO itrc=1,N_pom
+                DO itrc=1,Npom
                   POP_0(itrc,ng)=Rpom(itrc,ng)
                 END DO
               END DO
@@ -217,31 +227,31 @@
               Npts=load_r(Nval, Rval, Ngrids, d15N_NH4_0)
 #  if defined ORGANIC_MATTER
             CASE ('d15N_DON_0')
-              Npts=load_r(Nval, Rval, N_dom*Ngrids, Rdom)
+              Npts=load_r(Nval, Rval, Ndom*Ngrids, Rdom)
               DO ng=1,Ngrids
-                DO itrc=1,N_dom
+                DO itrc=1,Ndom
                   d15N_DON_0(itrc,ng)=Rdom(itrc,ng)
                 END DO
               END DO
             CASE ('d15N_PON_0')
-              Npts=load_r(Nval, Rval, N_pom*Ngrids, Rpom)
+              Npts=load_r(Nval, Rval, Npom*Ngrids, Rpom)
               DO ng=1,Ngrids
-                DO itrc=1,N_pom
+                DO itrc=1,Npom
                   d15N_PON_0(itrc,ng)=Rpom(itrc,ng)
                 END DO
               END DO
             CASE ('d15N_Phyt_0')
-              Npts=load_r(Nval, Rval, N_phyt*Ngrids, Rphyt)
+              Npts=load_r(Nval, Rval, Nphy*Ngrids, Rphyt)
               DO ng=1,Ngrids
-                DO itrc=1,N_phyt
+                DO itrc=1,Nphy
                   d15N_Phyt_0(itrc,ng)=Rphyt(itrc,ng)
                 END DO
               END DO
             CASE ('d15N_Zoop_0')
-              Npts=load_r(Nval, Rval, N_zoop*Ngrids, Rzoop)
+              Npts=load_r(Nval, Rval, Nzoo*Ngrids, Rzoop)
               DO ng=1,Ngrids
-                DO itrc=1,N_zoop
-                  d15N_Zoop_0(itrc,ng)=Rzoop(itrc,ng)
+                DO itrc=1,Nzoo
+                  d15Nzoo_0(itrc,ng)=Rzoop(itrc,ng)
                 END DO
               END DO
 #  endif
@@ -253,6 +263,26 @@
             CASE ('COTl0')
               Npts=load_r(Nval, Rval, Ngrids, COTl0)
 #endif
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+# ifdef SEDIMENT_ECOSYS
+            CASE ('Nsed')
+              Npts=load_i(Nval, Rval, Ngrids, NsedTemporary)
+              DO ng=1,Ngrids
+                Nsed(ng) = NsedTemporary(ng)
+              ENDDO
+            CASE ('SedEcoLayerDepths')
+              allocate ( SedEcoLayerDepths(Ngrids, maxval(Nsed)) )
+              allocate ( SedEcoLayerDepthsTemporary(sum(Nsed)) )
+              i=0
+              Npts=load_r(Nval, Rval, sum(Nsed), SedEcoLayerDepthsTemporary)
+              DO ng=1,Ngrids
+                DO k=1, Nsed(ng)
+                  i=i+1
+                  SedEcoLayerDepths(ng, k) = SedEcoLayerDepthsTemporary(i)
+                ENDDO
+              ENDDO
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
             CASE ('TNU2')
               Npts=load_r(Nval, Rval, NBT*Ngrids, Rbio)
@@ -389,39 +419,8 @@
               END DO
 
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
-            CASE ('Hout(idCrl1)')
-              IF (idCrl1.eq.0) THEN
-                IF (Master) WRITE (out,30) 'idCrl1'
-                exit_flag=5
-                RETURN
-              END IF
-              Npts=load_l(Nval, Cval, Ngrids, Hout(idCrl1,:))
-            CASE ('Hout(idCrl2)')
-              IF (idCrl2.eq.0) THEN
-                IF (Master) WRITE (out,30) 'idCrl2'
-                exit_flag=5
-                RETURN
-              END IF
-              Npts=load_l(Nval, Cval, Ngrids, Hout(idCrl2,:))
-
-            CASE ('Hout(idSgrs)')
-              IF (idSgrs.eq.0) THEN
-                IF (Master) WRITE (out,30) 'idSgrs'
-                exit_flag=5
-                RETURN
-              END IF
-              Npts=load_l(Nval, Cval, Ngrids, Hout(idSgrs,:))
-
-            CASE ('Hout(idAlga)')
-              IF (idAlga.eq.0) THEN
-                IF (Master) WRITE (out,30) 'idAlga'
-                exit_flag=5
-                RETURN
-              END IF
-              Npts=load_l(Nval, Cval, Ngrids, Hout(idAlga,:))
-
             CASE ('Hout(iHbio2)')
-              Npts=load_l(Nval, Cval, NHbio2d*Ngrids, Hbio2)
+              Npts=load_l(Nval, Cval, NHbio2d*Ngrids, LHbio2)
               DO ng=1,Ngrids
                 DO itrc=1,NHbio2d
                   i=iHbio2(itrc)
@@ -431,11 +430,11 @@
                     exit_flag=5
                     RETURN
                   END IF
-                  Hout(i,ng)=Hbio2(itrc,ng)
+                  Hout(i,ng)=LHbio2(itrc,ng)
                 END DO
               END DO
             CASE ('Hout(iHbio3)')
-              Npts=load_l(Nval, Cval, NHbio3d*Ngrids, Hbio3)
+              Npts=load_l(Nval, Cval, NHbio3d*Ngrids, LHbio3)
               DO ng=1,Ngrids
                 DO itrc=1,NHbio3d
                   i=iHbio3(itrc)
@@ -445,11 +444,26 @@
                     exit_flag=5
                     RETURN
                   END IF
-                  Hout(i,ng)=Hbio3(itrc,ng)
+                  Hout(i,ng)=LHbio3(itrc,ng)
                 END DO
               END DO
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
-
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+            CASE ('Hout(iHbiosed3)')
+              Npts=load_l(Nval, Cval, NHbiosed3d*Ngrids, LHbiosed3)
+              DO ng=1,Ngrids
+                DO itrc=1,NHbiosed3d
+                  i=iHbiosed3(itrc)
+                  IF (i.eq.0) THEN
+                    IF (Master) WRITE (out,30)                          &
+     &                                'iHbiosed3(', itrc, ')'
+                    exit_flag=5
+                    RETURN
+                  END IF
+                  Hout(i,ng)=LHbiosed3(itrc,ng)
+                END DO
+              END DO
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
             CASE ('Qout(idTvar)')
               Npts=load_l(Nval, Cval, NBT*Ngrids, Ltrc)
               DO ng=1,Ngrids
@@ -480,6 +494,79 @@
                   Qout(i,ng)=Ltrc(itrc,ng)
                 END DO
               END DO
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+            CASE ('Qout(iHbio2)')
+              Npts=load_l(Nval, Cval, NHbio2d*Ngrids, LHbio2)
+              DO ng=1,Ngrids
+                DO itrc=1,NHbio2d
+                  i=iHbio2(itrc)
+                  IF (i.eq.0) THEN
+                    IF (Master) WRITE (out,30)                          &
+     &                                'iHbio2(', itrc, ')'
+                    exit_flag=5
+                    RETURN
+                  END IF
+                  Qout(i,ng)=LHbio2(itrc,ng)
+                END DO
+              END DO
+            CASE ('Qout(iHbio3)')
+              Npts=load_l(Nval, Cval, NHbio3d*Ngrids, LHbio3)
+              DO ng=1,Ngrids
+                DO itrc=1,NHbio3d
+                  i=iHbio3(itrc)
+                  IF (i.eq.0) THEN
+                    IF (Master) WRITE (out,30)                          &
+     &                                'iHbio3(', itrc, ')'
+                    exit_flag=5
+                    RETURN
+                  END IF
+                  Qout(i,ng)=LHbio3(itrc,ng)
+                END DO
+              END DO
+            CASE ('Qout(iHbiosed3)')
+              Npts=load_l(Nval, Cval, NHbiosed3d*Ngrids, LHbiosed3)
+              DO ng=1,Ngrids
+                DO itrc=1,NHbiosed3d
+                  i=iHbiosed3(itrc)
+                  IF (i.eq.0) THEN
+                    IF (Master) WRITE (out,30)                          &
+     &                                'iHbiosed3(', itrc, ')'
+                    exit_flag=5
+                    RETURN
+                  END IF
+                  Qout(i,ng)=LHbiosed3(itrc,ng)
+                END DO
+              END DO
+
+            CASE ('Dout(iDbio2)')
+              Npts=load_l(Nval, Cval, NDbio2d*Ngrids, LDbio2)
+              DO ng=1,Ngrids
+                DO itrc=1,NDbio2d
+                  i=iDbio2(itrc)
+                  IF (i.eq.0) THEN
+                    IF (Master) WRITE (out,30)                          &
+     &                                'iDbio2(', itrc, ')'
+                    exit_flag=5
+                    RETURN
+                  END IF
+                  Dout(i,ng)=LDbio2(itrc,ng)
+                END DO
+              END DO
+            CASE ('Dout(iDbio3)')
+              Npts=load_l(Nval, Cval, NDbio3d*Ngrids, LDbio3)
+              DO ng=1,Ngrids
+                DO itrc=1,NDbio3d
+                  i=iDbio3(itrc)
+                  IF (i.eq.0) THEN
+                    IF (Master) WRITE (out,30)                          &
+     &                                'iDbio3(', itrc, ')'
+                    exit_flag=5
+                    RETURN
+                  END IF
+                  Dout(i,ng)=LDbio3(itrc,ng)
+                END DO
+              END DO
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #if defined AVERAGES    || \
    (defined AD_AVERAGES && defined ADJOINT) || \
    (defined RP_AVERAGES && defined TL_IOMS) || \
@@ -626,6 +713,26 @@
       exit_flag=4
       RETURN
   20  CONTINUE
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+!
+!  Set various parameters.
+!
+      DO ng=1,Ngrids
+!
+!  Set switch to create history NetCDF file.
+!
+        IF ((nHIS(ng).gt.0).and.ANY(Hout(:,ng))) THEN
+          LdefHIS(ng)=.TRUE.
+        END IF
+!
+!  Set switch to create quicksave NetCDF file.
+!
+        IF ((nQCK(ng).gt.0).and.ANY(Qout(:,ng))) THEN
+          LdefQCK(ng)=.TRUE.
+        END IF
+      END DO
+
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
 !-----------------------------------------------------------------------
 !  Report input parameters.
@@ -652,19 +759,19 @@
             WRITE (out,80) Oxyg0(ng), 'Oxyg0',                          &
      &            'Dissolved oxygen (umol/L).'
 #if defined ORGANIC_MATTER
-            DO itrc=1,N_dom
+            DO itrc=1,Ndom
               WRITE (out,140) DOC_0(itrc,ng), 'DOC_0', itrc,                          &
      &            'Dissolved organic carbon (umolC/L).'
             END DO
-            DO itrc=1,N_pom
+            DO itrc=1,Npom
               WRITE (out,140)  POC_0(itrc,ng), 'POC_0', itrc,                          &
      &            'Particulate organic carbon (umolC/L).'
             END DO
-            DO itrc=1,N_phyt
+            DO itrc=1,Nphy
               WRITE (out,140) Phyt_0(itrc,ng), 'Phyt_0', itrc,                          &
      &            'Phytoplankton (umolC/L).'
             END DO
-            DO itrc=1,N_zoop
+            DO itrc=1,Nzoo
               WRITE (out,140) Zoop_0(itrc,ng), 'Zoop_0', itrc,                          &
      &            'Zooplankton (umolC/L).'
             END DO
@@ -673,23 +780,23 @@
             WRITE (out,80) d13C_TIC0(ng), 'd13C_TIC0',                      &
      &            'd13C of DIC (permil VPDB).'
 # if defined ORGANIC_MATTER
-            DO itrc=1,N_dom
+            DO itrc=1,Ndom
               WRITE (out,140) d13C_DOC_0(itrc,ng), 'd13C_DOC_0', itrc,                      &
      &            'd13C of DOC (permil VPDB).'
             END DO
-            DO itrc=1,N_pom
+            DO itrc=1,Npom
               WRITE (out,140) d13C_POC_0(itrc,ng), 'd13C_POC_0', itrc,                      &
      &            'd13C of POC (permil VPDB).'
             END DO
-            DO itrc=1,N_phyt
+            DO itrc=1,Nphy
               WRITE (out,140) d13C_Phyt_0(itrc,ng), 'd13C_Phyt_0', itrc,                      &
      &            'd13C of phytoplankton (permil VPDB).'
             END DO
-            DO itrc=1,N_zoop
+            DO itrc=1,Nzoo
               WRITE (out,140) d13C_Zoop_0(itrc,ng), 'd13C_Zoop_0', itrc,                      &
      &            'd13C of zooplankton (permil VPDB).'
             END DO
-            DO itrc=1,N_pim
+            DO itrc=1,Npim
               WRITE (out,140) d13C_Zoop_0(itrc,ng), 'd13C_Zoop_0', itrc,                      &
      &            'd13C of zooplankton (permil VPDB).'
             END DO
@@ -705,19 +812,19 @@
             WRITE (out,80) PO4_0(ng), 'PO4_0',                          &
      &            'PO4 (umol/L).'
 # if defined ORGANIC_MATTER
-            DO itrc=1,N_dom
+            DO itrc=1,Ndom
               WRITE (out,140) DON_0(itrc,ng), 'DON_0', itrc,                          &
      &            'DON (umolN/L).'
             END DO
-            DO itrc=1,N_pom
+            DO itrc=1,Npom
               WRITE (out,140) PON_0(itrc,ng), 'PON_0', itrc,                          &
      &            'PON (umolN/L).'
             END DO
-            DO itrc=1,N_dom
+            DO itrc=1,Ndom
               WRITE (out,140) DOP_0(itrc,ng), 'DOP_0', itrc,                          &
      &            'DOP (umolP/L).'
             END DO
-            DO itrc=1,N_pom
+            DO itrc=1,Npom
               WRITE (out,140) POP_0(itrc,ng), 'POP_0', itrc,                          &
      &            'POP (umolP/L).'
             END DO
@@ -730,19 +837,19 @@
             WRITE (out,80) d15N_NH4_0(ng), 'd15N_NH4_0',                      &
      &            'd15N of NH4 (permil).'
 #  if defined ORGANIC_MATTER
-            DO itrc=1,N_dom
+            DO itrc=1,Ndom
               WRITE (out,140) d15N_DON_0(itrc,ng), 'd15N_DOC_0', itrc,                      &
      &            'd15N of DOC (permil).'
             END DO
-            DO itrc=1,N_pom
+            DO itrc=1,Npom
               WRITE (out,140) d15N_PON_0(itrc,ng), 'd15N_POC_0', itrc,                      &
      &            'd15N of POC (permil).'
             END DO
-            DO itrc=1,N_dom
+            DO itrc=1,Ndom
               WRITE (out,140) d15N_Phyt_0(itrc,ng), 'd15N_Phyt_0', itrc,                      &
      &            'd15N of phytoplankton (permil).'
             END DO
-            DO itrc=1,N_pom
+            DO itrc=1,Npom
               WRITE (out,140) d15N_Zoop_0(itrc,ng), 'd15N_Zoop_0', itrc,                      &
      &            'd15N of zooplankton (permil).'
             END DO
@@ -755,6 +862,16 @@
             WRITE (out,80) COTl0(ng), 'COTl0',                          &
      &            'Larvae of crown-of thorns starfish (umol/L).'
 #endif
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+# ifdef SEDIMENT_ECOSYS
+            WRITE (out,70) Nsed(ng), 'Nsed',                      &
+     &            'Number of biological sediment layers.'
+            DO k=1,Nsed(ng)
+              WRITE (out,140) SedEcoLayerDepths(ng,k), 'SedEcoLayerDepths', k,                      &
+      &            'Depth (cm) from surface at bottom of each biological sediment layer.'
+            ENDDO
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #ifdef TS_DIF2
             DO itrc=1,NBT
@@ -848,20 +965,6 @@
      &            'Write out tracer flux ', i, TRIM(Vname(1,idTvar(i)))
             END DO
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
-
-            IF (Hout(idCrl1,ng)) WRITE (out,120) Hout(idCrl1,ng),         &
-     &         'Hout(idCrl1)',                                            &
-     &         'Write out time-dependent coral coverage.'
-            IF (Hout(idCrl2,ng)) WRITE (out,120) Hout(idCrl2,ng),         &
-     &         'Hout(idCrl2)',                                            &
-     &         'Write out time-dependent coral2 coverage.'
-            IF (Hout(idSgrs,ng)) WRITE (out,120) Hout(idSgrs,ng),         &
-     &         'Hout(idSgrs)',                                            &
-     &         'Write out time-dependent seagrass coverage.'
-            IF (Hout(idAlga,ng)) WRITE (out,120) Hout(idAlga,ng),         &
-     &         'Hout(idAlga)',                                            &
-     &         'Write out time-dependent algal coverage.'
-
             IF (NHbio2d.gt.0) THEN
               DO itrc=1,NHbio2d
                 i=iHbio2(itrc)
@@ -877,6 +980,64 @@
      &            'Write out', TRIM(Vname(1,i))
             END DO
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+            DO itrc=1,NHbiosed3d
+              i=iHbiosed3(itrc)
+              IF (Hout(i,ng)) WRITE (out,130)                           &
+     &            Hout(i,ng), 'Hout(iHbiosed3)',                        &
+     &            'Write out', TRIM(Vname(1,i))
+            END DO
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+            DO itrc=1,NBT
+              i=idbio(itrc)
+              IF (Qout(idTvar(i),ng)) WRITE (out,120)                   &
+     &            Qout(idTvar(i),ng), 'Qout(idTvar)',                   &
+     &            'Write out tracer ', i, TRIM(Vname(1,idTvar(i)))
+            END DO
+            DO itrc=1,NBT
+              i=idbio(itrc)
+              IF (Qout(idTsur(i),ng)) WRITE (out,120)                   &
+     &            Qout(idTsur(i),ng), 'Qout(idTsur)',                   &
+     &            'Write out tracer flux ', i, TRIM(Vname(1,idTvar(i)))
+            END DO
+            IF (NHbio2d.gt.0) THEN
+              DO itrc=1,NHbio2d
+                i=iHbio2(itrc)
+                IF (Qout(i,ng)) WRITE (out,130)                         &
+     &              Qout(i,ng), 'Qout(iHbio2)',                         &
+     &              'Write out', TRIM(Vname(1,i))
+              END DO
+            END IF
+            DO itrc=1,NHbio3d
+              i=iHbio3(itrc)
+              IF (Qout(i,ng)) WRITE (out,130)                           &
+     &            Qout(i,ng), 'Qout(iHbio3)',                           &
+     &            'Write out', TRIM(Vname(1,i))
+            END DO
+            DO itrc=1,NHbiosed3d
+              i=iHbiosed3(itrc)
+              IF (Qout(i,ng)) WRITE (out,130)                           &
+     &            Qout(i,ng), 'Qout(iHbiosed3)',                        &
+     &            'Write out', TRIM(Vname(1,i))
+            END DO
+
+            IF (NDbio2d.gt.0) THEN
+              DO itrc=1,NDbio2d
+                i=iDbio2(itrc)
+                IF (Dout(i,ng)) WRITE (out,130)                         &
+     &              Dout(i,ng), 'Dout(iDbio2)',                         &
+     &              'Write out', TRIM(Vname(1,i))
+              END DO
+            END IF
+            DO itrc=1,NDbio3d
+              i=iDbio3(itrc)
+              IF (Dout(i,ng)) WRITE (out,130)                           &
+     &            Dout(i,ng), 'Dout(iDbio3)',                           &
+     &            'Write out', TRIM(Vname(1,i))
+            END DO
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
+
 #if defined AVERAGES    || \
    (defined AD_AVERAGES && defined ADJOINT) || \
    (defined RP_AVERAGES && defined TL_IOMS) || \

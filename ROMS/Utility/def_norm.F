@@ -49,7 +49,7 @@
 # ifdef ADJUST_BOUNDARY
       integer :: IorJdim, ifield
 # endif
-      integer :: DimIDs(32), t2dgrd(3), u2dgrd(3), v2dgrd(3)
+      integer :: DimIDs(36), t2dgrd(3), u2dgrd(3), v2dgrd(3) !!! <<< TN: DimIDs(32)->DimIDs(36)
 # ifdef ADJUST_BOUNDARY
       integer :: t2dobc(3)
 # endif

@@ -148,16 +148,41 @@
 #ifdef SOLVE3D
 # if defined BIOLOGY
 #  if defined ANA_BIOLOGY
-!        IF (nrrec(ng).ne.0) THEN  !!!>>>>>>>>>>>>>>>>>>>>>>TN: rm
-!          DO itrc=1,NBT
-!            get_var(idTvar(idbio(itrc)))=.TRUE.
-!          END DO
-!        END IF                   !!!>>>>>>>>>>>>>>>>>>>>>>>TN: rm
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#   if defined REEF_ECOSYS
+        IF ( LReadBioINI(1,ng) ) THEN
+#   else
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
+        IF (nrrec(ng).ne.0) THEN
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#   endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
+          DO itrc=1,NBT
+            get_var(idTvar(idbio(itrc)))=.TRUE.
+          END DO
+        END IF
 #  else
         DO itrc=1,NBT
           get_var(idTvar(idbio(itrc)))=.TRUE.
         END DO
 #  endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#  if defined REEF_ECOSYS
+        IF (LReadBioINI(2,ng)) THEN
+          DO itrc=1,NHbio2d
+            get_var(iHbio2(itrc))=.TRUE.
+          END DO
+          DO itrc=1,NHbio3d
+            get_var(iHbio3(itrc))=.TRUE.
+          END DO
+#   ifdef SEDIMENT_ECOSYS
+          DO itrc=1,NHbiosed3d
+            get_var(iHbiosed3(itrc))=.TRUE.
+          END DO
+#   endif
+        END IF
+#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 # endif
 # if defined T_PASSIVE
 #  if defined ANA_PASSIVE
@@ -613,6 +638,27 @@
           have_var(idRhoa)=.true.
         END IF
 # endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# if defined REEF_ECOSYS
+        DO itrc=1,NHbio2d 
+          IF (TRIM(var_name(i)).eq.TRIM(Vname(1,iHbio2(itrc)))) THEN
+            have_var(iHbio2(itrc))=.TRUE.
+          END IF 
+        END DO 
+        DO itrc=1,NHbio3d 
+          IF (TRIM(var_name(i)).eq.TRIM(Vname(1,iHbio3(itrc)))) THEN
+            have_var(iHbio3(itrc))=.TRUE.
+          END IF 
+        END DO 
+#  ifdef SEDIMENT_ECOSYS
+        DO itrc=1,NHbiosed3d 
+          IF (TRIM(var_name(i)).eq.TRIM(Vname(1,iHbiosed3(itrc)))) THEN
+            have_var(iHbiosed3(itrc))=.TRUE.
+          END IF 
+        END DO 
+#  endif
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #endif
       END DO
 !
@@ -1055,6 +1101,42 @@
       END IF
 #  endif
 # endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# if defined REEF_ECOSYS
+      DO itrc=1,NHbio2d
+        IF (.not.have_var(iHbio2(itrc)).and.                            &
+     &      get_var(iHbio2(itrc))) THEN
+          IF (Master) WRITE (stdout,10) string,                         &
+     &                                  TRIM(Vname(1,iHbio2(itrc))),    &
+     &                                  TRIM(ncname)
+          exit_flag=2
+          RETURN
+        END IF
+      END DO
+      DO itrc=1,NHbio3d
+        IF (.not.have_var(iHbio3(itrc)).and.                            &
+     &      get_var(iHbio3(itrc))) THEN
+          IF (Master) WRITE (stdout,10) string,                         &
+     &                                  TRIM(Vname(1,iHbio3(itrc))),    &
+     &                                  TRIM(ncname)
+          exit_flag=2
+          RETURN
+        END IF
+      END DO
+#  ifdef SEDIMENT_ECOSYS
+      DO itrc=1,NHbiosed3d
+        IF (.not.have_var(iHbiosed3(itrc)).and.                         &
+     &      get_var(iHbiosed3(itrc))) THEN
+          IF (Master) WRITE (stdout,10) string,                         &
+     &                                  TRIM(Vname(1,iHbiosed3(itrc))), &
+     &                                  TRIM(ncname)
+          exit_flag=2
+          RETURN
+        END IF
+      END DO
+#  endif
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #endif
 !
   10  FORMAT (/,a,'CHECKVARS - unable to find model variable: ',a,      &

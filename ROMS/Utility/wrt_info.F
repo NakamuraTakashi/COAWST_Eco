@@ -1614,6 +1614,19 @@
       IF (FoundError(exit_flag, NoError, __LINE__,                      &
      &               __FILE__)) RETURN
 #endif
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+#if defined SEDIMENT_ECOSYS
+!
+!  Biological sediment layer
+!
+      CALL netcdf_put_fvar (ng, model, ncname, 'sed_eco_layer',         &
+     &                      SedEcoLayerDepths(ng, :), (/1/), (/Nsed(ng)/),   &
+     &                      ncid = ncid)
+      IF (FoundError(exit_flag, NoError, __LINE__,                      &
+     &               __FILE__)) RETURN
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+
 !
 !  User generic parameters.
 !

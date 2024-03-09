@@ -1007,6 +1007,14 @@
       is=LEN_TRIM(Coptions)+1
       Coptions(is:is+17)=' DIAGNOSTICS_BIO,'
 #endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN:add
+#if defined DIAGNOSTICS_BIO && defined REEF_ECOSYS
+      IF (Master) WRITE (stdout,20) 'DIAGNOSTICS_BIO',                  &
+     &   'Computing and writing biological diagnostic terms.'
+      is=LEN_TRIM(Coptions)+1
+      Coptions(is:is+17)=' DIAGNOSTICS_BIO,'
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN:add
 #if defined SPECTRAL_LIGHT && defined BIO_FENNEL
       IF (Master) WRITE (stdout,20) 'SPECTRAL_LIGHT',                   &
      &   'Computing and writing spectral light terms.'

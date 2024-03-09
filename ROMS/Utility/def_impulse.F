@@ -47,7 +47,7 @@
       integer :: i, j, nvd3, nvd4
       integer :: recdim, status, varid
 
-      integer :: DimIDs(32), t2dgrd(3), u2dgrd(3), v2dgrd(3)
+      integer :: DimIDs(36), t2dgrd(3), u2dgrd(3), v2dgrd(3) !!! <<< TN: DimIDs(32)->DimIDs(36)
       integer :: Vsize(4)
 
       integer :: def_dim

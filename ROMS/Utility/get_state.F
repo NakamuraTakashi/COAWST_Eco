@@ -46,7 +46,7 @@
       USE mod_netcdf
       USE mod_ocean
       USE mod_scalars
-#if defined ESTUARYBGC && defined SAV_BIOMASS
+#if (defined ESTUARYBGC && defined SAV_BIOMASS) || defined REEF_ECOSYS /*!!!<<<TN:Add*/
       USE mod_biology
 #endif 
 #if defined SEDIMENT || defined BBL_MODEL
@@ -2278,6 +2278,112 @@
           END IF
         END DO
 #  endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#  if defined REEF_ECOSYS
+
+        DO i=1,NHbio2d
+          IF (get_var(iHbio2(i))) THEN
+            foundit=find_string(var_name, n_var,                        &
+     &                          TRIM(Vname(1,iHbio2(i))), varid)
+            gtype=var_flag(varid)*r3dvar
+            status=nf_fread2d(ng, IDmod, ncname, ncINPid,               &
+     &                        Vname(1,iHbio2(i)), varid,                &
+     &                        InpRec, gtype, Vsize,                     &
+     &                        LBi, UBi, LBj, UBj,                       &
+     &                        Fscl, Fmin, Fmax,                         &
+#    ifdef MASKING
+     &                        GRID(ng) % rmask,                         &
+#    endif
+     &                        OCEAN(ng) % HisBio2d(:,:,i))
+            IF (FoundError(status, nf90_noerr, __LINE__,                &
+     &                     __FILE__)) THEN
+              IF (Master) THEN
+                WRITE (stdout,60) string, TRIM(Vname(1,iHbio2(i))),     &
+     &                            InpRec, TRIM(ncname)
+              END IF
+              exit_flag=2
+              ioerror=status
+              RETURN
+            ELSE
+              IF (Master) THEN
+                WRITE (stdout,70) TRIM(Vname(2,iHbio2(i))), Fmin, Fmax
+              END IF
+            END IF
+          END IF
+        END DO 
+
+        DO i=1,NHbio3d
+          IF (get_var(iHbio3(i))) THEN
+            foundit=find_string(var_name, n_var,                        &
+     &                          TRIM(Vname(1,iHbio3(i))), varid)
+            gtype=var_flag(varid)*r3dvar
+            status=nf_fread3d(ng, IDmod, ncname, ncINPid,               &
+     &                        Vname(1,iHbio3(i)), varid,                &
+     &                        InpRec, gtype, Vsize,                     &
+     &                        LBi, UBi, LBj, UBj, 1, N(ng),             &
+     &                        Fscl, Fmin, Fmax,                         &
+#    ifdef MASKING
+     &                        GRID(ng) % rmask,                         &
+#    endif
+     &                        OCEAN(ng) % HisBio3d(:,:,:,i))
+            IF (FoundError(status, nf90_noerr, __LINE__,                &
+     &                     __FILE__)) THEN
+              IF (Master) THEN
+                WRITE (stdout,60) string, TRIM(Vname(1,iHbio3(i))),     &
+     &                            InpRec, TRIM(ncname)
+              END IF
+              exit_flag=2
+              ioerror=status
+              RETURN
+            ELSE
+              IF (Master) THEN
+                WRITE (stdout,70) TRIM(Vname(2,iHbio3(i))), Fmin, Fmax
+              END IF
+            END IF
+          END IF
+        END DO 
+
+#   ifdef SEDIMENT_ECOSYS
+!
+!  Read in sediment properties 
+!
+        DO i=1,NHbiosed3d
+          IF (get_var(iHbiosed3(i))) THEN
+            foundit=find_string(var_name, n_var,                        &
+     &                          TRIM(Vname(1,iHbiosed3(i))), varid)
+            gtype=var_flag(varid)*r3dvar
+            status=nf_fread3d(ng, IDmod, ncname, ncINPid,               &
+     &                        Vname(1,iHbiosed3(i)), varid,             &
+     &                        InpRec, gtype, Vsize,                     &
+     &                        LBi, UBi, LBj, UBj, 1, Nsed(ng),          &
+     &                        Fscl, Fmin, Fmax,                         &
+#    ifdef MASKING
+     &                        GRID(ng) % rmask,                         &
+#    endif
+     &                        OCEAN(ng) % HisBiosed3d(:,:,:,i))
+            IF (FoundError(status, nf90_noerr, __LINE__,                &
+     &                     __FILE__)) THEN
+              IF (Master) THEN
+                WRITE (stdout,60) string, TRIM(Vname(1,iHbiosed3(i))),  &
+     &                            InpRec, TRIM(ncname)
+              END IF
+              exit_flag=2
+              ioerror=status
+              RETURN
+            ELSE
+              IF (Master) THEN
+                WRITE (stdout,70) TRIM(Vname(2,iHbiosed3(i))), Fmin, Fmax
+              END IF
+            END IF
+          END IF
+        END DO 
+
+#   endif
+
+        CALL send_roms_his2reef_ecosys (ng, LBi, UBi, LBj, UBj)
+
+#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #  ifdef ICE_MODEL
         read_ice = .true.
 #   ifdef ANA_ICE

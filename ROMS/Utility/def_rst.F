@@ -56,10 +56,16 @@
 
       integer, parameter :: Natt = 25
 
-      integer :: i, j, nvd3, nvd4, nvd5
+      ! integer :: i, j, nvd3, nvd4, nvd5
+      integer :: i, j, ifield, nvd3, nvd4, nvd5  ! yt_edit
       integer :: recdim, status, varid
 
-#if defined VEGETATION && (defined VEG_DRAG || defined VEG_BIOMASS)
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+#if defined SEDIMENT_ECOSYS
+      integer :: DimIDs(36)
+#elif defined VEGETATION && (defined VEG_DRAG || defined VEG_BIOMASS)
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+! #if defined VEGETATION && (defined VEG_DRAG || defined VEG_BIOMASS)
       integer :: DimIDs(35)
 #elif defined INWAVE_MODEL
       integer :: DimIDs(33)
@@ -92,6 +98,11 @@
       integer :: r3dgrd(4), ru3dgrd(5), rv3dgrd(5)
       integer :: u3dgrd(5), v3dgrd(5), w3dgrd(4)
 #endif
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+#ifdef SEDIMENT_ECOSYS
+      integer :: biosed3dgrd(4)
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
       real(r8) :: Aval(6)
 
       character (len=120) :: Vinfo(Natt)
@@ -308,6 +319,14 @@
         IF (FoundError(exit_flag, NoError, __LINE__,                    &
      &                 __FILE__)) RETURN
 #endif
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+#if defined SEDIMENT_ECOSYS
+        status=def_dim(ng, iNLM, RST(ng)%ncid, ncname, 'sed_eco_layer', &
+     &                 Nsed(ng), DimIDs(36))
+        IF (FoundError(exit_flag, NoError, __LINE__,                    &
+     &                 __FILE__)) RETURN
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 
 #ifdef PERFECT_RESTART
         status=def_dim(ng, iNLM, RST(ng)%ncid, ncname, 'two',           &
@@ -384,6 +403,15 @@
         r3dgrd(4)=DimIDs(12)
 # endif
 #endif
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+#ifdef SEDIMENT_ECOSYS
+        biosed3dgrd(1)=DimIDs( 1)
+        biosed3dgrd(2)=DimIDs( 5)
+        biosed3dgrd(3)=DimIDs(36)
+        biosed3dgrd(4)=DimIDs(12)
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+
 !
 !  Define dimension vectors for staggered type variables at PSI-points.
 !
@@ -2475,6 +2503,98 @@
      &                 __FILE__)) RETURN
 # endif
 #endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#if defined SGD_ON
+!
+!  Define time-varying SGD point sources.
+!
+        IF (Hout(idSgds,ng)) THEN
+          Vinfo( 1)=Vname(1,idSgds)
+          Vinfo( 2)=Vname(2,idSgds)
+          Vinfo( 3)=Vname(3,idSgds)
+          Vinfo(14)=Vname(4,idSgds)
+          Vinfo(16)=Vname(1,idtime)
+# if defined WRITE_WATER && defined MASKING
+          Vinfo(20)='mask_rho'
+# endif
+          Vinfo(22)='coordinates'
+          Aval(5)=REAL(Iinfo(1,idSgds,ng),r8)
+          status=def_var(ng, iNLM, RST(ng)%ncid, RST(ng)%Vid(idSgds),   &
+     &                   NF_FOUT, nvd3, t2dgrd, Aval, Vinfo, ncname,    &
+     &                   SetFillVal = .FALSE.)
+          IF (exit_flag.ne.NoError) RETURN
+        END IF
+#endif
+
+#if defined REEF_ECOSYS
+!
+!  Define time-varying Biological 2D field.
+!
+        DO i=1,NHbio2d
+          ifield=iHbio2(i)
+          Vinfo( 1)=Vname(1,ifield)
+          Vinfo( 2)=Vname(2,ifield)
+          Vinfo( 3)=Vname(3,ifield)
+          Vinfo(14)=Vname(4,ifield)
+          Vinfo(16)=Vname(1,idtime)
+# if defined WRITE_WATER && defined MASKING
+          Vinfo(20)='mask_rho'
+# endif
+          Vinfo(22)='coordinates'
+          Aval(5)=REAL(Iinfo(1,ifield,ng),r8)
+          status=def_var(ng, iNLM, RST(ng)%ncid, RST(ng)%Vid(ifield),   &
+     &                   NF_FOUT, nvd3, t2dgrd, Aval, Vinfo, ncname )
+          IF (exit_flag.ne.NoError) RETURN
+        END DO
+!
+!  Define time-varying Biological 3D field.
+!
+        DO i=1,NHbio3d
+          ifield=iHbio3(i)
+          Vinfo( 1)=Vname(1,ifield)
+          Vinfo( 2)=Vname(2,ifield)
+          Vinfo( 3)=Vname(3,ifield)
+          Vinfo(14)=Vname(4,ifield)
+          Vinfo(16)=Vname(1,ifield)
+#  if defined WRITE_WATER && defined MASKING
+          Vinfo(20)='mask_rho'
+#  endif
+          Vinfo(22)='coordinates'
+          Aval(5)=REAL(Iinfo(1,ifield,ng),r8)
+          status=def_var(ng, iNLM, RST(ng)%ncid, RST(ng)%Vid(ifield),   &
+     &                   NF_FOUT, nvd4, t3dgrd, Aval, Vinfo, ncname)
+          IF (exit_flag.ne.NoError) RETURN
+        END DO
+
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+# if defined SEDIMENT_ECOSYS
+!
+!  Define time-varying Biological sediment 3D field.
+!
+        DO i=1,NHbiosed3d
+          ifield=iHbiosed3(i)
+          Vinfo( 1)=Vname(1,ifield)
+          Vinfo( 2)=Vname(2,ifield)
+          Vinfo( 3)=Vname(3,ifield)
+          Vinfo(14)=Vname(4,ifield)
+          Vinfo(16)=Vname(1,idtime)
+#  if defined WRITE_WATER && defined MASKING
+          Vinfo(20)='mask_rho'
+#  endif
+          Vinfo(22)='coordinates'
+          Aval(5)=REAL(Iinfo(1,ifield,ng),r8)
+          status=def_var(ng, iNLM, RST(ng)%ncid, RST(ng)%Vid(ifield),   &
+      &                   NF_FOUT, 4, biosed3dgrd, Aval, Vinfo, ncname)
+          IF (exit_flag.ne.NoError) RETURN
+        END DO
+
+# endif
+
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+#endif
+
+
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
 !-----------------------------------------------------------------------
 !  Leave definition mode.

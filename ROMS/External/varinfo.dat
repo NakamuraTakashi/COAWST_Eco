@@ -30,6 +30,7 @@
 !                       'v3dvar' => 3D V-variable.                            !
 !                       'w3dvar' => 3D W-variable.                            !
 !                       'b3dvar' => 3D BED-sediment.                          !
+!                       'd3dvar' => 3D Sed_Eco-layer.                         !   yuta_edits_for_masa
 !       scale         Scale to convert input data to model units.             !
 !                                                                             !
 !  Enclose Vinfo variables with single quotes so this file can be read with   !
@@ -9534,345 +9535,9 @@
     'r3dvar'
     1.0d0
 
-  !----------------------------------------------------------
-
-  'pH'                                       ! Input/Output
-    'sea surface pH'
-    'total scale'                 ! [total scale]
-    'pH, scalar, series'
-    'ocean_time'
-    'iHbio2(ipHt_)'
-    'r2dvar'
-    1.0d0
-
-  'Omega_arg'                                       ! Input/Output
-    'sea surface aragonite saturation state'
-    'nodimension'                               ! []
-    'Omega_arg, scalar, series'
-    'ocean_time'
-    'iHbio2(iWarg)'
-    'r2dvar'
-    1.0d0
-
-  'CO2_airsea'                                       ! Input/Output
-    'CO2 air-sea flux'
-    'mmol m-2 s-1'                 ! [mmol m-2 s-1]
-    'CO2_airsea, scalar, series'
-    'ocean_time'
-    'iHbio2(iCOfx)'
-    'r2dvar'
-    1.0d0
-
-  'pCO2'                                             ! Input/Output
-    'partial pressure of CO2'
-    'uatm'                                 ! [microatmosphere]
-    'pCO2, scalar, series'
-    'ocean_time'
-    'iHbio2(ipCO2)'
-    'r2dvar'
-    1.0d0
-
-  'O2_airsea'                                        ! Input/Output
-    'O2 air-sea flux'
-    'mmol m-2 s-1'                 ! [mmol m-2 s-1]
-    'O2_airsea, scalar, series'
-    'ocean_time'
-    'iHbio2(iO2fx)'
-    'r2dvar'
-    1.0d0
-
-  'PARbot'                                       ! Output
-    'bottom photn flux density'
-    'umol m-2 s-1'                               ! [umol m-2 s-1]
-    'PARbot, scalar, series'
-    'ocean_time'
-    'iHbio2(iPARb)'
-    'r2dvar'
-    1.0d0
-
-  'Tau_ave'                                       ! Output
-    'bottom shear stress'
-    'N m-2'                               ! [N m-2]
-    'Tau_ave, scalar, series'
-    'ocean_time'
-    'iHbio2(iTau_)'
-    'r2dvar'
-    1.0d0
-
-
-  'coral1_Pg'                                             ! Input/Output
-    'coral1 gross photosynthetic rate'
-    'nmol cm-2 s-1'                                 ! [nmol cm-2 s-1]
-    'coral1_Pg, scalar, series'
-    'ocean_time'
-    'iHbio2(iC1Pg)'
-    'r2dvar'
-    1.0d0
-
-  'coral1_R'                                             ! Input/Output
-    'coral1 respiration rate'
-    'nmol cm-2 s-1'                                 ! [nmol cm-2 s-1]
-    'coral_R, scalar, series'
-    'ocean_time'
-    'iHbio2(iC1_R)'
-    'r2dvar'
-    1.0d0
-
-  'coral1_Pn'                                             ! Input/Output
-    'coral1 net photosynthetic rate'
-    'nmol cm-2 s-1'                                 ! [nmol cm-2 s-1]
-    'coral1_Pn, scalar, series'
-    'ocean_time'
-    'iHbio2(iC1Pn)'
-    'r2dvar'
-    1.0d0
-
-  'coral1_G'                                             ! Input/Output
-    'coral1 calcification rate'
-    'nmol cm-2 s-1'                                 ! [nmol cm-2 s-1]
-    'coral1_G, scalar, series'
-    'ocean_time'
-    'iHbio2(iC1_G)'
-    'r2dvar'
-    1.0d0
-
-  'coral1_orgC'                                             ! Input/Output
-    'coral1 stored organic carbon'
-    'umol cm-2'                                         ! [umol cm-2]
-    'coral1_orgC, scalar, series'
-    'ocean_time'
-    'iHbio2(iC1OC)'
-    'r2dvar'
-    1.0d0
-
-  'coral1_d13Ctissue'                                             ! Input/Output
-    'coral1 tissue carbon isotope ratio'
-    'per mill VPDB'                                 ! [per mill VPDB]
-    'coral1_d13Ctissue, scalar, series'
-    'ocean_time'
-    'iHbio2(iC113)'
-    'r2dvar'
-    1.0d0
-
-  'coral1_densZoox'                                             ! Input/Output
-    'coral1 zooxanthellae density'
-    'cell cm-2'                                 ! [cell cm-2]
-    'coral1_densZoox, scalar, series'
-    'ocean_time'
-    'iHbio2(iC1zx)'
-    'r2dvar'
-    1.0d0
-
-  'coral1_Zoox_chl'                                             ! Input/Output
-    'coral1 zooxanthellae chlorophyll'
-    'pg cell-1'                                 ! [pg cell-1]
-    'coral1_Zoox_chl, scalar, series'
-    'ocean_time'
-    'iHbio2(iC1zchl)'
-    'r2dvar'
-    1.0d0
-
-  'coral1_mort'                                             ! Input/Output
-    'coral1 mortality'
-    's-1'                                 ! [s-1]
-    'coral1_mort, scalar, series'
-    'ocean_time'
-    'iHbio2(iC1mt)'
-    'r2dvar'
-    1.0d0
-
-  'coral1_growth'                                             ! Input/Output
-    'coral1 growth rate'
-    's-1'                                 ! [s-1]
-    'coral1_growth, scalar, series'
-    'ocean_time'
-    'iHbio2(iC1gr)'
-    'r2dvar'
-    1.0d0
-
-  'coral2_Pg'                                             ! Input/Output
-    'coral2 gross photosynthetic rate'
-    'nmol cm-2 s-1'                                 ! [nmol cm-2 s-1]
-    'coral2_Pg, scalar, series'
-    'ocean_time'
-    'iHbio2(iC2Pg)'
-    'r2dvar'
-    1.0d0
-
-  'coral2_R'                                             ! Input/Output
-    'coral2 respiration rate'
-    'nmol cm-2 s-1'                                 ! [nmol cm-2 s-1]
-    'coral2_R, scalar, series'
-    'ocean_time'
-    'iHbio2(iC2_R)'
-    'r2dvar'
-    1.0d0
-
-  'coral2_Pn'                                             ! Input/Output
-    'coral2 net photosynthetic rate'
-    'nmol cm-2 s-1'                                 ! [nmol cm-2 s-1]
-    'coral2_Pn, scalar, series'
-    'ocean_time'
-    'iHbio2(iC2Pn)'
-    'r2dvar'
-    1.0d0
-
-  'coral2_G'                                             ! Input/Output
-    'coral2 calcification rate'
-    'nmol cm-2 s-1'                                 ! [nmol cm-2 s-1]
-    'coral2_G, scalar, series'
-    'ocean_time'
-    'iHbio2(iC2_G)'
-    'r2dvar'
-    1.0d0
-
-  'coral2_orgC'                                             ! Input/Output
-    'coral2 stored organic carbon'
-    'umol cm-2'                                         ! [umol cm-2]
-    'coral1_orgC, scalar, series'
-    'ocean_time'
-    'iHbio2(iC2OC)'
-    'r2dvar'
-    1.0d0
-
-  'coral2_d13Ctissue'                                             ! Input/Output
-    'coral2 tissue carbon isotope ratio'
-    'per mill VPDB'                                 ! [per mill VPDB]
-    'coral2_d13Ctissue, scalar, series'
-    'ocean_time'
-    'iHbio2(iC213)'
-    'r2dvar'
-    1.0d0
-
-  'coral2_densZoox'                                             ! Input/Output
-    'coral2 zooxanthellae density'
-    'cell cm-2'                                 ! [cell cm-2]
-    'coral2_densZoox, scalar, series'
-    'ocean_time'
-    'iHbio2(iC2zx)'
-    'r2dvar'
-    1.0d0
-
-  'coral2_Zoox_chl'                                             ! Input/Output
-    'coral2 zooxanthellae chlorophyll'
-    'pg cell-1'                                 ! [pg cell-1]
-    'coral2_Zoox_chl, scalar, series'
-    'ocean_time'
-    'iHbio2(iC2zchl)'
-    'r2dvar'
-    1.0d0
-
-  'coral2_mort'                                             ! Input/Output
-    'coral2 mortality'
-    's-1'                                 ! [s-1]
-    'coral2_mort, scalar, series'
-    'ocean_time'
-    'iHbio2(iC2mt)'
-    'r2dvar'
-    1.0d0
-
-  'coral2_growth'                                             ! Input/Output
-    'coral2 growth rate'
-    's-1'                                 ! [s-1]
-    'coral2_growth, scalar, series'
-    'ocean_time'
-    'iHbio2(iC2gr)'
-    'r2dvar'
-    1.0d0
-
-  'seagrass_Pg'                                             ! Input/Output
-    'seagrass gross photosynthetic rate'
-    'mmol m-2 s-1'                                 ! [mmol m-2 s-1]
-    'Pg, scalar, series'
-    'ocean_time'
-    'iHbio2(iSgPg)'
-    'r2dvar'
-    1.0d0
-
-  'seagrass_R'                                             ! Input/Output
-    'seagrass respiration rate'
-    'mmol m-2 s-1'                                 ! [mmol m-2 s-1]
-    'R, scalar, series'
-    'ocean_time'
-    'iHbio2(iSg_R)'
-    'r2dvar'
-    1.0d0
-
-  'seagrass_Pn'                                             ! Input/Output
-    'seagrass net photosynthetic rate'
-    'mmol m-2 s-1'                                 ! [mmol m-2 s-1]
-    'Pn, scalar, series'
-    'ocean_time'
-    'iHbio2(iSgPn)'
-    'r2dvar'
-    1.0d0
-
-
-  'algal_Pg'                                             ! Input/Output
-    'algal gross photosynthetic rate'
-    'mmol m-2 s-1'                                 ! [mmol m-2 s-1]
-    'Pg, scalar, series'
-    'ocean_time'
-    'iHbio2(iAgPg)'
-    'r2dvar'
-    1.0d0
-
-  'algal_R'                                             ! Input/Output
-    'algal respiration rate'
-    'mmol m-2 s-1'                                 ! [mmol m-2 s-1]
-    'R, scalar, series'
-    'ocean_time'
-    'iHbio2(iAg_R)'
-    'r2dvar'
-    1.0d0
-
-  'algal_Pn'                                             ! Input/Output
-    'algal net photosynthetic rate'
-    'mmol m-2 s-1'                                 ! [mmol m-2 s-1]
-    'Pn, scalar, series'
-    'ocean_time'
-    'iHbio2(iAgPn)'
-    'r2dvar'
-    1.0d0
-
-  'sediment_Pg'                                             ! Input/Output
-    'sediment gross photosynthetic rate'
-    'mmol m-2 s-1'                                 ! [mmol m-2 s-1]
-    'Pg, scalar, series'
-    'ocean_time'
-    'iHbio2(iSdPg)'
-    'r2dvar'
-    1.0d0
-
-  'sediment_R'                                             ! Input/Output
-    'sediment respiration rate'
-    'mmol m-2 s-1'                                 ! [mmol m-2 s-1]
-    'R, scalar, series'
-    'ocean_time'
-    'iHbio2(iSd_R)'
-    'r2dvar'
-    1.0d0
-
-  'sediment_Pn'                                             ! Input/Output
-    'sediment net photosynthetic rate'
-    'mmol m-2 s-1'                                 ! [mmol m-2 s-1]
-    'Pn, scalar, series'
-    'ocean_time'
-    'iHbio2(iSdPn)'
-    'r2dvar'
-    1.0d0
-
-  'sediment_G'                                             ! Input/Output
-    'sediment net calcification rate'
-    'mmol m-2 s-1'                                 ! [mmol m-2 s-1]
-    'G, scalar, series'
-    'ocean_time'
-    'iHbio2(iSd_G)'
-    'r2dvar'
-    1.0d0
-
-  !---------------------------------------------------
-
+!----------------------------------------------------------
+! HisBio3d parameters !!!  Remove ???
+  
   'd13C_DIC'                                              ! Input/Output
     'carbon isotope ratio of DIC'
     'per mill VPDB'                                       ! [per mill]
@@ -9882,995 +9547,1769 @@
     'r3dvar'
     1.0d0
 
-  !
-  !  Boundary variables.
-  !
-  'TIC_east'                                         ! Input
-    'TIC eastern boundary condition'
-    'umol kg-1'                                      ! [umol kg-1]
-    'TIC_east, scalar, series'
-    'TIC_time'
-    'idTbry(ieast,iTIC_)'
-    'nulvar'
-    1.0d0
-
-  'TIC_west'                                         ! Input
-    'TIC western boundary condition'
-    'umol kg-1'                                      ! [umol kg-1]
-    'TIC_west, scalar, series'
-    'TIC_time'
-    'idTbry(iwest,iTIC_)'
-    'nulvar'
-    1.0d0
-
-  'TIC_north'                                        ! Input
-    'TIC northern boundary condition'
-    'umol kg-1'                                      ! [umol kg-1]
-    'TIC_north, scalar, series'
-    'TIC_time'
-    'idTbry(inorth,iTIC_)'
-    'nulvar'
-    1.0d0
-
-  'TIC_south'                                        ! Input
-    'TIC southern boundary condition'
-    'umol kg-1'                                      ! [umol kg-1]
-    'TIC_south, scalar, series'
-    'TIC_time'
-    'idTbry(isouth,iTIC_)'
-    'nulvar'
-    1.0d0
-
-
-  'alkalinity_east'                                  ! Input
-    'alkalinity eastern boundary condition'
-    'umol kg-1'                                      ! [umol kg-1]
-    'alkalinity_east, scalar, series'
-    'alkalinity_time'
-    'idTbry(ieast,iTAlk)'
-    'nulvar'
-    1.0d0
-
-  'alkalinity_west'                                  ! Input
-    'alkalinity western boundary condition'
-    'umol kg-1'                                      ! [umol kg-1]
-    'alkalinity_west, scalar, series'
-    'alkalinity_time'
-    'idTbry(iwest,iTAlk)'
-    'nulvar'
-    1.0d0
-
-  'alkalinity_north'                                 ! Input
-    'alkalinity northern boundary condition'
-    'umol kg-1'                                      ! [umol kg-1]
-    'alkalinity_north, scalar, series'
-    'alkalinity_time'
-    'idTbry(inorth,iTAlk)'
-    'nulvar'
-    1.0d0
-
-  'alkalinity_south'                                 ! Input
-    'alkalinity southern boundary condition'
-    'umol kg-1'                                      ! [umol kg-1]
-    'alkalinity_south, scalar, series'
-    'alkalinity_time'
-    'idTbry(isouth,iTAlk)'
-    'nulvar'
-    1.0d0
-
-
-  'oxygen_east'                                      ! Input
-    'oxygen eastern boundary condition'
-    'umol L-1'                                       ! [umol L-1]
-    'oxygen_east, scalar, series'
-    'oxygen_time'
-    'idTbry(ieast,iOxyg)'
-    'nulvar'
-    1.0d0
-
-  'oxygen_west'                                      ! Input
-    'oxygen western boundary condition'
-    'umol L-1'                                       ! [umol L-1]
-    'oxygen_west, scalar, series'
-    'oxygen_time'
-    'idTbry(iwest,iOxyg)'
-    'nulvar'
-    1.0d0
-
-  'oxygen_north'                                     ! Input
-    'oxygen northern boundary condition'
-    'umol L-1'                                       ! [umol L-1]
-    'oxygen_north, scalar, series'
-    'oxygen_time'
-    'idTbry(inorth,iOxyg)'
-    'nulvar'
-    1.0d0
-
-  'oxygen_south'                                     ! Input
-    'oxygen southern boundary condition'
-    'umol L-1'                                       ! [umol L-1]
-    'oxygen_south, scalar, series'
-    'oxygen_time'
-    'idTbry(isouth,iOxyg)'
-    'nulvar'
-    1.0d0
-
-
-  'DOC_east_'                                         ! Input
-    'dissolved organic carbon eastern boundary condition'
-    'umolC L-1'                                      ! [umolC L-1]
-    'DOC_east_, scalar, series'
-    'DOC_time'
-    'idTbry(ieast,iDOC(i))'
-    'nulvar'
-    1.0d0
-
-  'DOC_west_'                                         ! Input
-    'dissolved organic carbon western boundary condition'
-    'umolC L-1'                                      ! [umolC L-1]
-    'DOC_west_, scalar, series'
-    'DOC_time'
-    'idTbry(iwest,iDOC(i))'
-    'nulvar'
-    1.0d0
-
-  'DOC_south_'                                         ! Input
-    'dissolved organic carbon southern boundary condition'
-    'umolC L-1'                                      ! [umolC L-1]
-    'DOC_south_, scalar, series'
-    'DOC_time'
-    'idTbry(isouth,iDOC(i))'
-    'nulvar'
-    1.0d0
-
-  'DOC_north_'                                         ! Input
-    'dissolved organic carbon northern boundary condition'
-    'umolC L-1'                                      ! [umolC L-1]
-    'DOC_north_, scalar, series'
-    'DOC_time'
-    'idTbry(inorth,iDOC(i))'
-    'nulvar'
-    1.0d0
-
-
-  'POC_east_'                                         ! Input
-    'particulate organic carbon eastern boundary condition'
-    'umolC L-1'                                      ! [umolC L-1]
-    'POC_east_, scalar, series'
-    'POC_time'
-    'idTbry(ieast,iPOC(i))'
-    'nulvar'
-    1.0d0
-
-  'POC_west_'                                         ! Input
-    'particulate organic carbon western boundary condition'
-    'umolC L-1'                                      ! [umolC L-1]
-    'POC_west_, scalar, series'
-    'POC_time'
-    'idTbry(iwest,iPOC(i))'
-    'nulvar'
-    1.0d0
-
-  'POC_south_'                                         ! Input
-    'particulate organic carbon southern boundary condition'
-    'umolC L-1'                                      ! [umolC L-1]
-    'POC_south_, scalar, series'
-    'POC_time'
-    'idTbry(isouth,iPOC(i))'
-    'nulvar'
-    1.0d0
-
-  'POC_north_'                                         ! Input
-    'particulate organic carbon northern boundary condition'
-    'umolC L-1'                                      ! [umolC L-1]
-    'POC_north_, scalar, series'
-    'POC_time'
-    'idTbry(inorth,iPOC(i))'
-    'nulvar'
-    1.0d0
-
-
-  'phyt_east_'                                        ! Input
-    'phytoplankton eastern boundary condition'
-    'umolC L-1'                                      ! [umolC L-1]
-    'phyt_east_, scalar, series'
-    'phyt_time'
-    'idTbry(ieast,iPhyt(i))'
-    'nulvar'
-    1.0d0
-
-  'phyt_west_'                                        ! Input
-    'phytoplankton western boundary condition'
-    'umolC L-1'                                      ! [umolC L-1]
-    'phyt_west_, scalar, series'
-    'phyt_time'
-    'idTbry(iwest,iPhyt(i))'
-    'nulvar'
-    1.0d0
-
-  'phyt_north_'                                        ! Input
-    'phytoplankton northern boundary condition'
-    'umolC L-1'                                      ! [umolC L-1]
-    'phyt_north_, scalar, series'
-    'phyt_time'
-    'idTbry(inorth,iPhyt(i))'
-    'nulvar'
-    1.0d0
-
-  'phyt_south_'                                        ! Input
-    'phytoplankton southern boundary condition'
-    'umolC L-1'                                      ! [umolC L-1]
-    'phyt_south_, scalar, series'
-    'phyt_time'
-    'idTbry(isouth,iPhyt(i))'
-    'nulvar'
-    1.0d0
-
-  'zoop_east_'                                        ! Input
-    'zooplankton eastern boundary condition'
-    'umolC L-1'                                      ! [umolC L-1]
-    'zoop_east_, scalar, series'
-    'zoop_time'
-    'idTbry(ieast,iZoop(i))'
-    'nulvar'
-    1.0d0
-
-  'zoop_west_'                                        ! Input
-    'zooplankton western boundary condition'
-    'umolC L-1'                                      ! [umolC L-1]
-    'zoop_west_, scalar, series'
-    'zoop_time'
-    'idTbry(iwest,iZoop(i))'
-    'nulvar'
-    1.0d0
-
-  'zoop_south_'                                       ! Input
-    'zooplankton southern boundary condition'
-    'umolC L-1'                                      ! [umolC L-1]
-    'zoop_south_, scalar, series'
-    'zoop_time'
-    'idTbry(isouth,iZoop(i))'
-    'nulvar'
-    1.0d0
-
-  'zoop_north_'                                       ! Input
-    'zooplankton northern boundary condition'
-    'umolC L-1'                                      ! [umolC L-1]
-    'zoop_north_, scalar, series'
-    'zoop_time'
-    'idTbry(inorth,iZoop(i))'
-    'nulvar'
-    1.0d0
-
-
-  'TI13C_east'                                              ! Input/Output
-    'carbon 13 of TIC eastern boundary condition'
-    'umol kg-1'                       ! [umol kg-1]
-    'TI13C_east, scalar, series'
-    'TI13C_time'
-    'idTbry(ieast,iT13C)'
-    'nulvar'
-    1.0d0
-
-  'TI13C_west'                                              ! Input/Output
-    'carbon 13 of TIC western boundary condition'
-    'umol kg-1'                       ! [umol kg-1]
-    'TI13C_west, scalar, series'
-    'TI13C_time'
-    'idTbry(iwest,iT13C)'
-    'nulvar'
-    1.0d0
-
-  'TI13C_north'                                              ! Input/Output
-    'carbon 13 of TIC northern boundary condition'
-    'umol kg-1'                       ! [umol kg-1]
-    'TI13C_north, scalar, series'
-    'TI13C_time'
-    'idTbry(inorth,iT13C)'
-    'nulvar'
-    1.0d0
-
-  'TI13C_south'                                              ! Input/Output
-    'carbon 13 of TIC southern boundary condition'
-    'umol kg-1'                       ! [umol kg-1]
-    'TI13C_south, scalar, series'
-    'TI13C_time'
-    'idTbry(isouth,iT13C)'
-    'nulvar'
-    1.0d0
-
-
-  'DO13C_east_'                                              ! Input/Output
-    'carbon 13 of DOC eastern boundary condition'
-    'umolC L-1'                                             ! [umolC L-1]
-    'DO13C_east_, scalar, series'
-    'DO13C_time'
-    'idTbry(ieast,iDO13C(i))'
-    'nulvar'
-    1.0d0
-
-  'DO13C_west_'                                              ! Input/Output
-    'carbon 13 of DOC western boundary condition'
-    'umolC L-1'                                             ! [umolC L-1]
-    'DO13C_west_, scalar, series'
-    'DO13C_time'
-    'idTbry(iwest,iDO13C(i))'
-    'nulvar'
-    1.0d0
-
-  'DO13C_north_'                                              ! Input/Output
-    'carbon 13 of DOC northern boundary condition'
-    'umolC L-1'                                              ! [umolC L-1]
-    'DO13C_north_, scalar, series'
-    'DO13C_time'
-    'idTbry(inorth,iDO13C(i))'
-    'nulvar'
-    1.0d0
-
-  'DO13C_south_'                                              ! Input/Output
-    'carbon 13 of DOC southern boundary condition'
-    'umolC L-1'                                              ! [umolC L-1]
-    'DO13C_south_, scalar, series'
-    'DO13C_time'
-    'idTbry(isouth,iDO13C(i))'
-    'nulvar'
-    1.0d0
-
-
-  'Phyt13C_east_'                                              ! Input/Output
-    'carbon 13 of phytoplankton eastern boundary condition'
-    'umolC L-1'                                             ! [umolC L-1]
-    'Phyt13C_east_, scalar, series'
-    'Phyt13C_time'
-    'idTbry(ieast,iPhyt13C(i))'
-    'nulvar'
-    1.0d0
-
-  'Phyt13C_west_'                                              ! Input/Output
-    'carbon 13 of phytoplankton western boundary condition'
-    'umolC L-1'                                             ! [umolC L-1]
-    'Phyt13C_west_, scalar, series'
-    'Phyt13C_time'
-    'idTbry(iwest,iPhyt13C(i))'
-    'nulvar'
-    1.0d0
-
-  'Phyt13C_north_'                                              ! Input/Output
-    'carbon 13 of phytoplankton northern boundary condition'
-    'umolC L-1'                                              ! [umolC L-1]
-    'Phyt13C_north_, scalar, series'
-    'Phyt13C_time'
-    'idTbry(inorth,iPhyt13C(i))'
-    'nulvar'
-    1.0d0
-
-  'Phyt13C_south_'                                              ! Input/Output
-    'carbon 13 of phytoplankton southern boundary condition'
-    'umolC L-1'                                              ! [umolC L-1]
-    'Phyt13C_south_, scalar, series'
-    'Phyt13C_time'
-    'idTbry(isouth,iPhyt13C(i))'
-    'nulvar'
-    1.0d0
-
-  'Zoop13C_east_'                                              ! Input/Output
-    'carbon 13 of zooplankton eastern boundary condition'
-    'umolC L-1'                                             ! [umolC L-1]
-    'Zoop13C_east_, scalar, series'
-    'Zoop13C_time'
-    'idTbry(ieast,iZoop13C(i))'
-    'nulvar'
-    1.0d0
-
-  'Zoop13C_west_'                                              ! Input/Output
-    'carbon 13 of zooplankton western boundary condition'
-    'umolC L-1'                                             ! [umolC L-1]
-    'Zoop13C_west_, scalar, series'
-    'Zoop13C_time'
-    'idTbry(iwest,iZoop13C(i))'
-    'nulvar'
-    1.0d0
-
-  'Zoop13C_north_'                                              ! Input/Output
-    'carbon 13 of zooplankton northern boundary condition'
-    'umolC L-1'                                              ! [umolC L-1]
-    'Zoop13C_north_, scalar, series'
-    'Zoop13C_time'
-    'idTbry(inorth,iZoop13C(i))'
-    'nulvar'
-    1.0d0
-
-  'Zoop13C_south_'                                              ! Input/Output
-    'carbon 13 of zooplankton southern boundary condition'
-    'umolC L-1'                                              ! [umolC L-1]
-    'Zoop13C_south_, scalar, series'
-    'Zoop13C_time'
-    'idTbry(isouth,iZoop13C(i))'
-    'nulvar'
-    1.0d0
-
-
-  'NO3_east'                                         ! Input
-    'nitrate eastern boundary condition'
-    'umol L-1'                     ! [umol L-1]
-    'NO3_east, scalar, series'
-    'NO3_time'
-    'idTbry(ieast,iNO3_)'
-    'nulvar'
-    1.0d0
-
-  'NO3_west'                                         ! Input
-    'nitrate western boundary condition'
-    'umol L-1'                     ! [umol L-1]
-    'NO3_west, scalar, series'
-    'NO3_time'
-    'idTbry(iwest,iNO3_)'
-    'nulvar'
-    1.0d0
-
-  'NO3_south'                                        ! Input
-    'nitrate southern boundary condition'
-    'umol L-1'                     ! [umol L-1]
-    'NO3_south, scalar, series'
-    'NO3_time'
-    'idTbry(isouth,iNO3_)'
-    'nulvar'
-    1.0d0
-
-  'NO3_north'                                        ! Input
-    'nitrate northern boundary condition'
-    'umol L-1'                     ! [umol L-1]
-    'NO3_north, scalar, series'
-    'NO3_time'
-    'idTbry(inorth,iNO3_)'
-    'nulvar'
-    1.0d0
-
-
-  'NO2_east'                                         ! Input
-    'nitrite eastern boundary condition'
-    'umol L-1'                     ! [umol L-1]
-    'NO2_east, scalar, series'
-    'NO2_time'
-    'idTbry(ieast,iNO2_)'
-    'nulvar'
-    1.0d0
-
-  'NO2_west'                                         ! Input
-    'nitrite western boundary condition'
-    'umol L-1'                     ! [umol L-1]
-    'NO2_west, scalar, series'
-    'NO2_time'
-    'idTbry(iwest,iNO2_)'
-    'nulvar'
-    1.0d0
-
-  'NO2_south'                                        ! Input
-    'nitrite southern boundary condition'
-    'umol L-1'                     ! [umol L-1]
-    'NO2_south, scalar, series'
-    'NO2_time'
-    'idTbry(isouth,iNO2_)'
-    'nulvar'
-    1.0d0
-
-  'NO2_north'                                        ! Input
-    'nitrite northern boundary condition'
-    'umol L-1'                                       ! [umol L-1]
-    'NO2_north, scalar, series'
-    'NO2_time'
-    'idTbry(inorth,iNO2_)'
-    'nulvar'
-    1.0d0
-
-
-  'NH4_east'                                         ! Input
-    'ammonium eastern boundary condition'
-    'umol L-1'                                       ! [umol L-1]
-    'NH4_east, scalar, series'
-    'NH4_time'
-    'idTbry(ieast,iNH4_)'
-    'nulvar'
-    1.0d0
-
-  'NH4_west'                                         ! Input
-    'ammonium western boundary condition'
-    'umol L-1'                                       ! [umol L-1]
-    'NH4_west, scalar, series'
-    'NH4_time'
-    'idTbry(iwest,iNH4_)'
-    'nulvar'
-    1.0d0
-
-  'NH4_south'                                        ! Input
-    'ammonium southern boundary condition'
-    'umol L-1'                                       ! [umol L-1]
-    'NH4_south, scalar, series'
-    'NH4_time'
-    'idTbry(isouth,iNH4_)'
-    'nulvar'
-    1.0d0
-
-  'NH4_north'                                        ! Input
-    'ammonium northern boundary condition'
-    'umol L-1'                                       ! [umol L-1]
-    'NH4_north, scalar, series'
-    'NH4_time'
-    'idTbry(inorth,iNH4_)'
-    'nulvar'
-    1.0d0
-
-
-  'PO4_east'                                         ! Input
-    'phosphate eastern boundary condition'
-    'umol L-1'                                       ! [umol L-1]
-    'PO4_east, scalar, series'
-    'PO4_time'
-    'idTbry(ieast,iPO4_)'
-    'nulvar'
-    1.0d0
-
-  'PO4_west'                                         ! Input
-    'phosphate western boundary condition'
-    'umol L-1'                                       ! [umol L-1]
-    'PO4_west, scalar, series'
-    'PO4_time'
-    'idTbry(iwest,iPO4_)'
-    'nulvar'
-    1.0d0
-
-  'PO4_south'                                        ! Input
-    'phosphate southern boundary condition'
-    'umol L-1'                                       ! [umol L-1]
-    'PO4_south, scalar, series'
-    'PO4_time'
-    'idTbry(isouth,iPO4_)'
-    'nulvar'
-    1.0d0
-
-  'PO4_north'                                        ! Input
-    'phosphate northern boundary condition'
-    'umol L-1'                                       ! [umol L-1]
-    'PO4_north, scalar, series'
-    'PO4_time'
-    'idTbry(inorth,iPO4_)'
-    'nulvar'
-    1.0d0
-
-
-  'DON_east_'                                         ! Input
-    'dissolved organic nitrogen eastern boundary condition'
-    'umolN L-1'                                      ! [umolN L-1]
-    'DON_east_, scalar, series'
-    'DON_time'
-    'idTbry(ieast,iDON(i))'
-    'nulvar'
-    1.0d0
-
-  'DON_west_'                                         ! Input
-    'dissolved organic nitrogen western boundary condition'
-    'umolN L-1'                                      ! [umolN L-1]
-    'DON_west_, scalar, series'
-    'DON_time'
-    'idTbry(iwest,iDON(i))'
-    'nulvar'
-    1.0d0
-
-  'DON_south_'                                        ! Input
-    'dissolved organic nitrogen southern boundary condition'
-    'umolN L-1'                                      ! [umolN L-1]
-    'DON_south_, scalar, series'
-    'DON_time'
-    'idTbry(isouth,iDON(i))'
-    'nulvar'
-    1.0d0
-
-  'DON_north_'                                        ! Input
-    'dissolved organic nitrogen northern boundary condition'
-    'umolN L-1'                                      ! [umolN L-1]
-    'DON_north_, scalar, series'
-    'DON_time'
-    'idTbry(inorth,iDON(i))'
-    'nulvar'
-    1.0d0
-
-
-  'PON_east_'                                         ! Input
-    'particulate organic nitrogen eastern boundary condition'
-    'umolN L-1'                                      ! [umolN L-1]
-    'PON_east_, scalar, series'
-    'PON_time'
-    'idTbry(ieast,iPON(i))'
-    'nulvar'
-    1.0d0
-
-  'PON_west_'                                         ! Input
-    'particulate organic nitrogen western boundary condition'
-    'umolN L-1'                                      ! [umolN L-1]
-    'PON_west_, scalar, series'
-    'PON_time'
-    'idTbry(iwest,iPON(i))'
-    'nulvar'
-    1.0d0
-
-  'PON_south_'                                        ! Input
-    'particulate organic nitrogen southern boundary condition'
-    'umolN L-1'                                      ! [umolN L-1]
-    'PON_south_, scalar, series'
-    'PON_time'
-    'idTbry(isouth,iPON(i))'
-    'nulvar'
-    1.0d0
-
-  'PON_north_'                                        ! Input
-    'particulate organic nitrogen northern boundary condition'
-    'umolN L-1'                                      ! [umolN L-1]
-    'PON_north_, scalar, series'
-    'PON_time'
-    'idTbry(inorth,iPON(i))'
-    'nulvar'
-    1.0d0
-
-
-
-  'DOP_east_'                                         ! Input
-    'dissolved organic phosphorus eastern boundary condition'
-    'umolN L-1'                                      ! [umolN L-1]
-    'DOP_east_, scalar, series'
-    'DOP_time'
-    'idTbry(ieast,iDOP(i))'
-    'nulvar'
-    1.0d0
-
-  'DOP_west_'                                         ! Input
-    'dissolved organic phosphorus western boundary condition'
-    'umolN L-1'                                      ! [umolN L-1]
-    'DOP_west_, scalar, series'
-    'DOP_time'
-    'idTbry(iwest,iDOP(i))'
-    'nulvar'
-    1.0d0
-
-  'DOP_south_'                                        ! Input
-    'dissolved organic phosphorus southern boundary condition'
-    'umolN L-1'                                      ! [umolN L-1]
-    'DOP_south_, scalar, series'
-    'DOP_time'
-    'idTbry(isouth,iDOP(i))'
-    'nulvar'
-    1.0d0
-
-  'DOP_north_'                                        ! Input
-    'dissolved organic phosphorus northern boundary condition'
-    'umolN L-1'                                      ! [umolN L-1]
-    'DOP_north_, scalar, series'
-    'DOP_time'
-    'idTbry(inorth,iDOP(i))'
-    'nulvar'
-    1.0d0
-
-
-  'POP_east_'                                         ! Input
-    'particulate organic phosphorus eastern boundary condition'
-    'umolN L-1'                                      ! [umolN L-1]
-    'POP_east_, scalar, series'
-    'POP_time'
-    'idTbry(ieast,iPOP(i))'
-    'nulvar'
-    1.0d0
-
-  'POP_west_'                                         ! Input
-    'particulate organic phosphorus western boundary condition'
-    'umolN L-1'                                      ! [umolN L-1]
-    'POP_west_, scalar, series'
-    'POP_time'
-    'idTbry(iwest,iPOP(i))'
-    'nulvar'
-    1.0d0
-
-  'POP_south_'                                        ! Input
-    'particulate organic phosphorus southern boundary condition'
-    'umolN L-1'                                      ! [umolN L-1]
-    'POP_south_, scalar, series'
-    'POP_time'
-    'idTbry(isouth,iPOP(i))'
-    'nulvar'
-    1.0d0
-
-  'POP_north_'                                        ! Input
-    'particulate organic phosphorus northern boundary condition'
-    'umolN L-1'                                      ! [umolN L-1]
-    'POP_north_, scalar, series'
-    'POP_time'
-    'idTbry(inorth,iPOP(i))'
-    'nulvar'
-    1.0d0
-
-
-  'COTe_east'                                        ! Input
-    'crown-of-thornes starfish eggs eastern boundary condition'
-    'umolC L-1'                                      ! [umolC L-1]
-    'COTe_east, scalar, series'
-    'COTe_time'
-    'idTbry(ieast,iCOTe)'
-    'nulvar'
-    1.0d0
-
-  'COTe_west'                                        ! Input
-    'crown-of-thornes starfish eggs western boundary condition'
-    'umolC L-1'                                      ! [umolC L-1]
-    'COTe_west, scalar, series'
-    'COTe_time'
-    'idTbry(iwest,iCOTe)'
-    'nulvar'
-    1.0d0
-
-  'COTe_south'                                       ! Input
-    'crown-of-thornes starfish eggs southern boundary condition'
-    'umolC L-1'                                      ! [umolC L-1]
-    'COTe_south, scalar, series'
-    'COTe_time'
-    'idTbry(isouth,iCOTe)'
-    'nulvar'
-    1.0d0
-
-  'COTe_north'                                       ! Input
-    'crown-of-thornes starfish eggs northern boundary condition'
-    'umolC L-1'                                      ! [umolC L-1]
-    'COTe_north, scalar, series'
-    'COTe_time'
-    'idTbry(inorth,iCOTe)'
-    'nulvar'
-    1.0d0
-
-
-  'COTl_east'                                        ! Input
-    'crown-of-thornes starfish larvae eastern boundary condition'
-    'umolC L-1'                                      ! [umolC L-1]
-    'COTl_east, scalar, series'
-    'COTl_time'
-    'idTbry(ieast,iCOTl)'
-    'nulvar'
-    1.0d0
-
-  'COTl_west'                                        ! Input
-    'crown-of-thornes starfish larvae western boundary condition'
-    'umolC L-1'                                      ! [umolC L-1]
-    'COTl_west, scalar, series'
-    'COTl_time'
-    'idTbry(iwest,iCOTl)'
-    'nulvar'
-    1.0d0
-
-  'COTl_south'                                       ! Input
-    'crown-of-thornes starfish larvae southern boundary condition'
-    'umolC L-1'                                      ! [umolC L-1]
-    'COTl_south, scalar, series'
-    'COTl_time'
-    'idTbry(isouth,iCOTl)'
-    'nulvar'
-    1.0d0
-
-  'COTl_north'                                       ! Input
-    'crown-of-thornes starfish larvae northern boundary condition'
-    'umolC L-1'                                      ! [umolC L-1]
-    'COTl_north, scalar, series'
-    'COTl_time'
-    'idTbry(inorth,iCOTl)'
-    'nulvar'
-    1.0d0
-
-  !
-  !------------------------------------------------------------------------------
-  !  River forcing variables.
-  !------------------------------------------------------------------------------
-  !
-
-  'river_TIC'                                        ! Input
-    'river runoff TIC'
-    'umol kg-1'                       ! [umol kg-1]
-    'river_TIC, scalar, series'
-    'river_time'
-    'idRtrc(iTIC_)'
-    'nulvar'
-    1.0d0
-
-  'river_alkalinity'                                 ! Input
-    'river runoff alkalinity'
-    'umol kg-1'                       ! [umol kg-1]
-    'river_alkalinity, scalar, series'
-    'river_time'
-    'idRtrc(iTAlk)'
-    'nulvar'
-    1.0d0
-
-  'river_Oxyg'                                       ! Input
-    'river runoff oxygen'
-    'umol L-1'                       ! [umol L-1]
-    'river_Oxyg, scalar, series'
-    'river_time'
-    'idRtrc(iOxyg)'
-    'nulvar'
-    1.0d0
-
-  'river_DOC_'                                        ! Input
-    'river runoff dissolved organic carbon'
-    'umolC L-1'                     ! [umolC L-1]
-    'river_DOC_, scalar, series'
-    'river_time'
-    'idRtrc(iDOC(i))'
-    'nulvar'
-    1.0d0
-
-  'river_POC_'                                        ! Input
-    'river runoff particulate organic carbon'
-    'umolC L-1'                     ! [umolC L-1]
-    'river_POC_, scalar, series'
-    'river_time'
-    'idRtrc(iPOC(i))'
-    'nulvar'
-    1.0d0
-
-  'river_Phyt_'                                        ! Input
-    'river runoff phytoplankton'
-    'umolC L-1'                     ! [umolC L-1]
-    'river_Phyt_, scalar, series'
-    'river_time'
-    'idRtrc(iPhyt(i))'
-    'nulvar'
-    1.0d0
-
-  'river_Zoop_'                                        ! Input
-    'river runoff zooplankton'
-    'umolC L-1'                     ! [umolC L-1]
-    'river_Zoop_, scalar, series'
-    'river_time'
-    'idRtrc(iZoop(i))'
-    'nulvar'
-    1.0d0
-
-  'river_PIC_'                                         ! Input
-    'river runoff particulate inorganic carbon'
-    'umolC L-1'                       ! [umolC L-1]
-    'river_PIC_, scalar, series'
-    'river_time'
-    'idRtrc(iPIC(i))'
-    'nulvar'
-    1.0d0
-
-  'river_d13C_TIC'                                       ! Input
-    'river runoff d13C of DIC'
-    'permil VPDB'                       ! [permil VPDB]
-    'river_d13C_TIC, scalar, series'
-    'river_time'
-    'idRtrc(iT13C)'
-    'nulvar'
-    1.0d0
-
-  'river_d13C_DOC_'                                       ! Input
-    'river runoff d13C of DOC'
-    'permil VPDB'                       ! [permil VPDB]
-    'river_d13C_DOC_, scalar, series'
-    'river_time'
-    'idRtrc(iDO13C(i))'
-    'nulvar'
-    1.0d0
-
-  'river_d13C_POC_'                                       ! Input
-    'river runoff d13C of POC'
-    'permil VPDB'                       ! [permil VPDB]
-    'river_d13C_POC_, scalar, series'
-    'river_time'
-    'idRtrc(iPO13C(i))'
-    'nulvar'
-    1.0d0
-
-  'river_d13C_Phyt_'                                       ! Input
-    'river runoff d13C of phytoplankton'
-    'permil VPDB'                       ! [permil VPDB]
-    'river_d13C_Phyt_, scalar, series'
-    'river_time'
-    'idRtrc(iPhyt13C(i))'
-    'nulvar'
-    1.0d0
-
-  'river_d13C_Zoop_'                                       ! Input
-    'river runoff d13C of zooplankton'
-    'permil VPDB'                       ! [permil VPDB]
-    'river_d13C_Zoop_, scalar, series'
-    'river_time'
-    'idRtrc(iZoop13C(i))'
-    'nulvar'
-    1.0d0
-
-  'river_NO3'                                        ! Input
-    'river runoff NO3'
-    'umol L-1'                     ! [umol L-1]
-    'river_NO3, scalar, series'
-    'river_time'
-    'idRtrc(iNO3_)'
-    'nulvar'
-    1.0d0
-
-  'river_NO2'                                        ! Input
-    'river runoff NO2'
-    'umol L-1'                     ! [umol L-1]
-    'river_NO2, scalar, series'
-    'river_time'
-    'idRtrc(iNO2_)'
-    'nulvar'
-    1.0d0
-
-  'river_NH4'                                        ! Input
-    'river runoff NH4'
-    'umol L-1'                     ! [umol L-1]
-    'river_NH4, scalar, series'
-    'river_time'
-    'idRtrc(iNH4_)'
-    'nulvar'
-    1.0d0
-
-  'river_PO4'                                        ! Input
-    'river runoff PO4'
-    'umol L-1'                     ! [umol L-1]
-    'river_PO4, scalar, series'
-    'river_time'
-    'idRtrc(iPO4_)'
-    'nulvar'
-    1.0d0
-
-  'river_DON_'                                        ! Input
-    'river runoff dissolved organic nitrogen'
-    'umol L-1'                     ! [umol L-1]
-    'river_DON_, scalar, series'
-    'river_time'
-    'idRtrc(iDON(i))'
-    'nulvar'
-    1.0d0
-
-  'river_PON_'                                        ! Input
-    'river runoff particulate organic nitrogen'
-    'umol L-1'                     ! [umol L-1]
-    'river_PON_, scalar, series'
-    'river_time'
-    'idRtrc(iPON(i))'
-    'nulvar'
-    1.0d0
-
-  'river_DOP_'                                        ! Input
-    'river runoff dissolved organic P'
-    'umolP L-1'                     ! [umol L-1]
-    'river_DOP_, scalar, series'
-    'river_time'
-    'idRtrc(iDOP(i))'
-    'nulvar'
-    1.0d0
-
-  'river_POP_'                                        ! Input
-    'river runoff particulate organic P'
-    'umolP L-1'                     ! [umol L-1]
-    'river_POP_, scalar, series'
-    'river_time'
-    'idRtrc(iPOP(i))'
-    'nulvar'
-    1.0d0
-
-  'river_COTe'                                        ! Input
-    'river runoff crown-of-thorns starfish eggs'
-    'umolC L-1'                     ! [umolC L-1]
-    'river_COTe, scalar, series'
-    'river_time'
-    'idRtrc(iCOTe)'
-    'nulvar'
-    1.0d0
-
-  'river_COTl'                                        ! Input
-    'river runoff crown-of-thorns starfish larvae'
-    'umolC L-1'                     ! [umolC L-1]
-    'river_COTl, scalar, series'
-    'river_time'
-    'idRtrc(iCOTl)'
-    'nulvar'
-    1.0d0
+!----------------------------------------------------------
+! DiaBio2d parameters
+
+   'pH'                                       ! Input/Output
+    'sea surface pH'
+    'total scale'                 ! [total scale]
+    'pH, scalar, series'
+    'ocean_time'
+    'iDbio2(ipHt_)'
+    'r2dvar'
+    1.0d0
+
+  'Omega_arg'                                       ! Input/Output
+    'sea surface aragonite saturation state'
+    'nodimension'                               ! []
+    'Omega_arg, scalar, series'
+    'ocean_time'
+    'iDbio2(iWarg)'
+    'r2dvar'
+    1.0d0
+
+  'CO2_airsea'                                       ! Input/Output
+    'CO2 air-sea flux'
+    'mmol m-2 s-1'                 ! [mmol m-2 s-1]
+    'CO2_airsea, scalar, series'
+    'ocean_time'
+    'iDbio2(iCO2fx)'
+    'r2dvar'
+    1.0d0
+
+  'pCO2'                                             ! Input/Output
+    'partial pressure of CO2'
+    'uatm'                                 ! [microatmosphere]
+    'pCO2, scalar, series'
+    'ocean_time'
+    'iDbio2(ipCO2)'
+    'r2dvar'
+    1.0d0
+
+  'O2_airsea'                                        ! Input/Output
+    'O2 air-sea flux'
+    'mmol m-2 s-1'                 ! [mmol m-2 s-1]
+    'O2_airsea, scalar, series'
+    'ocean_time'
+    'iDbio2(iO2fx)'
+    'r2dvar'
+    1.0d0
+
+  'PARbot'                                       ! Output
+    'bottom photn flux density'
+    'umol m-2 s-1'                               ! [umol m-2 s-1]
+    'PARbot, scalar, series'
+    'ocean_time'
+    'iDbio2(iPARb)'
+    'r2dvar'
+    1.0d0
+
+  'Tau_ave'                                       ! Output
+    'bottom shear stress'
+    'N m-2'                               ! [N m-2]
+    'Tau_ave, scalar, series'
+    'ocean_time'
+    'iDbio2(iTau_)'
+    'r2dvar'
+    1.0d0
+  
+  'd13C_DIC'                                              ! Input/Output
+    'carbon isotope ratio of DIC'
+    'per mill VPDB'                                       ! [per mill]
+    'd13C_DIC, scalar, series'
+    'ocean_time'
+    'iDbio3(id13C)'
+    'r3dvar'
+    1.0d0
+
+!----------------------------------------------------------
+! Coral HisBio2d parameters
+
+'coral_TAcal_'                                ! Input/Output
+  'coral TA in the calcifiying fluid'
+  'umol kg-1'                                 ! [umol kg-1]
+  'coral_TAcal_, scalar, series'
+  'ocean_time'
+  'iHbio2(iClTAcal(i))'
+  'r2dvar'
+  1.0d0
+
+'coral_TAcoe_'                                ! Input/Output
+  'coral TA in the coelenteron'
+  'umol kg-1'                                 ! [umol kg-1]
+  'coral_TAcoe_, scalar, series'
+  'ocean_time'
+  'iHbio2(iClTAcoe(i))'
+  'r2dvar'
+  1.0d0
+
+
+'coral_DICcal_'                                ! Input/Output
+  'coral DIC in the calcifiying fluid'
+  'umol kg-1'                                 ! [umol kg-1]
+  'coral_DICcal_, scalar, series'
+  'ocean_time'
+  'iHbio2(iClDICcal(i))'
+  'r2dvar'
+  1.0d0
+
+'coral_DICcoe_'                                ! Input/Output
+  'coral DIC in the coelenteron'
+  'umol kg-1'                                 ! [umol kg-1]
+  'coral_DICcoe_, scalar, series'
+  'ocean_time'
+  'iHbio2(iClDICcoe(i))'
+  'r2dvar'
+  1.0d0
+
+'coral_DOcoe_'                                ! Input/Output
+  'coral DO in the coelenteron'
+  'umol kg-1'                                 ! [umol kg-1]
+  'coral_DOcoe_, scalar, series'
+  'ocean_time'
+  'iHbio2(iClDOcoe(i))'
+  'r2dvar'
+  1.0d0
+
+'coral_orgC_'                                             ! Input/Output
+  'coral stored organic carbon'
+  'umol cm-2'                                         ! [umol cm-2]
+  'coral_orgC_, scalar, series'
+  'ocean_time'
+  'iHbio2(iClQC(i))'
+  'r2dvar'
+  1.0d0
+
+'coral_CO2aqcal_'                                ! Input/Output
+  'coral [CO2*] in the calcifiying fluid'
+  'umol kg-1'                                 ! [umol kg-1]
+  'coral_CO2aqcal_, scalar, series'
+  'ocean_time'
+  'iHbio2(iClCO2cal(i))'
+  'r2dvar'
+  1.0d0
+
+'coral_CO2aqcoe_'                                ! Input/Output
+  'coral [CO2*] in the coelenteron'
+  'umol kg-1'                                 ! [umol kg-1]
+  'coral_CO2aqcoe_, scalar, series'
+  'ocean_time'
+  'iHbio2(iClCO2coe(i))'
+  'r2dvar'
+  1.0d0
+
+'coral_DI13Ccal_'                                ! Input/Output
+  'coral C13 in DIC in the calcifiying fluid'
+  'umol kg-1'                                 ! [umol kg-1]
+  'coral_DI13Ccal_, scalar, series'
+  'ocean_time'
+  'iHbio2(iClDI13Ccal(i))'
+  'r2dvar'
+  1.0d0
+
+'coral_DI13Ccoe_'                                ! Input/Output
+  'coral C13 in DIC in the coelenteron'
+  'umol kg-1'                                 ! [umol kg-1]
+  'coral_DI13Ccoe_, scalar, series'
+  'ocean_time'
+  'iHbio2(iClDI13Ccoe(i))'
+  'r2dvar'
+  1.0d0
+
+'coral_org13C_'                                             ! Input/Output
+  'coral stored organic C13'
+  'umol cm-2'                                         ! [umol cm-2]
+  'coral_org13C_, scalar, series'
+  'ocean_time'
+  'iHbio2(iClQ13C(i))'
+  'r2dvar'
+  1.0d0
+
+'coral_13CO2aqcal_'                                ! Input/Output
+  'coral [13CO2*] in the calcifiying fluid'
+  'umol kg-1'                                 ! [umol kg-1]
+  'coral_CO2aqcal_, scalar, series'
+  'ocean_time'
+  'iHbio2(iCl13CO2cal(i))'
+  'r2dvar'
+  1.0d0
+
+'coral_13CO2aqcoe_'                                ! Input/Output
+  'coral [13CO2*] in the coelenteron'
+  'umol kg-1'                                 ! [umol kg-1]
+  'coral_13CO2aqcoe_, scalar, series'
+  'ocean_time'
+  'iHbio2(iCl13CO2coe(i))'
+  'r2dvar'
+  1.0d0
+
+'coral_ROS_'                                ! Input/Output
+  'coral ROS concentration in the coelenteron'
+  'umol L-1'                                 ! [umol L-1]
+  'coral_ROS_, scalar, series'
+  'ocean_time'
+  'iHbio2(iClROS(i))'
+  'r2dvar'
+  1.0d0
+
+'coral_Zoox_dens_'                                             ! Input/Output
+  'coral zooxanthellae density'
+  'cell cm-2'                                 ! [cell cm-2]
+  'coral_Zoox_dens_, scalar, series'
+  'ocean_time'
+  'iHbio2(iZxDns(i))'
+  'r2dvar'
+  1.0d0
+
+'coral_Zoox_orgC_'                                             ! Input/Output
+  'coral zooxanthellae stored organic carbon'
+  'pmol cell-1'                                 ! [pmol cell-1]
+  'coral_Zoox_orgC_, scalar, series'
+  'ocean_time'
+  'iHbio2(iZxQC(i))'
+  'r2dvar'
+  1.0d0
+
+'coral_Zoox_chl_'                                             ! Input/Output
+  'coral zooxanthellae chlorophyll'
+  'pg cell-1'                                 ! [pg cell-1]
+  'coral_Zoox_chl_, scalar, series'
+  'ocean_time'
+  'iHbio2(iZxChl(i))'
+  'r2dvar'
+  1.0d0
+
+'coral_Zoox_QAo_'                                             ! Input/Output
+  'coral zooxanthellae oxidized RCII'
+  'pmol RCII cell-1'                                 ! [pmol RCII cell-1]
+  'coral_Zoox_QAo_, scalar, series'
+  'ocean_time'
+  'iHbio2(iZxQAo(i))'
+  'r2dvar'
+  1.0d0
+
+'coral_Zoox_QAr_'                                             ! Input/Output
+  'coral zooxanthellae reduced RCII'
+  'pmol RCII cell-1'                                 ! [pmol RCII cell-1]
+  'coral_Zoox_QAr_, scalar, series'
+  'ocean_time'
+  'iHbio2(iZxQAr(i))'
+  'r2dvar'
+  1.0d0
+
+'coral_Zoox_QAi_'                                             ! Input/Output
+  'coral zooxanthellae inhibited RCII'
+  'pmol RCII cell-1'                                 ! [pmol RCII cell-1]
+  'coral_Zoox_QAi_, scalar, series'
+  'ocean_time'
+  'iHbio2(iZxQAi(i))'
+  'r2dvar'
+  1.0d0
+
+'coral_Zoox_QAid_'                                             ! Input/Output
+  'coral zooxanthellae deeply damaged RCII'
+  'pmol RCII cell-1'                                 ! [pmol RCII cell-1]
+  'coral_Zoox_QAid_, scalar, series'
+  'ocean_time'
+  'iHbio2(iZxQAid(i))'
+  'r2dvar'
+  1.0d0
+
+'coral_Zoox_org13C_'                                             ! Input/Output
+  'coral zooxanthellae stored organic 13C'
+  'pmol RCII cell-1'                                 ! [pmol RCII cell-1]
+  'coral_Zoox_org13C_, scalar, series'
+  'ocean_time'
+  'iHbio2(iZxQ13C(i))'
+  'r2dvar'
+  1.0d0
+
+!----------------------------------------------------------
+! Coral DiaBio2d parameters
+
+'coral_Pg_'                                             ! Input/Output
+  'coral gross photosynthetic rate'
+  'nmol cm-2 s-1'                                 ! [nmol cm-2 s-1]
+  'coral_Pg_, scalar, series'
+  'ocean_time'
+  'iDbio2(iClPg(i))'
+  'r2dvar'
+  1.0d0
+
+'coral_R_'                                             ! Input/Output
+  'coral respiration rate'
+  'nmol cm-2 s-1'                                 ! [nmol cm-2 s-1]
+  'coral_R_, scalar, series'
+  'ocean_time'
+  'iDbio2(iCl_R(i))'
+  'r2dvar'
+  1.0d0
+
+'coral_G_'                                             ! Input/Output
+  'coral calcification rate'
+  'nmol cm-2 s-1'                                 ! [nmol cm-2 s-1]
+  'coral_G_, scalar, series'
+  'ocean_time'
+  'iDbio2(iCl_G(i))'
+  'r2dvar'
+  1.0d0
+
+'coral_Pn_'                                             ! Input/Output
+  'coral net photosynthetic rate'
+  'nmol cm-2 s-1'                                 ! [nmol cm-2 s-1]
+  'coral_Pn_, scalar, series'
+  'ocean_time'
+  'iDbio2(iClPn(i))'
+  'r2dvar'
+  1.0d0
+
+'coral_d13Ctissue_'                                             ! Input/Output
+  'coral tissue carbon isotope ratio'
+  'per mill VPDB'                                 ! [per mill VPDB]
+  'coral_d13Ctissue_, scalar, series'
+  'ocean_time'
+  'iDbio2(iClQCd13C(i))'
+  'r2dvar'
+  1.0d0
+
+'coral_Zoox_Pg_'                                             ! Input/Output
+  'coral zooxanthellae gross photosynthetic rate'
+  'pmolC cell-1 s-1'                                 ! [pmolC cell-1 s-1]
+  'coral_Zoox_Pg_, scalar, series'
+  'ocean_time'
+  'iDbio2(iZxPg(i))'
+  'r2dvar'
+  1.0d0
+
+'coral_Zoox_R_'                                             ! Input/Output
+  'coral zooxanthellae respiration rate'
+  'pmolC cell-1 s-1'                                 ! [pmolC cell-1 s-1]
+  'coral_Zoox_R_, scalar, series'
+  'ocean_time'
+  'iDbio2(iZx_R(i))'
+  'r2dvar'
+  1.0d0
+
+'coral_Zoox_Pn_'                                             ! Input/Output
+  'coral zooxanthellae net photosynthetic rate'
+  'pmolC cell-1 s-1'                                 ! [pmolC cell-1 s-1]
+  'coral_Zoox_Pn_, scalar, series'
+  'ocean_time'
+  'iDbio2(iZxPn(i))'
+  'r2dvar'
+  1.0d0
+
+'coral_mort_'                                             ! Input/Output
+  'coral mortality'
+  's-1'                                 ! [s-1]
+  'coral_mort_, scalar, series'
+  'ocean_time'
+  'iDbio2(iClmt(i))'
+  'r2dvar'
+  1.0d0
+
+'coral_growth_'                                             ! Input/Output
+  'coral growth rate'
+  's-1'                                 ! [s-1]
+  'coral_growth_, scalar, series'
+  'ocean_time'
+  'iDbio2(iClgw(i))'
+  'r2dvar'
+  1.0d0
+
+!----------------------------------------------------------
+! Seagrass DiaBio2d parameters
+
+'seagrass_Pg_'                                             ! Input/Output
+  'seagrass gross photosynthetic rate'
+  'mmol m-2 s-1'                                 ! [mmol m-2 s-1]
+  'seagrass_Pg_, scalar, series'
+  'ocean_time'
+  'iDbio2(iSgPg(i))'
+  'r2dvar'
+  1.0d0
+
+'seagrass_R_'                                             ! Input/Output
+  'seagrass respiration rate'
+  'mmol m-2 s-1'                                 ! [mmol m-2 s-1]
+  'seagrass_R_, scalar, series'
+  'ocean_time'
+  'iDbio2(iSg_R(i))'
+  'r2dvar'
+  1.0d0
+
+'seagrass_Pn_'                                             ! Input/Output
+  'seagrass net photosynthetic rate'
+  'mmol m-2 s-1'                                 ! [mmol m-2 s-1]
+  'seagrass_Pn_, scalar, series'
+  'ocean_time'
+  'iDbio2(iSgPn(i))'
+  'r2dvar'
+  1.0d0
+
+!----------------------------------------------------------
+! Macroalgae DiaBio2d parameters
+
+'algal_Pg_'                                             ! Input/Output
+  'algal gross photosynthetic rate'
+  'mmol m-2 s-1'                                 ! [mmol m-2 s-1]
+  'algal_Pg_, scalar, series'
+  'ocean_time'
+  'iDbio2(iAgPg(i))'
+  'r2dvar'
+  1.0d0
+
+'algal_R_'                                             ! Input/Output
+  'algal respiration rate'
+  'mmol m-2 s-1'                                 ! [mmol m-2 s-1]
+  'algal_R_, scalar, series'
+  'ocean_time'
+  'iDbio2(iAg_R(i))'
+  'r2dvar'
+  1.0d0
+
+'algal_Pn_'                                             ! Input/Output
+  'algal net photosynthetic rate'
+  'mmol m-2 s-1'                                 ! [mmol m-2 s-1]
+  'algal_Pn_, scalar, series'
+  'ocean_time'
+  'iDbio2(iAgPn(i))'
+  'r2dvar'
+  1.0d0
+
+!
+!  Boundary variables.
+!
+'TIC_east'                                         ! Input
+  'TIC eastern boundary condition'
+  'umol kg-1'                                      ! [umol kg-1]
+  'TIC_east, scalar, series'
+  'TIC_time'
+  'idTbry(ieast,iTIC_)'
+  'nulvar'
+  1.0d0
+
+'TIC_west'                                         ! Input
+  'TIC western boundary condition'
+  'umol kg-1'                                      ! [umol kg-1]
+  'TIC_west, scalar, series'
+  'TIC_time'
+  'idTbry(iwest,iTIC_)'
+  'nulvar'
+  1.0d0
+
+'TIC_north'                                        ! Input
+  'TIC northern boundary condition'
+  'umol kg-1'                                      ! [umol kg-1]
+  'TIC_north, scalar, series'
+  'TIC_time'
+  'idTbry(inorth,iTIC_)'
+  'nulvar'
+  1.0d0
+
+'TIC_south'                                        ! Input
+  'TIC southern boundary condition'
+  'umol kg-1'                                      ! [umol kg-1]
+  'TIC_south, scalar, series'
+  'TIC_time'
+  'idTbry(isouth,iTIC_)'
+  'nulvar'
+  1.0d0
+
+
+'alkalinity_east'                                  ! Input
+  'alkalinity eastern boundary condition'
+  'umol kg-1'                                      ! [umol kg-1]
+  'alkalinity_east, scalar, series'
+  'alkalinity_time'
+  'idTbry(ieast,iTAlk)'
+  'nulvar'
+  1.0d0
+
+'alkalinity_west'                                  ! Input
+  'alkalinity western boundary condition'
+  'umol kg-1'                                      ! [umol kg-1]
+  'alkalinity_west, scalar, series'
+  'alkalinity_time'
+  'idTbry(iwest,iTAlk)'
+  'nulvar'
+  1.0d0
+
+'alkalinity_north'                                 ! Input
+  'alkalinity northern boundary condition'
+  'umol kg-1'                                      ! [umol kg-1]
+  'alkalinity_north, scalar, series'
+  'alkalinity_time'
+  'idTbry(inorth,iTAlk)'
+  'nulvar'
+  1.0d0
+
+'alkalinity_south'                                 ! Input
+  'alkalinity southern boundary condition'
+  'umol kg-1'                                      ! [umol kg-1]
+  'alkalinity_south, scalar, series'
+  'alkalinity_time'
+  'idTbry(isouth,iTAlk)'
+  'nulvar'
+  1.0d0
+
+
+'oxygen_east'                                      ! Input
+  'oxygen eastern boundary condition'
+  'umol L-1'                                       ! [umol L-1]
+  'oxygen_east, scalar, series'
+  'oxygen_time'
+  'idTbry(ieast,iOxyg)'
+  'nulvar'
+  1.0d0
+
+'oxygen_west'                                      ! Input
+  'oxygen western boundary condition'
+  'umol L-1'                                       ! [umol L-1]
+  'oxygen_west, scalar, series'
+  'oxygen_time'
+  'idTbry(iwest,iOxyg)'
+  'nulvar'
+  1.0d0
+
+'oxygen_north'                                     ! Input
+  'oxygen northern boundary condition'
+  'umol L-1'                                       ! [umol L-1]
+  'oxygen_north, scalar, series'
+  'oxygen_time'
+  'idTbry(inorth,iOxyg)'
+  'nulvar'
+  1.0d0
+
+'oxygen_south'                                     ! Input
+  'oxygen southern boundary condition'
+  'umol L-1'                                       ! [umol L-1]
+  'oxygen_south, scalar, series'
+  'oxygen_time'
+  'idTbry(isouth,iOxyg)'
+  'nulvar'
+  1.0d0
+
+
+'DOC_east_'                                         ! Input
+  'dissolved organic carbon eastern boundary condition'
+  'umolC L-1'                                      ! [umolC L-1]
+  'DOC_east_, scalar, series'
+  'DOC_time'
+  'idTbry(ieast,iDOC(i))'
+  'nulvar'
+  1.0d0
+
+'DOC_west_'                                         ! Input
+  'dissolved organic carbon western boundary condition'
+  'umolC L-1'                                      ! [umolC L-1]
+  'DOC_west_, scalar, series'
+  'DOC_time'
+  'idTbry(iwest,iDOC(i))'
+  'nulvar'
+  1.0d0
+
+'DOC_south_'                                         ! Input
+  'dissolved organic carbon southern boundary condition'
+  'umolC L-1'                                      ! [umolC L-1]
+  'DOC_south_, scalar, series'
+  'DOC_time'
+  'idTbry(isouth,iDOC(i))'
+  'nulvar'
+  1.0d0
+
+'DOC_north_'                                         ! Input
+  'dissolved organic carbon northern boundary condition'
+  'umolC L-1'                                      ! [umolC L-1]
+  'DOC_north_, scalar, series'
+  'DOC_time'
+  'idTbry(inorth,iDOC(i))'
+  'nulvar'
+  1.0d0
+
+
+'POC_east_'                                         ! Input
+  'particulate organic carbon eastern boundary condition'
+  'umolC L-1'                                      ! [umolC L-1]
+  'POC_east_, scalar, series'
+  'POC_time'
+  'idTbry(ieast,iPOC(i))'
+  'nulvar'
+  1.0d0
+
+'POC_west_'                                         ! Input
+  'particulate organic carbon western boundary condition'
+  'umolC L-1'                                      ! [umolC L-1]
+  'POC_west_, scalar, series'
+  'POC_time'
+  'idTbry(iwest,iPOC(i))'
+  'nulvar'
+  1.0d0
+
+'POC_south_'                                         ! Input
+  'particulate organic carbon southern boundary condition'
+  'umolC L-1'                                      ! [umolC L-1]
+  'POC_south_, scalar, series'
+  'POC_time'
+  'idTbry(isouth,iPOC(i))'
+  'nulvar'
+  1.0d0
+
+'POC_north_'                                         ! Input
+  'particulate organic carbon northern boundary condition'
+  'umolC L-1'                                      ! [umolC L-1]
+  'POC_north_, scalar, series'
+  'POC_time'
+  'idTbry(inorth,iPOC(i))'
+  'nulvar'
+  1.0d0
+
+
+'phyt_east_'                                        ! Input
+  'phytoplankton eastern boundary condition'
+  'umolC L-1'                                      ! [umolC L-1]
+  'phyt_east_, scalar, series'
+  'phyt_time'
+  'idTbry(ieast,iPhyt(i))'
+  'nulvar'
+  1.0d0
+
+'phyt_west_'                                        ! Input
+  'phytoplankton western boundary condition'
+  'umolC L-1'                                      ! [umolC L-1]
+  'phyt_west_, scalar, series'
+  'phyt_time'
+  'idTbry(iwest,iPhyt(i))'
+  'nulvar'
+  1.0d0
+
+'phyt_north_'                                        ! Input
+  'phytoplankton northern boundary condition'
+  'umolC L-1'                                      ! [umolC L-1]
+  'phyt_north_, scalar, series'
+  'phyt_time'
+  'idTbry(inorth,iPhyt(i))'
+  'nulvar'
+  1.0d0
+
+'phyt_south_'                                        ! Input
+  'phytoplankton southern boundary condition'
+  'umolC L-1'                                      ! [umolC L-1]
+  'phyt_south_, scalar, series'
+  'phyt_time'
+  'idTbry(isouth,iPhyt(i))'
+  'nulvar'
+  1.0d0
+
+'zoop_east_'                                        ! Input
+  'zooplankton eastern boundary condition'
+  'umolC L-1'                                      ! [umolC L-1]
+  'zoop_east_, scalar, series'
+  'zoop_time'
+  'idTbry(ieast,iZoop(i))'
+  'nulvar'
+  1.0d0
+
+'zoop_west_'                                        ! Input
+  'zooplankton western boundary condition'
+  'umolC L-1'                                      ! [umolC L-1]
+  'zoop_west_, scalar, series'
+  'zoop_time'
+  'idTbry(iwest,iZoop(i))'
+  'nulvar'
+  1.0d0
+
+'zoop_south_'                                       ! Input
+  'zooplankton southern boundary condition'
+  'umolC L-1'                                      ! [umolC L-1]
+  'zoop_south_, scalar, series'
+  'zoop_time'
+  'idTbry(isouth,iZoop(i))'
+  'nulvar'
+  1.0d0
+
+'zoop_north_'                                       ! Input
+  'zooplankton northern boundary condition'
+  'umolC L-1'                                      ! [umolC L-1]
+  'zoop_north_, scalar, series'
+  'zoop_time'
+  'idTbry(inorth,iZoop(i))'
+  'nulvar'
+  1.0d0
+
+
+'TI13C_east'                                              ! Input/Output
+  'carbon 13 of TIC eastern boundary condition'
+  'umol kg-1'                       ! [umol kg-1]
+  'TI13C_east, scalar, series'
+  'TI13C_time'
+  'idTbry(ieast,iT13C)'
+  'nulvar'
+  1.0d0
+
+'TI13C_west'                                              ! Input/Output
+  'carbon 13 of TIC western boundary condition'
+  'umol kg-1'                       ! [umol kg-1]
+  'TI13C_west, scalar, series'
+  'TI13C_time'
+  'idTbry(iwest,iT13C)'
+  'nulvar'
+  1.0d0
+
+'TI13C_north'                                              ! Input/Output
+  'carbon 13 of TIC northern boundary condition'
+  'umol kg-1'                       ! [umol kg-1]
+  'TI13C_north, scalar, series'
+  'TI13C_time'
+  'idTbry(inorth,iT13C)'
+  'nulvar'
+  1.0d0
+
+'TI13C_south'                                              ! Input/Output
+  'carbon 13 of TIC southern boundary condition'
+  'umol kg-1'                       ! [umol kg-1]
+  'TI13C_south, scalar, series'
+  'TI13C_time'
+  'idTbry(isouth,iT13C)'
+  'nulvar'
+  1.0d0
+
+
+'DO13C_east_'                                              ! Input/Output
+  'carbon 13 of DOC eastern boundary condition'
+  'umolC L-1'                                             ! [umolC L-1]
+  'DO13C_east_, scalar, series'
+  'DO13C_time'
+  'idTbry(ieast,iDO13C(i))'
+  'nulvar'
+  1.0d0
+
+'DO13C_west_'                                              ! Input/Output
+  'carbon 13 of DOC western boundary condition'
+  'umolC L-1'                                             ! [umolC L-1]
+  'DO13C_west_, scalar, series'
+  'DO13C_time'
+  'idTbry(iwest,iDO13C(i))'
+  'nulvar'
+  1.0d0
+
+'DO13C_north_'                                              ! Input/Output
+  'carbon 13 of DOC northern boundary condition'
+  'umolC L-1'                                              ! [umolC L-1]
+  'DO13C_north_, scalar, series'
+  'DO13C_time'
+  'idTbry(inorth,iDO13C(i))'
+  'nulvar'
+  1.0d0
+
+'DO13C_south_'                                              ! Input/Output
+  'carbon 13 of DOC southern boundary condition'
+  'umolC L-1'                                              ! [umolC L-1]
+  'DO13C_south_, scalar, series'
+  'DO13C_time'
+  'idTbry(isouth,iDO13C(i))'
+  'nulvar'
+  1.0d0
+
+
+'Phyt13C_east_'                                              ! Input/Output
+  'carbon 13 of phytoplankton eastern boundary condition'
+  'umolC L-1'                                             ! [umolC L-1]
+  'Phyt13C_east_, scalar, series'
+  'Phyt13C_time'
+  'idTbry(ieast,iPhyt13C(i))'
+  'nulvar'
+  1.0d0
+
+'Phyt13C_west_'                                              ! Input/Output
+  'carbon 13 of phytoplankton western boundary condition'
+  'umolC L-1'                                             ! [umolC L-1]
+  'Phyt13C_west_, scalar, series'
+  'Phyt13C_time'
+  'idTbry(iwest,iPhyt13C(i))'
+  'nulvar'
+  1.0d0
+
+'Phyt13C_north_'                                              ! Input/Output
+  'carbon 13 of phytoplankton northern boundary condition'
+  'umolC L-1'                                              ! [umolC L-1]
+  'Phyt13C_north_, scalar, series'
+  'Phyt13C_time'
+  'idTbry(inorth,iPhyt13C(i))'
+  'nulvar'
+  1.0d0
+
+'Phyt13C_south_'                                              ! Input/Output
+  'carbon 13 of phytoplankton southern boundary condition'
+  'umolC L-1'                                              ! [umolC L-1]
+  'Phyt13C_south_, scalar, series'
+  'Phyt13C_time'
+  'idTbry(isouth,iPhyt13C(i))'
+  'nulvar'
+  1.0d0
+
+'Zoop13C_east_'                                              ! Input/Output
+  'carbon 13 of zooplankton eastern boundary condition'
+  'umolC L-1'                                             ! [umolC L-1]
+  'Zoop13C_east_, scalar, series'
+  'Zoop13C_time'
+  'idTbry(ieast,iZoop13C(i))'
+  'nulvar'
+  1.0d0
+
+'Zoop13C_west_'                                              ! Input/Output
+  'carbon 13 of zooplankton western boundary condition'
+  'umolC L-1'                                             ! [umolC L-1]
+  'Zoop13C_west_, scalar, series'
+  'Zoop13C_time'
+  'idTbry(iwest,iZoop13C(i))'
+  'nulvar'
+  1.0d0
+
+'Zoop13C_north_'                                              ! Input/Output
+  'carbon 13 of zooplankton northern boundary condition'
+  'umolC L-1'                                              ! [umolC L-1]
+  'Zoop13C_north_, scalar, series'
+  'Zoop13C_time'
+  'idTbry(inorth,iZoop13C(i))'
+  'nulvar'
+  1.0d0
+
+'Zoop13C_south_'                                              ! Input/Output
+  'carbon 13 of zooplankton southern boundary condition'
+  'umolC L-1'                                              ! [umolC L-1]
+  'Zoop13C_south_, scalar, series'
+  'Zoop13C_time'
+  'idTbry(isouth,iZoop13C(i))'
+  'nulvar'
+  1.0d0
+
+
+'NO3_east'                                         ! Input
+  'nitrate eastern boundary condition'
+  'umol L-1'                     ! [umol L-1]
+  'NO3_east, scalar, series'
+  'NO3_time'
+  'idTbry(ieast,iNO3_)'
+  'nulvar'
+  1.0d0
+
+'NO3_west'                                         ! Input
+  'nitrate western boundary condition'
+  'umol L-1'                     ! [umol L-1]
+  'NO3_west, scalar, series'
+  'NO3_time'
+  'idTbry(iwest,iNO3_)'
+  'nulvar'
+  1.0d0
+
+'NO3_south'                                        ! Input
+  'nitrate southern boundary condition'
+  'umol L-1'                     ! [umol L-1]
+  'NO3_south, scalar, series'
+  'NO3_time'
+  'idTbry(isouth,iNO3_)'
+  'nulvar'
+  1.0d0
+
+'NO3_north'                                        ! Input
+  'nitrate northern boundary condition'
+  'umol L-1'                     ! [umol L-1]
+  'NO3_north, scalar, series'
+  'NO3_time'
+  'idTbry(inorth,iNO3_)'
+  'nulvar'
+  1.0d0
+
+
+'NO2_east'                                         ! Input
+  'nitrite eastern boundary condition'
+  'umol L-1'                     ! [umol L-1]
+  'NO2_east, scalar, series'
+  'NO2_time'
+  'idTbry(ieast,iNO2_)'
+  'nulvar'
+  1.0d0
+
+'NO2_west'                                         ! Input
+  'nitrite western boundary condition'
+  'umol L-1'                     ! [umol L-1]
+  'NO2_west, scalar, series'
+  'NO2_time'
+  'idTbry(iwest,iNO2_)'
+  'nulvar'
+  1.0d0
+
+'NO2_south'                                        ! Input
+  'nitrite southern boundary condition'
+  'umol L-1'                     ! [umol L-1]
+  'NO2_south, scalar, series'
+  'NO2_time'
+  'idTbry(isouth,iNO2_)'
+  'nulvar'
+  1.0d0
+
+'NO2_north'                                        ! Input
+  'nitrite northern boundary condition'
+  'umol L-1'                                       ! [umol L-1]
+  'NO2_north, scalar, series'
+  'NO2_time'
+  'idTbry(inorth,iNO2_)'
+  'nulvar'
+  1.0d0
+
+
+'NH4_east'                                         ! Input
+  'ammonium eastern boundary condition'
+  'umol L-1'                                       ! [umol L-1]
+  'NH4_east, scalar, series'
+  'NH4_time'
+  'idTbry(ieast,iNH4_)'
+  'nulvar'
+  1.0d0
+
+'NH4_west'                                         ! Input
+  'ammonium western boundary condition'
+  'umol L-1'                                       ! [umol L-1]
+  'NH4_west, scalar, series'
+  'NH4_time'
+  'idTbry(iwest,iNH4_)'
+  'nulvar'
+  1.0d0
+
+'NH4_south'                                        ! Input
+  'ammonium southern boundary condition'
+  'umol L-1'                                       ! [umol L-1]
+  'NH4_south, scalar, series'
+  'NH4_time'
+  'idTbry(isouth,iNH4_)'
+  'nulvar'
+  1.0d0
+
+'NH4_north'                                        ! Input
+  'ammonium northern boundary condition'
+  'umol L-1'                                       ! [umol L-1]
+  'NH4_north, scalar, series'
+  'NH4_time'
+  'idTbry(inorth,iNH4_)'
+  'nulvar'
+  1.0d0
+
+
+'PO4_east'                                         ! Input
+  'phosphate eastern boundary condition'
+  'umol L-1'                                       ! [umol L-1]
+  'PO4_east, scalar, series'
+  'PO4_time'
+  'idTbry(ieast,iPO4_)'
+  'nulvar'
+  1.0d0
+
+'PO4_west'                                         ! Input
+  'phosphate western boundary condition'
+  'umol L-1'                                       ! [umol L-1]
+  'PO4_west, scalar, series'
+  'PO4_time'
+  'idTbry(iwest,iPO4_)'
+  'nulvar'
+  1.0d0
+
+'PO4_south'                                        ! Input
+  'phosphate southern boundary condition'
+  'umol L-1'                                       ! [umol L-1]
+  'PO4_south, scalar, series'
+  'PO4_time'
+  'idTbry(isouth,iPO4_)'
+  'nulvar'
+  1.0d0
+
+'PO4_north'                                        ! Input
+  'phosphate northern boundary condition'
+  'umol L-1'                                       ! [umol L-1]
+  'PO4_north, scalar, series'
+  'PO4_time'
+  'idTbry(inorth,iPO4_)'
+  'nulvar'
+  1.0d0
+
+
+'DON_east_'                                         ! Input
+  'dissolved organic nitrogen eastern boundary condition'
+  'umolN L-1'                                      ! [umolN L-1]
+  'DON_east_, scalar, series'
+  'DON_time'
+  'idTbry(ieast,iDON(i))'
+  'nulvar'
+  1.0d0
+
+'DON_west_'                                         ! Input
+  'dissolved organic nitrogen western boundary condition'
+  'umolN L-1'                                      ! [umolN L-1]
+  'DON_west_, scalar, series'
+  'DON_time'
+  'idTbry(iwest,iDON(i))'
+  'nulvar'
+  1.0d0
+
+'DON_south_'                                        ! Input
+  'dissolved organic nitrogen southern boundary condition'
+  'umolN L-1'                                      ! [umolN L-1]
+  'DON_south_, scalar, series'
+  'DON_time'
+  'idTbry(isouth,iDON(i))'
+  'nulvar'
+  1.0d0
+
+'DON_north_'                                        ! Input
+  'dissolved organic nitrogen northern boundary condition'
+  'umolN L-1'                                      ! [umolN L-1]
+  'DON_north_, scalar, series'
+  'DON_time'
+  'idTbry(inorth,iDON(i))'
+  'nulvar'
+  1.0d0
+
+
+'PON_east_'                                         ! Input
+  'particulate organic nitrogen eastern boundary condition'
+  'umolN L-1'                                      ! [umolN L-1]
+  'PON_east_, scalar, series'
+  'PON_time'
+  'idTbry(ieast,iPON(i))'
+  'nulvar'
+  1.0d0
+
+'PON_west_'                                         ! Input
+  'particulate organic nitrogen western boundary condition'
+  'umolN L-1'                                      ! [umolN L-1]
+  'PON_west_, scalar, series'
+  'PON_time'
+  'idTbry(iwest,iPON(i))'
+  'nulvar'
+  1.0d0
+
+'PON_south_'                                        ! Input
+  'particulate organic nitrogen southern boundary condition'
+  'umolN L-1'                                      ! [umolN L-1]
+  'PON_south_, scalar, series'
+  'PON_time'
+  'idTbry(isouth,iPON(i))'
+  'nulvar'
+  1.0d0
+
+'PON_north_'                                        ! Input
+  'particulate organic nitrogen northern boundary condition'
+  'umolN L-1'                                      ! [umolN L-1]
+  'PON_north_, scalar, series'
+  'PON_time'
+  'idTbry(inorth,iPON(i))'
+  'nulvar'
+  1.0d0
+
+
+
+'DOP_east_'                                         ! Input
+  'dissolved organic phosphorus eastern boundary condition'
+  'umolN L-1'                                      ! [umolN L-1]
+  'DOP_east_, scalar, series'
+  'DOP_time'
+  'idTbry(ieast,iDOP(i))'
+  'nulvar'
+  1.0d0
+
+'DOP_west_'                                         ! Input
+  'dissolved organic phosphorus western boundary condition'
+  'umolN L-1'                                      ! [umolN L-1]
+  'DOP_west_, scalar, series'
+  'DOP_time'
+  'idTbry(iwest,iDOP(i))'
+  'nulvar'
+  1.0d0
+
+'DOP_south_'                                        ! Input
+  'dissolved organic phosphorus southern boundary condition'
+  'umolN L-1'                                      ! [umolN L-1]
+  'DOP_south_, scalar, series'
+  'DOP_time'
+  'idTbry(isouth,iDOP(i))'
+  'nulvar'
+  1.0d0
+
+'DOP_north_'                                        ! Input
+  'dissolved organic phosphorus northern boundary condition'
+  'umolN L-1'                                      ! [umolN L-1]
+  'DOP_north_, scalar, series'
+  'DOP_time'
+  'idTbry(inorth,iDOP(i))'
+  'nulvar'
+  1.0d0
+
+
+'POP_east_'                                         ! Input
+  'particulate organic phosphorus eastern boundary condition'
+  'umolN L-1'                                      ! [umolN L-1]
+  'POP_east_, scalar, series'
+  'POP_time'
+  'idTbry(ieast,iPOP(i))'
+  'nulvar'
+  1.0d0
+
+'POP_west_'                                         ! Input
+  'particulate organic phosphorus western boundary condition'
+  'umolN L-1'                                      ! [umolN L-1]
+  'POP_west_, scalar, series'
+  'POP_time'
+  'idTbry(iwest,iPOP(i))'
+  'nulvar'
+  1.0d0
+
+'POP_south_'                                        ! Input
+  'particulate organic phosphorus southern boundary condition'
+  'umolN L-1'                                      ! [umolN L-1]
+  'POP_south_, scalar, series'
+  'POP_time'
+  'idTbry(isouth,iPOP(i))'
+  'nulvar'
+  1.0d0
+
+'POP_north_'                                        ! Input
+  'particulate organic phosphorus northern boundary condition'
+  'umolN L-1'                                      ! [umolN L-1]
+  'POP_north_, scalar, series'
+  'POP_time'
+  'idTbry(inorth,iPOP(i))'
+  'nulvar'
+  1.0d0
+
+
+'COTe_east'                                        ! Input
+  'crown-of-thornes starfish eggs eastern boundary condition'
+  'umolC L-1'                                      ! [umolC L-1]
+  'COTe_east, scalar, series'
+  'COTe_time'
+  'idTbry(ieast,iCOTe)'
+  'nulvar'
+  1.0d0
+
+'COTe_west'                                        ! Input
+  'crown-of-thornes starfish eggs western boundary condition'
+  'umolC L-1'                                      ! [umolC L-1]
+  'COTe_west, scalar, series'
+  'COTe_time'
+  'idTbry(iwest,iCOTe)'
+  'nulvar'
+  1.0d0
+
+'COTe_south'                                       ! Input
+  'crown-of-thornes starfish eggs southern boundary condition'
+  'umolC L-1'                                      ! [umolC L-1]
+  'COTe_south, scalar, series'
+  'COTe_time'
+  'idTbry(isouth,iCOTe)'
+  'nulvar'
+  1.0d0
+
+'COTe_north'                                       ! Input
+  'crown-of-thornes starfish eggs northern boundary condition'
+  'umolC L-1'                                      ! [umolC L-1]
+  'COTe_north, scalar, series'
+  'COTe_time'
+  'idTbry(inorth,iCOTe)'
+  'nulvar'
+  1.0d0
+
+
+'COTl_east'                                        ! Input
+  'crown-of-thornes starfish larvae eastern boundary condition'
+  'umolC L-1'                                      ! [umolC L-1]
+  'COTl_east, scalar, series'
+  'COTl_time'
+  'idTbry(ieast,iCOTl)'
+  'nulvar'
+  1.0d0
+
+'COTl_west'                                        ! Input
+  'crown-of-thornes starfish larvae western boundary condition'
+  'umolC L-1'                                      ! [umolC L-1]
+  'COTl_west, scalar, series'
+  'COTl_time'
+  'idTbry(iwest,iCOTl)'
+  'nulvar'
+  1.0d0
+
+'COTl_south'                                       ! Input
+  'crown-of-thornes starfish larvae southern boundary condition'
+  'umolC L-1'                                      ! [umolC L-1]
+  'COTl_south, scalar, series'
+  'COTl_time'
+  'idTbry(isouth,iCOTl)'
+  'nulvar'
+  1.0d0
+
+'COTl_north'                                       ! Input
+  'crown-of-thornes starfish larvae northern boundary condition'
+  'umolC L-1'                                      ! [umolC L-1]
+  'COTl_north, scalar, series'
+  'COTl_time'
+  'idTbry(inorth,iCOTl)'
+  'nulvar'
+  1.0d0
+
+!
+!------------------------------------------------------------------------------
+!  River forcing variables.
+!------------------------------------------------------------------------------
+!
+
+'river_TIC'                                        ! Input
+  'river runoff TIC'
+  'umol kg-1'                       ! [umol kg-1]
+  'river_TIC, scalar, series'
+  'river_time'
+  'idRtrc(iTIC_)'
+  'nulvar'
+  1.0d0
+
+'river_alkalinity'                                 ! Input
+  'river runoff alkalinity'
+  'umol kg-1'                       ! [umol kg-1]
+  'river_alkalinity, scalar, series'
+  'river_time'
+  'idRtrc(iTAlk)'
+  'nulvar'
+  1.0d0
+
+'river_Oxyg'                                       ! Input
+  'river runoff oxygen'
+  'umol L-1'                       ! [umol L-1]
+  'river_Oxyg, scalar, series'
+  'river_time'
+  'idRtrc(iOxyg)'
+  'nulvar'
+  1.0d0
+
+'river_DOC_'                                        ! Input
+  'river runoff dissolved organic carbon'
+  'umolC L-1'                     ! [umolC L-1]
+  'river_DOC_, scalar, series'
+  'river_time'
+  'idRtrc(iDOC(i))'
+  'nulvar'
+  1.0d0
+
+'river_POC_'                                        ! Input
+  'river runoff particulate organic carbon'
+  'umolC L-1'                     ! [umolC L-1]
+  'river_POC_, scalar, series'
+  'river_time'
+  'idRtrc(iPOC(i))'
+  'nulvar'
+  1.0d0
+
+'river_Phyt_'                                        ! Input
+  'river runoff phytoplankton'
+  'umolC L-1'                     ! [umolC L-1]
+  'river_Phyt_, scalar, series'
+  'river_time'
+  'idRtrc(iPhyt(i))'
+  'nulvar'
+  1.0d0
+
+'river_Zoop_'                                        ! Input
+  'river runoff zooplankton'
+  'umolC L-1'                     ! [umolC L-1]
+  'river_Zoop_, scalar, series'
+  'river_time'
+  'idRtrc(iZoop(i))'
+  'nulvar'
+  1.0d0
+
+'river_PIC_'                                         ! Input
+  'river runoff particulate inorganic carbon'
+  'umolC L-1'                       ! [umolC L-1]
+  'river_PIC_, scalar, series'
+  'river_time'
+  'idRtrc(iPIC(i))'
+  'nulvar'
+  1.0d0
+
+'river_d13C_TIC'                                       ! Input
+  'river runoff d13C of DIC'
+  'permil VPDB'                       ! [permil VPDB]
+  'river_d13C_TIC, scalar, series'
+  'river_time'
+  'idRtrc(iT13C)'
+  'nulvar'
+  1.0d0
+
+'river_d13C_DOC_'                                       ! Input
+  'river runoff d13C of DOC'
+  'permil VPDB'                       ! [permil VPDB]
+  'river_d13C_DOC_, scalar, series'
+  'river_time'
+  'idRtrc(iDO13C(i))'
+  'nulvar'
+  1.0d0
+
+'river_d13C_POC_'                                       ! Input
+  'river runoff d13C of POC'
+  'permil VPDB'                       ! [permil VPDB]
+  'river_d13C_POC_, scalar, series'
+  'river_time'
+  'idRtrc(iPO13C(i))'
+  'nulvar'
+  1.0d0
+
+'river_d13C_Phyt_'                                       ! Input
+  'river runoff d13C of phytoplankton'
+  'permil VPDB'                       ! [permil VPDB]
+  'river_d13C_Phyt_, scalar, series'
+  'river_time'
+  'idRtrc(iPhyt13C(i))'
+  'nulvar'
+  1.0d0
+
+'river_d13C_Zoop_'                                       ! Input
+  'river runoff d13C of zooplankton'
+  'permil VPDB'                       ! [permil VPDB]
+  'river_d13C_Zoop_, scalar, series'
+  'river_time'
+  'idRtrc(iZoop13C(i))'
+  'nulvar'
+  1.0d0
+
+'river_NO3'                                        ! Input
+  'river runoff NO3'
+  'umol L-1'                     ! [umol L-1]
+  'river_NO3, scalar, series'
+  'river_time'
+  'idRtrc(iNO3_)'
+  'nulvar'
+  1.0d0
+
+'river_NO2'                                        ! Input
+  'river runoff NO2'
+  'umol L-1'                     ! [umol L-1]
+  'river_NO2, scalar, series'
+  'river_time'
+  'idRtrc(iNO2_)'
+  'nulvar'
+  1.0d0
+
+'river_NH4'                                        ! Input
+  'river runoff NH4'
+  'umol L-1'                     ! [umol L-1]
+  'river_NH4, scalar, series'
+  'river_time'
+  'idRtrc(iNH4_)'
+  'nulvar'
+  1.0d0
+
+'river_PO4'                                        ! Input
+  'river runoff PO4'
+  'umol L-1'                     ! [umol L-1]
+  'river_PO4, scalar, series'
+  'river_time'
+  'idRtrc(iPO4_)'
+  'nulvar'
+  1.0d0
+
+'river_DON_'                                        ! Input
+  'river runoff dissolved organic nitrogen'
+  'umol L-1'                     ! [umol L-1]
+  'river_DON_, scalar, series'
+  'river_time'
+  'idRtrc(iDON(i))'
+  'nulvar'
+  1.0d0
+
+'river_PON_'                                        ! Input
+  'river runoff particulate organic nitrogen'
+  'umol L-1'                     ! [umol L-1]
+  'river_PON_, scalar, series'
+  'river_time'
+  'idRtrc(iPON(i))'
+  'nulvar'
+  1.0d0
+
+'river_DOP_'                                        ! Input
+  'river runoff dissolved organic P'
+  'umolP L-1'                     ! [umol L-1]
+  'river_DOP_, scalar, series'
+  'river_time'
+  'idRtrc(iDOP(i))'
+  'nulvar'
+  1.0d0
+
+'river_POP_'                                        ! Input
+  'river runoff particulate organic P'
+  'umolP L-1'                     ! [umol L-1]
+  'river_POP_, scalar, series'
+  'river_time'
+  'idRtrc(iPOP(i))'
+  'nulvar'
+  1.0d0
+
+'river_COTe'                                        ! Input
+  'river runoff crown-of-thorns starfish eggs'
+  'umolC L-1'                     ! [umolC L-1]
+  'river_COTe, scalar, series'
+  'river_time'
+  'idRtrc(iCOTe)'
+  'nulvar'
+  1.0d0
+
+'river_COTl'                                        ! Input
+  'river runoff crown-of-thorns starfish larvae'
+  'umolC L-1'                     ! [umolC L-1]
+  'river_COTl, scalar, series'
+  'river_time'
+  'idRtrc(iCOTl)'
+  'nulvar'
+  1.0d0
 
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
+
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+!
+!------------------------------------------------------------------------------
+!  SEDIMENT_ECOSYS variables.
+!------------------------------------------------------------------------------
+!
+! 3D sediment variables
+!
+
+'sediment_poro'                                             ! Input/Output
+  'SedEco: porosity'
+  'cm_w3 cm_s-3'                                 ! (cm_w3 cm_s-3)
+  'sediment_poro, scalar, series'
+  'ocean_time'
+  'iHbiosed3(iSdporo)'
+  'd3dvar'
+  1.0d0
+
+'sediment_Tmp'                                             ! Input/Output
+  'SedEco: temperature'
+  'ºC'                                 ! (ºC)
+  'sediment_Tmp, scalar, series'
+  'ocean_time'
+  'iHbiosed3(iSdTmp)'
+  'd3dvar'
+  1.0d0
+
+'sediment_Sal'                                             ! Input/Output
+  'SedEco: salinity'
+  'PSU'                                 ! (PSU)
+  'sediment_Sal, scalar, series'
+  'ocean_time'
+  'iHbiosed3(iSdSal)'
+  'd3dvar'
+  1.0d0
+
+! 'sediment_pH'                                             ! Input/Output
+!   'SedEco: pH'
+!   'pH'                                 ! (pH)
+!   'sediment_pH, scalar, series'
+!   'ocean_time'
+!   'iHbiosed3(iSdpH)'
+!   'd3dvar'
+!   1.0d0
+
+'sediment_TA'                                             ! Input/Output
+  'SedEco: total alkalinity'
+  'umol kg-1'                                 ! (µmol kg-1)
+  'sediment_TA, scalar, series'
+  'ocean_time'
+  'iHbiosed3(iSdTA)'
+  'd3dvar'
+  1.0d0
+
+! 'sediment_DIC'                                             ! Input/Output
+!   'SedEco: dissolved inorganic carbon'
+!   'umolC kg-1'                                 ! (µmol kg-1)
+!   'sediment_pH, scalar, series'
+!   'ocean_time'
+!   'iHbiosed3(iSdDIC)'
+!   'd3dvar'
+!   1.0d0
+
+'sediment_O2'                                             ! Input/Output
+  'SedEco: dissolved oxygen'
+  'umolO2 L-1'                                 ! (µmol l-1)
+  'sediment_O2, scalar, series'
+  'ocean_time'
+  'iHbiosed3(iSdO2)'
+  'd3dvar'
+  1.0d0
+
+'sediment_CO2'                                             ! Input/Output
+  'SedEco: dissolved carbon dioxide'
+  'umolCO2 L-1'                                 ! (µmol l-1)
+  'sediment_CO2, scalar, series'
+  'ocean_time'
+  'iHbiosed3(iSdCO2)'
+  'd3dvar'
+  1.0d0
+
+'sediment_N2'                                             ! Input/Output
+  'SedEco: dissolved nitrogen'
+  'umolN2 L-1'                                 ! (µmol l-1)
+  'sediment_N2, scalar, series'
+  'ocean_time'
+  'iHbiosed3(iSdN2)'
+  'd3dvar'
+  1.0d0
+
+'sediment_DOCf'                                             ! Input/Output
+  'SedEco: dissolved organic carbon (fast: labile)'
+  'µmolC L-1'                                 ! (µmol l-1)
+  'sediment_DOCf, scalar, series'
+  'ocean_time'
+  'iHbiosed3(iSdDOCf)'
+  'd3dvar'
+  1.0d0
+
+'sediment_DOCs'                                             ! Input/Output
+  'SedEco: dissolved organic carbon (slow: refractory)'
+  'µmolC L-1'                                 ! (µmol l-1)
+  'sediment_DOCs, scalar, series'
+  'ocean_time'
+  'iHbiosed3(iSdDOCs)'
+  'd3dvar'
+  1.0d0
+
+'sediment_POCf'                                             ! Input/Output
+  'SedEco: particulate organic carbon (fast: labile)'
+  'nmolC g-1'                                 ! (nmol g-1)
+  'sediment_POCf, scalar, series'
+  'ocean_time'
+  'iHbiosed3(iSdPOCf)'
+  'd3dvar'
+  1.0d0
+
+'sediment_POCs'                                             ! Input/Output
+  'SedEco: particulate organic carbon (slow: refractory)'
+  'nmolC g-1'                                 ! (nmol g-1)
+  'sediment_POCs, scalar, series'
+  'ocean_time'
+  'iHbiosed3(iSdPOCs)'
+  'd3dvar'
+  1.0d0
+
+'sediment_POCn'                                             ! Input/Output
+  'SedEco: particulate organic carbon (non-degradable)'
+  'nmolC g-1'                                 ! (nmol g-1)
+  'sediment_POCn, scalar, series'
+  'ocean_time'
+  'iHbiosed3(iSdPOCn)'
+  'd3dvar'
+  1.0d0
+
+'sediment_NO3'                                             ! Input/Output
+  'SedEco: nitrate'
+  'umolNO3 L-1'                                 ! (µmol l-1)
+  'sediment_NO3, scalar, series'
+  'ocean_time'
+  'iHbiosed3(iSdNO3)'
+  'd3dvar'
+  1.0d0
+
+'sediment_NH4'                                             ! Input/Output
+  'SedEco: ammonium'
+  'umolNH4 L-1'                                 ! (µmol l-1)
+  'sediment_NH4, scalar, series'
+  'ocean_time'
+  'iHbiosed3(iSdNH4)'
+  'd3dvar'
+  1.0d0
+
+'sediment_PO4'                                             ! Input/Output
+  'SedEco: phosphate'
+  'umolPO4 L-1'                                 ! (µmol l-1)
+  'sediment_PO4, scalar, series'
+  'ocean_time'
+  'iHbiosed3(iSdPO4)'
+  'd3dvar'
+  1.0d0
+
+'sediment_DONf'                                             ! Input/Output
+  'SedEco: dissolved organic nitrogen (fast: labile)'
+  'umolN L-1'                                 ! (µmol l-1)
+  'sediment_DONf, scalar, series'
+  'ocean_time'
+  'iHbiosed3(iSdDONf)'
+  'd3dvar'
+  1.0d0
+
+'sediment_DONs'                                             ! Input/Output
+  'SedEco: dissolved organic nitrogen (slow: refractory)'
+  'umolN L-1'                                 ! (µmol l-1)
+  'sediment_DONs, scalar, series'
+  'ocean_time'
+  'iHbiosed3(iSdDONs)'
+  'd3dvar'
+  1.0d0
+
+'sediment_PONf'                                             ! Input/Output
+  'SedEco: particulate organic nitrogen (fast: labile)'
+  'umolN L-1'                                 ! (nmol g-1)
+  'sediment_PONf, scalar, series'
+  'ocean_time'
+  'iHbiosed3(iSdPONf)'
+  'd3dvar'
+  1.0d0
+
+'sediment_PONs'                                             ! Input/Output
+  'SedEco: particulate organic nitrogen (slow: refractory)'
+  'umolN L-1'                                 ! (nmol g-1)
+  'sediment_PONs, scalar, series'
+  'ocean_time'
+  'iHbiosed3(iSdPONs)'
+  'd3dvar'
+  1.0d0
+
+'sediment_PONn'                                             ! Input/Output
+  'SedEco: particulate organic nitrogen (non-degradable)'
+  'umolN L-1'                                 ! (nmol g-1)
+  'sediment_PONn, scalar, series'
+  'ocean_time'
+  'iHbiosed3(iSdPONn)'
+  'd3dvar'
+  1.0d0
+
+'sediment_DOPf'                                             ! Input/Output
+  'SedEco: dissolved organic phosphorus (fast: labile)'
+  'umolN L-1'                                 ! (µmol l-1)
+  'sediment_DOPf, scalar, series'
+  'ocean_time'
+  'iHbiosed3(iSdDOPf)'
+  'd3dvar'
+  1.0d0
+    
+'sediment_DOPs'                                             ! Input/Output
+  'SedEco: dissolved organic phosphorus (slow: refractory)'
+  'umolN L-1'                                 ! (µmol l-1)
+  'sediment_DOPs, scalar, series'
+  'ocean_time'
+  'iHbiosed3(iSdDOPs)'
+  'd3dvar'
+  1.0d0
+
+'sediment_POPf'                                             ! Input/Output
+  'SedEco: particulate organic phosphorus (fast: labile)'
+  'umolN L-1'                                 ! (nmol g-1)
+  'sediment_POPf, scalar, series'
+  'ocean_time'
+  'iHbiosed3(iSdPOPf)'
+  'd3dvar'
+  1.0d0
+
+'sediment_POPs'                                             ! Input/Output
+  'SedEco: particulate organic phosphorus (slow: refractory)'
+  'umolN L-1'                                 ! (nmol g-1)
+  'sediment_POPs, scalar, series'
+  'ocean_time'
+  'iHbiosed3(iSdPOPs)'
+  'd3dvar'
+  1.0d0
+
+'sediment_POPn'                                             ! Input/Output
+  'SedEco: particulate organic phosphorus (non-degradable)'
+  'umolN L-1'                                 ! (nmol g-1)
+  'sediment_POPn, scalar, series'
+  'ocean_time'
+  'iHbiosed3(iSdPOPn)'
+  'd3dvar'
+  1.0d0
+
+'sediment_Mn2'                                             ! Input/Output
+  'SedEco: manganese ion'
+  'umolMn L-1'                                 ! (µmol l-1)
+  'sediment_Mn2, scalar, series'
+  'ocean_time'
+  'iHbiosed3(iSdMn2)'
+  'd3dvar'
+  1.0d0
+
+'sediment_MnO2'                                             ! Input/Output
+  'SedEco: manganese dioxide'
+  'umolMnO2 L-1'                                 ! (nmol g-1)
+  'sediment_MnO2, scalar, series'
+  'ocean_time'
+  'iHbiosed3(iSdMnO2)'
+  'd3dvar'
+  1.0d0
+
+'sediment_Fe2'                                             ! Input/Output
+  'SedEco: iron(II)'
+  'umolFe L-1'                                 ! (µmol l-1)
+  'sediment_Fe2, scalar, series'
+  'ocean_time'
+  'iHbiosed3(iSdFe2)'
+  'd3dvar'
+  1.0d0
+
+'sediment_FeS'                                             ! Input/Output
+  'SedEco: iron sulfide'
+  'nmolFeS g-1'                                 ! (nmol g-1)
+  'sediment_FeS, scalar, series'
+  'ocean_time'
+  'iHbiosed3(iSdFeS)'
+  'd3dvar'
+  1.0d0
+
+'sediment_FeS2'                                             ! Input/Output
+  'SedEco: pyrite'
+  'nmolFeS2 g-1'                                 ! (nmol g-1)
+  'sediment_FeS2, scalar, series'
+  'ocean_time'
+  'iHbiosed3(iSdFeS2)'
+  'd3dvar'
+  1.0d0
+
+'sediment_FeOOH'                                             ! Input/Output
+  'SedEco: iron hydroxide'
+  'nmolFeOOH g-1'                                 ! (nmol g-1)
+  'sediment_FeOOH, scalar, series'
+  'ocean_time'
+  'iHbiosed3(iSdFeOOH)'
+  'd3dvar'
+  1.0d0
+
+'sediment_FeOOH_PO4'                                             ! Input/Output
+  'SedEco: iron-bound phosphate (FeOOH=PO43-)'
+  'nmolFeOOH_PO4 g-1'                                 ! (nmol g-1)
+  'sediment_FeOOH_PO4, scalar, series'
+  'ocean_time'
+  'iHbiosed3(iSdFeOOH_PO4)'
+  'd3dvar'
+  1.0d0
+
+'sediment_H2S'                                             ! Input/Output
+  'SedEco: hydrogen sulfide'
+  'umolH2S L-1'                                 ! (µmol l-1)
+  'sediment_H2S, scalar, series'
+  'ocean_time'
+  'iHbiosed3(iSdH2S)'
+  'd3dvar'
+  1.0d0
+
+'sediment_SO4'                                             ! Input/Output
+  'SedEco: sulfate'
+  'umolSO4 L-1'                                 ! (µmol l-1)
+  'sediment_SO4, scalar, series'
+  'ocean_time'
+  'iHbiosed3(iSdSO4)'
+  'd3dvar'
+  1.0d0
+
+'sediment_S0'                                             ! Input/Output
+  'SedEco: sulfur'
+  'nmolS g-1'                                 ! (nmol g-1)
+  'sediment_S0, scalar, series'
+  'ocean_time'
+  'iHbiosed3(iSdS0)'
+  'd3dvar'
+  1.0d0
+
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add

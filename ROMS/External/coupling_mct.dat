@@ -28,6 +28,7 @@
 !                       'v3dvar' => 3D V-variable.                            !
 !                       'w3dvar' => 3D W-variable.                            !
 !                       'b3dvar' => 3D BED-sediment.                          !
+!                       'd3dvar' => 3D Sed_Eco-layer.                         !   yuta_edits_for_masa
 !       add_offset    Value added to data.                                    !
 !       scale         Scale to convert input data to model units.             !
 !                                                                             !

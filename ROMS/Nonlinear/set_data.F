@@ -1533,23 +1533,23 @@
      &                                 SOURCES(ng)%Tsrc(is,k,iT13C)     &
      &                               )*SOURCES(ng)%Tsrc(is,k,iTIC_)
 #     if defined ORGANIC_MATTER
-            DO itrc=1,N_dom
+            DO itrc=1,Ndom
               SOURCES(ng)%Tsrc(is,k,iDO13C(itrc)) = R13C_fromd13C(      &
      &          SOURCES(ng)%Tsrc(is,k,iDO13C(itrc)) )*SOURCES(ng)%Tsrc(is,k,iDOC(itrc)) 
             END DO
-            DO itrc=1,N_pom
+            DO itrc=1,Npom
               SOURCES(ng)%Tsrc(is,k,iPO13C(itrc)) = R13C_fromd13C(      &
      &                   SOURCES(ng)%Tsrc(is,k,iPO13C(itrc)) )*SOURCES(ng)%Tsrc(is,k,iPOC(itrc))
             END DO
-!            DO itrc=1,N_phyt
+!            DO itrc=1,Nphy
 !              SOURCES(ng)%Tsrc(is,k,iPhyt13C(itrc)) = R13C_fromd13C(    &
 !     &                  SOURCES(ng)%Tsrc(is,k,iPhyt13C(itrc)) )*SOURCES(ng)%Tsrc(is,k,iPhyt(itrc))
 !            END DO
-!            DO itrc=1,N_zoop
+!            DO itrc=1,Nzoo
 !              SOURCES(ng)%Tsrc(is,k,iZoop13C(itrc)) = R13C_fromd13C(     &
 !     &                  SOURCES(ng)%Tsrc(is,k,iZoop13C(itrc)) )*SOURCES(ng)%Tsrc(is,k,iZoop(itrc))
 !            END DO
-            DO itrc=1,N_pim
+            DO itrc=1,Npim
               SOURCES(ng)%Tsrc(is,k,iPI13C(itrc)) = R13C_fromd13C(       &
      &                  SOURCES(ng)%Tsrc(is,k,iPI13C(itrc)) )*SOURCES(ng)%Tsrc(is,k,iPIC(itrc))
             END DO
