@@ -9918,20 +9918,59 @@
   1.0d0
 
 !----------------------------------------------------------
+! Seagrass HisBio2d parameters
+
+'seagrass_SgCBm_'                                ! Input/Output
+  'seagrass carbon-biomass'
+  'umol m-2'                                 ! [umol.C m-2.sg.hab]
+  'seagrass_SgCBm_, scalar, series'
+  'ocean_time'
+  'iHbio2(iSgSgCBm(i))'
+  'r2dvar'
+  1.0d0
+
+'seagrass_LfCBm_'                                ! Input/Output
+  'seagrass above-ground carbon-biomass'
+  'umol m-2'                                 ! [umol.lf.C m-2.sg.hab]
+  'seagrass_LfCBm_, scalar, series'
+  'ocean_time'
+  'iHbio2(iSgLfCBm(i))'
+  'r2dvar'
+  1.0d0
+
+'seagrass_RtCBm_'                                ! Input/Output
+  'seagrass below-ground carbon-biomass'
+  'umol m-2'                                 ! [umol.C m-2.sg.hab]
+  'seagrass_RtCBm_, scalar, series'
+  'ocean_time'
+  'iHbio2(iSgRtCBm(i))'
+  'r2dvar'
+  1.0d0
+
+!----------------------------------------------------------
 ! Seagrass DiaBio2d parameters
 
 'seagrass_Pg_'                                             ! Input/Output
-  'seagrass gross photosynthetic rate'
-  'mmol m-2 s-1'                                 ! [mmol m-2 s-1]
+  'seagrass gross photosynthesis rate'
+  'umol m-2 s-1'                                 ! [umol.C m-2.sg.hab s-1]
   'seagrass_Pg_, scalar, series'
   'ocean_time'
   'iDbio2(iSgPg(i))'
   'r2dvar'
   1.0d0
 
+'seagrass_PLim_'                                             ! Input/Output
+  'seagrass limiting factor for photosynthesis'
+  '1 = light; 2 = Carbon uptake; 3 = Nitrogen uptake; 4 = Phosphorus uptake'                                 ! 1 = light; 2 = Carbon uptake; 3 = Nitrogen uptake; 4 = Phosphorus uptake
+  'seagrass_Pg_, scalar, series'
+  'ocean_time'
+  'iDbio2(iSgPLim(i))'
+  'r2dvar'
+  1.0d0
+
 'seagrass_R_'                                             ! Input/Output
   'seagrass respiration rate'
-  'mmol m-2 s-1'                                 ! [mmol m-2 s-1]
+  'umol m-2 s-1'                                 ! [umol.C m-2.sg.hab s-1]
   'seagrass_R_, scalar, series'
   'ocean_time'
   'iDbio2(iSg_R(i))'
@@ -9939,11 +9978,20 @@
   1.0d0
 
 'seagrass_Pn_'                                             ! Input/Output
-  'seagrass net photosynthetic rate'
-  'mmol m-2 s-1'                                 ! [mmol m-2 s-1]
+  'seagrass net photosynthesis rate'
+  'umol m-2 s-1'                                 ! [umol.C m-2.sg.hab s-1]
   'seagrass_Pn_, scalar, series'
   'ocean_time'
   'iDbio2(iSgPn(i))'
+  'r2dvar'
+  1.0d0
+
+'seagrass_Dieoff_'                                             ! Input/Output
+  'seagrass dieoff rate'
+  'umol m-2 s-1'                                 ! [umol.C m-2.sg.hab s-1]
+  'seagrass_Dieoff_, scalar, series'
+  'ocean_time'
+  'iDbio2(iSgDieoff(i))'
   'r2dvar'
   1.0d0
 

@@ -45,10 +45,18 @@
 #endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+#if defined SEDIMENT_ECOSYS
       logical, dimension(NHbiosed3d,Ngrids) :: LHbiosed3
       integer, dimension(Ngrids) :: NsedTemporary
-      real(r8), allocatable :: SedEcoLayerDepthsTemporary(:)
+      real(r8), allocatable :: SedEcoTemp(:), SedEcoTemp1(:), SedEcoTemp2(:)
       integer :: k
+      ! integer :: yt_debug
+!!! yuta_seagrass >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+# if defined SEAGRASS
+      real(r8), allocatable :: SgRtProfTemp(:), SgRtProfTemp1(:), SgRtProfTemp2(:)
+      integer :: iSgSpecies
+# endif
+#endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 
       real(r8), dimension(NBT,Ngrids) :: Rbio
@@ -64,6 +72,8 @@
       character (len=40 ) :: KeyWord
       character (len=256) :: line
       character (len=256), dimension(200) :: Cval
+
+      ! yt_debug = 0
 !
 !-----------------------------------------------------------------------
 !  Initialize.
@@ -269,20 +279,71 @@
 # ifdef SEDIMENT_ECOSYS
             CASE ('Nsed')
               Npts=load_i(Nval, Rval, Ngrids, NsedTemporary)
+              ! write(*,*) 'yt_debug1: line = ', line
               DO ng=1,Ngrids
                 Nsed(ng) = NsedTemporary(ng)
               ENDDO
-            CASE ('SedEcoLayerDepths')
               allocate ( SedEcoLayerDepths(Ngrids, maxval(Nsed)) )
-              allocate ( SedEcoLayerDepthsTemporary(sum(Nsed)) )
-              i=0
-              Npts=load_r(Nval, Rval, sum(Nsed), SedEcoLayerDepthsTemporary)
-              DO ng=1,Ngrids
-                DO k=1, Nsed(ng)
-                  i=i+1
-                  SedEcoLayerDepths(ng, k) = SedEcoLayerDepthsTemporary(i)
+              allocate ( SedEcoTemp(0) )
+              allocate ( SeagrassRootProf(Ngrids, Nsg, maxval(Nsed)) )
+              allocate ( SgRtProfTemp(0) )
+            CASE ('SedEcoLayerDepths')
+              write(*,*) 'yt_debug: SedEcoLayerDepths loading line: ', line
+              ! yt_debug = yt_debug+1
+              ! write(*,*) 'yt_debug2',yt_debug,':'
+              SedEcoTemp1 = (/SedEcoTemp/)
+              ! write(*,*) 'yt_debug3',yt_debug,': SedEcoTemp1 = ', SedEcoTemp1
+              allocate (SedEcoTemp2(Nval))
+              ! write(*,*) 'yt_debug4',yt_debug,': Nval = ', Nval
+              Npts=load_r(Nval, Rval, Nval, SedEcoTemp2)
+              ! write(*,*) 'yt_debug5',yt_debug,': SedEcoTemp2 = ', SedEcoTemp2
+              SedEcoTemp = (/SedEcoTemp1, SedEcoTemp2/)
+              ! write(*,*) 'yt_debug6',yt_debug,': SedEcoTemp = ', SedEcoTemp
+              deallocate (SedEcoTemp1)
+              deallocate (SedEcoTemp2)
+              if(size(SedEcoTemp)==sum(Nsed)) then
+                ! write(*,*) 'yt_debug7',yt_debug,':'
+                i=0
+                DO ng=1,Ngrids
+                  DO k=1, Nsed(ng)
+                    i=i+1
+                    SedEcoLayerDepths(ng, k) = SedEcoTemp(i)
+                  ENDDO
                 ENDDO
-              ENDDO
+                deallocate(SedEcoTemp)
+                ! write(*,*) 'yt_debug8',yt_debug,': SedEcoLayerDepths = ',SedEcoLayerDepths
+                write(*,*) 'yt_debug: SedEcoLayerDepths finished loading array.'
+              elseif(size(SedEcoTemp)>sum(Nsed)) then
+                write(*,*) 'yt_debug: SedEcoLayerDepths input array size does not match Nsed!'
+                error stop
+              endif
+!!! yuta_seagrass >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+#  ifdef SEAGRASS
+            CASE ('SeagrassRootProf')
+              write(*,*) 'yt_debug: SeagrassRootProf loading line: ', line
+              SgRtProfTemp1 = (/SgRtProfTemp/)
+              allocate (SgRtProfTemp2(Nval))
+              Npts=load_r(Nval, Rval, Nval, SgRtProfTemp2)
+              SgRtProfTemp = (/SgRtProfTemp1, SgRtProfTemp2/)
+              deallocate (SgRtProfTemp1)
+              deallocate (SgRtProfTemp2)
+              if(size(SgRtProfTemp)==sum(Nsed)) then
+                i=0
+                DO ng=1,Ngrids
+                  DO iSgSpecies=1,Nsg
+                    DO k=1, Nsed(ng)
+                      i=i+1
+                      SeagrassRootProf(ng, iSgSpecies, k) = SgRtProfTemp(i)
+                    ENDDO
+                  ENDDO
+                ENDDO
+                deallocate(SgRtProfTemp)
+                write(*,*) 'yt_debug: SeagrassRootProf finished loading array.'
+              elseif(size(SgRtProfTemp)>sum(Nsed)) then
+                write(*,*) 'yt_debug: SeagrassRootProf input array size does not match Nsed!'
+                error stop
+              endif
+#  endif
 # endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add

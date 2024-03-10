@@ -92,7 +92,7 @@ MODULE mod_seagrass
 
 ! >>> Saved Values <<< !
     ! Update at end of main interval
-    real(8), pointer :: SgCBm                                   (:,:,:)   ! [umol.C m-2.sg.hab]         Seagrass leaf+root carbon-biomass per unit ground area (in seagrass habitat area)
+    real(8), pointer :: SgCBm                                   (:,:,:)   ! [umol.C m-2.sg.hab]         iSgSgCBm    Seagrass leaf+root carbon-biomass per unit ground area (in seagrass habitat area)
     ! Update at end of growth interval
     ! update total carbon-biomass
     real(8), pointer :: TotSgCBm                                (:,:,:)   ! [mol.C.tot]                 Total seagrass carbon-biomass in grid
@@ -103,8 +103,8 @@ MODULE mod_seagrass
     real(8), pointer :: HabArea                                 (:,:,:)   ! [m2.sg.hab]                 Seagrass habitat ground area in grid cell (such that seagrass coverage (p_sgrass) times the grid area equals the habitat area)
     ! leaf-root biomass translocation
     ! update carbon-biomass per area
-    real(8), pointer :: LfCBm                                   (:,:,:)   ! [umol.lf.C m-2.sg.hab]      Seagrass leaf carbon-biomass per unit ground area (in seagrass habitat area)
-    real(8), pointer :: RtCBm                                   (:,:,:)   ! [umol.rt.C m-2.sg.hab]      Seagrass root carbon-biomass per unit ground area (in seagrass habitat area)
+    real(8), pointer :: LfCBm                                   (:,:,:)   ! [umol.lf.C m-2.sg.hab]      iSgLfCBm    Seagrass leaf carbon-biomass per unit ground area (in seagrass habitat area)
+    real(8), pointer :: RtCBm                                   (:,:,:)   ! [umol.rt.C m-2.sg.hab]      iSgRtCBm    Seagrass root carbon-biomass per unit ground area (in seagrass habitat area)
     ! update dry-weight biomass
     real(8), pointer :: TotSgDryBm                              (:,:,:)   ! [g.drywt]                   Total seagrass dry weight biomass in grid cell
     real(8), pointer :: TotLfDryBm                              (:,:,:)   ! [g.lf.drywt]                Total seagrass leaf dry weight biomass in grid cell
@@ -114,6 +114,15 @@ MODULE mod_seagrass
     real(8), pointer :: RtDryBm                                 (:,:,:)   ! [g.rt.drywt m-2.sg.hab]     Seagrass root dry weight biomass per unit ground area (in seagrass habitat area)
     ! update leaf area index
     real(8), pointer :: LAI                                     (:,:,:)   ! [m2.lf m-2.sg.hab]          Leaf area index: one-sided green leaf area per unit ground surface area 
+
+! >>> Diagnostic Saved Values <<< !
+# if defined DIAGNOSTICS_BIO
+    real(8), pointer :: DiagSgGrossPhot                         (:,:,:)   ! [umol.C m-2.sg.hab s-1]     iSgPg       Seagrass gross photosynthesis rate per unit ground area (in seagrass habitat area)
+    integer, pointer :: DiagSgPhotLimiting                      (:,:,:)   ! []                          iSgPLim     Seagrass photosynthesis limiting factor: 1 = light; 2 = Carbon uptake; 3 = Nitrogen uptake; 4 = Phosphorus uptake
+    real(8), pointer :: DiagSgResp                              (:,:,:)   ! [umol.C m-2.sg.hab s-1]     iSg_R       Seagrass respiration rate per unit ground area (in seagrass habitat area)
+                                                                          ! [umol.C m-2.sg.hab s-1]     iSgPn       Seagrass net photosynthesis rate per unit ground area (in seagrass habitat area)
+    real(8), pointer :: DiagSgDieoff                            (:,:,:)   ! [umol.C m-2.sg.hab s-1]     iSgDieoff   Seagrass dieoff rate carbon biomass per unit ground area (in seagrass habitat area)
+# endif
 
   END TYPE T_SGRASS
 
@@ -233,7 +242,13 @@ MODULE mod_seagrass
     allocate( SGRASS(ng)%RtDryBm                                    (Nsg,LBi:UBi,LBj:UBj)  ) ! [g.rt.drywt m-2.sg.hab]     Seagrass root dry weight biomass per unit ground area (in seagrass habitat area)
     ! update leaf area index
     allocate( SGRASS(ng)%LAI                                        (Nsg,LBi:UBi,LBj:UBj)  ) ! [m2.lf m-2.sg.hab]          Leaf area index: one-sided green leaf area per unit ground surface area
-
+! >>> Diagnostic Saved Values <<< !
+# if defined DIAGNOSTICS_BIO
+    allocate( SGRASS(ng)%DiagSgGrossPhot                            (Nsg,LBi:UBi,LBj:UBj)  ) ! [umol.C m-2.sg.hab s-1]     Seagrass gross photosynthesis rate per unit ground area (in seagrass habitat area)
+    allocate( SGRASS(ng)%DiagSgPhotLimiting                         (Nsg,LBi:UBi,LBj:UBj)  ) ! []                          Seagrass photosynthesis limiting factor: 1 = light; 2 = Carbon uptake; 3 = Nitrogen uptake; 4 = Phosphorus uptake
+    allocate( SGRASS(ng)%DiagSgResp                                 (Nsg,LBi:UBi,LBj:UBj)  ) ! [umol.C m-2.sg.hab s-1]     Seagrass respiration rate per unit ground area (in seagrass habitat area)
+    allocate( SGRASS(ng)%DiagSgDieoff                               (Nsg,LBi:UBi,LBj:UBj)  ) ! [umol.C m-2.sg.hab s-1]     Seagrass dieoff rate carbon biomass per unit ground area (in seagrass habitat area)
+# endif
     ! write(*,*) 'yt_debug: mod_seagrass.F initialize_seagrass() after array allocations'
 
     RETURN
@@ -255,7 +270,7 @@ MODULE mod_seagrass
 ! ====================================================================================================
 ! Module dependencies
 ! ====================================================================================================
-    USE mod_param,    ONLY : Nsg, Nsed
+    USE mod_param,    ONLY : Nsg, Nsed, SeagrassRootProf
     USE mod_grid,     ONLY : GRID
     USE mod_geochem
 
@@ -283,14 +298,11 @@ MODULE mod_seagrass
     SGRASS(ng)%k_proj                               = [ 0.8d0    ]                                    ! [m2.sg.hab m-2.leaf]        Species specific leaf projection coefficient                                                                  ! 0.8 is a guess
     ! SGRASS(ng)%k_proj                             = [ 1.0d0    ]                                    ! [m2.sg.hab m-2.leaf]        Species specific leaf projection coefficient                                                                
 # if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
-    SGRASS(ng)%root_mass_profile                    = reshape([ 0.02d0, 0.02d0, 0.02d0, 0.02d0, 0.02d0 &
-                                                              , 0.02d0, 0.02d0, 0.02d0, 0.02d0, 0.02d0 &  ! yt_edit To Do add this to read input under sediment layers
-                                                              , 0.2d0, 0.1d0, 0.1d0, 0.1d0, 0.1d0 &
-                                                              , 0.1d0, 0.1d0, 0.0d0, 0.0d0 &
-                                                              ],[Nsed(ng), Nsg])                    ! []                          Mass ratio of roots in each layer (total must sum to 1.0)
+    ! SeagrassRootProf(ng, species, k)                  Profile of seagrass root biomass: fraction in each biological sediment layer 
+    SGRASS(ng)%root_mass_profile                    = SeagrassRootProf(ng, :, :) ! Mass ratio of roots in each layer (total must sum to 1.0)
 # endif
     ! write(*,*) 'yt_debug: mod_seagrass.F initialize_seagrass() after root_mass_profile assigment'
-    ! write(*,*) 'yt_debug: mod_seagrass.F initialize_seagrass() root_mass_profile = ', SGRASS(ng)%root_mass_profile
+    write(*,*) 'yt_debug: mod_seagrass.F initialize_seagrass() root_mass_profile = ', SGRASS(ng)%root_mass_profile
 
     ! photoynthesis: light-limit
     ! SGRASS(ng)%P_max                              = [ 3.45d0   ]                                    ! [umol.C m-2.leaf s-1]       Species specific maximum photoynthesis rate                                                                   ! 50 µmol/kg/s Calculated from net photosynthesis data from Bjo ̈rk et al. (1997) or 3.45 µmol.C m-2.leaf s-1 (see master's thesis section 6.3.2c)
@@ -397,7 +409,7 @@ MODULE mod_seagrass
 
           ! HabArea                     [m2.sg.hab]                 Seagrass habitat ground area in grid cell (such that seagrass coverage (p_sgrass) times the grid area equals the habitat area)
           ! GridArea                    [m2.ground]                 Total ground area in grid cell
-          ! p_sgrass                    [m2.sg.hab m-2.ground]      Seagrass coverage
+          ! p_sgrass                    [m2.sg.hab m-2.ground](0~1) Seagrass coverage
           ! LAI                         [m2.leaf m-2.sg.hab]        Leaf area index: one-sided green leaf area per unit ground surface area 
           ! ELAP                        [m2.lf.proj m-2.sg.hab]     Effective leaf area projection on ground (only within seagrass habitat (covered area))
           ! k_proj                      [m2.sg.hab m-2.leaf]        Species specific leaf projection coefficient
@@ -418,8 +430,7 @@ MODULE mod_seagrass
           ! RtDryBm                     [g.rt.drywt m-2.sg.hab]     Seagrass root dry weight biomass per unit ground area (in seagrass habitat area)
 
           ! [m2.sg.hab]                   = [m2.ground]              [m2.sg.hab m-2.ground]
-          ! SGRASS(ng)%HabArea(species,i,j) = SGRASS(ng)%GridArea(i,j) * GRID(ng)%p_sgrass(species,i,j)
-          SGRASS(ng)%HabArea(species,i,j) = SGRASS(ng)%GridArea(i,j) * GRID(ng)%p_sgrass(i,j)
+          SGRASS(ng)%HabArea(species,i,j) = SGRASS(ng)%GridArea(i,j) * GRID(ng)%p_sgrass(species,i,j)
           
         !   SGRASS(ng)%LAI(species,i,j) = (-1*log(1.0-0.85)/SGRASS(ng)%k_proj(species))
           SGRASS(ng)%LAI(species,i,j) = (-1*log(1.0d0-0.30433574d0)/SGRASS(ng)%k_proj(species))
@@ -481,6 +492,14 @@ MODULE mod_seagrass
       enddo
     enddo
 
+    ! >>> Diagnostic Saved Values <<< !
+# if defined DIAGNOSTICS_BIO
+    SGRASS(ng)%DiagSgGrossPhot          = 0d0 ! [umol.C m-2.sg.hab s-1]     Seagrass gross photosynthesis rate per unit ground area (in seagrass habitat area)
+    SGRASS(ng)%DiagSgPhotLimiting       = 0   ! []                          Seagrass photosynthesis limiting factor: 1 = light; 2 = Carbon uptake; 3 = Nitrogen uptake; 4 = Phosphorus uptake
+    SGRASS(ng)%DiagSgResp               = 0d0 ! [umol.C m-2.sg.hab s-1]     Seagrass respiration rate per unit ground area (in seagrass habitat area)
+    SGRASS(ng)%DiagSgDieoff             = 0d0 ! [umol.C m-2.sg.hab s-1]     Seagrass dieoff rate carbon biomass per unit ground area (in seagrass habitat area)
+# endif
+
     ! write(*,*) 'yt_debug: mod_seagrass.F initialize_seagrass() after analytical start mass assigments'
     
     RETURN
@@ -508,7 +527,7 @@ MODULE mod_seagrass
 # endif
     , dz                          &   ! [m]                       vertical layer thickness (bottom water column layer)
     , dt                          &   ! [s]                       time step
-    , p_sgrass                    &   ! [m2.sg.hab m-2.ground]    Seagrass coverage (every species)
+    , p_sgrass                    &   ! [m2.sg.hab m-2.ground](0~1)Seagrass coverage (every species)
     , PFD                         &   ! [umol m-2 s-1]            Photon flux density 
     , rho_sw                      &   ! [g cm-3]                  Density of seawater 
     , ocean_DIC_conc              &   ! [umol.DIC kg-1]           DIC concentration of ocean water (input only, do not use in calculations)
@@ -559,8 +578,7 @@ MODULE mod_seagrass
 # endif
     real(8), intent(in)   :: dz                         ! [m]                         vertical layer thickness (bottom water column layer)
     real(8), intent(in)   :: dt                         ! [s]                         Time step interval duration
-    ! real(8), intent(inout):: p_sgrass(Nsg)         ! []                          Seagrass coverage (every species)
-    real(8), intent(inout):: p_sgrass                   ! []                          Seagrass coverage (every species)
+    real(8), intent(inout):: p_sgrass(Nsg)              ! [] (0~1)                    Seagrass coverage (every species)
     real(8), intent(in)   :: PFD                        ! [umol m-2 s-1]              Photon flux density 
     real(8), intent(in)   :: rho_sw                     ! [g cm-3]                    Density of seawater 
     real(8)               :: ocean_DIC_conc             ! [umol.DIC L-1]              DIC concentration of ocean water
@@ -707,6 +725,14 @@ MODULE mod_seagrass
     real(8), pointer :: delta_sed_POP(:)                ! [umol.P L-1 s-1]            Rate of change in POP due to root death in sediment (positive means seagrass to sediment)
 #   endif
 # endif
+
+! >>> Diagnostic Saved Values <<< !
+# if defined DIAGNOSTICS_BIO
+    real(8), pointer      :: DiagSgGrossPhot            ! [umol.C m-2.sg.hab s-1]     Seagrass gross photosynthesis rate per unit ground area (in seagrass habitat area)
+    integer, pointer      :: DiagSgPhotLimiting         ! []                          Seagrass photosynthesis limiting factor: 1 = light; 2 = Carbon uptake; 3 = Nitrogen uptake; 4 = Phosphorus uptake
+    real(8), pointer      :: DiagSgResp                 ! [umol.C m-2.sg.hab s-1]     Seagrass respiration rate per unit ground area (in seagrass habitat area)
+    real(8), pointer      :: DiagSgDieoff               ! [umol.C m-2.sg.hab s-1]     Seagrass dieoff rate carbon biomass per unit ground area (in seagrass habitat area)
+# endif    
 
 ! >>> Intermediate Calculation Variables <<< !      (erased each time step)
     ! Widely used temporary variables
@@ -918,28 +944,40 @@ MODULE mod_seagrass
     delta_SgCBm         =   0.0d0                                           ! [umol.C m-2.sg.hab s-1]     Rate of change in SgCBm
     ! values to write to sediment module
 # if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE
-    delta_sed_DIC       =>  SEDECO(ng)%sg_dDIC_dt(i, j, :)                  ! [umol.DIC L-1 s-1]          Rate of change in DIC due to flux from roots to sediment (positive means seagrass to sediment)
+    delta_sed_DIC       =>  SEDECO(ng)%sg_dDIC_dt(species,i,j,:)            ! [umol.DIC L-1 s-1]          Rate of change in DIC due to flux from roots to sediment (positive means seagrass to sediment)
     delta_sed_DIC       =   0.0d0                                           ! 
-    delta_sed_DO        =>  SEDECO(ng)%sg_dO2_dt (i, j, :)                  ! [umol.DO L-1 s-1]           Rate of change in DO due to flux from roots to sediment (positive means seagrass to sediment)
+    delta_sed_DO        =>  SEDECO(ng)%sg_dO2_dt (species,i,j,:)            ! [umol.DO L-1 s-1]           Rate of change in DO due to flux from roots to sediment (positive means seagrass to sediment)
     delta_sed_DO        =   0.0d0                                           !
 # endif
 # if defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
-    delta_sed_NO3       =>  SEDECO(ng)%sg_dNO3_dt(i, j, :)                  ! [umol.NO3 L-1 s-1]          Rate of change in NO3 due to flux from roots to sediment (positive means seagrass to sediment)
+    delta_sed_NO3       =>  SEDECO(ng)%sg_dNO3_dt(species,i,j,:)            ! [umol.NO3 L-1 s-1]          Rate of change in NO3 due to flux from roots to sediment (positive means seagrass to sediment)
     delta_sed_NO3       =   0.0d0                                           !
-    delta_sed_NH4       =>  SEDECO(ng)%sg_dNH4_dt(i, j, :)                  ! [umol.NH4 L-1 s-1]          Rate of change in NH4 due to flux from roots to sediment (positive means seagrass to sediment)
+    delta_sed_NH4       =>  SEDECO(ng)%sg_dNH4_dt(species,i,j,:)            ! [umol.NH4 L-1 s-1]          Rate of change in NH4 due to flux from roots to sediment (positive means seagrass to sediment)
     delta_sed_NH4       =   0.0d0                                           ! 
-    delta_sed_PO4       =>  SEDECO(ng)%sg_dPO4_dt(i, j, :)                  ! [umol.PO4 L-1 s-1]          Rate of change in PO4 due to flux from roots to sediment (positive means seagrass to sediment)
+    delta_sed_PO4       =>  SEDECO(ng)%sg_dPO4_dt(species,i,j,:)            ! [umol.PO4 L-1 s-1]          Rate of change in PO4 due to flux from roots to sediment (positive means seagrass to sediment)
     delta_sed_PO4       =   0.0d0                                           ! 
 # endif
 # if defined SEAGRASS_ROOT_POM
-    delta_sed_POC       =>  SEDECO(ng)%sg_dPOC_dt(i, j, :)                  ! [umol.C L-1 s-1]            Rate of change in POC due to root death in sediment (positive means seagrass to sediment)
+    delta_sed_POC       =>  SEDECO(ng)%sg_dPOC_dt(species,i,j,:)            ! [umol.C L-1 s-1]            Rate of change in POC due to root death in sediment (positive means seagrass to sediment)
     delta_sed_POC       =   0.0d0
 #   if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
-    delta_sed_PON       =>  SEDECO(ng)%sg_dPON_dt(i, j, :)                  ! [umol.N L-1 s-1]            Rate of change in PON due to root death in sediment (positive means seagrass to sediment)
+    delta_sed_PON       =>  SEDECO(ng)%sg_dPON_dt(species,i,j,:)            ! [umol.N L-1 s-1]            Rate of change in PON due to root death in sediment (positive means seagrass to sediment)
     delta_sed_PON       =   0.0d0
-    delta_sed_POP       =>  SEDECO(ng)%sg_dPOP_dt(i, j, :)                  ! [umol.P L-1 s-1]            Rate of change in POP due to root death in sediment (positive means seagrass to sediment)
+    delta_sed_POP       =>  SEDECO(ng)%sg_dPOP_dt(species,i,j,:)            ! [umol.P L-1 s-1]            Rate of change in POP due to root death in sediment (positive means seagrass to sediment)
     delta_sed_POP       =   0.0d0
 #   endif
+# endif
+
+! >>> Diagnostic Saved Values <<< !
+# if defined DIAGNOSTICS_BIO
+    DiagSgGrossPhot     =>  SGRASS(ng)%DiagSgGrossPhot        (species,i,j) ! [umol.C m-2.sg.hab s-1]     Seagrass gross photosynthesis rate per unit ground area (in seagrass habitat area)
+    DiagSgGrossPhot     =   0.0d0                                           !
+    DiagSgPhotLimiting  =>  SGRASS(ng)%DiagSgPhotLimiting     (species,i,j) ! []                          Seagrass photosynthesis limiting factor: 1 = light; 2 = Carbon uptake; 3 = Nitrogen uptake; 4 = Phosphorus uptake
+    DiagSgPhotLimiting  =   0                                               !
+    DiagSgResp          =>  SGRASS(ng)%DiagSgResp             (species,i,j) ! [umol.C m-2.sg.hab s-1]     Seagrass respiration rate per unit ground area (in seagrass habitat area)
+    DiagSgResp          =   0.0d0                                           !
+    DiagSgDieoff        =>  SGRASS(ng)%DiagSgDieoff           (species,i,j) ! [umol.C m-2.sg.hab s-1]     Seagrass dieoff rate carbon biomass per unit ground area (in seagrass habitat area)
+    DiagSgDieoff        =   0.0d0                                           !
 # endif
 
 
@@ -952,7 +990,9 @@ MODULE mod_seagrass
     if (int(tdays(ng)) .gt. Day) then
       is_growth_interval = .true.
       Day = int(tdays(ng))
-      ! write(*,*) "yt_debug:    Day = ", Day, "   tdays(ng) = ", tdays(ng)
+      if (i==1 .and. j==1) then
+        write(*,*) "yt_debug:    Day = ", Day, "   tdays(ng) = ", tdays(ng)
+      endif
     endif
 
 
@@ -1114,6 +1154,19 @@ MODULE mod_seagrass
       write(*,*) "yt_debug:     Growth_limit_PO4   = ", Growth_limit_PO4
       Growth_rate = 0.0d0
     endif
+
+! Diagnostics
+# if defined DIAGNOSTICS_BIO
+    ! DiagSgGrossPhot             [umol.C m-2.sg.hab s-1]     Seagrass gross photosynthesis rate per unit ground area (in seagrass habitat area)
+    DiagSgGrossPhot = Growth_rate
+    ! DiagSgPhotLimiting          []                          Seagrass photosynthesis limiting factor: 1 = light; 2 = Carbon uptake; 3 = Nitrogen uptake; 4 = Phosphorus uptake
+#  if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
+    DiagSgPhotLimiting = minloc((/Growth_limit_light, Growth_limit_DIC, (Growth_limit_NO3+Growth_limit_NH4) &
+      , Growth_limit_PO4/), DIM=1)
+#  else
+    DiagSgPhotLimiting = minloc((/Growth_limit_light, Growth_limit_DIC/), DIM=1)
+#  endif
+# endif
 
 ! Mass balance ---------------------------------------------------------------------------------------
     
@@ -1303,6 +1356,9 @@ MODULE mod_seagrass
 
 ! Dieoff when respiration is insufficient ------------------------------------------------------------
 
+    ! dieoff_rate                 [umol.C m-2.sg.hab s-1]     Seagrass dieoff rate
+    dieoff_rate = 0.0d0
+
     ! Resp_req                    [umol.C m-2.sg.hab s-1]     Respiration rate required for maintenance in this time step
     ! Resp_pos                    [umol.C m-2.sg.hab s-1]     Respiration rate possible in this time step
     if (Resp_req .gt. Resp_pos) then
@@ -1380,6 +1436,14 @@ MODULE mod_seagrass
       delta_SgCBm = delta_SgCBm - Resp_rate
 
     endif
+
+    ! Diagnostics
+# if defined DIAGNOSTICS_BIO
+    ! DiagSgResp                  [umol.C m-2.sg.hab s-1]     Seagrass respiration rate per unit ground area (in seagrass habitat area)
+    DiagSgResp = Resp_rate
+    ! DiagSgDieoff                [umol.C m-2.sg.hab s-1]     Seagrass dieoff rate carbon biomass per unit ground area (in seagrass habitat area)
+    DiagSgDieoff = dieoff_rate
+# endif
 
 # if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE
     ! CHEM_uptake_rate from_ocean [mmol m-2 s-1]              direction of ocean to seagrass is positive
@@ -1489,7 +1553,7 @@ MODULE mod_seagrass
 
 ! update total carbon-biomass ------------------------------------------------------------------------
 
-      write(*,*) 'yt_debug: TotSgCBm = ', TotSgCBm, ' TotLfCBm = ', TotLfCBm,  'TotRtCBm = ', TotRtCBm
+    !   write(*,*) 'yt_debug: TotSgCBm = ', TotSgCBm, ' TotLfCBm = ', TotLfCBm,  'TotRtCBm = ', TotRtCBm
 
       ! oldTotSgCBm                 [mol.C.tot]                 Old total seagrass carbon-biomass in grid cell
       ! oldTotLfCBm                 [mol.C.lf]                  Old total seagrass leaf carbon-biomass in grid cell
@@ -1596,8 +1660,7 @@ MODULE mod_seagrass
 
       ! update seagrass fraction 
       ! p_sgrass(Nsg)          [] (0.0~1.0)                Seagrass coverage (every species)
-      ! p_sgrass(species) = HabArea / GridArea ! yt_edit need to fix this to interact with other habitat types
-      p_sgrass = HabArea / GridArea ! yt_edit need to fix this to interact with other habitat types
+      p_sgrass(species) = HabArea / GridArea ! yt_edit need to fix this to interact with other habitat types
 # endif
 
 
@@ -1695,6 +1758,94 @@ MODULE mod_seagrass
 ! End
 ! ====================================================================================================
 
+    !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    if (isnan(SGRASS(ng)%SgCBm(species,i,j)) .or. SGRASS(ng)%SgCBm(species,i,j) > 1.0d30 &
+      .or. SGRASS(ng)%SgCBm(species,i,j) < 0.0d0) then
+      write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
+      write(*,*) 'yt_debug:     SgCBm =', SGRASS(ng)%SgCBm(species,i,j)
+      error stop
+    endif
+    if (isnan(SGRASS(ng)%LfCBm(species,i,j)) .or. SGRASS(ng)%LfCBm(species,i,j) > 1.0d30 &
+      .or. SGRASS(ng)%LfCBm(species,i,j) < 0.0d0) then
+      write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
+      write(*,*) 'yt_debug:     LfCBm =', SGRASS(ng)%LfCBm(species,i,j)
+      error stop
+    endif
+    if (isnan(SGRASS(ng)%RtCBm(species,i,j)) .or. SGRASS(ng)%RtCBm(species,i,j) > 1.0d30 &
+      .or. SGRASS(ng)%RtCBm(species,i,j) < 0.0d0) then
+      write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
+      write(*,*) 'yt_debug:     RtCBm =', SGRASS(ng)%RtCBm(species,i,j)
+      error stop
+    endif
+    if (isnan(SGRASS(ng)%TotSgCBm(species,i,j)) .or. SGRASS(ng)%TotSgCBm(species,i,j) > 1.0d30 &
+      .or. SGRASS(ng)%TotSgCBm(species,i,j) < 0.0d0) then
+      write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
+      write(*,*) 'yt_debug:     TotSgCBm =', SGRASS(ng)%TotSgCBm(species,i,j)
+      error stop
+    endif
+    if (isnan(SGRASS(ng)%TotLfCBm(species,i,j)) .or. SGRASS(ng)%TotLfCBm(species,i,j) > 1.0d30 &
+      .or. SGRASS(ng)%TotLfCBm(species,i,j) < 0.0d0) then
+      write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
+      write(*,*) 'yt_debug:     TotLfCBm =', SGRASS(ng)%TotLfCBm(species,i,j)
+      error stop
+    endif
+    if (isnan(SGRASS(ng)%TotRtCBm(species,i,j)) .or. SGRASS(ng)%TotRtCBm(species,i,j) > 1.0d30 &
+      .or. SGRASS(ng)%TotRtCBm(species,i,j) < 0.0d0) then
+      write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
+      write(*,*) 'yt_debug:     TotRtCBm =', SGRASS(ng)%TotRtCBm(species,i,j)
+      error stop
+    endif
+    if (isnan(SGRASS(ng)%HabArea(species,i,j)) .or. SGRASS(ng)%HabArea(species,i,j) > 1.0d30 &
+      .or. SGRASS(ng)%HabArea(species,i,j) < 0.0d0) then
+      write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
+      write(*,*) 'yt_debug:     HabArea =', SGRASS(ng)%HabArea(species,i,j)
+      error stop
+    endif
+    if (isnan(SGRASS(ng)%TotSgDryBm(species,i,j)) .or. SGRASS(ng)%TotSgDryBm(species,i,j) > 1.0d30 &
+      .or. SGRASS(ng)%TotSgDryBm(species,i,j) < 0.0d0) then
+      write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
+      write(*,*) 'yt_debug:     TotSgDryBm =', SGRASS(ng)%TotSgDryBm(species,i,j)
+      error stop
+    endif
+    if (isnan(SGRASS(ng)%TotLfDryBm(species,i,j)) .or. SGRASS(ng)%TotLfDryBm(species,i,j) > 1.0d30 &
+      .or. SGRASS(ng)%TotLfDryBm(species,i,j) < 0.0d0) then
+      write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
+      write(*,*) 'yt_debug:     TotLfDryBm =', SGRASS(ng)%TotLfDryBm(species,i,j)
+      error stop
+    endif
+    if (isnan(SGRASS(ng)%TotRtDryBm(species,i,j)) .or. SGRASS(ng)%TotRtDryBm(species,i,j) > 1.0d30 &
+      .or. SGRASS(ng)%TotRtDryBm(species,i,j) < 0.0d0) then
+      write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
+      write(*,*) 'yt_debug:     TotRtDryBm =', SGRASS(ng)%TotRtDryBm(species,i,j)
+      error stop
+    endif
+    if (isnan(SGRASS(ng)%SgDryBm(species,i,j)) .or. SGRASS(ng)%SgDryBm(species,i,j) > 1.0d30 &
+      .or. SGRASS(ng)%SgDryBm(species,i,j) < 0.0d0) then
+      write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
+      write(*,*) 'yt_debug:     SgDryBm =', SGRASS(ng)%SgDryBm(species,i,j)
+      error stop
+    endif
+    if (isnan(SGRASS(ng)%LfDryBm(species,i,j)) .or. SGRASS(ng)%LfDryBm(species,i,j) > 1.0d30 &
+      .or. SGRASS(ng)%LfDryBm(species,i,j) < 0.0d0) then
+      write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
+      write(*,*) 'yt_debug:     LfDryBm =', SGRASS(ng)%LfDryBm(species,i,j)
+      error stop
+    endif
+    if (isnan(SGRASS(ng)%RtDryBm(species,i,j)) .or. SGRASS(ng)%RtDryBm(species,i,j) > 1.0d30 &
+      .or. SGRASS(ng)%RtDryBm(species,i,j) < 0.0d0) then
+      write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
+      write(*,*) 'yt_debug:     RtDryBm =', SGRASS(ng)%RtDryBm(species,i,j)
+      error stop
+    endif
+    if (isnan(SGRASS(ng)%LAI(species,i,j)) .or. SGRASS(ng)%LAI(species,i,j) > 1.0d30 &
+      .or. SGRASS(ng)%LAI(species,i,j) < 0.0d0) then
+      write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
+      write(*,*) 'yt_debug:     LAI =', SGRASS(ng)%LAI(species,i,j)
+      error stop
+    endif
+
+    !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
     RETURN
     
   END SUBROUTINE seagrass
@@ -1721,8 +1872,9 @@ MODULE mod_seagrass
 ! ====================================================================================================
 ! Module dependencies
 ! ====================================================================================================
-    USE mod_geochem
+    USE mod_param,        ONLY : Nsg
     USE mod_scalars,      ONLY : tdays
+    USE mod_geochem
 # if defined SEDIMENT_ECOSYS
     USE mod_sedecosys,    ONLY : SEDECO
 # endif
@@ -1741,8 +1893,7 @@ MODULE mod_seagrass
 # endif
     real(8), intent(in)   :: dz                         ! [m]                         vertical layer thickness (bottom water column layer)
     real(8), intent(in)   :: dt                         ! [s]                         Time step interval duration
-    ! real(8), intent(inout):: p_sgrass(Nsg)         ! []                          Seagrass coverage (every species)
-    real(8), intent(inout):: p_sgrass                   ! []                          Seagrass coverage (every species)
+    real(8), intent(inout):: p_sgrass(Nsg)              ! [] (0~1)                    Seagrass coverage (every species)
 
 ! >>> Housekeeping Vars <<< !
     integer, pointer      :: day                        !                             Simulation whole day (integer round down)
@@ -1768,19 +1919,19 @@ MODULE mod_seagrass
 ! >>> Delta Values <<< !      amount to add to stored variables at end of the calculation time step to update values: positive adds, negative subtracts (erased each time step)
     ! values to write to sediment module
 # if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE
-    SEDECO(ng)%sg_dDIC_dt(i, j, :) = 0.0d0                  ! [umol.DIC L-1 s-1]          Rate of change in DIC due to flux from roots to sediment (positive means seagrass to sediment)
-    SEDECO(ng)%sg_dO2_dt (i, j, :) = 0.0d0                  ! [umol.DO L-1 s-1]           Rate of change in DO due to flux from roots to sediment (positive means seagrass to sediment)
+    SEDECO(ng)%sg_dDIC_dt(species,i,j,:) = 0.0d0                  ! [umol.DIC L-1 s-1]          Rate of change in DIC due to flux from roots to sediment (positive means seagrass to sediment)
+    SEDECO(ng)%sg_dO2_dt (species,i,j,:) = 0.0d0                  ! [umol.DO L-1 s-1]           Rate of change in DO due to flux from roots to sediment (positive means seagrass to sediment)
 # endif
 # if defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
-    SEDECO(ng)%sg_dNO3_dt(i, j, :) = 0.0d0                  ! [umol.NO3 L-1 s-1]          Rate of change in NO3 due to flux from roots to sediment (positive means seagrass to sediment)
-    SEDECO(ng)%sg_dNH4_dt(i, j, :) = 0.0d0                  ! [umol.NH4 L-1 s-1]          Rate of change in NH4 due to flux from roots to sediment (positive means seagrass to sediment)
-    SEDECO(ng)%sg_dPO4_dt(i, j, :) = 0.0d0                  ! [umol.PO4 L-1 s-1]          Rate of change in PO4 due to flux from roots to sediment (positive means seagrass to sediment)
+    SEDECO(ng)%sg_dNO3_dt(species,i,j,:) = 0.0d0                  ! [umol.NO3 L-1 s-1]          Rate of change in NO3 due to flux from roots to sediment (positive means seagrass to sediment)
+    SEDECO(ng)%sg_dNH4_dt(species,i,j,:) = 0.0d0                  ! [umol.NH4 L-1 s-1]          Rate of change in NH4 due to flux from roots to sediment (positive means seagrass to sediment)
+    SEDECO(ng)%sg_dPO4_dt(species,i,j,:) = 0.0d0                  ! [umol.PO4 L-1 s-1]          Rate of change in PO4 due to flux from roots to sediment (positive means seagrass to sediment)
 # endif
 # if defined SEAGRASS_ROOT_POM
-    SEDECO(ng)%sg_dPOC_dt(i, j, :) = 0.0d0                  ! [umol.C L-1 s-1]            Rate of change in POC due to root death in sediment (positive means seagrass to sediment)
+    SEDECO(ng)%sg_dPOC_dt(species,i,j,:) = 0.0d0                  ! [umol.C L-1 s-1]            Rate of change in POC due to root death in sediment (positive means seagrass to sediment)
 #  if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
-    SEDECO(ng)%sg_dPON_dt(i, j, :) = 0.0d0                  ! [umol.N L-1 s-1]            Rate of change in PON due to root death in sediment (positive means seagrass to sediment)
-    SEDECO(ng)%sg_dPOP_dt(i, j, :) = 0.0d0                  ! [umol.P L-1 s-1]            Rate of change in POP due to root death in sediment (positive means seagrass to sediment)
+    SEDECO(ng)%sg_dPON_dt(species,i,j,:) = 0.0d0                  ! [umol.N L-1 s-1]            Rate of change in PON due to root death in sediment (positive means seagrass to sediment)
+    SEDECO(ng)%sg_dPOP_dt(species,i,j,:) = 0.0d0                  ! [umol.P L-1 s-1]            Rate of change in POP due to root death in sediment (positive means seagrass to sediment)
 #  endif
 # endif
 
@@ -1793,7 +1944,9 @@ MODULE mod_seagrass
     if (int(tdays(ng)) .gt. Day) then
       is_growth_interval = .true.
       Day = int(tdays(ng))
-      write(*,*) "yt_debug:    Day = ", Day, "   tdays(ng) = ", tdays(ng), 'no_seagrass()'
+      if (i==1 .and. j==1) then
+        write(*,*) "yt_debug:    Day = ", Day, "   tdays(ng) = ", tdays(ng)
+      endif
     endif
 
 ! ====================================================================================================

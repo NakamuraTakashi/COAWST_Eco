@@ -202,10 +202,10 @@
       real(r8), intent(inout) :: DiaBio3d(LBi:,LBj:,:,:)
 # endif
 # ifdef CORAL_POLYP
-      real(r8), intent(inout) :: p_coral(2,LBi:UBi,LBj:UBj)
+      real(r8), intent(inout) :: p_coral(Ncl,LBi:UBi,LBj:UBj)
 # endif
 # ifdef SEAGRASS
-      real(r8), intent(inout) :: p_sgrass(LBi:UBi,LBj:UBj)
+      real(r8), intent(inout) :: p_sgrass(Nsg,LBi:UBi,LBj:UBj)
 # endif
 # ifdef MACROALGAE
       real(r8), intent(inout) :: p_algae(LBi:UBi,LBj:UBj)
@@ -249,10 +249,10 @@
       real(r8), intent(inout) :: DiaBio3d(LBi:UBi,LBj:UBj,UBk,NHbio3d)
 # endif
 # ifdef CORAL_POLYP
-      real(r8), intent(inout) :: p_coral(2,LBi:UBi,LBj:UBj)
+      real(r8), intent(inout) :: p_coral(Ncl,LBi:UBi,LBj:UBj)
 # endif
 # ifdef SEAGRASS
-      real(r8), intent(inout) :: p_sgrass(LBi:UBi,LBj:UBj)
+      real(r8), intent(inout) :: p_sgrass(Nsg,LBi:UBi,LBj:UBj)
 # endif
 # ifdef MACROALGAE
       real(r8), intent(inout) :: p_algae(LBi:UBi,LBj:UBj)
@@ -367,8 +367,7 @@
      &            ,p_coral(:,i,j)      &   ! Coral coverage (0-1)
 #endif
 #ifdef SEAGRASS
-     ! &            ,p_sgrass(:,i,j)     &   ! seagrass coverage (0-1)
-     &            ,p_sgrass(i,j)       &   ! seagrass coverage (0-1)
+     &            ,p_sgrass(:,i,j)     &   ! seagrass coverage (0-1)
 #endif
 #ifdef MACROALGAE
      &            ,p_algae(i,j)        &   ! algal coverage (0-1)

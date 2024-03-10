@@ -1928,7 +1928,7 @@
 #   ifdef MASKING
      &                        GRID(ng) % rmask,                         &
 #   endif
-     &                        GRID(ng) % p_sgrass)
+     &                        GRID(ng) % p_sgrass(1,:,:))
             IF (status.ne.nf90_noerr) THEN
               exit_flag=2
               ioerror=status
@@ -1937,15 +1937,46 @@
             IF (EWperiodic(ng).or.NSperiodic(ng)) THEN
               CALL exchange_r2d_tile (ng, tile,                         &
      &                                LBi, UBi, LBj, UBj,               &
-     &                                GRID(ng) % p_sgrass)
+     &                                GRID(ng) % p_sgrass(1,:,:))
             END IF
 #   ifdef DISTRIBUTE
             CALL mp_exchange2d (ng, tile, model, 1,                     &
      &                          LBi, UBi, LBj, UBj,                     &
      &                          NghostPoints,                           &
      &                          EWperiodic(ng), NSperiodic(ng),         &
-     &                          GRID(ng) % p_sgrass)
+     &                          GRID(ng) % p_sgrass(1,:,:))
 #   endif
+! !
+! !  Read in seagrass2 coverage.
+! !
+!           CASE ('p_seagrass2')
+!             gtype=r2dvar
+!             status=nf_fread2d(ng, model, ncname, GRD(ng)%ncid,          &
+!      &                        var_name(i), var_id(i),                   &
+!      &                        0, gtype, Vsize,                          &
+!      &                        LBi, UBi, LBj, UBj,                       &
+!      &                        Fscl, Fmin, Fmax,                         &
+! #   ifdef MASKING
+!      &                        GRID(ng) % rmask,                         &
+! #   endif
+!      &                        GRID(ng) % p_sgrass(2,:,:))
+!             IF (status.ne.nf90_noerr) THEN
+!               exit_flag=2
+!               ioerror=status
+!               EXIT
+!             END IF
+!             IF (EWperiodic(ng).or.NSperiodic(ng)) THEN
+!               CALL exchange_r2d_tile (ng, tile,                         &
+!      &                                LBi, UBi, LBj, UBj,               &
+!      &                                GRID(ng) % p_sgrass(2,:,:))
+!             END IF
+! #   ifdef DISTRIBUTE
+!             CALL mp_exchange2d (ng, tile, model, 1,                     &
+!      &                          LBi, UBi, LBj, UBj,                     &
+!      &                          NghostPoints,                           &
+!      &                          EWperiodic(ng), NSperiodic(ng),         &
+!      &                          GRID(ng) % p_sgrass(2,:,:))
+! #   endif
 #  endif
 #  ifdef MACROALGAE
 !

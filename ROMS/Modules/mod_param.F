@@ -431,7 +431,10 @@
 !!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
 # ifdef SEDIMENT_ECOSYS
       integer, allocatable :: Nsed(:)
-      real(8), allocatable :: SedEcoLayerDepths(:, :) ! (ng, k)        ! depth (cm) from surface at bottom of each biological sediment layer
+      real(8), allocatable :: SedEcoLayerDepths(:, :)   ! (ng, k)          ! depth (cm) from surface at bottom of each biological sediment layer
+#  ifdef SEAGRASS
+      real(8), allocatable :: SeagrassRootProf(:, :, :) ! (ng, species, k) ! Profile of seagrass root biomass: fraction in each biological sediment layer 
+#  endif
 # endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 

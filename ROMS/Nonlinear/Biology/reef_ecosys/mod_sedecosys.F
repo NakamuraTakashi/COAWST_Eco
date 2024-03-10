@@ -303,18 +303,18 @@ MODULE mod_sedecosys
 !!! yuta_seagrass >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
 # if defined SEAGRASS
 #  if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE
-    real(8), pointer :: sg_dDIC_dt(:,:,:) ! (umol L-1 s-1) change in DIC due to flux from seagrass (positive means seagrass to sediment)
-    real(8), pointer :: sg_dO2_dt (:,:,:) ! (umol L-1 s-1) change in DO due to flux from seagrass (positive means seagrass to sediment)
+    real(8), pointer :: sg_dDIC_dt(:,:,:,:) ! (umol L-1 s-1) change in DIC due to flux from seagrass (positive means seagrass to sediment)
+    real(8), pointer :: sg_dO2_dt (:,:,:,:) ! (umol L-1 s-1) change in DO due to flux from seagrass (positive means seagrass to sediment)
 #  endif
 #  if defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
-    real(8), pointer :: sg_dNO3_dt(:,:,:) ! (umol L-1 s-1) change in NO3 due to flux from seagrass (positive means seagrass to sediment)
-    real(8), pointer :: sg_dNH4_dt(:,:,:) ! (umol L-1 s-1) change in NH4 due to flux from seagrass (positive means seagrass to sediment)
-    real(8), pointer :: sg_dPO4_dt(:,:,:) ! (umol L-1 s-1) change in PO4 due to flux from seagrass (positive means seagrass to sediment)
+    real(8), pointer :: sg_dNO3_dt(:,:,:,:) ! (umol L-1 s-1) change in NO3 due to flux from seagrass (positive means seagrass to sediment)
+    real(8), pointer :: sg_dNH4_dt(:,:,:,:) ! (umol L-1 s-1) change in NH4 due to flux from seagrass (positive means seagrass to sediment)
+    real(8), pointer :: sg_dPO4_dt(:,:,:,:) ! (umol L-1 s-1) change in PO4 due to flux from seagrass (positive means seagrass to sediment)
 #  endif
 #  if defined SEAGRASS_ROOT_POM
-    real(8), pointer :: sg_dPOC_dt(:,:,:) ! (nmol g-1 s-1) change in POC due to root death in sediment (positive means seagrass to sediment)
-    real(8), pointer :: sg_dPON_dt(:,:,:) ! (nmol g-1 s-1) change in PON due to root death in sediment (positive means seagrass to sediment)
-    real(8), pointer :: sg_dPOP_dt(:,:,:) ! (nmol g-1 s-1) change in POP due to root death in sediment (positive means seagrass to sediment)
+    real(8), pointer :: sg_dPOC_dt(:,:,:,:) ! (nmol g-1 s-1) change in POC due to root death in sediment (positive means seagrass to sediment)
+    real(8), pointer :: sg_dPON_dt(:,:,:,:) ! (nmol g-1 s-1) change in PON due to root death in sediment (positive means seagrass to sediment)
+    real(8), pointer :: sg_dPOP_dt(:,:,:,:) ! (nmol g-1 s-1) change in POP due to root death in sediment (positive means seagrass to sediment)
 #  endif
 # endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
@@ -331,7 +331,9 @@ CONTAINS
 
   SUBROUTINE allocate_sedecosys(ng, LBi, UBi, LBj, UBj)
     USE mod_param, ONLY : Ngrids, Nsed, SedEcoLayerDepths
-
+# if defined SEAGRASS
+    USE mod_param, ONLY : Nsg
+# endif
     USE mod_geochem ! another module in a same folder (function list)
     ! USE mod_readinput
     
@@ -398,18 +400,18 @@ CONTAINS
 !!! yuta_seagrass >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
 # if defined SEAGRASS
 #  if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE
-    allocate( SEDECO(ng)%sg_dDIC_dt(LBi:UBi,LBj:UBj,Nsed(ng)) ) ! (µmol L-1 s-1) change in DIC due to flux from seagrass (positive means seagrass to sediment)
-    allocate( SEDECO(ng)%sg_dO2_dt (LBi:UBi,LBj:UBj,Nsed(ng)) ) ! (nmol g-1 s-1) change in DO due to flux from seagrass (positive means seagrass to sediment)
+    allocate( SEDECO(ng)%sg_dDIC_dt(Nsg,LBi:UBi,LBj:UBj,Nsed(ng)) ) ! (µmol L-1 s-1) change in DIC due to flux from seagrass (positive means seagrass to sediment)
+    allocate( SEDECO(ng)%sg_dO2_dt (Nsg,LBi:UBi,LBj:UBj,Nsed(ng)) ) ! (nmol g-1 s-1) change in DO due to flux from seagrass (positive means seagrass to sediment)
 #  endif
 #  if defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
-    allocate( SEDECO(ng)%sg_dNO3_dt(LBi:UBi,LBj:UBj,Nsed(ng)) ) ! (µmol L-1 s-1) change in NO3 due to flux from seagrass (positive means seagrass to sediment)
-    allocate( SEDECO(ng)%sg_dNH4_dt(LBi:UBi,LBj:UBj,Nsed(ng)) ) ! (µmol L-1 s-1) change in NH4 due to flux from seagrass (positive means seagrass to sediment)
-    allocate( SEDECO(ng)%sg_dPO4_dt(LBi:UBi,LBj:UBj,Nsed(ng)) ) ! (µmol L-1 s-1) change in PO4 due to flux from seagrass (positive means seagrass to sediment)
+    allocate( SEDECO(ng)%sg_dNO3_dt(Nsg,LBi:UBi,LBj:UBj,Nsed(ng)) ) ! (µmol L-1 s-1) change in NO3 due to flux from seagrass (positive means seagrass to sediment)
+    allocate( SEDECO(ng)%sg_dNH4_dt(Nsg,LBi:UBi,LBj:UBj,Nsed(ng)) ) ! (µmol L-1 s-1) change in NH4 due to flux from seagrass (positive means seagrass to sediment)
+    allocate( SEDECO(ng)%sg_dPO4_dt(Nsg,LBi:UBi,LBj:UBj,Nsed(ng)) ) ! (µmol L-1 s-1) change in PO4 due to flux from seagrass (positive means seagrass to sediment)
 #  endif    
 #  if defined SEAGRASS_ROOT_POM
-    allocate( SEDECO(ng)%sg_dPOC_dt(LBi:UBi,LBj:UBj,Nsed(ng)) ) ! (nmol g-1 s-1) change in POC due to root death in sediment (positive means seagrass to sediment)
-    allocate( SEDECO(ng)%sg_dPON_dt(LBi:UBi,LBj:UBj,Nsed(ng)) ) ! (nmol g-1 s-1) change in PON due to root death in sediment (positive means seagrass to sediment)
-    allocate( SEDECO(ng)%sg_dPOP_dt(LBi:UBi,LBj:UBj,Nsed(ng)) ) ! (nmol g-1 s-1) change in POP due to root death in sediment (positive means seagrass to sediment)
+    allocate( SEDECO(ng)%sg_dPOC_dt(Nsg,LBi:UBi,LBj:UBj,Nsed(ng)) ) ! (nmol g-1 s-1) change in POC due to root death in sediment (positive means seagrass to sediment)
+    allocate( SEDECO(ng)%sg_dPON_dt(Nsg,LBi:UBi,LBj:UBj,Nsed(ng)) ) ! (nmol g-1 s-1) change in PON due to root death in sediment (positive means seagrass to sediment)
+    allocate( SEDECO(ng)%sg_dPOP_dt(Nsg,LBi:UBi,LBj:UBj,Nsed(ng)) ) ! (nmol g-1 s-1) change in POP due to root death in sediment (positive means seagrass to sediment)
 #  endif  
 # endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
@@ -2090,24 +2092,24 @@ CONTAINS
 !!! yuta_seagrass >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
 # if defined SEAGRASS
 #  if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE
-    miscO2 (:) = miscO2 (:) + SEDECO(ng)%sg_dO2_dt (i,j,:) ! (umol L-1 s-1) change in DO  due to flux from seagrass (positive means seagrass to sediment)
-    miscDIC(:) = miscDIC(:) + SEDECO(ng)%sg_dDIC_dt(i,j,:) ! (umol L-1 s-1) change in DIC due to flux from seagrass (positive means seagrass to sediment)
+    miscO2 (:) = miscO2 (:) + sum(SEDECO(ng)%sg_dO2_dt (:,i,j,:),DIM=1) ! (umol L-1 s-1) change in DO  due to flux from seagrass (positive means seagrass to sediment)
+    miscDIC(:) = miscDIC(:) + sum(SEDECO(ng)%sg_dDIC_dt(:,i,j,:),DIM=1) ! (umol L-1 s-1) change in DIC due to flux from seagrass (positive means seagrass to sediment)
 #  endif
 #  if defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
-    miscNO3(:) = miscNO3(:) + SEDECO(ng)%sg_dNO3_dt(i,j,:) ! (µmol L-1 s-1) change in NO3 due to flux from seagrass (positive means seagrass to sediment)
-    miscNH4(:) = miscNH4(:) + SEDECO(ng)%sg_dNH4_dt(i,j,:) ! (µmol L-1 s-1) change in NH4 due to flux from seagrass (positive means seagrass to sediment)
-    miscPO4(:) = miscPO4(:) + SEDECO(ng)%sg_dPO4_dt(i,j,:) ! (µmol L-1 s-1) change in PO4 due to flux from seagrass (positive means seagrass to sediment)
+    miscNO3(:) = miscNO3(:) + sum(SEDECO(ng)%sg_dNO3_dt(:,i,j,:),DIM=1) ! (µmol L-1 s-1) change in NO3 due to flux from seagrass (positive means seagrass to sediment)
+    miscNH4(:) = miscNH4(:) + sum(SEDECO(ng)%sg_dNH4_dt(:,i,j,:),DIM=1) ! (µmol L-1 s-1) change in NH4 due to flux from seagrass (positive means seagrass to sediment)
+    miscPO4(:) = miscPO4(:) + sum(SEDECO(ng)%sg_dPO4_dt(:,i,j,:),DIM=1) ! (µmol L-1 s-1) change in PO4 due to flux from seagrass (positive means seagrass to sediment)
 #  endif    
 #  if defined SEAGRASS_ROOT_POM
-    miscPOC(:,1) = miscPOC(:,1) + OMFratio * SEDECO(ng)%sg_dPOC_dt(i,j,:) ! (nmol g-1 s-1) change in POC labile due to root death in sediment (positive means seagrass to sediment)
-    miscPOC(:,2) = miscPOC(:,2) + OMSratio * SEDECO(ng)%sg_dPOC_dt(i,j,:) ! (nmol g-1 s-1) change in POC refractory due to root death in sediment (positive means seagrass to sediment)
-    miscPOC(:,3) = miscPOC(:,3) + OMNratio * SEDECO(ng)%sg_dPOC_dt(i,j,:) ! (nmol g-1 s-1) change in POC non-degratable due to root death in sediment (positive means seagrass to sediment)
-    miscPON(:,1) = miscPON(:,1) + OMFratio * SEDECO(ng)%sg_dPON_dt(i,j,:) ! (nmol g-1 s-1) change in PON labile due to root death in sediment (positive means seagrass to sediment)
-    miscPON(:,2) = miscPON(:,2) + OMSratio * SEDECO(ng)%sg_dPON_dt(i,j,:) ! (nmol g-1 s-1) change in PON refractory due to root death in sediment (positive means seagrass to sediment)
-    miscPON(:,3) = miscPON(:,3) + OMNratio * SEDECO(ng)%sg_dPON_dt(i,j,:) ! (nmol g-1 s-1) change in PON non-degratable due to root death in sediment (positive means seagrass to sediment)
-    miscPOP(:,1) = miscPOP(:,1) + OMFratio * SEDECO(ng)%sg_dPOP_dt(i,j,:) ! (nmol g-1 s-1) change in POP labile due to root death in sediment (positive means seagrass to sediment)
-    miscPOP(:,2) = miscPOP(:,2) + OMSratio * SEDECO(ng)%sg_dPOP_dt(i,j,:) ! (nmol g-1 s-1) change in POP refractory due to root death in sediment (positive means seagrass to sediment)
-    miscPOP(:,3) = miscPOP(:,3) + OMNratio * SEDECO(ng)%sg_dPOP_dt(i,j,:) ! (nmol g-1 s-1) change in POP non-degratable due to root death in sediment (positive means seagrass to sediment)
+    miscPOC(:,1) = miscPOC(:,1) + OMFratio * sum(SEDECO(ng)%sg_dPOC_dt(:,i,j,:),DIM=1) ! (nmol g-1 s-1) change in POC labile due to root death in sediment (positive means seagrass to sediment)
+    miscPOC(:,2) = miscPOC(:,2) + OMSratio * sum(SEDECO(ng)%sg_dPOC_dt(:,i,j,:),DIM=1) ! (nmol g-1 s-1) change in POC refractory due to root death in sediment (positive means seagrass to sediment)
+    miscPOC(:,3) = miscPOC(:,3) + OMNratio * sum(SEDECO(ng)%sg_dPOC_dt(:,i,j,:),DIM=1) ! (nmol g-1 s-1) change in POC non-degratable due to root death in sediment (positive means seagrass to sediment)
+    miscPON(:,1) = miscPON(:,1) + OMFratio * sum(SEDECO(ng)%sg_dPON_dt(:,i,j,:),DIM=1) ! (nmol g-1 s-1) change in PON labile due to root death in sediment (positive means seagrass to sediment)
+    miscPON(:,2) = miscPON(:,2) + OMSratio * sum(SEDECO(ng)%sg_dPON_dt(:,i,j,:),DIM=1) ! (nmol g-1 s-1) change in PON refractory due to root death in sediment (positive means seagrass to sediment)
+    miscPON(:,3) = miscPON(:,3) + OMNratio * sum(SEDECO(ng)%sg_dPON_dt(:,i,j,:),DIM=1) ! (nmol g-1 s-1) change in PON non-degratable due to root death in sediment (positive means seagrass to sediment)
+    miscPOP(:,1) = miscPOP(:,1) + OMFratio * sum(SEDECO(ng)%sg_dPOP_dt(:,i,j,:),DIM=1) ! (nmol g-1 s-1) change in POP labile due to root death in sediment (positive means seagrass to sediment)
+    miscPOP(:,2) = miscPOP(:,2) + OMSratio * sum(SEDECO(ng)%sg_dPOP_dt(:,i,j,:),DIM=1) ! (nmol g-1 s-1) change in POP refractory due to root death in sediment (positive means seagrass to sediment)
+    miscPOP(:,3) = miscPOP(:,3) + OMNratio * sum(SEDECO(ng)%sg_dPOP_dt(:,i,j,:),DIM=1) ! (nmol g-1 s-1) change in POP non-degratable due to root death in sediment (positive means seagrass to sediment)
 #  endif  
 # endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
