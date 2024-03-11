@@ -428,16 +428,6 @@
 !                                                 ----W(i,j,k-1)----
       integer, allocatable :: N(:)
 
-!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
-# ifdef SEDIMENT_ECOSYS
-      integer, allocatable :: Nsed(:)
-      real(8), allocatable :: SedEcoLayerDepths(:, :)   ! (ng, k)          ! depth (cm) from surface at bottom of each biological sediment layer
-#  ifdef SEAGRASS
-      real(8), allocatable :: SeagrassRootProf(:, :, :) ! (ng, species, k) ! Profile of seagrass root biomass: fraction in each biological sediment layer 
-#  endif
-# endif
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
-
 !
 !-----------------------------------------------------------------------
 !  Tracers parameters.
@@ -578,9 +568,6 @@
       integer :: NHbiosed3d             ! 3D fields for the biological sediment layers in sedecosys
 # endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
-      integer, parameter :: Ncl = 2     ! Number of coral types
-      ! integer, parameter :: Nzx = 1    !! Number of zooxanthellae clade types
-      integer, parameter :: Nsg = 1     ! Number of seagrass species
 #endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 
@@ -707,6 +694,13 @@
 !  Allocate dimension parameters.
 !-----------------------------------------------------------------------
 !
+
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+# ifdef SEDIMENT_ECOSYS
+      USE mod_sedecosys, ONLY : Nsed
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+
       allocate ( Lm(Ngrids) )
       allocate ( Mm(Ngrids) )
 

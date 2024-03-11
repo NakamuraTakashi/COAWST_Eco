@@ -358,6 +358,16 @@
 !=======================================================================
 !
       USE mod_param
+!!! yuta_edits >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+#ifdef CORAL_POLYP
+      USE mod_coral, ONLY : Ncl
+      ! USE mod_coral, ONLY : Nzx
+#endif
+#ifdef SEAGRASS
+      USE mod_seagrass, ONLY : Nsg
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+
 !
 !  Local variable declarations.
 !

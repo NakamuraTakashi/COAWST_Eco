@@ -357,6 +357,7 @@
      &            ,N(ng)               &   ! Number of vertical grid (following ROMS vertical grid)
      &            ,CrlIter(ng)         &   ! Internal loop counts of coral polyp model
      &            ,SedIter(ng)         &   ! Internal loop counts of sediment ecosystem model
+     &            ,tdays(ng)           &   ! Date (days since x or elapsed days)  yt_edit I believe tdays is roms model clock https://www.myroms.org/projects/src/ticket/724
      &            ,dt(ng)              &   ! Time step (sec)
      &            ,Hz(i,j,:)           &   ! dz(N): vertical grid size (m)
      &            ,PFDsurf             &   ! Sea surface photon flux density (umol m-2 s-1)

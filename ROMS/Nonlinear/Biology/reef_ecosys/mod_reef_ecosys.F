@@ -12,7 +12,7 @@ contains
 !!! **********************************************************************
 !!!  Allocate module variables of reef ecosystem model
 !!! **********************************************************************
-SUBROUTINE allocate_reef_ecosys(ng, LBi, UBi, LBj, UBj)
+SUBROUTINE allocate_reef_ecosys(ng, Ngrids, LBi, UBi, LBj, UBj)
 #ifdef CORAL_POLYP
   USE mod_coral
 #endif
@@ -28,22 +28,26 @@ SUBROUTINE allocate_reef_ecosys(ng, LBi, UBi, LBj, UBj)
     
   implicit none
 
-  integer, intent(in) :: ng, LBi, UBi, LBj, UBj
+  integer, intent(in) :: ng, Ngrids, LBi, UBi, LBj, UBj
 
 #ifdef CORAL_POLYP
-  CALL allocate_coral(ng, LBi, UBi, LBj, UBj)
+  CALL allocate_coral(ng, Ngrids, LBi, UBi, LBj, UBj)
   write(*,*) 'yt_debug: mod_reef_ecosys.F allocate_reef_ecosys() finished coral aloc'
 #endif
 #ifdef SEAGRASS
-  CALL allocate_seagrass(ng, LBi, UBi, LBj, UBj)
+  CALL allocate_seagrass(ng, Ngrids, LBi, UBi, LBj, UBj)
   write(*,*) 'yt_debug: mod_reef_ecosys.F allocate_reef_ecosys() finished seagrass aloc'
 #endif
 #ifdef MACROALGAE
-  CALL allocate_macroalgae(ng, LBi, UBi, LBj, UBj)
+  CALL allocate_macroalgae(ng, Ngrids, LBi, UBi, LBj, UBj)
   write(*,*) 'yt_debug: mod_reef_ecosys.F allocate_reef_ecosys() finished macroalgae aloc'
 #endif
 #ifdef SEDIMENT_ECOSYS
-  CALL allocate_sedecosys(ng, LBi, UBi, LBj, UBj)
+  CALL allocate_sedecosys(ng, Ngrids, LBi, UBi, LBj, UBj  &
+# if defined SEAGRASS && (SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE)
+                          , Nsg                   &
+# endif
+                          )
   write(*,*) 'yt_debug: mod_reef_ecosys.F allocate_reef_ecosys() finished sediment aloc'
 #endif
     
@@ -54,8 +58,13 @@ END SUBROUTINE allocate_reef_ecosys
 !!! **********************************************************************
 !!!  Set initial conditions for reef ecosystem model
 !!! **********************************************************************
-  SUBROUTINE initialize_reef_ecosys(ng, tile)
-    USE mod_param
+  SUBROUTINE initialize_reef_ecosys(ng, LBi, UBi, LBj, UBj &
+#ifdef SEAGRASS
+      , XI_size, ETA_size   &   ! grid size XI-direction (meters); grid size ETA-direction (meters)
+      , p_sgrass            &   ! seagrass coverage (habitat area in grid / grid area)
+#endif
+    )
+
 #ifdef CORAL_POLYP
     USE mod_coral
 #endif
@@ -68,67 +77,75 @@ END SUBROUTINE allocate_reef_ecosys
 #ifdef SEDIMENT_ECOSYS
     USE mod_sedecosys
 #endif
-    USE mod_biology, ONLY : send_reef_ecosys2roms_his
 
-
-    implicit none
-    integer, intent(in) :: ng, tile
-    integer :: i, j
-    integer :: Imin, Imax, Jmin, Jmax
-
-!
-# include "tile.h"
-!
-!  Set array initialization range.
-!
-#ifdef _OPENMP
-    IF (DOMAIN(ng)%Western_Edge(tile)) THEN
-      Imin=BOUNDS(ng)%LBi(tile)
-    ELSE
-      Imin=Istr
-    END IF
-    IF (DOMAIN(ng)%Eastern_Edge(tile)) THEN
-      Imax=BOUNDS(ng)%UBi(tile)
-    ELSE
-      Imax=Iend
-    END IF
-    IF (DOMAIN(ng)%Southern_Edge(tile)) THEN
-      Jmin=BOUNDS(ng)%LBj(tile)
-    ELSE
-      Jmin=Jstr
-    END IF
-    IF (DOMAIN(ng)%Northern_Edge(tile)) THEN
-      Jmax=BOUNDS(ng)%UBj(tile)
-    ELSE
-      Jmax=Jend
-    END IF
-#else
-    Imin=LBi
-    Imax=UBi
-    Jmin=LBj
-    Jmax=UBj
+    integer, intent(in) :: ng, LBi, UBi, LBj, UBj
+#ifdef SEAGRASS
+    real(8), intent(in) :: XI_size (    LBi:UBi,LBj:UBj)   ! grid size XI-direction (meters)
+    real(8), intent(in) :: ETA_size(    LBi:UBi,LBj:UBj)   ! grid size ETA-direction (meters)
+    real(8), intent(in) :: p_sgrass(Nsg,LBi:UBi,LBj:UBj)   ! seagrass coverage (habitat area in grid / grid area)
 #endif
+
+
+!     USE mod_param
+
+!     implicit none
+!     integer, intent(in) :: ng, tile
+!     integer :: i, j
+!     integer :: Imin, Imax, Jmin, Jmax
+
+! !
+! # include "tile.h"
+! !
+! !  Set array initialization range.
+! !
+! #ifdef _OPENMP
+!     IF (DOMAIN(ng)%Western_Edge(tile)) THEN
+!       Imin=BOUNDS(ng)%LBi(tile)
+!     ELSE
+!       Imin=Istr
+!     END IF
+!     IF (DOMAIN(ng)%Eastern_Edge(tile)) THEN
+!       Imax=BOUNDS(ng)%UBi(tile)
+!     ELSE
+!       Imax=Iend
+!     END IF
+!     IF (DOMAIN(ng)%Southern_Edge(tile)) THEN
+!       Jmin=BOUNDS(ng)%LBj(tile)
+!     ELSE
+!       Jmin=Jstr
+!     END IF
+!     IF (DOMAIN(ng)%Northern_Edge(tile)) THEN
+!       Jmax=BOUNDS(ng)%UBj(tile)
+!     ELSE
+!       Jmax=Jend
+!     END IF
+! #else
+!     Imin=LBi
+!     Imax=UBi
+!     Jmin=LBj
+!     Jmax=UBj
+! #endif
 
 
 #ifdef CORAL_POLYP
-    CALL initialize_coral(ng, Imin, Imax, Jmin, Jmax)
+    CALL initialize_coral(ng, LBi, UBi, LBj, UBj)
     write(*,*) 'yt_debug: mod_reef_ecosys.F initialize_reef_ecosys() finished coral init'
 #endif
 #ifdef SEAGRASS
-    CALL initialize_seagrass(ng, Imin, Imax, Jmin, Jmax)
+    CALL initialize_seagrass( ng, LBi, UBi, LBj, UBj    &
+                            , XI_size, ETA_size         & ! grid size XI-direction (meters); grid size ETA-direction (meters)
+                            , p_sgrass                  & ! seagrass coverage (habitat area/grid area)
+                            )
     write(*,*) 'yt_debug: mod_reef_ecosys.F initialize_reef_ecosys() finished seagrass init'
 #endif
 #ifdef MACROALGAE
-    CALL initialize_macroalgae(ng, Imin, Imax, Jmin, Jmax)
+    CALL initialize_macroalgae(ng, LBi, UBi, LBj, UBj)
     write(*,*) 'yt_debug: mod_reef_ecosys.F initialize_reef_ecosys() finished macroalgae init'
 #endif
 #ifdef SEDIMENT_ECOSYS
-    CALL initialize_sedecosys(ng, Imin, Imax, Jmin, Jmax)
+    CALL initialize_sedecosys(ng, LBi, UBi, LBj, UBj)
     write(*,*) 'yt_debug: mod_reef_ecosys.F initialize_reef_ecosys() finished sediment init'
 #endif
-      
-    CALL send_reef_ecosys2roms_his (ng, Imin, Imax, Jmin, Jmax)
-    write(*,*) 'yt_debug: mod_reef_ecosys.F initialize_reef_ecosys() finished send_reef_ecosys2roms_his'
 
     RETURN
   END SUBROUTINE initialize_reef_ecosys
@@ -144,6 +161,7 @@ END SUBROUTINE allocate_reef_ecosys
     , N              &   ! Number of vertical grid (following ROMS vertical grid)
     , isplitc        &   ! Internal loop counts of coral polyp model
     , isplitsed      &   ! Internal loop counts of sediment ecosystem model
+    , date           &   ! Date (days since x or elapsed days) yt_edit best if in phase with clock to maintain consistency on restart
     , dt             &   ! Time step (sec)
     , dz             &   ! dz(N): vertical grid size (m)
     , PFDsurf        &   ! Sea surface photon flux density (umol m-2 s-1)
@@ -299,18 +317,15 @@ END SUBROUTINE allocate_reef_ecosys
     USE mod_geochem
 #ifdef CORAL_POLYP
     USE mod_coral
-    USE mod_param, ONLY : Ncl
 #endif
 #ifdef SEAGRASS
     USE mod_seagrass
-    USE mod_param, ONLY : Nsg
 #endif
 #ifdef MACROALGAE
     USE mod_macroalgae
 #endif
 #ifdef SEDIMENT_ECOSYS
     USE mod_sedecosys
-    USE mod_param, ONLY : Nsed
 #endif
 #ifdef FOODWEB
     USE mod_foodweb
@@ -323,6 +338,7 @@ END SUBROUTINE allocate_reef_ecosys
     integer, intent(in) :: N
     integer, intent(in) :: isplitc     
     integer, intent(in) :: isplitsed     
+    real(8), intent(in) :: date
     real(8), intent(in) :: dt         
     real(8), intent(in) :: dz(N)      
     real(8), intent(in) :: PFDsurf    
@@ -1864,6 +1880,7 @@ END SUBROUTINE allocate_reef_ecosys
         , Nsed(ng)       &   ! Number of sediment layers
 # endif
         , dz(1)          &   ! vertical layer thickness (m)
+        , date           &   ! Date (days since x or elapsed days) yt_edit best if in phase with clock to maintain consistency on restart
         , dt             &   ! Time step (sec)
         , p_sgrass(:)    &   ! seagrass coverage (every species)
         , PFD            &   ! Photon flux density (umol m-2 s-1)
@@ -1927,6 +1944,7 @@ END SUBROUTINE allocate_reef_ecosys
         , Nsed(ng)       &   ! Number of sediment layers
 # endif
         , dz(1)          &   ! vertical layer thickness (m)
+        , date           &   ! Date (days since x or elapsed days) yt_edit best if in phase with clock to maintain consistency on restart
         , dt             &   ! Time step (sec)
         , p_sgrass(:)    &   ! seagrass coverage (every species)
         )

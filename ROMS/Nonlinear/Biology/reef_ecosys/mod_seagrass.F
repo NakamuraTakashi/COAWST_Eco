@@ -27,6 +27,11 @@ MODULE mod_seagrass
 
   implicit none
 
+  integer, parameter :: Nsg = 1     ! Number of seagrass species
+# if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
+  real(8), allocatable :: SeagrassRootProf(:, :, :) ! (ng, species, k) ! Profile of seagrass root biomass: fraction in each biological sediment layer 
+# endif
+
   TYPE T_SGRASS ! create a class for all seagrass values (for a given nested grid)
     !                                                         (c s i j l)                               the columns correspond to indexes for: c = chemical species; s = species_id_number; i = i-position; j = j-position; l = sediment layer
 ! >>> Housekeeping Vars <<< !
@@ -139,19 +144,21 @@ MODULE mod_seagrass
 ! ====================================================================================================
 ! Seagrass initialization subroutine in/out interface
 ! ====================================================================================================
-  SUBROUTINE allocate_seagrass(ng, LBi, UBi, LBj, UBj)
+  SUBROUTINE allocate_seagrass(ng, Ngrids, LBi, UBi, LBj, UBj)
 
 ! ====================================================================================================
 ! Module dependencies
 ! ====================================================================================================
-    USE mod_param,  ONLY : Ngrids, Nsg, Nsed
+# if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
+    USE mod_sedecosys, ONLY : Nsed
+# endif
 
 ! ====================================================================================================
 ! Variable declarations
 ! ====================================================================================================
     implicit none
 ! input parameters
-    integer, intent(in) :: ng                                  !                         ng is the nested grid number
+    integer, intent(in) :: ng, Ngrids                          !                         ng is the nested grid number
     integer, intent(in) :: LBi, UBi, LBj, UBj                  !                         lower and upper bounds i & j
   
 ! ====================================================================================================
@@ -264,13 +271,14 @@ MODULE mod_seagrass
 ! ====================================================================================================
 ! Seagrass initialization subroutine in/out interface
 ! ====================================================================================================
-  SUBROUTINE initialize_seagrass(ng, LBi, UBi, LBj, UBj)
+  SUBROUTINE initialize_seagrass(ng, LBi, UBi, LBj, UBj, XI_size, ETA_size, p_sgrass)
 
 ! ====================================================================================================
 ! Module dependencies
 ! ====================================================================================================
-    USE mod_param,    ONLY : Nsg, Nsed, SeagrassRootProf
-    USE mod_grid,     ONLY : GRID
+# if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
+    USE mod_sedecosys, ONLY : Nsed
+# endif
     USE mod_geochem
 
 ! ====================================================================================================
@@ -278,8 +286,11 @@ MODULE mod_seagrass
 ! ====================================================================================================
     implicit none
 ! input parameters
-    integer, intent(in) :: ng                                  !                         ng is the nested grid number
-    integer, intent(in) :: LBi, UBi, LBj, UBj                  !                         lower and upper bounds i & j
+    integer, intent(in) :: ng                             ! ng is the nested grid number
+    integer, intent(in) :: LBi, UBi, LBj, UBj             ! lower and upper bounds i & j
+    real(8), intent(in) :: XI_size (    LBi:UBi,LBj:UBj)  ! grid size XI-direction (meters)
+    real(8), intent(in) :: ETA_size(    LBi:UBi,LBj:UBj)  ! grid size ETA-direction (meters)
+    real(8), intent(in) :: p_sgrass(Nsg,LBi:UBi,LBj:UBj)  ! seagrass coverage (habitat area/grid area)
 
 ! indexing variables
     integer species,i,j
@@ -359,9 +370,7 @@ MODULE mod_seagrass
     do i=LBi,UBi
       do j=LBj,UBj
         ! grid areas
-        ! 1.0d0/(GRID(ng)%pm*GRID(ng)%pn)       & ! RHO-grid area (meters2)
-        ! 1.0d0/GRID(ng)%pm, 1.0d0/GRID(ng)%pn  & ! size of grid: RHO-grid spacing (meters) in the XI-direction
-        SGRASS(ng)%GridArea(i,j) = 1.0d0/(GRID(ng)%pm(i,j)*GRID(ng)%pn(i,j))
+        SGRASS(ng)%GridArea(i,j) = XI_size(i,j) * ETA_size(i,j)
         if (isnan(SGRASS(ng)%GridArea(i,j)) .or. abs(SGRASS(ng)%GridArea(i,j)) > huge(SGRASS(ng)%GridArea(i,j))) then
           SGRASS(ng)%GridArea(i,j) = 0.0d0
         endif
@@ -429,7 +438,7 @@ MODULE mod_seagrass
           ! RtDryBm                     [g.rt.drywt m-2.sg.hab]     Seagrass root dry weight biomass per unit ground area (in seagrass habitat area)
 
           ! [m2.sg.hab]                   = [m2.ground]              [m2.sg.hab m-2.ground]
-          SGRASS(ng)%HabArea(species,i,j) = SGRASS(ng)%GridArea(i,j) * GRID(ng)%p_sgrass(species,i,j)
+          SGRASS(ng)%HabArea(species,i,j) = SGRASS(ng)%GridArea(i,j) * p_sgrass(species,i,j)
           
         !   SGRASS(ng)%LAI(species,i,j) = (-1*log(1.0-0.85)/SGRASS(ng)%k_proj(species))
           SGRASS(ng)%LAI(species,i,j) = (-1*log(1.0d0-0.30433574d0)/SGRASS(ng)%k_proj(species))
@@ -525,6 +534,7 @@ MODULE mod_seagrass
     , Nsed                        &   !                           Number of sediment layers
 # endif
     , dz                          &   ! [m]                       vertical layer thickness (bottom water column layer)
+    , date                        &   ! Date (days since x or elapsed days) yt_edit best if in phase with clock to maintain consistency on restart
     , dt                          &   ! [s]                       time step
     , p_sgrass                    &   ! [m2.sg.hab m-2.ground](0~1)Seagrass coverage (every species)
     , PFD                         &   ! [umol m-2 s-1]            Photon flux density 
@@ -556,8 +566,6 @@ MODULE mod_seagrass
 ! ====================================================================================================
 ! Module dependencies
 ! ====================================================================================================
-    USE mod_param,        ONLY : Nsg
-    USE mod_scalars,      ONLY : tdays
     USE mod_geochem
 # if defined SEDIMENT_ECOSYS
     USE mod_sedecosys,    ONLY : SEDECO
@@ -576,6 +584,7 @@ MODULE mod_seagrass
     integer, intent(in)   :: Nsed                       !                             Number of sediment layers
 # endif
     real(8), intent(in)   :: dz                         ! [m]                         vertical layer thickness (bottom water column layer)
+    real(8), intent(in)   :: date                       ! [days]                      Date (days since x or elapsed days) yt_edit best if in phase with clock to maintain consistency on restart
     real(8), intent(in)   :: dt                         ! [s]                         Time step interval duration
     real(8), intent(inout):: p_sgrass(Nsg)              ! [] (0~1)                    Seagrass coverage (every species)
     real(8), intent(in)   :: PFD                        ! [umol m-2 s-1]              Photon flux density 
@@ -986,11 +995,11 @@ MODULE mod_seagrass
 ! ----------------------------------------------------------------------------------------------------
 ! ====================================================================================================
 
-    if (int(tdays(ng)) .gt. Day) then
+    if (int(date) .gt. Day) then
       is_growth_interval = .true.
-      Day = int(tdays(ng))
+      Day = int(date)
       if (i==1 .and. j==1) then
-        write(*,*) "yt_debug:    Day = ", Day, "   tdays(ng) = ", tdays(ng)
+        write(*,*) "yt_debug:    Day = ", Day, "   date = ", date
       endif
     endif
 
@@ -1144,7 +1153,7 @@ MODULE mod_seagrass
 
     if (Growth_rate .lt. 0d0) then ! error handling
       write(*,*) "yt_debug: negative value error in photosynthesis/growth. Time =", &
-        tdays(ng), "Position =", i, j, "Growth_rate = ", Growth_rate
+        date, "Position =", i, j, "Growth_rate = ", Growth_rate
       write(*,*) "yt_debug:     Growth_rate        = ", Growth_rate
       write(*,*) "yt_debug:     Growth_limit_light = ", Growth_limit_light
       write(*,*) "yt_debug:     Growth_limit_DIC   = ", Growth_limit_DIC
@@ -1349,7 +1358,7 @@ MODULE mod_seagrass
 
     if (Resp_rate .lt. 0d0) then ! error handling
       write(*,*) 'yt_debug: negative value error in respiration. Time =', &
-        tdays(ng), 'Position =', i, j
+        date, 'Position =', i, j
       write(*,*) 'yt_debug:     Resp_rate =', Resp_rate
       write(*,*) 'yt_debug:     Resp_pos  =', Resp_pos
       write(*,*) 'yt_debug:     Resp_req  =', Resp_req
@@ -1873,14 +1882,13 @@ MODULE mod_seagrass
     , Nsed                        &   !                           Number of sediment layers
 # endif
     , dz                          &   ! [m]                       vertical layer thickness (bottom water column layer)
+    , date                        &   ! Date (days since x or elapsed days) yt_edit best if in phase with clock to maintain consistency on restart
     , dt                          &   ! [s]                       time step
     , p_sgrass                    &   ! [m2.sg.hab m-2.ground]    Seagrass coverage (every species)
     )
 ! ====================================================================================================
 ! Module dependencies
 ! ====================================================================================================
-    USE mod_param,        ONLY : Nsg
-    USE mod_scalars,      ONLY : tdays
     USE mod_geochem
 # if defined SEDIMENT_ECOSYS
     USE mod_sedecosys,    ONLY : SEDECO
@@ -1899,6 +1907,7 @@ MODULE mod_seagrass
     integer, intent(in)   :: Nsed                       !                             Number of sediment layers
 # endif
     real(8), intent(in)   :: dz                         ! [m]                         vertical layer thickness (bottom water column layer)
+    real(8), intent(in)   :: date                       ! [days]                      Date (days since x or elapsed days) yt_edit best if in phase with clock to maintain consistency on restart
     real(8), intent(in)   :: dt                         ! [s]                         Time step interval duration
     real(8), intent(inout):: p_sgrass(Nsg)              ! [] (0~1)                    Seagrass coverage (every species)
 
@@ -1948,11 +1957,11 @@ MODULE mod_seagrass
 ! ----------------------------------------------------------------------------------------------------
 ! ====================================================================================================
 
-    if (int(tdays(ng)) .gt. Day) then
+    if (int(date) .gt. Day) then
       is_growth_interval = .true.
-      Day = int(tdays(ng))
+      Day = int(date)
       if (i==1 .and. j==1) then
-        write(*,*) "yt_debug:    Day = ", Day, "   tdays(ng) = ", tdays(ng)
+        write(*,*) "yt_debug:    Day = ", Day, "   date = ", date
       endif
     endif
 

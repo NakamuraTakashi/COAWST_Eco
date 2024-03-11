@@ -1156,15 +1156,15 @@
 #endif
 
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
-!
-!!!----------------------------------------------------------------------
-!!!  Initialize reef ecosys model parameters ! yt_edit I split allocation and initialization
-!!!----------------------------------------------------------------------
-!
 #ifdef REEF_ECOSYS
+!
+!!!----------------------------------------------------------------------
+!!!  Initialize reef ecosys model parameters ! yt_edit this subroutine 
+!!!----------------------------------------------------------------------
+!
       DO ng=1,Ngrids
         DO tile=first_tile(ng),last_tile(ng),+1
-          CALL initialize_reef_ecosys(ng, tile)
+          CALL call_initialize_reef_ecosys_wrapper(ng, tile)
         END DO
 !$OMP BARRIER
       END DO
@@ -1173,3 +1173,65 @@
 
       RETURN
       END SUBROUTINE initial
+
+!!! yuta_edits >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+#ifdef REEF_ECOSYS
+      ! yt_edit this subroutine wraps the logic for getting tile bounds and ROMS inputs with the actual initialize_reef_ecosys() call
+      SUBROUTINE call_initialize_reef_ecosys_wrapper(ng, tile)
+
+        USE mod_param
+        USE mod_grid,         ONLY : GRID
+        USE mod_reef_ecosys,  ONLY : initialize_reef_ecosys
+        USE mod_biology,      ONLY : send_reef_ecosys2roms_his
+
+        implicit none
+        integer, intent(in) :: ng, tile
+        integer :: i, j
+        integer :: Imin, Imax, Jmin, Jmax
+        !
+# include "tile.h"
+        !
+        !  Set array initialization range.
+        !
+# ifdef _OPENMP
+        IF (DOMAIN(ng)%Western_Edge(tile)) THEN
+          Imin=BOUNDS(ng)%LBi(tile)
+        ELSE
+          Imin=Istr
+        END IF
+        IF (DOMAIN(ng)%Eastern_Edge(tile)) THEN
+          Imax=BOUNDS(ng)%UBi(tile)
+        ELSE
+          Imax=Iend
+        END IF
+        IF (DOMAIN(ng)%Southern_Edge(tile)) THEN
+          Jmin=BOUNDS(ng)%LBj(tile)
+        ELSE
+          Jmin=Jstr
+        END IF
+        IF (DOMAIN(ng)%Northern_Edge(tile)) THEN
+          Jmax=BOUNDS(ng)%UBj(tile)
+        ELSE
+          Jmax=Jend
+        END IF
+# else
+        Imin=LBi
+        Imax=UBi
+        Jmin=LBj
+        Jmax=UBj
+# endif
+        
+        CALL initialize_reef_ecosys(ng, Imin, Imax, Jmin, Jmax  &
+# ifdef SEAGRASS
+          , 1.0d0/(GRID(ng)%pm(Imin:Imax,Jmin:Jmax))            &   ! grid size XI-direction (meters)
+          , 1.0d0/(GRID(ng)%pn(Imin:Imax,Jmin:Jmax))            &   ! grid size ETA-direction (meters)
+          , GRID(ng)%p_sgrass                                   &   ! seagrass coverage (habitat area in grid / grid area)
+# endif
+          )
+
+        CALL send_reef_ecosys2roms_his (ng, LBi, UBi, LBj, UBj)
+        write(*,*) 'yt_debug: mod_reef_ecosys.F initialize_reef_ecosys() finished send_reef_ecosys2roms_his'
+    
+      END SUBROUTINE call_initialize_reef_ecosys_wrapper
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add

@@ -9,8 +9,8 @@ MODULE mod_coral
 
   implicit none
 
-!   integer, parameter :: Ncl= 2    !! Number of coral types
-!    integer, parameter :: Nzx= 1    !! Number of zooxanthellae clade types
+  integer, parameter :: Ncl = 2    !! Number of coral types
+  ! integer, parameter :: Nzx = 1    !! Number of zooxanthellae clade types
 
   TYPE T_CORAL
 
@@ -96,12 +96,11 @@ CONTAINS
 !!!  allocate variables for coral polyp model (Nakamura et al. 2013)
 !!! **********************************************************************
 
-  SUBROUTINE allocate_coral(ng, LBi, UBi, LBj, UBj)
-    USE mod_param,  ONLY : Ngrids, Ncl
-    
+  SUBROUTINE allocate_coral(ng, Ngrids, LBi, UBi, LBj, UBj)
+
     implicit none
 ! input parameters
-    integer, intent(in) :: ng, LBi, UBi, LBj, UBj
+    integer, intent(in) :: ng, Ngrids, LBi, UBi, LBj, UBj
 
     IF (ng.eq.1) allocate ( CORAL(Ngrids) )
 
@@ -174,7 +173,6 @@ CONTAINS
 !!! **********************************************************************
 
   SUBROUTINE initialize_coral(ng, LBi, UBi, LBj, UBj)
-    USE mod_param,  ONLY : Ncl
     USE mod_geochem
     
     implicit none
@@ -337,7 +335,6 @@ CONTAINS
 
 !-----------------------------------------------------------------------
 
-    USE mod_param,  ONLY : Ncl
     USE mod_geochem
     
     implicit none

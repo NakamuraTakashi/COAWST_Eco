@@ -238,7 +238,10 @@ MODULE mod_sedecosys
   implicit none
 
 ! Variables Declaration
-!   integer, parameter :: Nsed = 101      !! Number of sediment layers
+  integer, allocatable :: Nsed(:)
+  real(8), allocatable :: SedEcoLayerDepths(:, :)   ! (ng, k)          ! depth (cm) from surface at bottom of each biological sediment layer
+
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 
   TYPE T_SEDECO
 ! general parameters
@@ -329,18 +332,22 @@ CONTAINS
 !!!  Initial conditions for sediment ecosystem model
 !!! **********************************************************************
 
-  SUBROUTINE allocate_sedecosys(ng, LBi, UBi, LBj, UBj)
-    USE mod_param, ONLY : Ngrids, Nsed, SedEcoLayerDepths
-# if defined SEAGRASS
-    USE mod_param, ONLY : Nsg
+  SUBROUTINE allocate_sedecosys(ng, Ngrids, LBi, UBi, LBj, UBj  &
+# if defined SEAGRASS && (SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE)
+                                , Nsg                           &
 # endif
+    )
+
     USE mod_geochem ! another module in a same folder (function list)
     ! USE mod_readinput
     
     implicit none
 
     ! input parameters
-    integer, intent(in) :: ng, LBi, UBi, LBj, UBj
+    integer, intent(in) :: ng, Ngrids, LBi, UBi, LBj, UBj
+# if defined SEAGRASS && (SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE)
+    integer, intent(in) :: Nsg
+# endif
 
     ! allocate sizes of each parameters for (LBi:UBi, LBj:UBj)
     IF (ng.eq.1) allocate( SEDECO(Ngrids) )
@@ -427,7 +434,6 @@ CONTAINS
 !!! **********************************************************************
 
   SUBROUTINE initialize_sedecosys(ng, LBi, UBi, LBj, UBj)
-    USE mod_param, ONLY : Nsed, SedEcoLayerDepths
     USE mod_geochem ! another module in a same folder (function list)
     ! USE mod_readinput
     

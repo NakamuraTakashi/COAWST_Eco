@@ -285,8 +285,10 @@
               ENDDO
               allocate ( SedEcoLayerDepths(Ngrids, maxval(Nsed)) )
               allocate ( SedEcoTemp(0) )
+#  if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
               allocate ( SeagrassRootProf(Ngrids, Nsg, maxval(Nsed)) )
               allocate ( SgRtProfTemp(0) )
+#  endif
             CASE ('SedEcoLayerDepths')
               write(*,*) 'yt_debug: SedEcoLayerDepths loading line: ', line
               ! yt_debug = yt_debug+1
@@ -318,7 +320,7 @@
                 error stop
               endif
 !!! yuta_seagrass >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
-#  ifdef SEAGRASS
+#  if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
             CASE ('SeagrassRootProf')
               write(*,*) 'yt_debug: SeagrassRootProf loading line: ', line
               SgRtProfTemp1 = (/SgRtProfTemp/)
