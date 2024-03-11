@@ -1371,49 +1371,105 @@ CONTAINS
 !    Closed boundary condition 
 # if defined sedBC_closed
 !! set boundary-1 to boundary and calculate below vvv in ficks law to get zero diffusion
-    SEDECO(ng)%Tmp(i,j,Nsed) = SEDECO(ng)%Tmp(i,j,Nsed-1) 
-    SEDECO(ng)%Sal(i,j,Nsed) = SEDECO(ng)%Sal(i,j,Nsed-1)
+    ! SEDECO(ng)%Tmp(i,j,Nsed) = SEDECO(ng)%Tmp(i,j,Nsed-1)
+    ! SEDECO(ng)%Sal(i,j,Nsed) = SEDECO(ng)%Sal(i,j,Nsed-1)
 
-    SEDECO(ng)%O2(i,j,Nsed) = SEDECO(ng)%O2(i,j,Nsed-1)
-    SEDECO(ng)%CO2(i,j,Nsed) = SEDECO(ng)%CO2(i,j,Nsed-1)
-    SEDECO(ng)%N2(i,j,Nsed) = SEDECO(ng)%N2(i,j,Nsed-1)
+    ! SEDECO(ng)%O2(i,j,Nsed) = SEDECO(ng)%O2(i,j,Nsed-1)
+    ! SEDECO(ng)%CO2(i,j,Nsed) = SEDECO(ng)%CO2(i,j,Nsed-1)
+    ! SEDECO(ng)%N2(i,j,Nsed) = SEDECO(ng)%N2(i,j,Nsed-1)
+
+    ! yt_edit >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    SEDECO(ng)%Tmp(i,j,Nsed) = min( SEDECO(ng)%Tmp(i,j,Nsed-1), 50.0d0 ) ! yt_edit cap bottom layer value
+    SEDECO(ng)%Sal(i,j,Nsed) = min( SEDECO(ng)%Sal(i,j,Nsed-1), 50.0d0 ) ! yt_edit cap bottom layer value
+
+    SEDECO(ng)%O2 (i,j,Nsed) = min( SEDECO(ng)%O2 (i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
+    SEDECO(ng)%CO2(i,j,Nsed) = min( SEDECO(ng)%CO2(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
+    SEDECO(ng)%N2 (i,j,Nsed) = min( SEDECO(ng)%N2 (i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
+    ! yt_edit <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
 #  if defined ORGANIC_MATTER
-    SEDECO(ng)%DOCf(i,j,Nsed) = SEDECO(ng)%DOCf(i,j,Nsed-1)
-    SEDECO(ng)%DOCs(i,j,Nsed) = SEDECO(ng)%DOCs(i,j,Nsed-1)
-    SEDECO(ng)%POCf(i,j,Nsed) = SEDECO(ng)%POCf(i,j,Nsed-1)
-    SEDECO(ng)%POCs(i,j,Nsed) = SEDECO(ng)%POCs(i,j,Nsed-1)
-    SEDECO(ng)%POCn(i,j,Nsed) = SEDECO(ng)%POCn(i,j,Nsed-1)
+    ! SEDECO(ng)%DOCf(i,j,Nsed) = SEDECO(ng)%DOCf(i,j,Nsed-1)
+    ! SEDECO(ng)%DOCs(i,j,Nsed) = SEDECO(ng)%DOCs(i,j,Nsed-1)
+    ! SEDECO(ng)%POCf(i,j,Nsed) = SEDECO(ng)%POCf(i,j,Nsed-1)
+    ! SEDECO(ng)%POCs(i,j,Nsed) = SEDECO(ng)%POCs(i,j,Nsed-1)
+    ! SEDECO(ng)%POCn(i,j,Nsed) = SEDECO(ng)%POCn(i,j,Nsed-1)
+
+    ! yt_edit >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    SEDECO(ng)%DOCf(i,j,Nsed) = min( SEDECO(ng)%DOCf(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
+    SEDECO(ng)%DOCs(i,j,Nsed) = min( SEDECO(ng)%DOCs(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
+    SEDECO(ng)%POCf(i,j,Nsed) = min( SEDECO(ng)%POCf(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
+    SEDECO(ng)%POCs(i,j,Nsed) = min( SEDECO(ng)%POCs(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
+    SEDECO(ng)%POCn(i,j,Nsed) = min( SEDECO(ng)%POCn(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
+    ! yt_edit <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
 #  endif
 #  if defined NUTRIENTS
-    SEDECO(ng)%NO3(i,j,Nsed)  = SEDECO(ng)%NO3(i,j,Nsed-1)
-    SEDECO(ng)%NH4(i,j,Nsed) = SEDECO(ng)%NH4(i,j,Nsed-1)
-    SEDECO(ng)%PO4(i,j,Nsed) = SEDECO(ng)%PO4(i,j,Nsed-1)
+    ! SEDECO(ng)%NO3(i,j,Nsed) = SEDECO(ng)%NO3(i,j,Nsed-1)
+    ! SEDECO(ng)%NH4(i,j,Nsed) = SEDECO(ng)%NH4(i,j,Nsed-1)
+    ! SEDECO(ng)%PO4(i,j,Nsed) = SEDECO(ng)%PO4(i,j,Nsed-1)
+
+    ! yt_edit >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    SEDECO(ng)%NO3(i,j,Nsed) = min( SEDECO(ng)%NO3(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
+    SEDECO(ng)%NH4(i,j,Nsed) = min( SEDECO(ng)%NH4(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
+    SEDECO(ng)%PO4(i,j,Nsed) = min( SEDECO(ng)%PO4(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
+    ! yt_edit <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
 #   if defined ORGANIC_MATTER
-    SEDECO(ng)%DONf(i,j,Nsed) = SEDECO(ng)%DONf(i,j,Nsed-1)
-    SEDECO(ng)%DONs(i,j,Nsed) = SEDECO(ng)%DONs(i,j,Nsed-1)
-    SEDECO(ng)%PONf(i,j,Nsed) = SEDECO(ng)%PONf(i,j,Nsed-1)
-    SEDECO(ng)%PONs(i,j,Nsed) = SEDECO(ng)%PONs(i,j,Nsed-1)
-    SEDECO(ng)%PONn(i,j,Nsed) = SEDECO(ng)%PONn(i,j,Nsed-1)
-    SEDECO(ng)%DOPf(i,j,Nsed) = SEDECO(ng)%DOPf(i,j,Nsed-1)
-    SEDECO(ng)%DOPs(i,j,Nsed) = SEDECO(ng)%DOPs(i,j,Nsed-1)
-    SEDECO(ng)%POPf(i,j,Nsed) = SEDECO(ng)%POPf(i,j,Nsed-1)
-    SEDECO(ng)%POPs(i,j,Nsed) = SEDECO(ng)%POPs(i,j,Nsed-1)
-    SEDECO(ng)%POPn(i,j,Nsed) = SEDECO(ng)%POPn(i,j,Nsed-1)
+    ! SEDECO(ng)%DONf(i,j,Nsed) = SEDECO(ng)%DONf(i,j,Nsed-1)
+    ! SEDECO(ng)%DONs(i,j,Nsed) = SEDECO(ng)%DONs(i,j,Nsed-1)
+    ! SEDECO(ng)%PONf(i,j,Nsed) = SEDECO(ng)%PONf(i,j,Nsed-1)
+    ! SEDECO(ng)%PONs(i,j,Nsed) = SEDECO(ng)%PONs(i,j,Nsed-1)
+    ! SEDECO(ng)%PONn(i,j,Nsed) = SEDECO(ng)%PONn(i,j,Nsed-1)
+    ! SEDECO(ng)%DOPf(i,j,Nsed) = SEDECO(ng)%DOPf(i,j,Nsed-1)
+    ! SEDECO(ng)%DOPs(i,j,Nsed) = SEDECO(ng)%DOPs(i,j,Nsed-1)
+    ! SEDECO(ng)%POPf(i,j,Nsed) = SEDECO(ng)%POPf(i,j,Nsed-1)
+    ! SEDECO(ng)%POPs(i,j,Nsed) = SEDECO(ng)%POPs(i,j,Nsed-1)
+    ! SEDECO(ng)%POPn(i,j,Nsed) = SEDECO(ng)%POPn(i,j,Nsed-1)
+
+    ! yt_edit >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    SEDECO(ng)%DONf(i,j,Nsed) = min( SEDECO(ng)%DONf(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
+    SEDECO(ng)%DONs(i,j,Nsed) = min( SEDECO(ng)%DONs(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
+    SEDECO(ng)%PONf(i,j,Nsed) = min( SEDECO(ng)%PONf(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
+    SEDECO(ng)%PONs(i,j,Nsed) = min( SEDECO(ng)%PONs(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
+    SEDECO(ng)%PONn(i,j,Nsed) = min( SEDECO(ng)%PONn(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
+    SEDECO(ng)%DOPf(i,j,Nsed) = min( SEDECO(ng)%DOPf(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
+    SEDECO(ng)%DOPs(i,j,Nsed) = min( SEDECO(ng)%DOPs(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
+    SEDECO(ng)%POPf(i,j,Nsed) = min( SEDECO(ng)%POPf(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
+    SEDECO(ng)%POPs(i,j,Nsed) = min( SEDECO(ng)%POPs(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
+    SEDECO(ng)%POPn(i,j,Nsed) = min( SEDECO(ng)%POPn(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
+    ! yt_edit <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
 #   endif
 #  endif
 #  if defined SULFATE
-    SEDECO(ng)%Mn2(i,j,Nsed)  = SEDECO(ng)%Mn2(i,j,Nsed-1)
-    SEDECO(ng)%MnO2(i,j,Nsed) = SEDECO(ng)%MnO2(i,j,Nsed-1)
+    ! SEDECO(ng)%Mn2(i,j,Nsed)  = SEDECO(ng)%Mn2(i,j,Nsed-1)
+    ! SEDECO(ng)%MnO2(i,j,Nsed) = SEDECO(ng)%MnO2(i,j,Nsed-1)
 
-    SEDECO(ng)%Fe2(i,j,Nsed)       = SEDECO(ng)%Fe2(i,j,Nsed-1)
-    SEDECO(ng)%FeS(i,j,Nsed)       = SEDECO(ng)%FeS(i,j,Nsed-1)
-    SEDECO(ng)%FeS2(i,j,Nsed)      = SEDECO(ng)%FeS2(i,j,Nsed-1)
-    SEDECO(ng)%FeOOH(i,j,Nsed)     = SEDECO(ng)%FeOOH(i,j,Nsed-1)
-    SEDECO(ng)%FeOOH_PO4(i,j,Nsed) = SEDECO(ng)%FeOOH_PO4(i,j,Nsed-1)
+    ! SEDECO(ng)%Fe2(i,j,Nsed)       = SEDECO(ng)%Fe2(i,j,Nsed-1)
+    ! SEDECO(ng)%FeS(i,j,Nsed)       = SEDECO(ng)%FeS(i,j,Nsed-1)
+    ! SEDECO(ng)%FeS2(i,j,Nsed)      = SEDECO(ng)%FeS2(i,j,Nsed-1)
+    ! SEDECO(ng)%FeOOH(i,j,Nsed)     = SEDECO(ng)%FeOOH(i,j,Nsed-1)
+    ! SEDECO(ng)%FeOOH_PO4(i,j,Nsed) = SEDECO(ng)%FeOOH_PO4(i,j,Nsed-1)
 
-    SEDECO(ng)%H2S(i,j,Nsed) = SEDECO(ng)%H2S(i,j,Nsed-1)
-    SEDECO(ng)%S0(i,j,Nsed)  = SEDECO(ng)%S0(i,j,Nsed-1)
-    SEDECO(ng)%SO4(i,j,Nsed) = SEDECO(ng)%SO4(i,j,Nsed-1)
+    ! SEDECO(ng)%H2S(i,j,Nsed) = SEDECO(ng)%H2S(i,j,Nsed-1)
+    ! SEDECO(ng)%S0(i,j,Nsed)  = SEDECO(ng)%S0(i,j,Nsed-1)
+    ! SEDECO(ng)%SO4(i,j,Nsed) = SEDECO(ng)%SO4(i,j,Nsed-1)
+
+    ! yt_edit >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    SEDECO(ng)%Mn2      (i,j,Nsed) = min( SEDECO(ng)%Mn2      (i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
+    SEDECO(ng)%MnO2     (i,j,Nsed) = min( SEDECO(ng)%MnO2     (i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
+
+    SEDECO(ng)%Fe2      (i,j,Nsed) = min( SEDECO(ng)%Fe2      (i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
+    SEDECO(ng)%FeS      (i,j,Nsed) = min( SEDECO(ng)%FeS      (i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
+    SEDECO(ng)%FeS2     (i,j,Nsed) = min( SEDECO(ng)%FeS2     (i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
+    SEDECO(ng)%FeOOH    (i,j,Nsed) = min( SEDECO(ng)%FeOOH    (i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
+    SEDECO(ng)%FeOOH_PO4(i,j,Nsed) = min( SEDECO(ng)%FeOOH_PO4(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
+
+    SEDECO(ng)%H2S      (i,j,Nsed) = min( SEDECO(ng)%H2S      (i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
+    SEDECO(ng)%S0       (i,j,Nsed) = min( SEDECO(ng)%S0       (i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
+    SEDECO(ng)%SO4      (i,j,Nsed) = min( SEDECO(ng)%SO4      (i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
+    ! yt_edit <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    
 #  endif
 # endif    
 
