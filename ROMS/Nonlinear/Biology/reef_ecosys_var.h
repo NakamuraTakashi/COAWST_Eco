@@ -1296,13 +1296,12 @@
    &                    TRIM(ADJUSTL(Vinfo(5)))
                 END DO
                 varid=varid+1
-# if defined DIAGNOSTICS_BIO
-              CASE ('iDbio2(iSgPg(i))')
+              CASE ('iHbio2(iSgTotSgCBm(i))')
                 load=.FALSE.
                 varid=varid-1
                 DO i=1,Nsg
                   varid=varid+1
-                  iDbio2(iSgPg(i))=varid
+                  iHbio2(iSgTotSgCBm(i))=varid
                   DO ng=1,Ngrids
                     Fscale(varid,ng)=scale
                     Iinfo(1,varid,ng)=gtype
@@ -1319,12 +1318,12 @@
    &                    TRIM(ADJUSTL(Vinfo(5)))
                 END DO
                 varid=varid+1
-              CASE ('iDbio2(iSgPLim(i))')
+              CASE ('iHbio2(iSgTotLfCBm(i))')
                 load=.FALSE.
                 varid=varid-1
                 DO i=1,Nsg
                   varid=varid+1
-                  iDbio2(iSgPLim(i))=varid
+                  iHbio2(iSgTotLfCBm(i))=varid
                   DO ng=1,Ngrids
                     Fscale(varid,ng)=scale
                     Iinfo(1,varid,ng)=gtype
@@ -1341,12 +1340,12 @@
    &                    TRIM(ADJUSTL(Vinfo(5)))
                 END DO
                 varid=varid+1
-              CASE ('iDbio2(iSg_R(i))')
+              CASE ('iHbio2(iSgTotRtCBm(i))')
                 load=.FALSE.
                 varid=varid-1
                 DO i=1,Nsg
                   varid=varid+1
-                  iDbio2(iSg_R(i))=varid
+                  iHbio2(iSgTotRtCBm(i))=varid
                   DO ng=1,Ngrids
                     Fscale(varid,ng)=scale
                     Iinfo(1,varid,ng)=gtype
@@ -1363,12 +1362,12 @@
    &                    TRIM(ADJUSTL(Vinfo(5)))
                 END DO
                 varid=varid+1
-              CASE ('iDbio2(iSgPn(i))')
+              CASE ('iHbio2(iSgTotLA(i))')
                 load=.FALSE.
                 varid=varid-1
                 DO i=1,Nsg
                   varid=varid+1
-                  iDbio2(iSgPn(i))=varid
+                  iHbio2(iSgTotLA(i))=varid
                   DO ng=1,Ngrids
                     Fscale(varid,ng)=scale
                     Iinfo(1,varid,ng)=gtype
@@ -1385,12 +1384,12 @@
    &                    TRIM(ADJUSTL(Vinfo(5)))
                 END DO
                 varid=varid+1
-              CASE ('iDbio2(iSgDieoff(i))')
+              CASE ('iHbio2(iSgGridELAP(i))')
                 load=.FALSE.
                 varid=varid-1
                 DO i=1,Nsg
                   varid=varid+1
-                  iDbio2(iSgDieoff(i))=varid
+                  iHbio2(iSgGridELAP(i))=varid
                   DO ng=1,Ngrids
                     Fscale(varid,ng)=scale
                     Iinfo(1,varid,ng)=gtype
@@ -1407,8 +1406,118 @@
    &                    TRIM(ADJUSTL(Vinfo(5)))
                 END DO
                 varid=varid+1
-# endif
+              CASE ('iHbio2(iSgGridPhot(i))')
+                load=.FALSE.
+                varid=varid-1
+                DO i=1,Nsg
+                  varid=varid+1
+                  iHbio2(iSgGridPhot(i))=varid
+                  DO ng=1,Ngrids
+                    Fscale(varid,ng)=scale
+                    Iinfo(1,varid,ng)=gtype
+                  END DO
+                  WRITE (Vname(1,varid),'(a,i2.2)')                   &
+   &                    TRIM(ADJUSTL(Vinfo(1))), i
+                  WRITE (Vname(2,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(2))), ', functional group ', i
+                  WRITE (Vname(3,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(3)))
+                  WRITE (Vname(4,varid),'(a,a)')                      &
+   &                    TRIM(Vname(1,varid)), ', scalar, series'
+                  WRITE (Vname(5,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(5)))
+                END DO
+                varid=varid+1
+              CASE ('iHbio2(iSgPhotLim(i))')
+                load=.FALSE.
+                varid=varid-1
+                DO i=1,Nsg
+                  varid=varid+1
+                  iHbio2(iSgPhotLim(i))=varid
+                  DO ng=1,Ngrids
+                    Fscale(varid,ng)=scale
+                    Iinfo(1,varid,ng)=gtype
+                  END DO
+                  WRITE (Vname(1,varid),'(a,i2.2)')                   &
+   &                    TRIM(ADJUSTL(Vinfo(1))), i
+                  WRITE (Vname(2,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(2))), ', functional group ', i
+                  WRITE (Vname(3,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(3)))
+                  WRITE (Vname(4,varid),'(a,a)')                      &
+   &                    TRIM(Vname(1,varid)), ', scalar, series'
+                  WRITE (Vname(5,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(5)))
+                END DO
+                varid=varid+1
+              CASE ('iHbio2(iSgGridResp(i))')
+                load=.FALSE.
+                varid=varid-1
+                DO i=1,Nsg
+                  varid=varid+1
+                  iHbio2(iSgGridResp(i))=varid
+                  DO ng=1,Ngrids
+                    Fscale(varid,ng)=scale
+                    Iinfo(1,varid,ng)=gtype
+                  END DO
+                  WRITE (Vname(1,varid),'(a,i2.2)')                   &
+   &                    TRIM(ADJUSTL(Vinfo(1))), i
+                  WRITE (Vname(2,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(2))), ', functional group ', i
+                  WRITE (Vname(3,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(3)))
+                  WRITE (Vname(4,varid),'(a,a)')                      &
+   &                    TRIM(Vname(1,varid)), ', scalar, series'
+                  WRITE (Vname(5,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(5)))
+                END DO
+                varid=varid+1
+              CASE ('iHbio2(iSgGridNetPhot(i))')
+                load=.FALSE.
+                varid=varid-1
+                DO i=1,Nsg
+                  varid=varid+1
+                  iHbio2(iSgGridNetPhot(i))=varid
+                  DO ng=1,Ngrids
+                    Fscale(varid,ng)=scale
+                    Iinfo(1,varid,ng)=gtype
+                  END DO
+                  WRITE (Vname(1,varid),'(a,i2.2)')                   &
+   &                    TRIM(ADJUSTL(Vinfo(1))), i
+                  WRITE (Vname(2,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(2))), ', functional group ', i
+                  WRITE (Vname(3,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(3)))
+                  WRITE (Vname(4,varid),'(a,a)')                      &
+   &                    TRIM(Vname(1,varid)), ', scalar, series'
+                  WRITE (Vname(5,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(5)))
+                END DO
+                varid=varid+1
+              CASE ('iHbio2(iSgGridDieoff(i))')
+                load=.FALSE.
+                varid=varid-1
+                DO i=1,Nsg
+                  varid=varid+1
+                  iHbio2(iSgGridDieoff(i))=varid
+                  DO ng=1,Ngrids
+                    Fscale(varid,ng)=scale
+                    Iinfo(1,varid,ng)=gtype
+                  END DO
+                  WRITE (Vname(1,varid),'(a,i2.2)')                   &
+   &                    TRIM(ADJUSTL(Vinfo(1))), i
+                  WRITE (Vname(2,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(2))), ', functional group ', i
+                  WRITE (Vname(3,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(3)))
+                  WRITE (Vname(4,varid),'(a,a)')                      &
+   &                    TRIM(Vname(1,varid)), ', scalar, series'
+                  WRITE (Vname(5,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(5)))
+                END DO
+                varid=varid+1
 #endif
+
 ! ==== Macroalgae parameters ===============================================
 #ifdef MACROALGAE
 

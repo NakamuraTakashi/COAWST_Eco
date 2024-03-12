@@ -121,9 +121,19 @@
 # endif
 #endif
 #ifdef SEAGRASS
-      integer  :: iSgSgCBm(Nsg)
-      integer  :: iSgLfCBm(Nsg)
-      integer  :: iSgRtCBm(Nsg)
+      integer  :: iSgSgCBm(Nsg)        ! Seagrass leaf+root carbon-biomass per unit ground area (in seagrass habitat area) [umol.C m-2.sg.hab]
+      integer  :: iSgLfCBm(Nsg)        ! Seagrass leaf carbon-biomass per unit ground area (in seagrass habitat area) [umol.lf.C m-2.sg.hab]
+      integer  :: iSgRtCBm(Nsg)        ! Seagrass root carbon-biomass per unit ground area (in seagrass habitat area) [umol.rt.C m-2.sg.hab]
+      integer  :: iSgTotSgCBm(Nsg)     ! Total seagrass carbon-biomass in grid [mol.C.tot]
+      integer  :: iSgTotLfCBm(Nsg)     ! Total seagrass above ground carbon-biomass in grid [mol.C.lf]
+      integer  :: iSgTotRtCBm(Nsg)     ! Total seagrass below ground carbon-biomass in grid [mol.C.rt]
+      integer  :: iSgTotLA(Nsg)        ! Total one-sided green leaf area in grid [m2.lf]
+      integer  :: iSgGridELAP(Nsg)     ! Effective leaf area projection on ground (whole grid) [m2.lf.proj m-2.grid]
+      integer  :: iSgGridPhot(Nsg)     ! Seagrass gross photosynthesis rate per unit ground area (whole grid) [umol.C m-2.grid s-1]
+      integer  :: iSgPhotLim(Nsg)      ! Seagrass photosynthesis limiting factor: 1 = light; 2 = Carbon uptake; 3 = Nitrogen uptake; 4 = Phosphorus uptake
+      integer  :: iSgGridResp(Nsg)     ! Seagrass respiration rate per unit ground area (whole grid) [umol.C m-2.grid s-1]
+      integer  :: iSgGridNetPhot(Nsg)  ! Seagrass net photosynthesis rate per unit ground area (whole grid) [umol.C m-2.grid s-1]
+      integer  :: iSgGridDieoff(Nsg)   ! Seagrass dieoff rate carbon biomass per unit ground area (whole grid) [umol.C m-2.grid s-1]    
 #endif
 #ifdef MACROALGAE
 
@@ -169,11 +179,6 @@
 #  endif
 # endif
 # ifdef SEAGRASS
-      integer  :: iSgPg(Nsg)                   ! seagrass gross photosynthesis rate
-      integer  :: iSgPLim(Nsg)                 ! seagrass photosynthesis limiting factor
-      integer  :: iSg_R(Nsg)                   ! seagrass respiration rate
-      integer  :: iSgPn(Nsg)                   ! seagrass net photosynthesis rate
-      integer  :: iSgDieoff(Nsg)               ! Seagrass dieoff rate
 # endif
 # ifdef MACROALGAE
       integer  :: iAgPg(Nag)                  ! Algal gross photosynthesis rate
@@ -536,6 +541,26 @@
         iSgLfCBm(j)=ic
         ic=ic+1
         iSgRtCBm(j)=ic
+        ic=ic+1
+        iSgTotSgCBm(j)=ic
+        ic=ic+1
+        iSgTotLfCBm(j)=ic
+        ic=ic+1
+        iSgTotRtCBm(j)=ic
+        ic=ic+1
+        iSgTotLA(j)=ic
+        ic=ic+1
+        iSgGridELAP(j)=ic
+        ic=ic+1
+        iSgGridPhot(j)=ic
+        ic=ic+1
+        iSgPhotLim(j)=ic
+        ic=ic+1
+        iSgGridResp(j)=ic
+        ic=ic+1
+        iSgGridNetPhot(j)=ic
+        ic=ic+1
+        iSgGridDieoff(j)=ic
       END DO
 #endif
 #ifdef MACROALGAE
@@ -735,16 +760,6 @@
 # endif
 # ifdef SEAGRASS
       DO j=1,Nsg
-        ic=ic+1
-        iSgPg(j)=ic
-        ic=ic+1
-        iSgPLim(j)=ic
-        ic=ic+1
-        iSg_R(j)=ic
-        ic=ic+1
-        iSgPn(j)=ic
-        ic=ic+1
-        iSgDieoff(j)=ic
       END DO
 # endif
 # ifdef MACROALGAE
@@ -998,9 +1013,19 @@
 
 #ifdef SEAGRASS  
           DO isp=1,Nsg
-            SGRASS(ng)%SgCBm(isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgSgCBm(isp) )
-            SGRASS(ng)%LfCBm(isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgLfCBm(isp) )
-            SGRASS(ng)%RtCBm(isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgRtCBm(isp) )
+            SGRASS(ng)%SgCBmF     (isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgSgCBm      (isp) )
+            SGRASS(ng)%LfCBm      (isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgLfCBm      (isp) )
+            SGRASS(ng)%RtCBm      (isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgRtCBm      (isp) )
+            SGRASS(ng)%TotSgCBmF  (isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgTotSgCBm   (isp) )
+            SGRASS(ng)%TotLfCBm   (isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgTotLfCBm   (isp) )
+            SGRASS(ng)%TotRtCBm   (isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgTotRtCBm   (isp) )
+            SGRASS(ng)%TotLA      (isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgTotLA      (isp) )
+            SGRASS(ng)%GridELAP   (isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgGridELAP   (isp) )
+            SGRASS(ng)%GridPhot   (isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgGridPhot   (isp) )
+            SGRASS(ng)%PhotLim    (isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgPhotLim    (isp) )
+            SGRASS(ng)%GridResp   (isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgGridResp   (isp) )
+            SGRASS(ng)%GridNetPhot(isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgGridNetPhot(isp) )
+            SGRASS(ng)%GridDieoff (isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgGridDieoff (isp) )
           END DO
 #endif
 #ifdef MACROALGAE  
@@ -1142,9 +1167,19 @@
 #endif
 #ifdef SEAGRASS
           DO isp=1,Nsg
-            OCEAN(ng)%HisBio2d(i,j, iSgSgCBm(isp) ) = SGRASS(ng)%SgCBm(isp,i,j)
-            OCEAN(ng)%HisBio2d(i,j, iSgLfCBm(isp) ) = SGRASS(ng)%LfCBm(isp,i,j)
-            OCEAN(ng)%HisBio2d(i,j, iSgRtCBm(isp) ) = SGRASS(ng)%RtCBm(isp,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgSgCBm      (isp) ) = SGRASS(ng)%SgCBmF     (isp,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgLfCBm      (isp) ) = SGRASS(ng)%LfCBm      (isp,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgRtCBm      (isp) ) = SGRASS(ng)%RtCBm      (isp,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgTotSgCBm   (isp) ) = SGRASS(ng)%TotSgCBmF  (isp,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgTotLfCBm   (isp) ) = SGRASS(ng)%TotLfCBm   (isp,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgTotRtCBm   (isp) ) = SGRASS(ng)%TotRtCBm   (isp,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgTotLA      (isp) ) = SGRASS(ng)%TotLA      (isp,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgGridELAP   (isp) ) = SGRASS(ng)%GridELAP   (isp,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgGridPhot   (isp) ) = SGRASS(ng)%GridPhot   (isp,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgPhotLim    (isp) ) = SGRASS(ng)%PhotLim    (isp,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgGridResp   (isp) ) = SGRASS(ng)%GridResp   (isp,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgGridNetPhot(isp) ) = SGRASS(ng)%GridNetPhot(isp,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgGridDieoff (isp) ) = SGRASS(ng)%GridDieoff (isp,i,j)
           END DO
 #endif
 #ifdef MACROALGAE
@@ -1279,11 +1314,6 @@
 
 # ifdef SEAGRASS
           DO isp=1,Nsg
-            DIAGS(ng)%DiaBio2d(i,j, iSgPg    (isp) ) = SGRASS(ng)%DiagSgGrossPhot   (isp,i,j)
-            DIAGS(ng)%DiaBio2d(i,j, iSgPLim  (isp) ) = SGRASS(ng)%DiagSgPhotLimiting(isp,i,j)
-            DIAGS(ng)%DiaBio2d(i,j, iSg_R    (isp) ) = SGRASS(ng)%DiagSgResp        (isp,i,j)
-            DIAGS(ng)%DiaBio2d(i,j, iSgPn    (isp) ) = SGRASS(ng)%DiagSgGrossPhot   (isp,i,j) - SGRASS(ng)%DiagSgResp (isp,i,j)
-            DIAGS(ng)%DiaBio2d(i,j, iSgDieoff(isp) ) = SGRASS(ng)%DiagSgDieoff      (isp,i,j)
           END DO
 # endif
 
