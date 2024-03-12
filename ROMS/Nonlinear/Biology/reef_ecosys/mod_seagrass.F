@@ -1961,21 +1961,21 @@ MODULE mod_seagrass
     endif
 # endif
 # if defined SEAGRASS_LEAF_POM
-    if (isnan(POC_uptake_rate_from_ocean) .or. POC_uptake_rate_from_ocean > 1.0d30 &
-      .or. POC_uptake_rate_from_ocean < 0.0d0) then
+    if (isnan(POC_uptake_rate_from_ocean) .or. abs(POC_uptake_rate_from_ocean) > 1.0d30 &
+      .or. POC_uptake_rate_from_ocean > 0.0d0) then
       write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
       write(*,*) 'yt_debug:     POC_uptake_rate_from_ocean =', POC_uptake_rate_from_ocean
       error stop
     endif
 #  if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
-    if (isnan(PON_uptake_rate_from_ocean) .or. PON_uptake_rate_from_ocean > 1.0d30 &
-      .or. PON_uptake_rate_from_ocean < 0.0d0) then
+    if (isnan(PON_uptake_rate_from_ocean) .or. abs(PON_uptake_rate_from_ocean) > 1.0d30 &
+      .or. PON_uptake_rate_from_ocean > 0.0d0) then
       write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
       write(*,*) 'yt_debug:     PON_uptake_rate_from_ocean =', PON_uptake_rate_from_ocean
       error stop
     endif
-    if (isnan(POP_uptake_rate_from_ocean) .or. POP_uptake_rate_from_ocean > 1.0d30 &
-      .or. POP_uptake_rate_from_ocean < 0.0d0) then
+    if (isnan(POP_uptake_rate_from_ocean) .or. abs(POP_uptake_rate_from_ocean) > 1.0d30 &
+      .or. POP_uptake_rate_from_ocean > 0.0d0) then
       write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
       write(*,*) 'yt_debug:     POP_uptake_rate_from_ocean =', POP_uptake_rate_from_ocean
       error stop
