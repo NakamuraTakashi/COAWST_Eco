@@ -35,7 +35,7 @@ MODULE mod_seagrass
   TYPE T_SGRASS ! create a class for all seagrass values (for a given nested grid)
     !                                                         (c s i j l)                               the columns correspond to indexes for: c = chemical species; s = species_id_number; i = i-position; j = j-position; l = sediment layer
 ! >>> Housekeeping Vars <<< !
-    integer, pointer :: Day                                     (  :,:)   ! date                        Simulation whole day (integer round down)
+    real(8), pointer :: Day                                     (  :,:)   ! [day]                       Last growth interval
 ! >>> Saved Constants <<< !
     ! model params
     real(8), pointer :: GridArea                                (  :,:)   ! [m2.grid]                   Total ground area in grid cell
@@ -170,7 +170,7 @@ MODULE mod_seagrass
       allocate ( SGRASS(Ngrids) ) ! array of T_SGRASS which holds all the values for each nested grid
     ENDIF
 ! >>> Housekeeping Vars <<< !
-    allocate( SGRASS(ng)%Day                                            (LBi:UBi,LBj:UBj)  ) !                             Simulation whole day (integer round down)
+    allocate( SGRASS(ng)%Day                                            (LBi:UBi,LBj:UBj)  ) ! [day]                       Last growth interval
 ! >>> Saved Constants <<< !
     ! model params
     allocate( SGRASS(ng)%GridArea                                       (LBi:UBi,LBj:UBj)  ) ! [m2.grid]                   Total ground area in grid cell
@@ -609,7 +609,7 @@ MODULE mod_seagrass
 # endif
 
 ! >>> Housekeeping Vars <<< !
-    integer, pointer      :: day                        !                             Simulation whole day (integer round down)
+    real(8), pointer      :: day                        ! [day]                       Last growth interval
     logical               :: is_growth_interval         !                             Boolean flag for if the current interval is a growth interval
 
 ! >>> Saved Constants <<< !
@@ -838,7 +838,7 @@ MODULE mod_seagrass
 
 ! >>> Housekeeping Vars <<< !
     ! update at start of every loop before everything else
-    Day                 =>  SGRASS(ng)%Day                            (i,j) !                             Simulation whole day (integer round down)
+    Day                 =>  SGRASS(ng)%Day                            (i,j) ! [day]                       Last growth interval
     is_growth_interval  =   .false.                                         !                             Boolean flag for if the current interval is a growth interval
 
 ! >>> Saved Constants <<< !
@@ -987,11 +987,11 @@ MODULE mod_seagrass
 !                                  HOUSE KEEPING AT START OF LOOP
 ! ----------------------------------------------------------------------------------------------------
 ! ====================================================================================================
-
-    if (int(date) .gt. Day) then
+    
+    if (date .gt. real(int(Day*24), 8)/24) then
       is_growth_interval = .true.
-      Day = int(date)
-      if (i==1 .and. j==1) then
+      Day = real(int(date*24+1), 8)/24d0
+      if(i == 50 .and. j == 50) then
         write(*,*) "yt_debug:    Day = ", Day, "   date = ", date
       endif
     endif
@@ -1228,12 +1228,15 @@ MODULE mod_seagrass
     ! sed_layer_thickness(Nsed)   [mm]                        Thickness of each sediment layer
     ! [umol.CHEM/L s] = [umol.CHEM/L s] - [mol.CHEM/mol.C] [umol.C/m2.hab s] [] / [mm] (m2*mm/L)
     if (sumNUpPos .gt. 0d0) then
+      !     (-)                           -               (+)
       delta_sed_NO3(:) = delta_sed_NO3(:) - SgNperC * Growth_rate * (NO3_uptake_possible(1:Nsed)/sumNUpPos) / sed_layer_thickness(:)
       delta_sed_NH4(:) = delta_sed_NH4(:) - SgNperC * Growth_rate * (NH4_uptake_possible(1:Nsed)/sumNUpPos) / sed_layer_thickness(:)
 #  if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE
-      delta_sed_DO(:)  = delta_sed_DO(:)  + 2d0 * delta_sed_NO3(:) ! delta_sed_NO3 should have been zero before the previous calculation (should be changed if NO3 parameters are changed before this step)
+      !     (+)                           -              (-)
+      delta_sed_DO(:)  = delta_sed_DO(:)  - 2d0 * delta_sed_NO3(:) ! delta_sed_NO3 should have been zero before the previous calculation (should be changed if NO3 parameters are changed before this step)
 #  else
-      DO__uptake_rate_from_ocean = DO__uptake_rate_from_ocean - 2d0 * sum(delta_sed_NO3(:))
+      !     (-)                                                                (-)
+      DO__uptake_rate_from_ocean = DO__uptake_rate_from_ocean + 2d0 * sum(delta_sed_NO3(:))
 #  endif
     endif
     if (sumPUpPos .gt. 0d0) then
@@ -1264,9 +1267,9 @@ MODULE mod_seagrass
       delta_sed_NO3(:) = delta_sed_NO3(:) - SgNperC * Growth_rate * (NO3_uptake_possible(1:Nsed)/sumNUpPos) / sed_layer_thickness(:)
       delta_sed_NH4(:) = delta_sed_NH4(:) - SgNperC * Growth_rate * (NH4_uptake_possible(1:Nsed)/sumNUpPos) / sed_layer_thickness(:)
 #  if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE
-      delta_sed_DO(:)  = delta_sed_DO(:)  + 2d0 * delta_sed_NO3(:) ! delta_sed_NO3 should have been zero before the previous calculation (should be changed if NO3 parameters are changed before this step)
+      delta_sed_DO(:)  = delta_sed_DO(:)  - 2d0 * delta_sed_NO3(:) ! delta_sed_NO3 should have been zero before the previous calculation (should be changed if NO3 parameters are changed before this step)
 #  else
-      DO__uptake_rate_from_ocean = DO__uptake_rate_from_ocean - 2d0 * sum(delta_sed_NO3(:))
+      DO__uptake_rate_from_ocean = DO__uptake_rate_from_ocean + 2d0 * sum(delta_sed_NO3(:))
 #  endif
     endif
     if (sumPUpPos .gt. 0d0) then
@@ -1464,7 +1467,7 @@ MODULE mod_seagrass
 ! Mass balance ---------------------------------------------------------------------------------------
 
       ! respiration consumes CH2O in biomass
-      ! delta_SgCBmF                 [umol.C m-2.sg.hab s-1]     Rate of change in SgCBmF
+      ! delta_SgCBmF                [umol.C m-2.sg.hab s-1]     Rate of change in SgCBmF
       ! Resp_rate                   [umol.C m-2.sg.hab s-1]     Gross respiration/un-growth rate
       delta_SgCBmF = delta_SgCBmF - Resp_rate
 
@@ -1926,9 +1929,15 @@ MODULE mod_seagrass
       write(*,*) 'yt_debug:     ocean_DO__conc =', ocean_DO__conc
       write(*,*) 'yt_debug:     ocean_DO__conc - DO__uptake_rate_from_ocean*dt/dz =' &
         , ocean_DO__conc - DO__uptake_rate_from_ocean*dt/dz ! [umol/L] - [mmol  m-2 s-1][s/m](m3/1000L)(1000umol/mmol)
-      write(*,*) 'yt_debug:     Resp_rate =', Resp_rate
-      write(*,*) 'yt_debug:     Resp_pos =', Resp_pos
-      write(*,*) 'yt_debug:     Resp_req =', Resp_req
+      write(*,*) 'yt_debug:     dt =', dt
+      write(*,*) 'yt_debug:     dz =', dz
+      write(*,*) 'yt_debug:     DO_uptake_possible(0) =', DO_uptake_possible(0)
+      write(*,*) 'yt_debug:     0.5*ocean_DO__conc*dz/dt*1000', 0.5d0*ocean_DO__conc*dz/dt*1000.0d0
+      write(*,*) 'yt_debug:     Resp_rate*0.001 =', Resp_rate*0.001d0
+      write(*,*) 'yt_debug:     Resp_pos*0.001 =', Resp_pos*0.001d0
+      write(*,*) 'yt_debug:     Resp_req*0.001 =', Resp_req*0.001d0
+      write(*,*) 'yt_debug:     -Growth_rate*0.001', -1d0*Growth_rate*0.001d0
+      write(*,*) 'yt_debug:     2 * sum(delta_sed_NO3(:))', 2d0 * sum(delta_sed_NO3(:))
       error stop
     endif
 # if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE
@@ -2036,7 +2045,7 @@ MODULE mod_seagrass
     real(8), intent(inout):: p_sgrass(Nsg)              ! [] (0~1)                    Seagrass coverage (every species)
 
 ! >>> Housekeeping Vars <<< !
-    integer, pointer      :: day                        !                             Simulation whole day (integer round down)
+    real(8), pointer      :: day                        !                             Simulation whole day (integer round down)
     logical               :: is_growth_interval         !                             Boolean flag for if the current interval is a growth interval
 
 ! >>> Saved Constants <<< !
@@ -2081,10 +2090,10 @@ MODULE mod_seagrass
 ! ----------------------------------------------------------------------------------------------------
 ! ====================================================================================================
 
-    if (int(date) .gt. Day) then
+    if (date .gt. real(int(Day*24), 8)/24) then
       is_growth_interval = .true.
-      Day = int(date)
-      if (i==1 .and. j==1) then
+      Day = real(int(date*24+1), 8)/24d0
+      if(i == 50 .and. j == 50) then
         write(*,*) "yt_debug:    Day = ", Day, "   date = ", date
       endif
     endif

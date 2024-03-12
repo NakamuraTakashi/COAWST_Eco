@@ -2050,40 +2050,40 @@ endif
     DO icl=1,Nsg    
       IF(p_sgrass(icl) .gt. 0.0d0) THEN 
 
-        CALL seagrass              &
+        CALL seagrass         &
 !       input parameters
-          ( ng             &   ! ng: nested grid number; 
-          , icl            &   ! icl: seagrass species id
-          , i, j           &   ! i,j: position
+          ( ng                &   ! ng: nested grid number; 
+          , icl               &   ! icl: seagrass species id
+          , i, j              &   ! i,j: position
 # if defined SEDIMENT_ECOSYS
-          , Nsed(ng)       &   ! Number of sediment layers
+          , Nsed(ng)          &   ! Number of sediment layers
 # endif
-          , dz(1)          &   ! vertical layer thickness (m)
-          , date           &   ! Date (days since x or elapsed days) yt_edit best if in phase with clock to maintain consistency on restart
-          , dt             &   ! Time step (sec)
-          , p_sgrass(:)    &   ! seagrass coverage (every species)
-          , PFD            &   ! Photon flux density (umol m-2 s-1)
-          , rho_sw(1)      &   ! Density of seawater (g cm-3)
-          , DIC(1)*rho_sw(1)&   ! DIC (umol l-1)            ! [umol/L] = [umol/kg] [g/cm3] (kg/1000g)(1000cm3/L)
-          , DOx(1)         &   ! DO  (umol L-1)
+          , dz(1)             &   ! vertical layer thickness (m)
+          , date              &   ! Date (days since x or elapsed days) yt_edit best if in phase with clock to maintain consistency on restart
+          , dt                &   ! Time step (sec)
+          , p_sgrass(:)       &   ! seagrass coverage (every species)
+          , PFD               &   ! Photon flux density (umol m-2 s-1)
+          , rho_sw(1)         &    ! Density of seawater (g cm-3)
+          , DIC(1)*rho_sw(1)  &   ! DIC (umol l-1)            ! [umol/L] = [umol/kg] [g/cm3] (kg/1000g)(1000cm3/L)
+          , DOx(1)            &   ! DO  (umol L-1)
 # if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE         
-          , NO3(1)         &   ! NO3 concentration (umol L-1)
-          , NH4(1)         &   ! NH4 concentration (umol L-1)
-          , PO4(1)         &   ! PO4 concentration (umol L-1)
+          , NO3(1)            &   ! NO3 concentration (umol L-1)
+          , NH4(1)            &   ! NH4 concentration (umol L-1)
+          , PO4(1)            &   ! PO4 concentration (umol L-1)
 # endif
 !       output parameters 
-          , Flux_DIC      &   ! DIC uptake rate (mmol m-2 s-1)  * direction of ocean to seagrass is positive
-          , Flux_DO       &   ! DO  uptake rate (mmol m-2 s-1)  * direction of ocean to seagrass is positive
+          , Flux_DIC          &   ! DIC uptake rate (mmol m-2 s-1)  * direction of ocean to seagrass is positive
+          , Flux_DO           &   ! DO  uptake rate (mmol m-2 s-1)  * direction of ocean to seagrass is positive
 # if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE         
-          , Flux_NO3      &   ! NO3 uptake rate (mmol m-2 s-1)  * direction of ocean to seagrass is positive
-          , Flux_NH4      &   ! NH4 uptake rate (mmol m-2 s-1)  * direction of ocean to seagrass is positive
-          , Flux_PO4      &   ! PO4 uptake rate (mmol m-2 s-1)  * direction of ocean to seagrass is positive
+          , Flux_NO3          &   ! NO3 uptake rate (mmol m-2 s-1)  * direction of ocean to seagrass is positive
+          , Flux_NH4          &   ! NH4 uptake rate (mmol m-2 s-1)  * direction of ocean to seagrass is positive
+          , Flux_PO4          &   ! PO4 uptake rate (mmol m-2 s-1)  * direction of ocean to seagrass is positive
 # endif
 # if defined SEAGRASS_LEAF_POM
-          , Flux_POC(iDtr)&   ! POC uptake rate (mmol m-2 s-1)  * direction of ocean to seagrass is positive
+          , Flux_POC(iDtr)    &   ! POC uptake rate (mmol m-2 s-1)  * direction of ocean to seagrass is positive
 #  if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
-          , Flux_PON(iDtr)&   ! PON uptake rate (mmol m-2 s-1)  * direction of ocean to seagrass is positive
-          , Flux_POP(iDtr)&   ! POP uptake rate (mmol m-2 s-1)  * direction of ocean to seagrass is positive
+          , Flux_PON(iDtr)    &   ! PON uptake rate (mmol m-2 s-1)  * direction of ocean to seagrass is positive
+          , Flux_POP(iDtr)    &   ! POP uptake rate (mmol m-2 s-1)  * direction of ocean to seagrass is positive
 #  endif
 # endif
           )
@@ -2094,7 +2094,7 @@ endif
         ! [umol kg-1 s-1] = [mmol m-2 s-1] / [m]    * []                     / [g cm-3] * [ (1000 umol/mmol) (0.000001 m3/cm3) (1000 g/kg) = 1]
 
         ! dCHEM_dt        = Flux_CHEM      / height * coverage_area_fraction * unit_conversion_factor
-        ! [umol L-1 s-1]  = [mmol m-2 s-1] / [m]    * []                     * [ (1000 umol/mmol) (0.001 m3/L) = 1]
+        ! [umol L-1 s-1]  = [mmol/m2 s]    / [m]    * []                     * [ (1000 umol/mmol) (m3/1000 L) = 1]
 
         ! cff = unit_conversion_factor / height * coverage_area_fraction
         cff = 1.0d0/dz(1) * p_sgrass(icl)
