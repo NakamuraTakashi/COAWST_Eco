@@ -2427,7 +2427,7 @@ endif
 !!!  Sediment ecosystem model
 
 ! yt_edit to do put output data in his2.nc file
-! yt_edit don't run under reef rock (confirm coverage type interactions)
+! yt_edit don't run under reef rock (confirm coverage type interactions) (don't forget to fix seagrass -> sediment coupling when you implement this: umol/L volume shouuld be; gridarea * sed_dz -> p_sediment * sed_dz)
 ! yt_edit porosity from coverage??
 
       DO m=1,isplitsed   !!! Loop for sediment model: dtc <= 0.05 sec

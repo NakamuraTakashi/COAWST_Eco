@@ -11,5 +11,5 @@ Lib/SCRIP_COAWST/netcdf.inc
 *.bot
 *.grd
 
-test.txt
-test.F
+test*.txt
+test*.F

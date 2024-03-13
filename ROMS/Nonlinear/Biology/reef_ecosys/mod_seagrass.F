@@ -778,6 +778,7 @@ MODULE mod_seagrass
     real(8)               :: Growth_limit_NO3           ! [umol.C m-2.sg.hab s-1]     Photosynthesis/growth rate possible as limited by NO3 uptake
     real(8)               :: Growth_limit_NH4           ! [umol.C m-2.sg.hab s-1]     Photosynthesis/growth rate possible as limited by NH4 uptake
     real(8)               :: Growth_limit_PO4           ! [umol.C m-2.sg.hab s-1]     Photosynthesis/growth rate possible as limited by PO4 uptake
+    real(8)               :: DO_released_from_NO3       ! [umol.O m-2.sg.hab s-1]     Total DO produced from consumption of NO3 in the growth reaction: for every mol of NO3 uptake, release 2 mol of O2
 # endif
     ! Respiration/Un-growth
     real(8)               :: Resp_rate                  ! [umol.C m-2.sg.hab s-1]     Gross respiration/un-growth rate
@@ -1183,20 +1184,21 @@ MODULE mod_seagrass
     ! CHEM_uptake_rate_from_ocean [mmol.CHEM m-2.sg.hab s-1]  direction of ocean to seagrass is positive
     ! Growth_rate                 [umol.C m-2.sg.hab s-1]     Gross photosynthesis/growth rate
     ! DIC_uptake_possible(:)      [umol.DIC m-2.sg.hab s-1]   DIC uptake rate possible in each layer; 0 = water column, 1-Nsed = sediment layers
-    ! [mmol.CHEM/m2.hab s]     = [mmol.CHEM/m2.hab s]       + [umol.C/m2.hab s]                                (mmol/1000umol)
     if (sumCUpPos .gt. 0d0) then
+      ! [mmol.CHEM/m2.hab s]     = [mmol.CHEM/m2.hab s]       + [umol.C/m2.hab s]                                (mmol/1000umol)
       DIC_uptake_rate_from_ocean = DIC_uptake_rate_from_ocean + Growth_rate * (DIC_uptake_possible(0)/sumCUpPos) * 0.001d0
+      DO__uptake_rate_from_ocean = DO__uptake_rate_from_ocean - Growth_rate * (f_abv_cur                       ) * 0.001d0
     endif
-    DO__uptake_rate_from_ocean = DO__uptake_rate_from_ocean - Growth_rate * (f_abv_cur                       ) * 0.001d0
     ! delta_sed_CHEM(Nsed)        [umol.CHEM L-1 s-1]         Rate of change in CHEM due to flux from roots to sediment (positive means seagrass to sediment)
+    ! p_sgrass(Nsg)               [m2.sg.hab m-2.grid]        (0~1)  Seagrass coverage (every species)
     ! root_mass_profile(sed)      []                          Mass ratio of roots in each layer (total must sum to 1.0)
     ! sed_layer_thickness(Nsed)   [mm]                        Thickness of each sediment layer
     ! root_comp_dist_factor(Nsed) [g.rt.comp g-1.tot mm-1]    root compartemtent distribution factor equal to f_blw_cur * root_mass_profile(:) / sed_layer_thickness(:) 
-    ! [umol.CHEM/L s] = [umol.CHEM/L s] - [umol.C/m2.hab s] [1/mm] (1000mm/m)(m3/1000L)
     if (sumCUpPos .gt. 0d0) then
-      delta_sed_DIC(:) = delta_sed_DIC(:) - Growth_rate * (DIC_uptake_possible(1:Nsed)/sumCUpPos) / sed_layer_thickness(:)
+      ! [umol.CHEM/L s] = [umol.CHEM/L s]  - [umol.C/m2.hab s] [m2.hab/m2.grid]   [1/mm] (1000mm/m)(m3/1000L)
+      delta_sed_DIC(:)  = delta_sed_DIC(:) - Growth_rate      * p_sgrass(species) * (DIC_uptake_possible(1:Nsed)/sumCUpPos) / sed_layer_thickness(:)
+      delta_sed_DO(:)   = delta_sed_DO(:)  + Growth_rate      * p_sgrass(species) * root_comp_dist_factor(:)
     endif
-    delta_sed_DO(:)  = delta_sed_DO(:)  + Growth_rate * root_comp_dist_factor(:)
 # else
     ! CHEM_uptake_rate_from_ocean [mmol.CHEM m-2.sg.hab s-1]  direction of ocean to seagrass is positive
     ! Growth_rate                 [umol.C m-2.sg.hab s-1]     Gross photosynthesis/growth rate
@@ -1215,7 +1217,6 @@ MODULE mod_seagrass
     if (sumNUpPos .gt. 0d0) then
       NO3_uptake_rate_from_ocean = NO3_uptake_rate_from_ocean + SgNperC * Growth_rate * (NO3_uptake_possible(0)/sumNUpPos) * 0.001d0
       NH4_uptake_rate_from_ocean = NH4_uptake_rate_from_ocean + SgNperC * Growth_rate * (NH4_uptake_possible(0)/sumNUpPos) * 0.001d0
-      DO__uptake_rate_from_ocean = DO__uptake_rate_from_ocean - 2d0 * NO3_uptake_rate_from_ocean ! NO3_uptake_rate_from_ocean should have been zero before the previous calculation (should be changed if NO3 parameters are changed before this step)
     endif
     if (sumPUpPos .gt. 0d0) then
       PO4_uptake_rate_from_ocean = PO4_uptake_rate_from_ocean + SgPperC * Growth_rate * (PO4_uptake_possible(0)/sumPUpPos) * 0.001d0
@@ -1223,26 +1224,22 @@ MODULE mod_seagrass
     ! delta_sed_CHM(Nsed)         [umol.CHM L-1 s-1]          Rate of change in CHM due to flux from roots to sediment (positive means seagrass to sediment)
     ! SgXperC                     [mol.CHEM mol-1.C]          Species specific seagrass Nitrogen or Phosphorus to Carbon ratio
     ! Growth_rate                 [umol.C m-2.sg.hab s-1]     Gross photosynthesis/growth rate
+    ! p_sgrass(Nsg)               [m2.sg.hab m-2.grid]        (0~1)  Seagrass coverage (every species)
     ! CHM_uptake_possible(:)      [umol.CHM m-2.sg.hab s-1]   CHM uptake rate possible in each layer; 0 = water column, 1-Nsed = sediment layers
     ! sumXUpPos                   [umol.N m-2.sg.hab s-1]     sum of all potential nitrogen or phosphate uptake (used for scaling/normalizing uptake proportions)
     ! sed_layer_thickness(Nsed)   [mm]                        Thickness of each sediment layer
-    ! [umol.CHEM/L s] = [umol.CHEM/L s] - [mol.CHEM/mol.C] [umol.C/m2.hab s] [] / [mm] (m2*mm/L)
+    ! [umol.CHEM/L s] = [umol.CHEM/L s] - [mol.CHEM/mol.C] [umol.C/m2.hab s] [m2.hab/m2.grid] [] / [mm] (m2*mm/L)
     if (sumNUpPos .gt. 0d0) then
       !     (-)                           -               (+)
-      delta_sed_NO3(:) = delta_sed_NO3(:) - SgNperC * Growth_rate * (NO3_uptake_possible(1:Nsed)/sumNUpPos) / sed_layer_thickness(:)
-      delta_sed_NH4(:) = delta_sed_NH4(:) - SgNperC * Growth_rate * (NH4_uptake_possible(1:Nsed)/sumNUpPos) / sed_layer_thickness(:)
-#  if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE
-      !     (+)                           -              (-)
-      delta_sed_DO(:)  = delta_sed_DO(:)  - 2d0 * delta_sed_NO3(:) ! delta_sed_NO3 should have been zero before the previous calculation (should be changed if NO3 parameters are changed before this step)
-#  else
-      !     (-)                                                                (-)
-      DO__uptake_rate_from_ocean = DO__uptake_rate_from_ocean + 2d0 * sum(delta_sed_NO3(:))
-#  endif
+      delta_sed_NO3(:) = delta_sed_NO3(:) - SgNperC * Growth_rate * p_sgrass(species) &
+                          * (NO3_uptake_possible(1:Nsed)/sumNUpPos) / sed_layer_thickness(:)
+      delta_sed_NH4(:) = delta_sed_NH4(:) - SgNperC * Growth_rate * p_sgrass(species) &
+                          * (NH4_uptake_possible(1:Nsed)/sumNUpPos) / sed_layer_thickness(:)
     endif
     if (sumPUpPos .gt. 0d0) then
-      delta_sed_PO4(:) = delta_sed_PO4(:) - SgPperC * Growth_rate * (PO4_uptake_possible(1:Nsed)/sumPUpPos) / sed_layer_thickness(:)
+      delta_sed_PO4(:) = delta_sed_PO4(:) - SgPperC * Growth_rate * p_sgrass(species) &
+                          * (PO4_uptake_possible(1:Nsed)/sumPUpPos) / sed_layer_thickness(:)
     endif
-
 # elif defined SEAGRASS_LEAF_NUTRIENT_UPTAKE
     ! CHEM_uptake_rate_from_ocean [mmol.CHEM m-2.sg.hab s-1]  CHEM uptake rate  * direction of ocean to seagrass is positive
     ! SgXperC                     [mol.CHEM mol-1.C]          Species specific seagrass Nitrogen or Phosphorus to Carbon ratio
@@ -1250,34 +1247,55 @@ MODULE mod_seagrass
     ! sumXUpPos                   [umol.N m-2.sg.hab s-1]     sum of all potential nitrogen or phosphate uptake (used for scaling/normalizing uptake proportions)
     ! [mmol.CHEM/m2.hab s]     = [mmol.CHEM/m2.hab s]       + [mol.CHEM/mol.C] [umol.C/m2.hab s] (mmol/1000umol)
     if (sumNUpPos .gt. 0d0) then
-      NO3_uptake_rate_from_ocean = NO3_uptake_rate_from_ocean + SgNperC          * Growth_rate     * 0.001d0       * NO3_uptake_possible(0)/sumNUpPos
-      NH4_uptake_rate_from_ocean = NH4_uptake_rate_from_ocean + SgNperC          * Growth_rate     * 0.001d0       * NH4_uptake_possible(0)/sumNUpPos
-      DO__uptake_rate_from_ocean = DO__uptake_rate_from_ocean - 2d0 * NO3_uptake_rate_from_ocean ! NO3_uptake_rate_from_ocean should have been zero before the previous calculation (should be changed if NO3 parameters are changed before this step)
+      NO3_uptake_rate_from_ocean = NO3_uptake_rate_from_ocean + SgNperC * Growth_rate * 0.001d0 * NO3_uptake_possible(0)/sumNUpPos
+      NH4_uptake_rate_from_ocean = NH4_uptake_rate_from_ocean + SgNperC * Growth_rate * 0.001d0 * NH4_uptake_possible(0)/sumNUpPos
     endif
-    PO4_uptake_rate_from_ocean = PO4_uptake_rate_from_ocean + SgPperC          * Growth_rate     * 0.001d0
+    PO4_uptake_rate_from_ocean   = PO4_uptake_rate_from_ocean + SgPperC * Growth_rate * 0.001d0
 # elif defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
     ! delta_sed_CHM(Nsed)         [umol.CHM L-1 s-1]          Rate of change in CHM due to flux from roots to sediment (positive means seagrass to sediment)
     ! SgXperC                     [mol.CHEM mol-1.C]          Species specific seagrass Nitrogen or Phosphorus to Carbon ratio
     ! Growth_rate                 [umol.C m-2.sg.hab s-1]     Gross photosynthesis/growth rate
+    ! p_sgrass(Nsg)               [m2.sg.hab m-2.grid]        (0~1)  Seagrass coverage (every species)
     ! CHM_uptake_possible(:)      [umol.CHM m-2.sg.hab s-1]   CHM uptake rate possible in each layer; 0 = water column, 1-Nsed = sediment layers
     ! sumXUpPos                   [umol.N m-2.sg.hab s-1]     sum of all potential nitrogen or phosphate uptake (used for scaling/normalizing uptake proportions)
     ! sed_layer_thickness(Nsed)   [mm]                        Thickness of each sediment layer
-    ! [umol.CHEM/L s] = [umol.CHEM/L s] - [mol.CHEM/mol.C] [umol.C/m2.hab s] [] / [mm] (m2*mm/L)
+    ! [umol.CHEM/L s] = [umol.CHEM/L s] - [mol.CHEM/mol.C] [umol.C/m2.hab s] [m2.hab/m2.grid] [] / [mm] (m2*mm/L)
     if (sumNUpPos .gt. 0d0) then
-      delta_sed_NO3(:) = delta_sed_NO3(:) - SgNperC * Growth_rate * (NO3_uptake_possible(1:Nsed)/sumNUpPos) / sed_layer_thickness(:)
-      delta_sed_NH4(:) = delta_sed_NH4(:) - SgNperC * Growth_rate * (NH4_uptake_possible(1:Nsed)/sumNUpPos) / sed_layer_thickness(:)
-#  if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE
-      delta_sed_DO(:)  = delta_sed_DO(:)  - 2d0 * delta_sed_NO3(:) ! delta_sed_NO3 should have been zero before the previous calculation (should be changed if NO3 parameters are changed before this step)
-#  else
-      DO__uptake_rate_from_ocean = DO__uptake_rate_from_ocean + 2d0 * sum(delta_sed_NO3(:))
-#  endif
+      delta_sed_NO3(:) = delta_sed_NO3(:) - SgNperC * Growth_rate * p_sgrass(species) &
+                          * (NO3_uptake_possible(1:Nsed)/sumNUpPos) / sed_layer_thickness(:)
+      delta_sed_NH4(:) = delta_sed_NH4(:) - SgNperC * Growth_rate * p_sgrass(species) &
+                          * (NH4_uptake_possible(1:Nsed)/sumNUpPos) / sed_layer_thickness(:)
     endif
     if (sumPUpPos .gt. 0d0) then
-      delta_sed_PO4(:) = delta_sed_PO4(:) - SgPperC * Growth_rate * (PO4_uptake_possible(1:Nsed)/sumPUpPos) / sed_layer_thickness(:)
+      delta_sed_PO4(:) = delta_sed_PO4(:) - SgPperC * Growth_rate * p_sgrass(species) &
+                          * (PO4_uptake_possible(1:Nsed)/sumPUpPos) / sed_layer_thickness(:)
     endif
+# endif
 
-# else
-    ! nothing
+# if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
+    ! DO_released_from_NO3        [umol.O m-2.sg.hab s-1]     Total O2 produced from consumption of NO3 in the growth reaction: for every mol of NO3 uptake, release 2 mol of O2
+    ! SgNperC                     [mol.N mol-1.C]             Species specific seagrass Nitrogen or Phosphorus to Carbon ratio
+    ! Growth_rate                 [umol.C m-2.sg.hab s-1]     Gross photosynthesis/growth rate
+    ! [umol.O/m2.hab s] = [mol.O/mol.C] [umol.C/m2.hab s] []
+    if (sumNUpPos .gt. 0d0) then
+      DO_released_from_NO3 = 2d0 * SgNperC * Growth_rate * (sum(NO3_uptake_possible(:))/sumNUpPos)
+    else
+      DO_released_from_NO3 = 0.0d0
+    endif
+#  if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE
+    ! DO__uptake_rate_from_ocean  [mmol.O m-2.sg.hab s-1]     direction of ocean to seagrass is positive
+    ! [mmol.O/m2.hab s]        = [mmol.O/m2.hab s]          - [umol.O/m2.hab s]    []            (mmol/1000umol)
+    DO__uptake_rate_from_ocean = DO__uptake_rate_from_ocean - DO_released_from_NO3 * (f_abv_cur) * 0.001d0
+    ! delta_sed_DO(Nsed)          [umol.O L-1 s-1]            Rate of change in DO due to flux from roots to sediment (positive means seagrass to sediment)
+    ! p_sgrass(Nsg)               [m2.sg.hab m-2.grid]        (0~1)  Seagrass coverage (every species)
+    ! root_comp_dist_factor(Nsed) [g.rt.comp g-1.tot mm-1]    root compartemtent distribution factor equal to f_blw_cur * root_mass_profile(:) / sed_layer_thickness(:) 
+    ! [umol.O/L s]  = [umol.O/L s]    + [umol.O/m2.hab s]    [m2.hab/m2.grid]   [1/mm] (1000mm/m)(m3/1000L)
+    delta_sed_DO(:) = delta_sed_DO(:) + DO_released_from_NO3 * p_sgrass(species) * root_comp_dist_factor(:)
+#  else
+    ! DO__uptake_rate_from_ocean  [mmol.O m-2.sg.hab s-1]     direction of ocean to seagrass is positive
+    ! [mmol.O/m2.hab s]        = [mmol.O/m2.hab s]          - [umol.O/m2.hab s]    (mmol/1000umol)
+    DO__uptake_rate_from_ocean = DO__uptake_rate_from_ocean - DO_released_from_NO3 * 0.001d0
+#  endif
 # endif
 
 ! update saved output values -------------------------------------------------------------------------
@@ -1454,11 +1472,12 @@ MODULE mod_seagrass
       ! sed_layer_thickness(Nsed)   [mm]                        Thickness of each sediment layer
       ! root_comp_dist_factor(Nsed) [g.rt.comp g-1.tot mm-1]    root compartemtent distribution factor equal to f_blw_cur * root_mass_profile(:) / sed_layer_thickness(:) 
       ! dieoff_rate                 [umol.C m-2.sg.hab s-1]     Seagrass dieoff rate
-      ! [umol.X/L s]   = [umol.X/L s]     + [X/C]   [1/mm]                     [umol.C/m2.hab s] (m2.hab*mm/L)
-      delta_sed_POC(:) = delta_sed_POC(:) +           root_comp_dist_factor(:) * dieoff_rate
+      ! p_sgrass(Nsg)               [m2.sg.hab m-2.grid]        (0~1)  Seagrass coverage (every species)
+      ! [umol.X/L s]   = [umol.X/L s]     + [X/C]   [1/mm]                     [umol.C/m2.hab s] [m2.hab/m2.grid]    (m2.hab*mm/L)
+      delta_sed_POC(:) = delta_sed_POC(:) +           root_comp_dist_factor(:) * dieoff_rate     * p_sgrass(species)
 #  if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
-      delta_sed_PON(:) = delta_sed_PON(:) + SgNperC * root_comp_dist_factor(:) * dieoff_rate
-      delta_sed_POP(:) = delta_sed_POP(:) + SgPperC * root_comp_dist_factor(:) * dieoff_rate
+      delta_sed_PON(:) = delta_sed_PON(:) + SgNperC * root_comp_dist_factor(:) * dieoff_rate     * p_sgrass(species)
+      delta_sed_POP(:) = delta_sed_POP(:) + SgPperC * root_comp_dist_factor(:) * dieoff_rate     * p_sgrass(species)
 #  endif
 # endif
 
@@ -1486,17 +1505,18 @@ MODULE mod_seagrass
     endif
     DIC_uptake_rate_from_ocean = DIC_uptake_rate_from_ocean - Resp_rate * (f_abv_cur                      ) * 0.001d0
     ! delta_sed_CHEM(Nsed)        [umol.CHEM L-1 s-1]         Rate of change in CHEM due to flux from roots to sediment (positive means seagrass to sediment)
+    ! p_sgrass(Nsg)               [m2.sg.hab m-2.grid]        (0~1)  Seagrass coverage (every species)
     ! root_mass_profile(sed)      []                          Mass ratio of roots in each layer (total must sum to 1.0)
     ! sed_layer_thickness(Nsed)   [mm]                        Thickness of each sediment layer
     ! root_comp_dist_factor(Nsed) [g.rt.comp g-1.tot mm-1]    root compartemtent distribution factor equal to f_blw_cur * root_mass_profile(:) / sed_layer_thickness(:) 
     ! sumOUpPos                   [umol.DO m-2.sg.hab s-1]    sum of all potential DO uptake (used for scaling/normalizing uptake proportions)
     ! TotRtCBm                    [mol.C.rt]                  Total seagrass root carbon-biomass in grid cell
     ! TotSgCBm                    [mol.C.tot]                 Total seagrass carbon-biomass in grid cell
-    ! [umol.CHEM/L s] = [umol.CHEM/L s] - [umol.C/m2.hab s] [1/mm] (1000mm/m)(m3/1000L)
+    ! [umol.CHEM/L s] = [umol.CHEM/L s] - [umol.C/m2.hab s] [m2.hab/m2.grid] [1/mm] (1000mm/m)(m3/1000L)
     if (sumOUpPos .gt. 0d0) then
-      delta_sed_DO(:)  = delta_sed_DO(:)  - Resp_rate * (DO_uptake_possible(1:Nsed)/sumOUpPos) / sed_layer_thickness(:)
+      delta_sed_DO(:) = delta_sed_DO(:) - Resp_rate * p_sgrass(species) * (DO_uptake_possible(1:Nsed)/sumOUpPos) / sed_layer_thickness(:)
     endif
-    delta_sed_DIC(:) = delta_sed_DIC(:) + Resp_rate * root_comp_dist_factor(:)
+    delta_sed_DIC(:) = delta_sed_DIC(:) + Resp_rate * p_sgrass(species) * root_comp_dist_factor(:)
 # else
     ! CHEM_uptake_rate from_ocean [mmol m-2 s-1]              direction of ocean to seagrass is positive
     ! Resp                        [mmol.C m-2.ground s-1]     Gross respiration rate
@@ -1517,13 +1537,14 @@ MODULE mod_seagrass
     ! delta_sed_CHM(Nsed)         [umol.CHM L-1 s-1]          Rate of change in CHM due to flux from roots to sediment (positive means seagrass to sediment)
     ! SgXperC                     [mol.CHEM mol-1.C]          Species specific seagrass Nitrogen or Phosphorus to Carbon ratio
     ! Resp_rate                   [umol.C m-2.sg.hab s-1]     Gross respiration/un-growth rate
+    ! p_sgrass(Nsg)               [m2.sg.hab m-2.grid]        (0~1)  Seagrass coverage (every species)
     ! sed_layer_thickness(Nsed)   [mm]                        Thickness of each sediment layer
     ! root_comp_dist_factor(Nsed) [g.rt.comp g-1.tot mm-1]    root compartemtent distribution factor equal to f_blw_cur * root_mass_profile(:) / sed_layer_thickness(:) 
     ! TotRtCBm                    [mol.C.rt]                  Total seagrass root carbon-biomass in grid cell
     ! TotSgCBm                    [mol.C.tot]                 Total seagrass carbon-biomass in grid cell
-    ! [umol.CHEM/L s] = [umol.CHEM/L s] - [mol.CHEM/mol.C] [umol.C/m2.hab s] [] / [mm] (m2*mm/L)
-    delta_sed_NH4(:) = delta_sed_NH4(:) + SgNperC * Resp_rate * root_comp_dist_factor(:)
-    delta_sed_PO4(:) = delta_sed_PO4(:) + SgPperC * Resp_rate * root_comp_dist_factor(:)
+    ! [umol.CHEM/L s] = [umol.CHEM/L s] - [mol.CHEM/mol.C] [umol.C/m2.hab s] [m2.hab/m2.grid] [] / [mm] (m2*mm/L)
+    delta_sed_NH4(:) = delta_sed_NH4(:) + SgNperC * Resp_rate * p_sgrass(species) * root_comp_dist_factor(:)
+    delta_sed_PO4(:) = delta_sed_PO4(:) + SgPperC * Resp_rate * p_sgrass(species) * root_comp_dist_factor(:)
 # elif defined SEAGRASS_LEAF_NUTRIENT_UPTAKE
     ! CHEM_uptake_rate_from_ocean [mmol.CHEM m-2.sg.hab s-1]  CHEM uptake rate  * direction of ocean to seagrass is positive
     ! SgXperC                     [mol.CHEM mol-1.C]          Species specific seagrass Nitrogen or Phosphorus to Carbon ratio
@@ -1535,13 +1556,14 @@ MODULE mod_seagrass
     ! delta_sed_CHM(Nsed)         [umol.CHM L-1 s-1]          Rate of change in CHM due to flux from roots to sediment (positive means seagrass to sediment)
     ! SgXperC                     [mol.CHEM mol-1.C]          Species specific seagrass Nitrogen or Phosphorus to Carbon ratio
     ! Resp_rate                   [umol.C m-2.sg.hab s-1]     Gross respiration/un-growth rate
+    ! p_sgrass(Nsg)               [m2.sg.hab m-2.grid]        (0~1)  Seagrass coverage (every species)
     ! sed_layer_thickness(Nsed)   [mm]                        Thickness of each sediment layer
     ! root_comp_dist_factor(Nsed) [g.rt.comp g-1.tot mm-1]    root compartemtent distribution factor equal to f_blw_cur * root_mass_profile(:) / sed_layer_thickness(:) 
     ! TotRtCBm                    [mol.C.rt]                  Total seagrass root carbon-biomass in grid cell
     ! TotSgCBm                    [mol.C.tot]                 Total seagrass carbon-biomass in grid cell
-    ! [umol.CHEM/L s] = [umol.CHEM/L s] - [mol.CHEM/mol.C] [umol.C/m2.hab s] [] / [mm] (m2*mm/L)
-    delta_sed_NH4(:) = delta_sed_NH4(:) + SgNperC * Resp_rate * root_comp_dist_factor(:)
-    delta_sed_PO4(:) = delta_sed_PO4(:) + SgPperC * Resp_rate * root_comp_dist_factor(:)
+    ! [umol.CHEM/L s] = [umol.CHEM/L s] - [mol.CHEM/mol.C] [umol.C/m2.hab s] [m2.hab/m2.grid] [] / [mm] (m2*mm/L)
+    delta_sed_NH4(:) = delta_sed_NH4(:) + SgNperC * Resp_rate * p_sgrass(species) * root_comp_dist_factor(:)
+    delta_sed_PO4(:) = delta_sed_PO4(:) + SgPperC * Resp_rate * p_sgrass(species) * root_comp_dist_factor(:)
 # else
     ! nothing
 # endif
@@ -1606,7 +1628,7 @@ MODULE mod_seagrass
 
 ! update total carbon-biomass ------------------------------------------------------------------------
 
-    !   write(*,*) 'yt_debug: TotSgCBm = ', TotSgCBm, ' TotLfCBm = ', TotLfCBm,  'TotRtCBm = ', TotRtCBm
+      !   write(*,*) 'yt_debug: TotSgCBm = ', TotSgCBm, ' TotLfCBm = ', TotLfCBm,  'TotRtCBm = ', TotRtCBm
 
       ! oldTotSgCBm                 [mol.C.tot]                 Old total seagrass carbon-biomass in grid cell
       ! oldTotLfCBm                 [mol.C.lf]                  Old total seagrass leaf carbon-biomass in grid cell
