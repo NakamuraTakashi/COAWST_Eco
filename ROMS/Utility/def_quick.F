@@ -4527,7 +4527,7 @@ Aval(5)=REAL(Iinfo(1,ifield,ng),r8)
           ELSE IF (TRIM(var_name(i)).eq.TRIM(Vname(1,idv3dN))) THEN
             got_var(idv3dN)=.TRUE.
             QCK(ng)%Vid(idv3dN)=var_id(i)
-                    ELSE IF (TRIM(var_name(i)).eq.TRIM(Vname(1,idWvel))) THEN
+          ELSE IF (TRIM(var_name(i)).eq.TRIM(Vname(1,idWvel))) THEN
             got_var(idWvel)=.TRUE.
             QCK(ng)%Vid(idWvel)=var_id(i)
           ELSE IF (TRIM(var_name(i)).eq.TRIM(Vname(1,idOvel))) THEN
@@ -4606,7 +4606,7 @@ Aval(5)=REAL(Iinfo(1,ifield,ng),r8)
           ELSE IF (TRIM(var_name(i)).eq.TRIM(Vname(1,idVair))) THEN
             got_var(idVair)=.TRUE.
             QCK(ng)%Vid(idVair)=var_id(i)
-ELSE IF (TRIM(var_name(i)).eq.TRIM(Vname(1,idUairE))) THEN
+          ELSE IF (TRIM(var_name(i)).eq.TRIM(Vname(1,idUairE))) THEN
             got_var(idUairE)=.TRUE.
             QCK(ng)%Vid(idUairE)=var_id(i)
           ELSE IF (TRIM(var_name(i)).eq.TRIM(Vname(1,idVairN))) THEN
@@ -5364,7 +5364,7 @@ ELSE IF (TRIM(var_name(i)).eq.TRIM(Vname(1,idUairE))) THEN
           exit_flag=3
           RETURN
         END IF
-IF (.not.got_var(idUairE).and.Qout(idUairE,ng)) THEN
+        IF (.not.got_var(idUairE).and.Qout(idUairE,ng)) THEN
           IF (Master) WRITE (stdout,70) TRIM(Vname(1,idUairE)),          &
      &                                  TRIM(ncname)
           exit_flag=3

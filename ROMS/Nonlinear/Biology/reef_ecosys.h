@@ -79,7 +79,7 @@
      &                   GRID(ng) % p_coral,                            &
 #endif
 #ifdef SEAGRASS
-     &                   GRID(ng) % p_seagrass,                         &
+     &                   GRID(ng) % p_sgrass,                           &
 #endif
 #ifdef MACROALGAE
      &                   GRID(ng) % p_algae,                            &
@@ -132,7 +132,7 @@
      &                         p_coral,                                 &
 #endif
 #ifdef SEAGRASS
-     &                         p_seagrass,                              &
+     &                         p_sgrass,                              &
 #endif
 #ifdef MACROALGAE
      &                         p_algae,                                 &
@@ -202,10 +202,10 @@
       real(r8), intent(inout) :: DiaBio3d(LBi:,LBj:,:,:)
 # endif
 # ifdef CORAL_POLYP
-      real(r8), intent(inout) :: p_coral(2,LBi:UBi,LBj:UBj)
+      real(r8), intent(inout) :: p_coral(Ncl,LBi:UBi,LBj:UBj)
 # endif
 # ifdef SEAGRASS
-      real(r8), intent(inout) :: p_seagrass(LBi:UBi,LBj:UBj)
+      real(r8), intent(inout) :: p_sgrass(Nsg,LBi:UBi,LBj:UBj)
 # endif
 # ifdef MACROALGAE
       real(r8), intent(inout) :: p_algae(LBi:UBi,LBj:UBj)
@@ -249,10 +249,10 @@
       real(r8), intent(inout) :: DiaBio3d(LBi:UBi,LBj:UBj,UBk,NHbio3d)
 # endif
 # ifdef CORAL_POLYP
-      real(r8), intent(inout) :: p_coral(2,LBi:UBi,LBj:UBj)
+      real(r8), intent(inout) :: p_coral(Ncl,LBi:UBi,LBj:UBj)
 # endif
 # ifdef SEAGRASS
-      real(r8), intent(inout) :: p_seagrass(LBi:UBi,LBj:UBj)
+      real(r8), intent(inout) :: p_sgrass(Nsg,LBi:UBi,LBj:UBj)
 # endif
 # ifdef MACROALGAE
       real(r8), intent(inout) :: p_algae(LBi:UBi,LBj:UBj)
@@ -355,13 +355,9 @@
 !          input parameters
      &            (ng, i, j            &   ! ng: nested grid number; i,j: position
      &            ,N(ng)               &   ! Number of vertical grid (following ROMS vertical grid)
-!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
-# ifdef SEDIMENT_ECOSYS
-     &            ,Nsed(ng)            &   ! Number of vertical biological sediment layers
-# endif
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
      &            ,CrlIter(ng)         &   ! Internal loop counts of coral polyp model
      &            ,SedIter(ng)         &   ! Internal loop counts of sediment ecosystem model
+     &            ,tdays(ng)           &   ! Date (days since x or elapsed days)  yt_edit I believe tdays is roms model clock https://www.myroms.org/projects/src/ticket/724
      &            ,dt(ng)              &   ! Time step (sec)
      &            ,Hz(i,j,:)           &   ! dz(N): vertical grid size (m)
      &            ,PFDsurf             &   ! Sea surface photon flux density (umol m-2 s-1)
@@ -372,7 +368,7 @@
      &            ,p_coral(:,i,j)      &   ! Coral coverage (0-1)
 #endif
 #ifdef SEAGRASS
-     &            ,p_seagrass(i,j)     &   ! seagrass coverage (0-1)
+     &            ,p_sgrass(:,i,j)     &   ! seagrass coverage (0-1)
 #endif
 #ifdef MACROALGAE
      &            ,p_algae(i,j)        &   ! algal coverage (0-1)

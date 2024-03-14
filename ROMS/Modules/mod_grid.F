@@ -332,7 +332,7 @@
           real(r8), pointer :: p_coral(:,:,:)
 # endif
 # ifdef SEAGRASS
-          real(r8), pointer :: p_seagrass(:,:)
+          real(r8), pointer :: p_sgrass(:,:,:)
 # endif
 # ifdef MACROALGAE
           real(r8), pointer :: p_algae(:,:)
@@ -358,6 +358,16 @@
 !=======================================================================
 !
       USE mod_param
+!!! yuta_edits >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+#ifdef CORAL_POLYP
+      USE mod_coral, ONLY : Ncl
+      ! USE mod_coral, ONLY : Nzx
+#endif
+#ifdef SEAGRASS
+      USE mod_seagrass, ONLY : Nsg
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+
 !
 !  Local variable declarations.
 !
@@ -552,10 +562,10 @@
 #endif
 #ifdef REEF_ECOSYS
 # ifdef CORAL_POLYP
-      allocate ( GRID(ng) % p_coral(2,LBi:UBi,LBj:UBj) )
+      allocate ( GRID(ng) % p_coral(Ncl,LBi:UBi,LBj:UBj) )
 # endif
 # ifdef SEAGRASS
-      allocate ( GRID(ng) % p_seagrass(LBi:UBi,LBj:UBj) )
+      allocate ( GRID(ng) % p_sgrass(Nsg,LBi:UBi,LBj:UBj) )
 # endif
 # ifdef MACROALGAE
       allocate ( GRID(ng) % p_algae(LBi:UBi,LBj:UBj) )
@@ -788,11 +798,12 @@
 #endif
 #ifdef REEF_ECOSYS
 # ifdef CORAL_POLYP
-            GRID(ng) % p_coral(1,i,j) = IniVal
-            GRID(ng) % p_coral(2,i,j) = IniVal
+            ! GRID(ng) % p_coral(1,i,j) = IniVal
+            ! GRID(ng) % p_coral(2,i,j) = IniVal
+            GRID(ng) % p_coral(:,i,j) = IniVal
 # endif
 # ifdef SEAGRASS
-            GRID(ng) % p_seagrass(i,j) = IniVal
+            GRID(ng) % p_sgrass(:,i,j) = IniVal
 # endif
 # ifdef MACROALGAE
             GRID(ng) % p_algae(i,j) = IniVal

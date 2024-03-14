@@ -10,6 +10,7 @@
 MODULE mod_macroalgae
   implicit none
   integer, parameter :: Nag = 1    !! Number of algal groups
+
   TYPE T_ALGAE
     real(8), pointer :: Pg(:,:,:) 
     real(8), pointer :: R (:,:,:) 
@@ -26,19 +27,16 @@ MODULE mod_macroalgae
   TYPE (T_ALGAE), allocatable :: ALGAE(:)
 CONTAINS
 
+
 !!! **********************************************************************
 !!!  set initial conditions for algae model
 !!! **********************************************************************
 
-  subroutine initialize_macroalgae(ng, Ngrids, LBi, UBi, LBj, UBj)
-
+  SUBROUTINE allocate_macroalgae(ng, Ngrids, LBi, UBi, LBj, UBj)
     USE mod_geochem
     
     implicit none
-! input parameters
     integer, intent(in) :: ng, Ngrids, LBi, UBi, LBj, UBj
-    real(8)  R13C
-    integer i,j,n
 
     IF (ng.eq.1) allocate ( ALGAE(Ngrids) )
     allocate( ALGAE(ng)%Pg(Nag,LBi:UBi,LBj:UBj)     )
@@ -51,6 +49,24 @@ CONTAINS
     allocate( ALGAE(ng)%QN(Nag,LBi:UBi,LBj:UBj)     )
     allocate( ALGAE(ng)%QP(Nag,LBi:UBi,LBj:UBj)     )
 #endif
+
+    RETURN
+
+  END SUBROUTINE allocate_macroalgae
+
+
+!!! **********************************************************************
+!!!  set initial conditions for algae model
+!!! **********************************************************************
+
+  SUBROUTINE initialize_macroalgae(ng, LBi, UBi, LBj, UBj)
+    USE mod_geochem
+    
+    implicit none
+! input parameters
+    integer, intent(in) :: ng, LBi, UBi, LBj, UBj
+    real(8)  R13C
+    integer i,j,n
 
 !------------------------------------------
 !  Set initial conditions

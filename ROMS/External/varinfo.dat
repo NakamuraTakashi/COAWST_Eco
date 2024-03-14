@@ -9218,7 +9218,7 @@
     'r2dvar'
     1.0d0
 
-  'p_seagrass'                                          ! Input/Output
+  'p_seagrass'                                        ! Input/Output
     'seagrass coverage'
     'nondimensional'                                          ! []
     'coverage, scalar, series'
@@ -9918,32 +9918,122 @@
   1.0d0
 
 !----------------------------------------------------------
-! Seagrass DiaBio2d parameters
+! Seagrass HisBio2d parameters
 
-'seagrass_Pg_'                                             ! Input/Output
-  'seagrass gross photosynthetic rate'
-  'mmol m-2 s-1'                                 ! [mmol m-2 s-1]
-  'seagrass_Pg_, scalar, series'
+'seagrass_SgCBm_'                                ! Input/Output
+  'Seagrass leaf+root carbon-biomass (umol.C m-2.sg.hab)'
+  'umol m-2'                                 ! [umol.C m-2.sg.hab]
+  'seagrass_SgCBm_, scalar, series'
   'ocean_time'
-  'iDbio2(iSgPg(i))'
+  'iHbio2(iSgSgCBm(i))'
   'r2dvar'
   1.0d0
 
-'seagrass_R_'                                             ! Input/Output
-  'seagrass respiration rate'
-  'mmol m-2 s-1'                                 ! [mmol m-2 s-1]
-  'seagrass_R_, scalar, series'
+'seagrass_LfCBm_'                                ! Input/Output
+  'Seagrass leaf carbon-biomass (umol.lf.C m-2.sg.hab)'
+  'umol m-2'                                 ! [umol.lf.C m-2.sg.hab]
+  'seagrass_LfCBm_, scalar, series'
   'ocean_time'
-  'iDbio2(iSg_R(i))'
+  'iHbio2(iSgLfCBm(i))'
   'r2dvar'
   1.0d0
 
-'seagrass_Pn_'                                             ! Input/Output
-  'seagrass net photosynthetic rate'
-  'mmol m-2 s-1'                                 ! [mmol m-2 s-1]
-  'seagrass_Pn_, scalar, series'
+'seagrass_RtCBm_'                                ! Input/Output
+  'Seagrass root carbon-biomass (umol.rt.C m-2.sg.hab)'
+  'umol m-2'                                 ! [umol.rt.C m-2.sg.hab]
+  'seagrass_RtCBm_, scalar, series'
   'ocean_time'
-  'iDbio2(iSgPn(i))'
+  'iHbio2(iSgRtCBm(i))'
+  'r2dvar'
+  1.0d0
+
+'seagrass_TotSgCBm_'                                ! Input/Output
+  'Total seagrass carbon-biomass in grid (mol.C.tot)'
+  'mol'                                 ! [mol.C.tot]
+  'seagrass_TotSgCBm_, scalar, series'
+  'ocean_time'
+  'iHbio2(iSgTotSgCBm(i))'
+  'r2dvar'
+  1.0d0
+
+'seagrass_TotLfCBm_'                                ! Input/Output
+  'Total seagrass above ground carbon-biomass in grid (mol.C.lf)'
+  'mol'                                 ! [mol.C.lf]
+  'seagrass_TotLfCBm_, scalar, series'
+  'ocean_time'
+  'iHbio2(iSgTotLfCBm(i))'
+  'r2dvar'
+  1.0d0
+
+'seagrass_TotRtCBm_'                                ! Input/Output
+  'Total seagrass below ground carbon-biomass in grid (mol.C.rt)'
+  'mol'                                 ! [mol.C.rt]
+  'seagrass_TotRtCBm_, scalar, series'
+  'ocean_time'
+  'iHbio2(iSgTotRtCBm(i))'
+  'r2dvar'
+  1.0d0
+
+'seagrass_LA_'                                ! Input/Output
+  'Total one-sided green leaf area in grid (m2.lf)'
+  'm2'                                 ! [m2.lf]
+  'seagrass_LA_, scalar, series'
+  'ocean_time'
+  'iHbio2(iSgTotLA(i))'
+  'r2dvar'
+  1.0d0
+
+'seagrass_ELAP_'                                ! Input/Output
+  'Effective leaf area projection (m2.lf.proj m-2.grid)'
+  'nondimensional'                                 ! [m2.lf.proj m-2.grid]
+  'seagrass_ELAP_, scalar, series'
+  'ocean_time'
+  'iHbio2(iSgGridELAP(i))'
+  'r2dvar'
+  1.0d0
+
+'seagrass_Phot_'                                ! Input/Output
+  'Seagrass gross photosynthesis rate (umol.C m-2.grid s-1)'
+  'umol m-2 s-1'                                 ! [umol.C m-2.grid s-1]
+  'seagrass_Phot_, scalar, series'
+  'ocean_time'
+  'iHbio2(iSgGridPhot(i))'
+  'r2dvar'
+  1.0d0
+
+'seagrass_Phot_Limiting_'                                ! Input/Output
+  'Seagrass photosynthesis limiting factor'
+  'limiting factor: 1 = light; 2 = Carbon uptake; 3 = Nitrogen uptake; 4 = Phosphorus uptake'                                 ! [limiting factor: 1 = light; 2 = Carbon uptake; 3 = Nitrogen uptake; 4 = Phosphorus uptake]
+  'seagrass_Phot_Limiting_, scalar, series'
+  'ocean_time'
+  'iHbio2(iSgPhotLim(i))'
+  'r2dvar'
+  1.0d0
+
+'seagrass_Resp_'                                ! Input/Output
+  'Seagrass respiration rate (umol.C m-2.grid s-1)'
+  'umol m-2 s-1'                                 ! [umol.C m-2.grid s-1]
+  'seagrass_Resp_, scalar, series'
+  'ocean_time'
+  'iHbio2(iSgGridResp(i))'
+  'r2dvar'
+  1.0d0
+
+'seagrass_Net_Phot_'                                ! Input/Output
+  'Seagrass net photosynthesis rate (umol.C m-2.grid s-1)'
+  'umol m-2 s-1'                                 ! [umol.C m-2.grid s-1]
+  'seagrass_Net_Phot_, scalar, series'
+  'ocean_time'
+  'iHbio2(iSgGridNetPhot(i))'
+  'r2dvar'
+  1.0d0
+
+'seagrass_Dieoff_'                                ! Input/Output
+  'iSgGridDieoff   Seagrass dieoff rate carbon biomass (umol.C m-2.grid s-1)'
+  'umol m-2 s-1'                                 ! [umol.C m-2.grid s-1]
+  'seagrass_Dieoff_, scalar, series'
+  'ocean_time'
+  'iHbio2(iSgGridDieoff(i))'
   'r2dvar'
   1.0d0
 

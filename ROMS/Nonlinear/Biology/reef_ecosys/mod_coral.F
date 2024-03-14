@@ -9,8 +9,8 @@ MODULE mod_coral
 
   implicit none
 
-  integer, parameter :: Ncl= 2    !! Number of coral types
-!    integer, parameter :: Nzx= 1    !! Number of zooxanthellae clade types
+  integer, parameter :: Ncl = 2    !! Number of coral types
+  ! integer, parameter :: Nzx = 1    !! Number of zooxanthellae clade types
 
   TYPE T_CORAL
 
@@ -91,20 +91,16 @@ MODULE mod_coral
 
 CONTAINS
 
+
 !!! **********************************************************************
-!!!  set initial conditions for coral polyp model (Nakamura et al. 2013)
+!!!  allocate variables for coral polyp model (Nakamura et al. 2013)
 !!! **********************************************************************
 
-  SUBROUTINE initialize_coral(ng, Ngrids, LBi, UBi, LBj, UBj)
+  SUBROUTINE allocate_coral(ng, Ngrids, LBi, UBi, LBj, UBj)
 
-    USE mod_geochem
-    
     implicit none
 ! input parameters
     integer, intent(in) :: ng, Ngrids, LBi, UBi, LBj, UBj
-    real(8)  R13C
-    real(8)  QAt
-    integer i,j,n
 
     IF (ng.eq.1) allocate ( CORAL(Ngrids) )
 
@@ -166,6 +162,25 @@ CONTAINS
     allocate( ZOOX(ng)%QP(Ncl,LBi:UBi,LBj:UBj)   )
 # endif
 #endif
+
+    RETURN
+
+  END SUBROUTINE allocate_coral
+
+
+!!! **********************************************************************
+!!!  set initial conditions for coral polyp model (Nakamura et al. 2013)
+!!! **********************************************************************
+
+  SUBROUTINE initialize_coral(ng, LBi, UBi, LBj, UBj)
+    USE mod_geochem
+    
+    implicit none
+! input parameters
+    integer, intent(in) :: ng, LBi, UBi, LBj, UBj
+    real(8)  R13C
+    real(8)  QAt
+    integer i,j,n
 
 !  Set initial conditions
     do j=LBj,UBj
