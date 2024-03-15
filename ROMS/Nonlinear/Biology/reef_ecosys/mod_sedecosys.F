@@ -333,7 +333,7 @@ CONTAINS
 !!! **********************************************************************
 
   SUBROUTINE allocate_sedecosys(ng, Ngrids, LBi, UBi, LBj, UBj  &
-# if defined SEAGRASS && (SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE)
+# if defined SEAGRASS && (defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE || defined SEAGRASS_ROOT_POM)
                                 , Nsg                           &
 # endif
     )
@@ -345,7 +345,7 @@ CONTAINS
 
     ! input parameters
     integer, intent(in) :: ng, Ngrids, LBi, UBi, LBj, UBj
-# if defined SEAGRASS && (SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE)
+# if defined SEAGRASS && (defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE || defined SEAGRASS_ROOT_POM)
     integer, intent(in) :: Nsg
 # endif
 

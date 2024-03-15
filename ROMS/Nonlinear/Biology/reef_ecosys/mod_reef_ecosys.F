@@ -44,7 +44,7 @@ SUBROUTINE allocate_reef_ecosys(ng, Ngrids, LBi, UBi, LBj, UBj)
 #endif
 #ifdef SEDIMENT_ECOSYS
   CALL allocate_sedecosys(ng, Ngrids, LBi, UBi, LBj, UBj  &
-# if defined SEAGRASS && (SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE)
+# if defined SEAGRASS && (defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE || defined SEAGRASS_ROOT_POM)
                           , Nsg                   &
 # endif
                           )
@@ -356,6 +356,7 @@ END SUBROUTINE allocate_reef_ecosys
 #endif
 #ifdef SEDIMENT_ECOSYS
     real(8), intent(in) :: p_sand      
+    real(8)             :: p_sedmnt
 #endif
 
 ! raw tracer inputs
@@ -885,7 +886,41 @@ END SUBROUTINE allocate_reef_ecosys
     ssO2flux  = 0.0d0   ! sea surface O2 flux (mmol m-2 s-1)
     PFDbott   = 0.0d0   ! Bottom photon flux density (umol m-2 s-1)
 
+#ifdef SEDIMENT_ECOSYS
+    p_sedmnt = p_sand
+# ifdef SEAGRASS
+    p_sedmnt = p_sedmnt + sum(p_sgrass)
+# endif
+# ifdef MACROALGAE
+    p_sedmnt = p_sedmnt + p_algae
+# endif
+#endif
+
 !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    if ( sum( (/ 0d0      &
+#ifdef CORAL_POLYP
+      , sum(p_coral(:))   &
+#endif
+#ifdef SEAGRASS
+      , sum(p_sgrass(:))  &
+#endif
+#ifdef MACROALGAE
+      , p_algae           &
+#endif
+#ifdef SEDIMENT_ECOSYS
+      , p_sand            &
+#endif
+    /) ) > 1.0d0 ) then
+      write(*,*) 'yt_debug: mod_reef_ecosys.F    ERROR: Sum of coverage is greater than 1.0      i =', i, '   j =', j
+      write(*,*) 'yt_debug: mod_reef_ecosys.F           p_coral(1)  =', p_coral(1)
+      write(*,*) 'yt_debug: mod_reef_ecosys.F           p_coral(2)  =', p_coral(2)
+      write(*,*) 'yt_debug: mod_reef_ecosys.F           p_sgrass(1) =', p_sgrass(1)
+      write(*,*) 'yt_debug: mod_reef_ecosys.F           p_algae     =', p_algae
+      write(*,*) 'yt_debug: mod_reef_ecosys.F           p_sand      =', p_sand
+      write(*,*) 'yt_debug: mod_reef_ecosys.F           sum         =', sum((/sum(p_coral),sum(p_sgrass),p_algae,p_sand/))
+      error stop
+    endif
+
     DO k=1,N
       ! if (isnan() .or. abs() > huge()) then
       if (isnan(DIC(k)) .or. abs(DIC(k)) > 1.0d15 .or. DIC(k) < 0.0d0) then
@@ -2055,15 +2090,18 @@ endif
           ( ng                &   ! ng: nested grid number; 
           , icl               &   ! icl: seagrass species id
           , i, j              &   ! i,j: position
-# if defined SEDIMENT_ECOSYS
+# if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE || defined SEAGRASS_ROOT_POM
           , Nsed(ng)          &   ! Number of sediment layers
 # endif
           , dz(1)             &   ! vertical layer thickness (m)
           , date              &   ! Date (days since x or elapsed days) yt_edit best if in phase with clock to maintain consistency on restart
           , dt                &   ! Time step (sec)
           , p_sgrass(:)       &   ! seagrass coverage (every species)
+# if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE || defined SEAGRASS_ROOT_POM
+          , p_sedmnt          &   ! Sediment coverage
+# endif
           , PFD               &   ! Photon flux density (umol m-2 s-1)
-          , rho_sw(1)         &    ! Density of seawater (g cm-3)
+          , rho_sw(1)         &   ! Density of seawater (g cm-3)
           , DIC(1)*rho_sw(1)  &   ! DIC (umol l-1)            ! [umol/L] = [umol/kg] [g/cm3] (kg/1000g)(1000cm3/L)
           , DOx(1)            &   ! DO  (umol L-1)
 # if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE         
@@ -2119,13 +2157,12 @@ endif
           ( ng             &   ! ng: nested grid number; 
           , icl            &   ! icl: seagrass species id
           , i, j           &   ! i,j: position
-# if defined SEDIMENT_ECOSYS
+# if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE || defined SEAGRASS_ROOT_POM
           , Nsed(ng)       &   ! Number of sediment layers
 # endif
           , dz(1)          &   ! vertical layer thickness (m)
           , date           &   ! Date (days since x or elapsed days) yt_edit best if in phase with clock to maintain consistency on restart
           , dt             &   ! Time step (sec)
-          , p_sgrass(:)    &   ! seagrass coverage (every species)
           )
       END IF
     END DO
@@ -2370,8 +2407,7 @@ endif
 ! Compute sediment ecosystem model.
 !-----------------------------------------------------------------------
 !
-    ! IF(p_sand .gt. 0.0d0) THEN  ! yt_edit  implement coverage scheme later
-    IF(.true.) THEN  ! yt_edit  implement coverage scheme later
+    IF(p_sedmnt .gt. 0.0d0) THEN
 # ifdef SEDIMENT_EMPIRICAL
 !!!  Empirical sediment model
       CALL sedecosys     &
@@ -2429,6 +2465,7 @@ endif
 ! yt_edit to do put output data in his2.nc file
 ! yt_edit don't run under reef rock (confirm coverage type interactions) (don't forget to fix seagrass -> sediment coupling when you implement this: umol/L volume shouuld be; gridarea * sed_dz -> p_sediment * sed_dz)
 ! yt_edit porosity from coverage??
+
 
       DO m=1,isplitsed   !!! Loop for sediment model: dtc <= 0.05 sec
 
@@ -2511,7 +2548,7 @@ endif
     ! x[nmol/cm2 s] (umol/1000nmol) (10000cm2/m2) (1/dz)[1/m] (m3/1000L)= x/dz 0.01(umol L-1 s-1)
     ! cff: convaert [nmol cm-2 s-1] to [umol L-1 s-1]
       ! cff=0.01d0 /dz(1) * p_sand ! yt_edit  implement coverage scheme later
-      cff=0.01d0 /dz(1)
+      cff=0.01d0 /dz(1) * p_sedmnt
     ! (umol L-1 s-1) / rho(kg L-1) = (1/rho) (umol kg-1 s-1)
 
       ! dTA_dt (1) = dTA_dt (1) - Flux_TA  * cff ! yt_edit what are the units? do we need to divide by rho?
