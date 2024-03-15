@@ -8,6 +8,7 @@
 
 
 MODULE mod_macroalgae
+#ifdef MACROALGAE
   implicit none
   integer, parameter :: Nag = 1    !! Number of algal groups
 
@@ -211,6 +212,6 @@ CONTAINS
     RETURN
   
   END SUBROUTINE macroalgae
-
+#endif
 END MODULE mod_macroalgae
 

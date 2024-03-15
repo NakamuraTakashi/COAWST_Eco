@@ -7,6 +7,8 @@
 !!!**** MODULE OF ECOSYSTEM MODEL ************************************
 
 MODULE mod_reef_ecosys
+#if defined REEF_ECOSYS
+
 contains
 
 !!! **********************************************************************
@@ -2952,6 +2954,6 @@ endif
 
     RETURN
   END SUBROUTINE bio_vadv2
-
+#endif
 END MODULE mod_reef_ecosys
 

@@ -8,6 +8,8 @@
 !!!**** MODULE OF FOOD WEB *******************************************
 
 MODULE mod_foodweb
+#if defined FOODWEB
+
   implicit none
 
   integer, parameter :: Ndom = 2     ! Number of Dissolved Organic Matter types
@@ -958,7 +960,7 @@ CONTAINS
     RETURN
 
   END SUBROUTINE foodweb
-
+#endif
 END MODULE mod_foodweb
 
 

@@ -6,7 +6,7 @@
 !!!**** MODULE OF CORAL POLYP MODEL ************************************
 
 MODULE mod_coral
-
+#if defined CORAL_POLYP
   implicit none
 
   integer, parameter :: Ncl = 2    !! Number of coral types
@@ -2153,6 +2153,7 @@ CONTAINS
 
   END SUBROUTINE photosystem
 #endif
-      
+
+#endif      
 END MODULE mod_coral
 
