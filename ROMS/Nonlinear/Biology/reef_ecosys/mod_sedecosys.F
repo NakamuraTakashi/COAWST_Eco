@@ -13,6 +13,7 @@
 !!!  Empirical sediment model
 !!! **********************************************************************
 MODULE mod_sedecosys
+#if defined SEDIMENT_ECOSYS
   implicit none
   TYPE T_SEDECO
     real(8), pointer :: Pg(:,:) 
@@ -219,7 +220,7 @@ CONTAINS
     RETURN
     
   END SUBROUTINE sedecosys
-
+#endif
 END MODULE mod_sedecosys
 
 
@@ -235,6 +236,8 @@ END MODULE mod_sedecosys
 
 
 MODULE mod_sedecosys
+#if defined SEDIMENT_ECOSYS
+
   implicit none
 
 ! Variables Declaration
@@ -2953,6 +2956,7 @@ CONTAINS
     RETURN
 
   END SUBROUTINE sedecosys
+#endif
 END MODULE mod_sedecosys
 
 #endif
