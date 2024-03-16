@@ -61,6 +61,7 @@ END SUBROUTINE allocate_reef_ecosys
 !!!  Set initial conditions for reef ecosystem model
 !!! **********************************************************************
   SUBROUTINE initialize_reef_ecosys(ng, LBi, UBi, LBj, UBj &
+      , start_of_new_run    &   ! TRUE = initialize coral, seagass, macroalgae, sediment from start; FALSE = continue from previous run
 #ifdef SEAGRASS
       , XI_size, ETA_size   &   ! grid size XI-direction (meters); grid size ETA-direction (meters)
       , p_sgrass            &   ! seagrass coverage (habitat area in grid / grid area)
@@ -81,6 +82,7 @@ END SUBROUTINE allocate_reef_ecosys
 #endif
 
     integer, intent(in) :: ng, LBi, UBi, LBj, UBj
+    logical, intent(in) :: start_of_new_run
 #ifdef SEAGRASS
     real(8), intent(in) :: XI_size (    LBi:UBi,LBj:UBj)   ! grid size XI-direction (meters)
     real(8), intent(in) :: ETA_size(    LBi:UBi,LBj:UBj)   ! grid size ETA-direction (meters)
@@ -128,6 +130,7 @@ END SUBROUTINE allocate_reef_ecosys
 !     Jmax=UBj
 ! #endif
 
+    write(*,*) 'yt_debug: mod_reef_ecosys.F initialize_reef_ecosys() start_of_new_run =', start_of_new_run
 
 #ifdef CORAL_POLYP
     CALL initialize_coral(ng, LBi, UBi, LBj, UBj)
@@ -135,6 +138,7 @@ END SUBROUTINE allocate_reef_ecosys
 #endif
 #ifdef SEAGRASS
     CALL initialize_seagrass( ng, LBi, UBi, LBj, UBj    &
+                            , start_of_new_run          & ! TRUE = initialize coral, seagass, macroalgae, sediment from start; FALSE = continue from previous run
                             , XI_size, ETA_size         & ! grid size XI-direction (meters); grid size ETA-direction (meters)
                             , p_sgrass                  & ! seagrass coverage (habitat area/grid area)
                             )
@@ -145,7 +149,7 @@ END SUBROUTINE allocate_reef_ecosys
     write(*,*) 'yt_debug: mod_reef_ecosys.F initialize_reef_ecosys() finished macroalgae init'
 #endif
 #ifdef SEDIMENT_ECOSYS
-    CALL initialize_sedecosys(ng, LBi, UBi, LBj, UBj)
+    CALL initialize_sedecosys(ng, LBi, UBi, LBj, UBj, start_of_new_run)
     write(*,*) 'yt_debug: mod_reef_ecosys.F initialize_reef_ecosys() finished sediment init'
 #endif
 

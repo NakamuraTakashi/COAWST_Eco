@@ -9947,6 +9947,15 @@
   'r2dvar'
   1.0d0
 
+'seagrass_TotSgCBmS_'                               ! Input/Output
+  'SgTotSgCBm of last growth interval (For internal use: save in restart)'
+  'mol'                                 ! [mol.C.tot]
+  'seagrass_TotSgCBmS_, scalar, series'
+  'ocean_time'
+  'iHbio2(iSgTotSgCBmS(i))'
+  'r2dvar'
+  1.0d0
+
 'seagrass_TotSgCBm_'                                ! Input/Output
   'Total seagrass carbon-biomass in grid (mol.C.tot)'
   'mol'                                 ! [mol.C.tot]
@@ -9974,6 +9983,15 @@
   'r2dvar'
   1.0d0
 
+'seagrass_LAI_'                                ! Input/Output
+  'Leaf area index (m2.lf m-2.sg.hab)'
+  'm2 m-2'                                 ! [m2.lf m-2.sg.hab]
+  'seagrass_LAI_, scalar, series'
+  'ocean_time'
+  'iHbio2(iSgLAI(i))'
+  'r2dvar'
+  1.0d0
+
 'seagrass_LA_'                                ! Input/Output
   'Total one-sided green leaf area in grid (m2.lf)'
   'm2'                                 ! [m2.lf]
@@ -9985,7 +10003,7 @@
 
 'seagrass_ELAP_'                                ! Input/Output
   'Effective leaf area projection (m2.lf.proj m-2.grid)'
-  'nondimensional'                                 ! [m2.lf.proj m-2.grid]
+  'm2 m-2'                                 ! [m2.lf.proj m-2.grid]
   'seagrass_ELAP_, scalar, series'
   'ocean_time'
   'iHbio2(iSgGridELAP(i))'

@@ -100,7 +100,7 @@ MODULE mod_seagrass
     real(8), pointer :: TotSgCBmF                               (:,:,:)   ! [mol.C.tot]                 iSgTotSgCBm   Total seagrass carbon-biomass in grid. updates on fine time interval
     ! Update at end of growth interval
     ! update total carbon-biomass
-    real(8), pointer :: TotSgCBm                                (:,:,:)   ! [mol.C.tot]                 Total seagrass carbon-biomass in grid
+    real(8), pointer :: TotSgCBm                                (:,:,:)   ! [mol.C.tot]                 iSgTotSgCBmS  Total seagrass carbon-biomass in grid
     ! allocate growth
     real(8), pointer :: TotLfCBm                                (:,:,:)   ! [mol.C.lf]                  iSgTotLfCBm   Total seagrass above ground carbon-biomass in grid
     real(8), pointer :: TotRtCBm                                (:,:,:)   ! [mol.C.rt]                  iSgTotRtCBm   Total seagrass below ground carbon-biomass in grid
@@ -118,7 +118,7 @@ MODULE mod_seagrass
     real(8), pointer :: LfDryBm                                 (:,:,:)   ! [g.lf.drywt m-2.sg.hab]     Seagrass leaf dry weight biomass per unit ground area (in seagrass habitat area)
     real(8), pointer :: RtDryBm                                 (:,:,:)   ! [g.rt.drywt m-2.sg.hab]     Seagrass root dry weight biomass per unit ground area (in seagrass habitat area)
     ! update leaf area index
-    real(8), pointer :: LAI                                     (:,:,:)   ! [m2.lf m-2.sg.hab]          Leaf area index: one-sided green leaf area per unit ground surface area 
+    real(8), pointer :: LAI                                     (:,:,:)   ! [m2.lf m-2.sg.hab]          iSgLAI          Leaf area index: one-sided green leaf area per unit ground surface area 
 
 ! >>> Saved Values Only for Output  <<< !
     real(8), pointer :: TotLA                                   (:,:,:)   ! [m2.lf]                     iSgTotLA        Total one-sided green leaf area in grid
@@ -276,7 +276,7 @@ MODULE mod_seagrass
 ! ====================================================================================================
 ! Seagrass initialization subroutine in/out interface
 ! ====================================================================================================
-  SUBROUTINE initialize_seagrass(ng, LBi, UBi, LBj, UBj, XI_size, ETA_size, p_sgrass)
+  SUBROUTINE initialize_seagrass(ng, LBi, UBi, LBj, UBj, start_of_new_run, XI_size, ETA_size, p_sgrass)
 
 ! ====================================================================================================
 ! Module dependencies
@@ -293,6 +293,7 @@ MODULE mod_seagrass
 ! input parameters
     integer, intent(in) :: ng                             ! ng is the nested grid number
     integer, intent(in) :: LBi, UBi, LBj, UBj             ! lower and upper bounds i & j
+    logical, intent(in) :: start_of_new_run               ! TRUE = initialize coral, seagass, macroalgae, sediment from start; FALSE = continue from previous run
     real(8), intent(in) :: XI_size (    LBi:UBi,LBj:UBj)  ! grid size XI-direction (meters)
     real(8), intent(in) :: ETA_size(    LBi:UBi,LBj:UBj)  ! grid size ETA-direction (meters)
     real(8), intent(in) :: p_sgrass(Nsg,LBi:UBi,LBj:UBj)  ! seagrass coverage (habitat area/grid area)
@@ -415,97 +416,110 @@ MODULE mod_seagrass
     enddo
     ! write(*,*) 'yt_debug: mod_seagrass.F initialize_seagrass() after CNP ratio assigments'
 
-! analytical start
+
+    ! HabArea                     [m2.sg.hab]                 Seagrass habitat ground area in grid cell (such that seagrass coverage (p_sgrass) times the grid area equals the habitat area)
+    ! GridArea                    [m2.grid]                   Total ground area in grid cell
+    ! p_sgrass                    [m2.sg.hab m-2.grid](0~1)   Seagrass coverage
     do species=1,Nsg
       do i=LBi,UBi
         do j=LBj,UBj
-          ! when initializaing from start in a new run when only coverage is known, calculate biomass values assuming an ELAP of 90% in the coverage area and an ideal ratio of above to belowground biomass
-
-          ! HabArea                     [m2.sg.hab]                 Seagrass habitat ground area in grid cell (such that seagrass coverage (p_sgrass) times the grid area equals the habitat area)
-          ! GridArea                    [m2.grid]                   Total ground area in grid cell
-          ! p_sgrass                    [m2.sg.hab m-2.grid](0~1)   Seagrass coverage
-          ! LAI                         [m2.leaf m-2.sg.hab]        Leaf area index: one-sided green leaf area per unit ground surface area 
-          ! ELAP                        [m2.lf.proj m-2.sg.hab]     Effective leaf area projection on ground (only within seagrass habitat (covered area))
-          ! k_proj                      [m2.sg.hab m-2.leaf]        Species specific leaf projection coefficient
-          ! rho_lf                      [kg.drywt m-2.leaf]         Rho_leaf: Species specific leaf mass density
-          ! SgMperC                     [g.drywt mol-1.C]           Species specific biomass mass per unit carbon based on C-N-P ratio according to (CH2O)x(NH3)y(H3PO4)z as the chemical formula for biomass
-          ! SgCBmF                      [umol.C m-2.sg.hab]         Seagrass leaf+root carbon-biomass per unit ground area (in seagrass habitat area) updates on fine time interval
-          ! TotSgCBmF                   [mol.C.tot]                 Total seagrass carbon-biomass in grid cell. updates on fine time interval
-          ! LfCBm                       [umol.lf.C m-2.sg.hab]      Seagrass leaf carbon-biomass per unit ground area (in seagrass habitat area)
-          ! RtCBm                       [umol.rt.C m-2.sg.hab]      Seagrass root carbon-biomass per unit ground area (in seagrass habitat area)
-          ! TotSgCBm                    [mol.C.tot]                 Total seagrass carbon-biomass in grid cell
-          ! TotLfCBm                    [mol.C.lf]                  Total seagrass leaf carbon-biomass in grid cell
-          ! TotRtCBm                    [mol.C.rt]                  Total seagrass root carbon-biomass in grid cell
-          ! f_above                     [g.lf.drywt g-1.tot.drywt]  also [mol.C.lf mol-1.C.tot] Ideal above ground biomass to total biomass fraction  
-          ! TotSgDryBm                  [g.drywt]                   Total seagrass dry weight biomass in grid cell
-          ! TotLfDryBm                  [g.lf.drywt]                Total seagrass leaf dry weight biomass in grid cell
-          ! TotRtDryBm                  [g.rt.drywt]                Total seagrass root dry weight biomass in grid cell
-          ! SgDryBm                     [g.drywt m-2.sg.hab]        Seagrass dry weight biomass per unit ground area (in seagrass habitat area)
-          ! LfDryBm                     [g.lf.drywt m-2.sg.hab]     Seagrass leaf dry weight biomass per unit ground area (in seagrass habitat area)
-          ! RtDryBm                     [g.rt.drywt m-2.sg.hab]     Seagrass root dry weight biomass per unit ground area (in seagrass habitat area)
-
           ! [m2.sg.hab]                   = [m2.grid]                [m2.sg.hab m-2.grid]
           SGRASS(ng)%HabArea(species,i,j) = SGRASS(ng)%GridArea(i,j) * p_sgrass(species,i,j)
-          
-          ! SGRASS(ng)%LAI(species,i,j) = (-1*log(1.0-0.85)/SGRASS(ng)%k_proj(species))
-          ! SGRASS(ng)%LAI(species,i,j) = (-1*log(1.0d0-0.30433574d0)/SGRASS(ng)%k_proj(species))
-          SGRASS(ng)%LAI(species,i,j) = 0.05d0
-
-          ! [umol.C/m2.hab]              
-          SGRASS(ng)%LfCBm(species,i,j)                                                                                           &
-          ! = [m2.lf/m2.hab]              [kg.drywt/m2.lf]             [mol.C/g.drywt]                 (1000.g.drywt/kg.drywt) (1000000umol/mol)
-            = SGRASS(ng)%LAI(species,i,j) * SGRASS(ng)%rho_lf(species) / SGRASS(ng)%SgMperC(species) * 1000000000d0
-
-          ! [umol.C.tot/m2.hab]         = [umol.C.lf/m2.hab]             [mol.C.tot/mol.C.lf]
-          SGRASS(ng)%SgCBmF(species,i,j) = SGRASS(ng)%LfCBm(species,i,j) / SGRASS(ng)%f_above(species)
-
-          ! [umol.C.rt/m2.hab]          = [umol.C.tot/m2.hab]            [mol.C.rt/mol.C.tot]
-          SGRASS(ng)%RtCBm(species,i,j) = SGRASS(ng)%SgCBmF(species,i,j) * (1.0d0 - SGRASS(ng)%f_above(species))
-
-          ! [mol.C]                        = [umol.C/m2.hab]                [m2.hab]                          (mol/1000000umol)
-          SGRASS(ng)%TotSgCBm(species,i,j) = SGRASS(ng)%SgCBmF(species,i,j) * SGRASS(ng)%HabArea(species,i,j) * 0.000001d0
-
-          ! [mol.C]                        = [umol.C/m2.hab]               [m2.hab]                          (mol/1000000umol)
-          SGRASS(ng)%TotLfCBm(species,i,j) = SGRASS(ng)%LfCBm(species,i,j) * SGRASS(ng)%HabArea(species,i,j) * 0.000001d0
-
-          ! [mol.C]                        = [umol.C/m2.hab]               [m2.hab]                          (mol/1000000umol)
-          SGRASS(ng)%TotRtCBm(species,i,j) = SGRASS(ng)%RtCBm(species,i,j) * SGRASS(ng)%HabArea(species,i,j) * 0.000001d0
-          
-          ! [g.drywt]                        = [mol.C]                          [g.drywt/mol.C]
-          SGRASS(ng)%TotSgDryBm(species,i,j) = SGRASS(ng)%TotSgCBm(species,i,j) * SGRASS(ng)%SgMperC(species)
-
-          ! [g.drywt]                        = [mol.C]                          [g.drywt/mol.C]
-          SGRASS(ng)%TotLfDryBm(species,i,j) = SGRASS(ng)%TotLfCBm(species,i,j) * SGRASS(ng)%SgMperC(species)
-
-          ! [g.drywt]                        = [mol.C]                          [g.drywt/mol.C]
-          SGRASS(ng)%TotRtDryBm(species,i,j) = SGRASS(ng)%TotRtCBm(species,i,j) * SGRASS(ng)%SgMperC(species)
-
-          ! [g.drywt/m2.hab]              = [umol.C/m2.hab]                [g.drywt/mol.C]               (mol.C/1000000umol.C)
-          SGRASS(ng)%SgDryBm(species,i,j) = SGRASS(ng)%SgCBmF(species,i,j) * SGRASS(ng)%SgMperC(species) * 0.000001d0
-
-          ! [g.drywt/m2.hab]              = [umol.C/m2.hab]               [g.drywt/mol.C]               (mol.C/1000000umol.C)
-          SGRASS(ng)%LfDryBm(species,i,j) = SGRASS(ng)%LfCBm(species,i,j) * SGRASS(ng)%SgMperC(species) * 0.000001d0
-
-          ! [g.drywt/m2.hab]              = [umol.C/m2.hab]               [g.drywt/mol.C]               (mol.C/1000000umol.C)
-          SGRASS(ng)%RtDryBm(species,i,j) = SGRASS(ng)%RtCBm(species,i,j) * SGRASS(ng)%SgMperC(species) * 0.000001d0
-
-          SGRASS(ng)%TotSgCBmF(species,i,j) = SGRASS(ng)%TotSgCBm(species,i,j)
-
         enddo
       enddo
     enddo
 
-! >>> Saved Values Only for Output  <<< !
-    SGRASS(ng)%TotLA                    = 0d0 ! [m2.lf]                     Total one-sided green leaf area in grid
-    SGRASS(ng)%GridELAP                 = 0d0 ! [m2.lf.proj m-2.grid]       Effective leaf area projection on ground (whole grid)
-    SGRASS(ng)%GridPhot                 = 0d0 ! [umol.C m-2.grid s-1]       Seagrass gross photosynthesis rate per unit ground area (whole grid)
-    SGRASS(ng)%PhotLim                  = 0   ! []                          Seagrass photosynthesis limiting factor: 1 = light; 2 = Carbon uptake; 3 = Nitrogen uptake; 4 = Phosphorus uptake
-    SGRASS(ng)%GridResp                 = 0d0 ! [umol.C m-2.grid s-1]       Seagrass respiration rate per unit ground area (whole grid)
-    SGRASS(ng)%GridNetPhot              = 0d0 ! [umol.C m-2.grid s-1]       Seagrass net photosynthesis rate per unit ground area (whole grid)
-    SGRASS(ng)%GridDieoff               = 0d0 ! [umol.C m-2.grid s-1]       Seagrass dieoff rate carbon biomass per unit ground area (whole grid)
 
-    ! write(*,*) 'yt_debug: mod_seagrass.F initialize_seagrass() after analytical start mass assigments'
-    
+! analytical start
+    if( start_of_new_run ) then
+      do species=1,Nsg
+        do i=LBi,UBi
+          do j=LBj,UBj
+            ! when initializaing from start in a new run when only coverage is known, calculate biomass values assuming an ELAP of 90% in the coverage area and an ideal ratio of above to belowground biomass
+
+            ! HabArea                     [m2.sg.hab]                 Seagrass habitat ground area in grid cell (such that seagrass coverage (p_sgrass) times the grid area equals the habitat area)
+            ! GridArea                    [m2.grid]                   Total ground area in grid cell
+            ! p_sgrass                    [m2.sg.hab m-2.grid](0~1)   Seagrass coverage
+            ! LAI                         [m2.leaf m-2.sg.hab]        Leaf area index: one-sided green leaf area per unit ground surface area 
+            ! ELAP                        [m2.lf.proj m-2.sg.hab]     Effective leaf area projection on ground (only within seagrass habitat (covered area))
+            ! k_proj                      [m2.sg.hab m-2.leaf]        Species specific leaf projection coefficient
+            ! rho_lf                      [kg.drywt m-2.leaf]         Rho_leaf: Species specific leaf mass density
+            ! SgMperC                     [g.drywt mol-1.C]           Species specific biomass mass per unit carbon based on C-N-P ratio according to (CH2O)x(NH3)y(H3PO4)z as the chemical formula for biomass
+            ! SgCBmF                      [umol.C m-2.sg.hab]         Seagrass leaf+root carbon-biomass per unit ground area (in seagrass habitat area) updates on fine time interval
+            ! TotSgCBmF                   [mol.C.tot]                 Total seagrass carbon-biomass in grid cell. updates on fine time interval
+            ! LfCBm                       [umol.lf.C m-2.sg.hab]      Seagrass leaf carbon-biomass per unit ground area (in seagrass habitat area)
+            ! RtCBm                       [umol.rt.C m-2.sg.hab]      Seagrass root carbon-biomass per unit ground area (in seagrass habitat area)
+            ! TotSgCBm                    [mol.C.tot]                 Total seagrass carbon-biomass in grid cell
+            ! TotLfCBm                    [mol.C.lf]                  Total seagrass leaf carbon-biomass in grid cell
+            ! TotRtCBm                    [mol.C.rt]                  Total seagrass root carbon-biomass in grid cell
+            ! f_above                     [g.lf.drywt g-1.tot.drywt]  also [mol.C.lf mol-1.C.tot] Ideal above ground biomass to total biomass fraction  
+            ! TotSgDryBm                  [g.drywt]                   Total seagrass dry weight biomass in grid cell
+            ! TotLfDryBm                  [g.lf.drywt]                Total seagrass leaf dry weight biomass in grid cell
+            ! TotRtDryBm                  [g.rt.drywt]                Total seagrass root dry weight biomass in grid cell
+            ! SgDryBm                     [g.drywt m-2.sg.hab]        Seagrass dry weight biomass per unit ground area (in seagrass habitat area)
+            ! LfDryBm                     [g.lf.drywt m-2.sg.hab]     Seagrass leaf dry weight biomass per unit ground area (in seagrass habitat area)
+            ! RtDryBm                     [g.rt.drywt m-2.sg.hab]     Seagrass root dry weight biomass per unit ground area (in seagrass habitat area)
+            
+            ! SGRASS(ng)%LAI(species,i,j) = (-1*log(1.0-0.85)/SGRASS(ng)%k_proj(species))
+            ! SGRASS(ng)%LAI(species,i,j) = (-1*log(1.0d0-0.30433574d0)/SGRASS(ng)%k_proj(species))
+            SGRASS(ng)%LAI(species,i,j) = 0.05d0
+
+            ! [umol.C/m2.hab]              
+            SGRASS(ng)%LfCBm(species,i,j)  &
+            ! = [m2.lf/m2.hab]              [kg.drywt/m2.lf]             [mol.C/g.drywt]                 (1000.g.drywt/kg.drywt) (1000000umol/mol)
+              = SGRASS(ng)%LAI(species,i,j) * SGRASS(ng)%rho_lf(species) / SGRASS(ng)%SgMperC(species) * 1000000000d0
+
+            ! [umol.C.tot/m2.hab]         = [umol.C.lf/m2.hab]             [mol.C.tot/mol.C.lf]
+            SGRASS(ng)%SgCBmF(species,i,j) = SGRASS(ng)%LfCBm(species,i,j) / SGRASS(ng)%f_above(species)
+
+            ! [umol.C.rt/m2.hab]          = [umol.C.tot/m2.hab]            [mol.C.rt/mol.C.tot]
+            SGRASS(ng)%RtCBm(species,i,j) = SGRASS(ng)%SgCBmF(species,i,j) * (1.0d0 - SGRASS(ng)%f_above(species))
+
+            ! [mol.C]                        = [umol.C/m2.hab]                [m2.hab]                          (mol/1000000umol)
+            SGRASS(ng)%TotSgCBm(species,i,j) = SGRASS(ng)%SgCBmF(species,i,j) * SGRASS(ng)%HabArea(species,i,j) * 0.000001d0
+
+            ! [mol.C]                        = [umol.C/m2.hab]               [m2.hab]                          (mol/1000000umol)
+            SGRASS(ng)%TotLfCBm(species,i,j) = SGRASS(ng)%LfCBm(species,i,j) * SGRASS(ng)%HabArea(species,i,j) * 0.000001d0
+
+            ! [mol.C]                        = [umol.C/m2.hab]               [m2.hab]                          (mol/1000000umol)
+            SGRASS(ng)%TotRtCBm(species,i,j) = SGRASS(ng)%RtCBm(species,i,j) * SGRASS(ng)%HabArea(species,i,j) * 0.000001d0
+            
+            ! [g.drywt]                        = [mol.C]                          [g.drywt/mol.C]
+            SGRASS(ng)%TotSgDryBm(species,i,j) = SGRASS(ng)%TotSgCBm(species,i,j) * SGRASS(ng)%SgMperC(species)
+
+            ! [g.drywt]                        = [mol.C]                          [g.drywt/mol.C]
+            SGRASS(ng)%TotLfDryBm(species,i,j) = SGRASS(ng)%TotLfCBm(species,i,j) * SGRASS(ng)%SgMperC(species)
+
+            ! [g.drywt]                        = [mol.C]                          [g.drywt/mol.C]
+            SGRASS(ng)%TotRtDryBm(species,i,j) = SGRASS(ng)%TotRtCBm(species,i,j) * SGRASS(ng)%SgMperC(species)
+
+            ! [g.drywt/m2.hab]              = [umol.C/m2.hab]                [g.drywt/mol.C]               (mol.C/1000000umol.C)
+            SGRASS(ng)%SgDryBm(species,i,j) = SGRASS(ng)%SgCBmF(species,i,j) * SGRASS(ng)%SgMperC(species) * 0.000001d0
+
+            ! [g.drywt/m2.hab]              = [umol.C/m2.hab]               [g.drywt/mol.C]               (mol.C/1000000umol.C)
+            SGRASS(ng)%LfDryBm(species,i,j) = SGRASS(ng)%LfCBm(species,i,j) * SGRASS(ng)%SgMperC(species) * 0.000001d0
+
+            ! [g.drywt/m2.hab]              = [umol.C/m2.hab]               [g.drywt/mol.C]               (mol.C/1000000umol.C)
+            SGRASS(ng)%RtDryBm(species,i,j) = SGRASS(ng)%RtCBm(species,i,j) * SGRASS(ng)%SgMperC(species) * 0.000001d0
+
+            SGRASS(ng)%TotSgCBmF(species,i,j) = SGRASS(ng)%TotSgCBm(species,i,j)
+
+          enddo
+        enddo
+      enddo
+
+      ! >>> Saved Values Only for Output  <<< !
+      SGRASS(ng)%TotLA                    = 0d0 ! [m2.lf]                     Total one-sided green leaf area in grid
+      SGRASS(ng)%GridELAP                 = 0d0 ! [m2.lf.proj m-2.grid]       Effective leaf area projection on ground (whole grid)
+      SGRASS(ng)%GridPhot                 = 0d0 ! [umol.C m-2.grid s-1]       Seagrass gross photosynthesis rate per unit ground area (whole grid)
+      SGRASS(ng)%PhotLim                  = 0   ! []                          Seagrass photosynthesis limiting factor: 1 = light; 2 = Carbon uptake; 3 = Nitrogen uptake; 4 = Phosphorus uptake
+      SGRASS(ng)%GridResp                 = 0d0 ! [umol.C m-2.grid s-1]       Seagrass respiration rate per unit ground area (whole grid)
+      SGRASS(ng)%GridNetPhot              = 0d0 ! [umol.C m-2.grid s-1]       Seagrass net photosynthesis rate per unit ground area (whole grid)
+      SGRASS(ng)%GridDieoff               = 0d0 ! [umol.C m-2.grid s-1]       Seagrass dieoff rate carbon biomass per unit ground area (whole grid)
+
+      ! write(*,*) 'yt_debug: mod_seagrass.F initialize_seagrass() after analytical start mass assigments'
+    endif
+
     RETURN
     
   END SUBROUTINE initialize_seagrass
@@ -820,7 +834,7 @@ MODULE mod_seagrass
     real(8)               :: translocatable_mass        ! [mol.C]                     Biomass that can be translocated between leaf and root as limited by the translocation rate
 
 
-    ! write(*,*) 'yt_debug: start of mod_seagrass.F seagrass()'
+    ! write(*,*) 'yt_debug: start of mod_seagrass.F seagrass()   i =', i, '   j =', j
 
 
 ! ====================================================================================================
@@ -990,6 +1004,15 @@ MODULE mod_seagrass
     delta_sed_POP       =   0.0d0
 #  endif
 # endif
+
+! ! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+! if (SgCBmF /= SgCBmF) then
+!   write(*,*) 'SEAGRASS error: SgCBmF is NAN at start'
+!   error stop
+! else 
+!   write(*,*) 'SEAGRASS okay : SgCBmF =', SgCBmF
+! endif
+! ! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
 ! ====================================================================================================

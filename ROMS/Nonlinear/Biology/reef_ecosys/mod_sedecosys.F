@@ -436,7 +436,7 @@ CONTAINS
 !!!  Initial conditions for sediment ecosystem model
 !!! **********************************************************************
 
-  SUBROUTINE initialize_sedecosys(ng, LBi, UBi, LBj, UBj)
+  SUBROUTINE initialize_sedecosys(ng, LBi, UBi, LBj, UBj, start_of_new_run)
     USE mod_geochem ! another module in a same folder (function list)
     ! USE mod_readinput
     
@@ -444,6 +444,8 @@ CONTAINS
 
     ! input parameters
     integer, intent(in) :: ng, LBi, UBi, LBj, UBj
+    logical, intent(in) :: start_of_new_run               ! TRUE = initialize coral, seagass, macroalgae, sediment from start; FALSE = continue from previous run
+
     integer i,j,k ! symbols for loop calculations
     !! depth : Diffusive Boundary Layer (DBL)
     real(8), parameter :: dbl = 0.03d0 ! DBL:difussive boundary layer (cm)
@@ -497,7 +499,7 @@ CONTAINS
         ! SEDECO(ng)%poro(:,:,k) = 0.6007d0 - 0.006d0 * log(SEDECO(ng)%z(k))
     enddo
 
-# if defined SEDIMENT_ECOSYS_INITIAL_MODE
+    if ( start_of_new_run ) then
     !!! ------------------- For determinating initial concentration ----------------------- !!!
         ! General
         SEDECO(ng)%Tmp(:,:,:)  = 0.0d0     
@@ -686,7 +688,8 @@ CONTAINS
 !         read(217,*) SEDECO(ng)%SO4(:,:,:)
 !         close(217)
 
-# endif
+    endif
+
     !! for debug
     ! write(*,*) SEDECO(ng)%SO4(1,1,:)
 
