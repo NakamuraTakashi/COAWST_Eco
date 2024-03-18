@@ -2590,13 +2590,14 @@ endif
 !#  endif
 
 !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-      DO k=1,1
+      DO k=1,N
         ! if (isnan() .or. abs() > huge()) then
         if (isnan(dDIC_dt(k)) .or. abs(dDIC_dt(k)) > 1.0d15 .or. DIC(k)+dDIC_dt(k)*dt*dz(k) < -100.0d0) then
           write(*,*) 'yt_debug: mod_reef_ecosys.F dDIC_dt(k)    sediment      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     dDIC_dt(k) =', dDIC_dt(k)
           write(*,*) 'yt_debug:     DIC(k) =', DIC(k)
           write(*,*) 'yt_debug:     DIC(k)+dDIC_dt(k)*dt*dz(k) =', DIC(k)+dDIC_dt(k)*dt*dz(k)
+          error stop
         endif
         ! if (isnan() .or. abs() > huge()) then
         if (isnan(dTA_dt(k)) .or. abs(dTA_dt(k)) > 1.0d15 .or. TA(k)+dTA_dt(k)*dt*dz(k) < -100.0d0) then
@@ -2604,6 +2605,7 @@ endif
           write(*,*) 'yt_debug:     dTA_dt(k) =', dTA_dt(k)
           write(*,*) 'yt_debug:     TA(k) =', TA(k)
           write(*,*) 'yt_debug:     TA(k)+dTA_dt(k)*dt*dz(k) =', TA(k)+dTA_dt(k)*dt*dz(k)
+          error stop
         endif
         ! if (isnan() .or. abs() > huge()) then
         if (isnan(dDOx_dt(k)) .or. abs(dDOx_dt(k)) > 1.0d15 .or. DOx(k)+dDOx_dt(k)*dt*dz(k) < -100.0d0) then
@@ -2611,6 +2613,7 @@ endif
           write(*,*) 'yt_debug:     dDOx_dt(k) =', dDOx_dt(k)
           write(*,*) 'yt_debug:     DOx(k) =', DOx(k)
           write(*,*) 'yt_debug:     DOx(k)+dDOx_dt(k)*dt*dz(k) =', DOx(k)+dDOx_dt(k)*dt*dz(k)
+          error stop
         endif
 #  if defined ORGANIC_MATTER
         DO yt_iter = 1, Ndom
@@ -2622,6 +2625,7 @@ endif
             write(*,*) 'yt_debug:     dDOC_dt(k,Ndom) =', dDOC_dt(k,yt_iter)
             write(*,*) 'yt_debug:     DOC(k,Ndom) =', DOC(k,yt_iter)
             write(*,*) 'yt_debug:     DOC(k,Ndom)+dDOC_dt(k,Ndom)*dt*dz(k) =', DOC(k,yt_iter)+dDOC_dt(k,yt_iter)*dt*dz(k)
+            error stop
           endif
         ENDDO
         DO yt_iter = 1, Npom
@@ -2633,6 +2637,7 @@ endif
             write(*,*) 'yt_debug:     dPOC_dt(k,Npom) =', dPOC_dt(k,yt_iter)
             write(*,*) 'yt_debug:     POC(k,Npom) =', POC(k,yt_iter)
             write(*,*) 'yt_debug:     POC(k,Npom)+dPOC_dt(k,Npom)*dt*dz(k) =', POC(k,yt_iter)+dPOC_dt(k,yt_iter)*dt*dz(k)
+            error stop
           endif
         ENDDO
         DO yt_iter = 1, Nphy
@@ -2644,6 +2649,7 @@ endif
             write(*,*) 'yt_debug:     dPHY_dt(k,Nphy) =', dPHY_dt(k,yt_iter)
             write(*,*) 'yt_debug:     PHY(k,Nphy) =', PHY(k,yt_iter)
             write(*,*) 'yt_debug:     PHY(k,Nphy)+dPHY_dt(k,Nphy)*dt*dz(k) =', PHY(k,yt_iter)+dPHY_dt(k,yt_iter)*dt*dz(k)
+            error stop
           endif
         ENDDO
         DO yt_iter = 1, Nzoo
@@ -2655,6 +2661,7 @@ endif
             write(*,*) 'yt_debug:     dZOO_dt(k,Nzoo) =', dZOO_dt(k,yt_iter)
             write(*,*) 'yt_debug:     ZOO(k,Nzoo) =', ZOO(k,yt_iter)
             write(*,*) 'yt_debug:     ZOO(k,Nzoo)+dZOO_dt(k,Nzoo)*dt*dz(k) =', ZOO(k,yt_iter)+dZOO_dt(k,yt_iter)*dt*dz(k)
+            error stop
           endif
         ENDDO
         DO yt_iter = 1, Npim
@@ -2666,6 +2673,7 @@ endif
             write(*,*) 'yt_debug:     dPIC_dt(k,Npim) =', dPIC_dt(k,yt_iter)
             write(*,*) 'yt_debug:     PIC(k,Npim) =', PIC(k,yt_iter)
             write(*,*) 'yt_debug:     PIC(k,Npim)+dPIC_dt(k,Npim)*dt*dz(k) =', PIC(k,yt_iter)+dPIC_dt(k,yt_iter)*dt*dz(k)
+            error stop
           endif
         ENDDO
 #  endif
@@ -2676,6 +2684,7 @@ endif
           write(*,*) 'yt_debug:     dNO3_dt(k) =', dNO3_dt(k)
           write(*,*) 'yt_debug:     NO3(k) =', NO3(k)
           write(*,*) 'yt_debug:     NO3(k)+dNO3_dt(k)*dt*dz(k) =', NO3(k)+dNO3_dt(k)*dt*dz(k)
+          error stop
         endif
         ! if (isnan() .or. abs() > huge()) then
         if (isnan(dNH4_dt(k)) .or. abs(dNH4_dt(k)) > 1.0d15 .or. NH4(k)+dNH4_dt(k)*dt*dz(k) < -100.0d0) then
@@ -2683,6 +2692,7 @@ endif
           write(*,*) 'yt_debug:     dNH4_dt(k) =', dNH4_dt(k)
           write(*,*) 'yt_debug:     NH4(k) =', NH4(k)
           write(*,*) 'yt_debug:     NH4(k)+dNH4_dt(k)*dt*dz(k) =', NH4(k)+dNH4_dt(k)*dt*dz(k)
+          error stop
         endif
         ! if (isnan() .or. abs() > huge()) then
         if (isnan(dPO4_dt(k)) .or. abs(dPO4_dt(k)) > 1.0d15 .or. PO4(k)+dPO4_dt(k)*dt*dz(k) < -100.0d0) then
@@ -2690,6 +2700,7 @@ endif
           write(*,*) 'yt_debug:     dPO4_dt(k) =', dPO4_dt(k)
           write(*,*) 'yt_debug:     PO4(k) =', PO4(k)
           write(*,*) 'yt_debug:     PO4(k)+dPO4_dt(k)*dt*dz(k) =', PO4(k)+dPO4_dt(k)*dt*dz(k)
+          error stop
         endif
 #  if defined ORGANIC_MATTER
         DO yt_iter = 1, Ndom
@@ -2701,6 +2712,7 @@ endif
             write(*,*) 'yt_debug:     dDON_dt(k,Ndom) =', dDON_dt(k,yt_iter)
             write(*,*) 'yt_debug:     DON(k,Ndom) =', DON(k,yt_iter)
             write(*,*) 'yt_debug:     DON(k,Ndom)+dDON_dt(k,Ndom)*dt*dz(k) =', DON(k,yt_iter)+dDON_dt(k,yt_iter)*dt*dz(k)
+            error stop
           endif
           ! if (isnan() .or. abs() > huge()) then
           if (isnan(dDOP_dt(k,yt_iter)) .or. abs(dDOP_dt(k,yt_iter)) > 1.0d15 &
@@ -2710,6 +2722,7 @@ endif
             write(*,*) 'yt_debug:     dDOP_dt(k,Ndom) =', dDOP_dt(k,yt_iter)
             write(*,*) 'yt_debug:     DOP(k,Ndom) =', DOP(k,yt_iter)
             write(*,*) 'yt_debug:     DOP(k,Ndom)+dDOP_dt(k,Ndom)*dt*dz(k) =', DOP(k,yt_iter)+dDOP_dt(k,yt_iter)*dt*dz(k)
+            error stop
           endif
         ENDDO
         DO yt_iter = 1, Npom
@@ -2721,6 +2734,7 @@ endif
             write(*,*) 'yt_debug:     dPON_dt(k,Npom) =', dPON_dt(k,yt_iter)
             write(*,*) 'yt_debug:     PON(k,Npom) =', PON(k,yt_iter)
             write(*,*) 'yt_debug:     PON(k,Npom)+dPON_dt(k,Npom)*dt*dz(k) =', PON(k,yt_iter)+dPON_dt(k,yt_iter)*dt*dz(k)
+            error stop
           endif
           ! if (isnan() .or. abs() > huge()) then
           if (isnan(dPOP_dt(k,yt_iter)) .or. abs(dPOP_dt(k,yt_iter)) > 1.0d15 &
@@ -2730,6 +2744,7 @@ endif
             write(*,*) 'yt_debug:     dPOP_dt(k,Npom) =', dPOP_dt(k,yt_iter)
             write(*,*) 'yt_debug:     POP(k,Npom) =', POP(k,yt_iter)
             write(*,*) 'yt_debug:     POP(k,Npom)+dPOP_dt(k,Npom)*dt*dz(k) =', POP(k,yt_iter)+dPOP_dt(k,yt_iter)*dt*dz(k)
+            error stop
           endif
         ENDDO
 #  endif
@@ -2740,31 +2755,37 @@ endif
       if (isnan(sspH) .or. abs(sspH) > 1.0d15) then
         write(*,*) 'yt_debug: mod_reef_ecosys.F sspH    sediment      i =', i, '   j =', j
         write(*,*) 'yt_debug:     sspH =', sspH
+        error stop
       endif
       ! if (isnan() .or. abs() > huge()) then
       if (isnan(ssfCO2) .or. abs(ssfCO2) > 1.0d15) then
         write(*,*) 'yt_debug: mod_reef_ecosys.F ssfCO2    sediment      i =', i, '   j =', j
         write(*,*) 'yt_debug:     ssfCO2 =', ssfCO2
+        error stop
       endif
       ! if (isnan() .or. abs() > huge()) then
       if (isnan(ssWarg) .or. abs(ssWarg) > 1.0d15) then
         write(*,*) 'yt_debug: mod_reef_ecosys.F ssWarg    sediment      i =', i, '   j =', j
         write(*,*) 'yt_debug:     ssWarg =', ssWarg
+        error stop
       endif
       ! if (isnan() .or. abs() > huge()) then
       if (isnan(ssCO2flux) .or. abs(ssCO2flux) > 1.0d15) then
         write(*,*) 'yt_debug: mod_reef_ecosys.F ssCO2flux    sediment      i =', i, '   j =', j
         write(*,*) 'yt_debug:     ssCO2flux =', ssCO2flux
+        error stop
       endif
       ! if (isnan() .or. abs() > huge()) then
       if (isnan(ssO2flux) .or. abs(ssO2flux) > 1.0d15) then
         write(*,*) 'yt_debug: mod_reef_ecosys.F ssO2flux    sediment      i =', i, '   j =', j
         write(*,*) 'yt_debug:     ssO2flux =', ssO2flux
+        error stop
       endif
       ! if (isnan() .or. abs() > huge()) then
       if (isnan(PFDbott) .or. abs(PFDbott) > 1.0d15) then
         write(*,*) 'yt_debug: mod_reef_ecosys.F PFDbott    sediment      i =', i, '   j =', j
         write(*,*) 'yt_debug:     PFDbott =', PFDbott
+        error stop
       endif
 !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
