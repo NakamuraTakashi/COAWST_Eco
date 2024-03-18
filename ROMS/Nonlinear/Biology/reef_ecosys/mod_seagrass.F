@@ -1012,7 +1012,7 @@ MODULE mod_seagrass
 ! else 
 !   write(*,*) 'SEAGRASS okay : SgCBmF =', SgCBmF
 ! endif
-! ! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+! ! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
 ! ====================================================================================================
@@ -1024,9 +1024,9 @@ MODULE mod_seagrass
     if (date .gt. real(int(Day*24), 8)/24) then
       is_growth_interval = .true.
       Day = real(int(date*24+1), 8)/24d0
-      if(i == 50 .and. j == 50) then
-        write(*,*) "yt_debug:    Day = ", Day, "   date = ", date
-      endif
+      ! if(i == 50 .and. j == 50) then
+      !   write(*,*) "yt_debug:    Day = ", Day, "   date = ", date
+      ! endif
     endif
 
 
