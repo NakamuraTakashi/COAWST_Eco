@@ -336,7 +336,7 @@ CONTAINS
 !!! **********************************************************************
 
   SUBROUTINE allocate_sedecosys(ng, Ngrids, LBi, UBi, LBj, UBj  &
-# if defined SEAGRASS && (SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE)
+# if defined SEAGRASS && (defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE || defined SEAGRASS_ROOT_POM)
                                 , Nsg                           &
 # endif
     )
@@ -348,7 +348,7 @@ CONTAINS
 
     ! input parameters
     integer, intent(in) :: ng, Ngrids, LBi, UBi, LBj, UBj
-# if defined SEAGRASS && (SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE)
+# if defined SEAGRASS && (defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE || defined SEAGRASS_ROOT_POM)
     integer, intent(in) :: Nsg
 # endif
 
@@ -436,7 +436,7 @@ CONTAINS
 !!!  Initial conditions for sediment ecosystem model
 !!! **********************************************************************
 
-  SUBROUTINE initialize_sedecosys(ng, LBi, UBi, LBj, UBj)
+  SUBROUTINE initialize_sedecosys(ng, LBi, UBi, LBj, UBj, start_of_new_run)
     USE mod_geochem ! another module in a same folder (function list)
     ! USE mod_readinput
     
@@ -444,6 +444,8 @@ CONTAINS
 
     ! input parameters
     integer, intent(in) :: ng, LBi, UBi, LBj, UBj
+    logical, intent(in) :: start_of_new_run               ! TRUE = initialize coral, seagass, macroalgae, sediment from start; FALSE = continue from previous run
+
     integer i,j,k ! symbols for loop calculations
     !! depth : Diffusive Boundary Layer (DBL)
     real(8), parameter :: dbl = 0.03d0 ! DBL:difussive boundary layer (cm)
@@ -497,7 +499,7 @@ CONTAINS
         ! SEDECO(ng)%poro(:,:,k) = 0.6007d0 - 0.006d0 * log(SEDECO(ng)%z(k))
     enddo
 
-# if defined SEDIMENT_ECOSYS_INITIAL_MODE
+    if ( start_of_new_run ) then
     !!! ------------------- For determinating initial concentration ----------------------- !!!
         ! General
         SEDECO(ng)%Tmp(:,:,:)  = 0.0d0     
@@ -686,7 +688,8 @@ CONTAINS
 !         read(217,*) SEDECO(ng)%SO4(:,:,:)
 !         close(217)
 
-# endif
+    endif
+
     !! for debug
     ! write(*,*) SEDECO(ng)%SO4(1,1,:)
 
@@ -743,6 +746,26 @@ CONTAINS
     , Fdep_POP       &   ! POP deposition flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
 #  endif
 # endif
+# if defined SGD_ON
+    , sgd_flux          &   ! sumbarine groundwater discharge rate (cm s-1)  This flux is assumed to be the same throughout the sediment ecosystem layers (no compression/expansion) So volume flux doesn't change but concentrations of tracers do
+    , sgd_Tmp_in        &   ! SGD concentration coming in through bottom: Tmp: Temperature (oC)
+    , sgd_Sal_in        &   ! SGD concentration coming in through bottom: Sal: Salinity (PSU)
+    , sgd_DIC_in        &   ! SGD concentration coming in through bottom: DIC: Total dissolved inorganic carbon (DIC: umol kg-1)
+    , sgd_TA_in         &   ! SGD concentration coming in through bottom: TA : Total alkalinity (TA: umol kg-1)
+    , sgd_DOx_in        &   ! SGD concentration coming in through bottom: DOx: Dissolved oxygen (umol L-1)
+#  if defined CARBON_ISOTOPE
+    , sgd_DI13C_in      &   ! SGD concentration coming in through bottom: DI13C : 13C of DIC (umol kg-1)
+#  endif
+#  if defined NUTRIENTS            
+    , sgd_NO3_in        &   ! SGD concentration coming in through bottom: NO3: NO3 (umol L-1)
+    , sgd_NH4_in        &   ! SGD concentration coming in through bottom: NH4: NH4 (umol L-1)
+    , sgd_PO4_in        &   ! SGD concentration coming in through bottom: PO4: PO4 (umol L-1)
+#   if defined NITROGEN_ISOTOPE
+    , sgd_NO3_15N_in    &   ! SGD concentration coming in through bottom: NO3_15N: 15N of NO3 (umol L-1)
+    , sgd_NH4_15N_in    &   ! SGD concentration coming in through bottom: NH4_15N: 15N of NH4 (umol L-1)
+#   endif
+#  endif
+# endif
 !   output parameters
     ! , Flux_Tmp       &   ! Temperature flux (K cm-2 s-1)  * direction of water column to sediment is positive
     ! , Flux_Sal       &   ! Salinity flux (cm-2 s-1)  * direction of water column to sediment is positive
@@ -778,6 +801,25 @@ CONTAINS
     , Flux_H2S       &   ! H2S flux   (nmol cm-2 s-1) * direction of water column to sediment is positive
     ! , Flux_S0        &   ! S0 flux    (nmol cm-2 s-1) * direction of water column to sediment is positive  ! yt_edit diffusion is not modeled so flux is zero
     , Flux_SO4       &   ! SO4 flux   (nmol cm-2 s-1) * direction of water column to sediment is positive
+# endif
+# if defined SGD_ON
+    , sgd_Tmp_out        &   ! SGD concentration going out through surface: Tmp: Temperature (oC)
+    , sgd_Sal_out        &   ! SGD concentration going out through surface: Sal: Salinity (PSU)
+    , sgd_DIC_out        &   ! SGD concentration going out through surface: DIC: Total dissolved inorganic carbon (DIC: umol kg-1)
+    , sgd_TA_out         &   ! SGD concentration going out through surface: TA : Total alkalinity (TA: umol kg-1)
+    , sgd_DOx_out        &   ! SGD concentration going out through surface: DOx: Dissolved oxygen (umol L-1)
+#  if defined CARBON_ISOTOPE
+    , sgd_DI13C_out      &   ! SGD concentration going out through surface: DI13C : 13C of DIC (umol kg-1)
+#  endif
+#  if defined NUTRIENTS            
+    , sgd_NO3_out        &   ! SGD concentration going out through surface: NO3: NO3 (umol L-1)
+    , sgd_NH4_out        &   ! SGD concentration going out through surface: NH4: NH4 (umol L-1)
+    , sgd_PO4_out        &   ! SGD concentration going out through surface: PO4: PO4 (umol L-1)
+#   if defined NITROGEN_ISOTOPE
+    , sgd_NO3_15N_out    &   ! SGD concentration going out through surface: NO3_15N: 15N of NO3 (umol L-1)
+    , sgd_NH4_15N_out    &   ! SGD concentration going out through surface: NH4_15N: 15N of NH4 (umol L-1)
+#   endif
+#  endif
 # endif
     )
 
@@ -832,6 +874,27 @@ CONTAINS
 #  endif
 # endif
 
+# if defined SGD_ON
+    real(8), intent(in) :: sgd_flux           ! sumbarine groundwater discharge rate (cm s-1)  This flux is assumed to be the same throughout the sediment ecosystem layers (no compression/expansion) So volume flux doesn't change but concentrations of tracers do
+    real(8), intent(in) :: sgd_Tmp_in         ! SGD concentration coming in through bottom: Tmp: Temperature (oC)
+    real(8), intent(in) :: sgd_Sal_in         ! SGD concentration coming in through bottom: Sal: Salinity (PSU)
+    real(8), intent(in) :: sgd_DIC_in         ! SGD concentration coming in through bottom: DIC: Total dissolved inorganic carbon (DIC: umol kg-1)
+    real(8), intent(in) :: sgd_TA_in          ! SGD concentration coming in through bottom: TA : Total alkalinity (TA: umol kg-1)
+    real(8), intent(in) :: sgd_DOx_in         ! SGD concentration coming in through bottom: DOx: Dissolved oxygen (umol L-1)
+#  if defined CARBON_ISOTOPE
+    real(8), intent(in) :: sgd_DI13C_in       ! SGD concentration coming in through bottom: DI13C : 13C of DIC (umol kg-1)
+#  endif
+#  if defined NUTRIENTS            
+    real(8), intent(in) :: sgd_NO3_in         ! SGD concentration coming in through bottom: NO3: NO3 (umol L-1)
+    real(8), intent(in) :: sgd_NH4_in         ! SGD concentration coming in through bottom: NH4: NH4 (umol L-1)
+    real(8), intent(in) :: sgd_PO4_in         ! SGD concentration coming in through bottom: PO4: PO4 (umol L-1)
+#   if defined NITROGEN_ISOTOPE
+    real(8), intent(in) :: sgd_NO3_15N_in     ! SGD concentration coming in through bottom: NO3_15N: 15N of NO3 (umol L-1)
+    real(8), intent(in) :: sgd_NH4_15N_in     ! SGD concentration coming in through bottom: NH4_15N: 15N of NH4 (umol L-1)
+#   endif
+#  endif
+# endif
+
 !! output parameters (Flux)
     ! real(8), intent(out) :: Flux_Tmp
     ! real(8), intent(out) :: Flux_Sal
@@ -869,6 +932,27 @@ CONTAINS
     ! real(8), intent(out) :: Flux_S0
     real(8), intent(out) :: Flux_SO4
 # endif
+
+# if defined SEDIMENT_ECOSYS && defined SGD_ON
+    real(8), intent(out) :: sgd_Tmp_out         ! SGD concentration going out through surface: Tmp: Temperature (oC)
+    real(8), intent(out) :: sgd_Sal_out         ! SGD concentration going out through surface: Sal: Salinity (PSU)
+    real(8), intent(out) :: sgd_DIC_out         ! SGD concentration going out through surface: DIC: Total dissolved inorganic carbon (DIC: umol kg-1)
+    real(8), intent(out) :: sgd_TA_out          ! SGD concentration going out through surface: TA : Total alkalinity (TA: umol kg-1)
+    real(8), intent(out) :: sgd_DOx_out         ! SGD concentration going out through surface: DOx: Dissolved oxygen (umol L-1)
+#  if defined CARBON_ISOTOPE
+    real(8), intent(out) :: sgd_DI13C_out       ! SGD concentration going out through surface: DI13C : 13C of DIC (umol kg-1)
+#  endif
+#  if defined NUTRIENTS            
+    real(8), intent(out) :: sgd_NO3_out         ! SGD concentration going out through surface: NO3: NO3 (umol L-1)
+    real(8), intent(out) :: sgd_NH4_out         ! SGD concentration going out through surface: NH4: NH4 (umol L-1)
+    real(8), intent(out) :: sgd_PO4_out         ! SGD concentration going out through surface: PO4: PO4 (umol L-1)
+#   if defined NITROGEN_ISOTOPE
+    real(8), intent(out) :: sgd_NO3_15N_out     ! SGD concentration going out through surface: NO3_15N: 15N of NO3 (umol L-1)
+    real(8), intent(out) :: sgd_NH4_15N_out     ! SGD concentration going out through surface: NH4_15N: 15N of NH4 (umol L-1)
+#   endif
+#  endif
+# endif
+
 
 
 !!! Set parameters 
@@ -1342,6 +1426,30 @@ CONTAINS
 !     endif
 ! #  endif
 ! # endif
+
+
+! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# if defined SGD_ON
+    ! real(8), intent(in) :: sgd_flux           ! sumbarine groundwater discharge rate (cm s-1)  This flux is assumed to be the same throughout the sediment ecosystem layers (no compression/expansion) So volume flux doesn't change but concentrations of tracers do
+    sgd_Tmp_out = sgd_Tmp_in         ! SGD concentration: Tmp: Temperature (oC)
+    sgd_Sal_out = sgd_Sal_in         ! SGD concentration: Sal: Salinity (PSU)
+    sgd_DIC_out = sgd_DIC_in         ! SGD concentration: DIC: Total dissolved inorganic carbon (DIC: umol kg-1)
+    sgd_TA_out  = sgd_TA_in          ! SGD concentration: TA : Total alkalinity (TA: umol kg-1)
+    sgd_DOx_out = sgd_DOx_in         ! SGD concentration: DOx: Dissolved oxygen (umol L-1)
+#  if defined CARBON_ISOTOPE
+    sgd_DI13C_out = sgd_DI13C_in       ! SGD concentration: DI13C : 13C of DIC (umol kg-1)
+#  endif
+#  if defined NUTRIENTS            
+    sgd_NO3_out = sgd_NO3_in         ! SGD concentration: NO3: NO3 (umol L-1)
+    sgd_NH4_out = sgd_NH4_in         ! SGD concentration: NH4: NH4 (umol L-1)
+    sgd_PO4_out = sgd_PO4_in         ! SGD concentration: PO4: PO4 (umol L-1)
+#   if defined NITROGEN_ISOTOPE
+    sgd_NO3_15N_out = sgd_NO3_15N_in     ! SGD concentration: NO3_15N: 15N of NO3 (umol L-1)
+    sgd_NH4_15N_out = sgd_NH4_15N_in     ! SGD concentration: NH4_15N: 15N of NH4 (umol L-1)
+#   endif
+#  endif
+# endif
+! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
 

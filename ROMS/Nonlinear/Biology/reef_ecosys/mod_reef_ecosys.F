@@ -46,7 +46,7 @@ SUBROUTINE allocate_reef_ecosys(ng, Ngrids, LBi, UBi, LBj, UBj)
 #endif
 #ifdef SEDIMENT_ECOSYS
   CALL allocate_sedecosys(ng, Ngrids, LBi, UBi, LBj, UBj  &
-# if defined SEAGRASS && (SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE)
+# if defined SEAGRASS && (defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE || defined SEAGRASS_ROOT_POM)
                           , Nsg                   &
 # endif
                           )
@@ -61,6 +61,7 @@ END SUBROUTINE allocate_reef_ecosys
 !!!  Set initial conditions for reef ecosystem model
 !!! **********************************************************************
   SUBROUTINE initialize_reef_ecosys(ng, LBi, UBi, LBj, UBj &
+      , start_of_new_run    &   ! TRUE = initialize coral, seagass, macroalgae, sediment from start; FALSE = continue from previous run
 #ifdef SEAGRASS
       , XI_size, ETA_size   &   ! grid size XI-direction (meters); grid size ETA-direction (meters)
       , p_sgrass            &   ! seagrass coverage (habitat area in grid / grid area)
@@ -81,6 +82,7 @@ END SUBROUTINE allocate_reef_ecosys
 #endif
 
     integer, intent(in) :: ng, LBi, UBi, LBj, UBj
+    logical, intent(in) :: start_of_new_run
 #ifdef SEAGRASS
     real(8), intent(in) :: XI_size (    LBi:UBi,LBj:UBj)   ! grid size XI-direction (meters)
     real(8), intent(in) :: ETA_size(    LBi:UBi,LBj:UBj)   ! grid size ETA-direction (meters)
@@ -128,6 +130,7 @@ END SUBROUTINE allocate_reef_ecosys
 !     Jmax=UBj
 ! #endif
 
+    write(*,*) 'yt_debug: mod_reef_ecosys.F initialize_reef_ecosys() start_of_new_run =', start_of_new_run
 
 #ifdef CORAL_POLYP
     CALL initialize_coral(ng, LBi, UBi, LBj, UBj)
@@ -135,6 +138,7 @@ END SUBROUTINE allocate_reef_ecosys
 #endif
 #ifdef SEAGRASS
     CALL initialize_seagrass( ng, LBi, UBi, LBj, UBj    &
+                            , start_of_new_run          & ! TRUE = initialize coral, seagass, macroalgae, sediment from start; FALSE = continue from previous run
                             , XI_size, ETA_size         & ! grid size XI-direction (meters); grid size ETA-direction (meters)
                             , p_sgrass                  & ! seagrass coverage (habitat area/grid area)
                             )
@@ -145,7 +149,7 @@ END SUBROUTINE allocate_reef_ecosys
     write(*,*) 'yt_debug: mod_reef_ecosys.F initialize_reef_ecosys() finished macroalgae init'
 #endif
 #ifdef SEDIMENT_ECOSYS
-    CALL initialize_sedecosys(ng, LBi, UBi, LBj, UBj)
+    CALL initialize_sedecosys(ng, LBi, UBi, LBj, UBj, start_of_new_run)
     write(*,*) 'yt_debug: mod_reef_ecosys.F initialize_reef_ecosys() finished sediment init'
 #endif
 
@@ -232,6 +236,26 @@ END SUBROUTINE allocate_reef_ecosys
     , COTe_in           &   ! COTe(N): COT starfish egg (umol L-1)
     , COTl_in           &   ! COTl(N): COT starfish larvae (umol L-1)
 #endif
+#if defined SEDIMENT_ECOSYS && defined SGD_ON
+    , sgd_flux          &   ! sumbarine groundwater discharge rate (cm s-1)  This flux is assumed to be the same throughout the sediment ecosystem layers (no compression/expansion) So volume flux doesn't change but concentrations of tracers do
+    , sgd_Tmp_in        &   ! SGD concentration coming in through bottom: Tmp: Temperature (oC)
+    , sgd_Sal_in        &   ! SGD concentration coming in through bottom: Sal: Salinity (PSU)
+    , sgd_DIC_in        &   ! SGD concentration coming in through bottom: DIC: Total dissolved inorganic carbon (DIC: umol kg-1)
+    , sgd_TA_in         &   ! SGD concentration coming in through bottom: TA : Total alkalinity (TA: umol kg-1)
+    , sgd_DOx_in        &   ! SGD concentration coming in through bottom: DOx: Dissolved oxygen (umol L-1)
+# if defined CARBON_ISOTOPE
+    , sgd_DI13C_in      &   ! SGD concentration coming in through bottom: DI13C : 13C of DIC (umol kg-1)
+# endif
+# if defined NUTRIENTS            
+    , sgd_NO3_in        &   ! SGD concentration coming in through bottom: NO3: NO3 (umol L-1)
+    , sgd_NH4_in        &   ! SGD concentration coming in through bottom: NH4: NH4 (umol L-1)
+    , sgd_PO4_in        &   ! SGD concentration coming in through bottom: PO4: PO4 (umol L-1)
+#  if defined NITROGEN_ISOTOPE
+    , sgd_NO3_15N_in    &   ! SGD concentration coming in through bottom: NO3_15N: 15N of NO3 (umol L-1)
+    , sgd_NH4_15N_in    &   ! SGD concentration coming in through bottom: NH4_15N: 15N of NH4 (umol L-1)
+#  endif
+# endif
+#endif
 !   output parameters
     , dDIC_dt        &   ! dDIC_dt(N): dDIC/dt (umol kg-1 s-1)
     , dTA_dt         &   ! dTA_dt (N): dTA/dt (umol kg-1 s-1)
@@ -282,6 +306,25 @@ END SUBROUTINE allocate_reef_ecosys
 #if defined COT_STARFISH         
     , dCOTe_dt       &   ! dCOTe/dt(N): (umol L-1 s-1)
     , dCOTl_dt       &   ! dCOTl/dt(N): (umol L-1 s-1)
+#endif
+#if defined SEDIMENT_ECOSYS && defined SGD_ON
+    , sgd_Tmp_out        &   ! SGD concentration going out through surface: Tmp: Temperature (oC)
+    , sgd_Sal_out        &   ! SGD concentration going out through surface: Sal: Salinity (PSU)
+    , sgd_DIC_out        &   ! SGD concentration going out through surface: DIC: Total dissolved inorganic carbon (DIC: umol kg-1)
+    , sgd_TA_out         &   ! SGD concentration going out through surface: TA : Total alkalinity (TA: umol kg-1)
+    , sgd_DOx_out        &   ! SGD concentration going out through surface: DOx: Dissolved oxygen (umol L-1)
+# if defined CARBON_ISOTOPE
+    , sgd_DI13C_out      &   ! SGD concentration going out through surface: DI13C : 13C of DIC (umol kg-1)
+# endif
+# if defined NUTRIENTS            
+    , sgd_NO3_out        &   ! SGD concentration going out through surface: NO3: NO3 (umol L-1)
+    , sgd_NH4_out        &   ! SGD concentration going out through surface: NH4: NH4 (umol L-1)
+    , sgd_PO4_out        &   ! SGD concentration going out through surface: PO4: PO4 (umol L-1)
+#  if defined NITROGEN_ISOTOPE
+    , sgd_NO3_15N_out    &   ! SGD concentration going out through surface: NO3_15N: 15N of NO3 (umol L-1)
+    , sgd_NH4_15N_out    &   ! SGD concentration going out through surface: NH4_15N: 15N of NH4 (umol L-1)
+#  endif
+# endif
 #endif
     , sspH           &   ! sea surface pH
     , ssfCO2         &   ! sea surface fCO2 (uatm)
@@ -358,6 +401,7 @@ END SUBROUTINE allocate_reef_ecosys
 #endif
 #ifdef SEDIMENT_ECOSYS
     real(8), intent(in) :: p_sand      
+    real(8)             :: p_sedmnt
 #endif
 
 ! raw tracer inputs
@@ -411,7 +455,26 @@ END SUBROUTINE allocate_reef_ecosys
     real(8), intent(in) :: COTe_in(N)         ! COT starfish egg (umol L-1)
     real(8), intent(in) :: COTl_in(N)         ! COT starfish larvae (umol L-1)
 #endif
-
+#if defined SEDIMENT_ECOSYS && defined SGD_ON
+    real(8), intent(in) :: sgd_flux           ! sumbarine groundwater discharge rate (cm s-1)  This flux is assumed to be the same throughout the sediment ecosystem layers (no compression/expansion) So volume flux doesn't change but concentrations of tracers do
+    real(8), intent(in) :: sgd_Tmp_in         ! SGD concentration coming in through bottom: Tmp: Temperature (oC)
+    real(8), intent(in) :: sgd_Sal_in         ! SGD concentration coming in through bottom: Sal: Salinity (PSU)
+    real(8), intent(in) :: sgd_DIC_in         ! SGD concentration coming in through bottom: DIC: Total dissolved inorganic carbon (DIC: umol kg-1)
+    real(8), intent(in) :: sgd_TA_in          ! SGD concentration coming in through bottom: TA : Total alkalinity (TA: umol kg-1)
+    real(8), intent(in) :: sgd_DOx_in         ! SGD concentration coming in through bottom: DOx: Dissolved oxygen (umol L-1)
+# if defined CARBON_ISOTOPE
+    real(8), intent(in) :: sgd_DI13C_in       ! SGD concentration coming in through bottom: DI13C : 13C of DIC (umol kg-1)
+# endif
+# if defined NUTRIENTS            
+    real(8), intent(in) :: sgd_NO3_in         ! SGD concentration coming in through bottom: NO3: NO3 (umol L-1)
+    real(8), intent(in) :: sgd_NH4_in         ! SGD concentration coming in through bottom: NH4: NH4 (umol L-1)
+    real(8), intent(in) :: sgd_PO4_in         ! SGD concentration coming in through bottom: PO4: PO4 (umol L-1)
+#  if defined NITROGEN_ISOTOPE
+    real(8), intent(in) :: sgd_NO3_15N_in     ! SGD concentration coming in through bottom: NO3_15N: 15N of NO3 (umol L-1)
+    real(8), intent(in) :: sgd_NH4_15N_in     ! SGD concentration coming in through bottom: NH4_15N: 15N of NH4 (umol L-1)
+#  endif
+# endif
+#endif
 ! input with negatives corrected to zero
     real(8) :: Tmp(N)        
     real(8) :: Sal(N)        
@@ -463,7 +526,6 @@ END SUBROUTINE allocate_reef_ecosys
     real(8) :: COTe(N)         ! COT starfish egg (umol L-1)
     real(8) :: COTl(N)         ! COT starfish larvae (umol L-1)
 #endif
-
 ! output parameters
     real(8), intent(out) :: dDIC_dt(N)     
     real(8), intent(out) :: dTA_dt(N)     
@@ -514,6 +576,25 @@ END SUBROUTINE allocate_reef_ecosys
 #if defined COT_STARFISH         
     real(8), intent(out) :: dCOTe_dt(N)    ! dCOTe/dt (umol L-1 s-1)
     real(8), intent(out) :: dCOTl_dt(N)    ! dCOTl/dt (umol L-1 s-1)
+#endif
+#if defined SEDIMENT_ECOSYS && defined SGD_ON
+    real(8), intent(out) :: sgd_Tmp_out         ! SGD concentration going out through surface: Tmp: Temperature (oC)
+    real(8), intent(out) :: sgd_Sal_out         ! SGD concentration going out through surface: Sal: Salinity (PSU)
+    real(8), intent(out) :: sgd_DIC_out         ! SGD concentration going out through surface: DIC: Total dissolved inorganic carbon (DIC: umol kg-1)
+    real(8), intent(out) :: sgd_TA_out          ! SGD concentration going out through surface: TA : Total alkalinity (TA: umol kg-1)
+    real(8), intent(out) :: sgd_DOx_out         ! SGD concentration going out through surface: DOx: Dissolved oxygen (umol L-1)
+# if defined CARBON_ISOTOPE
+    real(8), intent(out) :: sgd_DI13C_out       ! SGD concentration going out through surface: DI13C : 13C of DIC (umol kg-1)
+# endif
+# if defined NUTRIENTS            
+    real(8), intent(out) :: sgd_NO3_out         ! SGD concentration going out through surface: NO3: NO3 (umol L-1)
+    real(8), intent(out) :: sgd_NH4_out         ! SGD concentration going out through surface: NH4: NH4 (umol L-1)
+    real(8), intent(out) :: sgd_PO4_out         ! SGD concentration going out through surface: PO4: PO4 (umol L-1)
+#  if defined NITROGEN_ISOTOPE
+    real(8), intent(out) :: sgd_NO3_15N_out     ! SGD concentration going out through surface: NO3_15N: 15N of NO3 (umol L-1)
+    real(8), intent(out) :: sgd_NH4_15N_out     ! SGD concentration going out through surface: NH4_15N: 15N of NH4 (umol L-1)
+#  endif
+# endif
 #endif
     real(8), intent(out) :: sspH      
     real(8), intent(out) :: ssfCO2    
@@ -887,7 +968,41 @@ END SUBROUTINE allocate_reef_ecosys
     ssO2flux  = 0.0d0   ! sea surface O2 flux (mmol m-2 s-1)
     PFDbott   = 0.0d0   ! Bottom photon flux density (umol m-2 s-1)
 
+#ifdef SEDIMENT_ECOSYS
+    p_sedmnt = p_sand
+# ifdef SEAGRASS
+    p_sedmnt = p_sedmnt + sum(p_sgrass)
+# endif
+# ifdef MACROALGAE
+    p_sedmnt = p_sedmnt + p_algae
+# endif
+#endif
+
 !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    if ( sum( (/ 0d0      &
+#ifdef CORAL_POLYP
+      , sum(p_coral(:))   &
+#endif
+#ifdef SEAGRASS
+      , sum(p_sgrass(:))  &
+#endif
+#ifdef MACROALGAE
+      , p_algae           &
+#endif
+#ifdef SEDIMENT_ECOSYS
+      , p_sand            &
+#endif
+    /) ) > 1.0d0 ) then
+      write(*,*) 'yt_debug: mod_reef_ecosys.F    ERROR: Sum of coverage is greater than 1.0      i =', i, '   j =', j
+      write(*,*) 'yt_debug: mod_reef_ecosys.F           p_coral(1)  =', p_coral(1)
+      write(*,*) 'yt_debug: mod_reef_ecosys.F           p_coral(2)  =', p_coral(2)
+      write(*,*) 'yt_debug: mod_reef_ecosys.F           p_sgrass(1) =', p_sgrass(1)
+      write(*,*) 'yt_debug: mod_reef_ecosys.F           p_algae     =', p_algae
+      write(*,*) 'yt_debug: mod_reef_ecosys.F           p_sand      =', p_sand
+      write(*,*) 'yt_debug: mod_reef_ecosys.F           sum         =', sum((/sum(p_coral),sum(p_sgrass),p_algae,p_sand/))
+      error stop
+    endif
+
     DO k=1,N
       ! if (isnan() .or. abs() > huge()) then
       if (isnan(DIC(k)) .or. abs(DIC(k)) > 1.0d15 .or. DIC(k) < 0.0d0) then
@@ -2057,15 +2172,18 @@ endif
           ( ng                &   ! ng: nested grid number; 
           , icl               &   ! icl: seagrass species id
           , i, j              &   ! i,j: position
-# if defined SEDIMENT_ECOSYS
+# if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE || defined SEAGRASS_ROOT_POM
           , Nsed(ng)          &   ! Number of sediment layers
 # endif
           , dz(1)             &   ! vertical layer thickness (m)
           , date              &   ! Date (days since x or elapsed days) yt_edit best if in phase with clock to maintain consistency on restart
           , dt                &   ! Time step (sec)
           , p_sgrass(:)       &   ! seagrass coverage (every species)
+# if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE || defined SEAGRASS_ROOT_POM
+          , p_sedmnt          &   ! Sediment coverage
+# endif
           , PFD               &   ! Photon flux density (umol m-2 s-1)
-          , rho_sw(1)         &    ! Density of seawater (g cm-3)
+          , rho_sw(1)         &   ! Density of seawater (g cm-3)
           , DIC(1)*rho_sw(1)  &   ! DIC (umol l-1)            ! [umol/L] = [umol/kg] [g/cm3] (kg/1000g)(1000cm3/L)
           , DOx(1)            &   ! DO  (umol L-1)
 # if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE         
@@ -2121,13 +2239,12 @@ endif
           ( ng             &   ! ng: nested grid number; 
           , icl            &   ! icl: seagrass species id
           , i, j           &   ! i,j: position
-# if defined SEDIMENT_ECOSYS
+# if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE || defined SEAGRASS_ROOT_POM
           , Nsed(ng)       &   ! Number of sediment layers
 # endif
           , dz(1)          &   ! vertical layer thickness (m)
           , date           &   ! Date (days since x or elapsed days) yt_edit best if in phase with clock to maintain consistency on restart
           , dt             &   ! Time step (sec)
-          , p_sgrass(:)    &   ! seagrass coverage (every species)
           )
       END IF
     END DO
@@ -2372,8 +2489,7 @@ endif
 ! Compute sediment ecosystem model.
 !-----------------------------------------------------------------------
 !
-    ! IF(p_sand .gt. 0.0d0) THEN  ! yt_edit  implement coverage scheme later
-    IF(.true.) THEN  ! yt_edit  implement coverage scheme later
+    IF(p_sedmnt .gt. 0.0d0) THEN
 # ifdef SEDIMENT_EMPIRICAL
 !!!  Empirical sediment model
       CALL sedecosys     &
@@ -2432,6 +2548,7 @@ endif
 ! yt_edit don't run under reef rock (confirm coverage type interactions) (don't forget to fix seagrass -> sediment coupling when you implement this: umol/L volume shouuld be; gridarea * sed_dz -> p_sediment * sed_dz)
 ! yt_edit porosity from coverage??
 
+
       DO m=1,isplitsed   !!! Loop for sediment model: dtc <= 0.05 sec
 
         CALL sedecosys      &
@@ -2472,6 +2589,26 @@ endif
           , -Fdep_POP(iDtr)  &   ! POP deposition flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
 #   endif
 #  endif
+#  if defined SGD_ON
+          , sgd_flux          &   ! sumbarine groundwater discharge rate (cm s-1)  This flux is assumed to be the same throughout the sediment ecosystem layers (no compression/expansion) So volume flux doesn't change but concentrations of tracers do
+          , sgd_Tmp_in        &   ! SGD concentration coming in through bottom: Tmp: Temperature (oC)
+          , sgd_Sal_in        &   ! SGD concentration coming in through bottom: Sal: Salinity (PSU)
+          , sgd_DIC_in        &   ! SGD concentration coming in through bottom: DIC: Total dissolved inorganic carbon (DIC: umol kg-1)
+          , sgd_TA_in         &   ! SGD concentration coming in through bottom: TA : Total alkalinity (TA: umol kg-1)
+          , sgd_DOx_in        &   ! SGD concentration coming in through bottom: DOx: Dissolved oxygen (umol L-1)
+#   if defined CARBON_ISOTOPE
+          , sgd_DI13C_in      &   ! SGD concentration coming in through bottom: DI13C : 13C of DIC (umol kg-1)
+#   endif
+#   if defined NUTRIENTS            
+          , sgd_NO3_in        &   ! SGD concentration coming in through bottom: NO3: NO3 (umol L-1)
+          , sgd_NH4_in        &   ! SGD concentration coming in through bottom: NH4: NH4 (umol L-1)
+          , sgd_PO4_in        &   ! SGD concentration coming in through bottom: PO4: PO4 (umol L-1)
+#    if defined NITROGEN_ISOTOPE
+          , sgd_NO3_15N_in    &   ! SGD concentration coming in through bottom: NO3_15N: 15N of NO3 (umol L-1)
+          , sgd_NH4_15N_in    &   ! SGD concentration coming in through bottom: NH4_15N: 15N of NH4 (umol L-1)
+#    endif
+#   endif
+#  endif
 !         output parameters
         ! , Flux_Tmp       &   ! Temperature flux (K cm-2 s-1)  * direction of water column to sediment is positive
         ! , Flux_Sal       &   ! Salinity  flux (cm-2 s-1)  * direction of water column to sediment is positive
@@ -2506,6 +2643,25 @@ endif
         ! , Flux_S0        &   ! S0 flux    (nmol cm-2 s-1) * direction of water column to sediment is positive  ! yt_edit diffusion is not modeled so flux is zero
           , Flux_SO4       &   ! SO4 flux   (nmol cm-2 s-1) * direction of water column to sediment is positive
 #  endif
+#  if defined SGD_ON
+          , sgd_Tmp_out        &   ! SGD concentration going out through surface: Tmp: Temperature (oC)
+          , sgd_Sal_out        &   ! SGD concentration going out through surface: Sal: Salinity (PSU)
+          , sgd_DIC_out        &   ! SGD concentration going out through surface: DIC: Total dissolved inorganic carbon (DIC: umol kg-1)
+          , sgd_TA_out         &   ! SGD concentration going out through surface: TA : Total alkalinity (TA: umol kg-1)
+          , sgd_DOx_out        &   ! SGD concentration going out through surface: DOx: Dissolved oxygen (umol L-1)
+#   if defined CARBON_ISOTOPE
+          , sgd_DI13C_out      &   ! SGD concentration going out through surface: DI13C : 13C of DIC (umol kg-1)
+#   endif
+#   if defined NUTRIENTS            
+          , sgd_NO3_out        &   ! SGD concentration going out through surface: NO3: NO3 (umol L-1)
+          , sgd_NH4_out        &   ! SGD concentration going out through surface: NH4: NH4 (umol L-1)
+          , sgd_PO4_out        &   ! SGD concentration going out through surface: PO4: PO4 (umol L-1)
+#    if defined NITROGEN_ISOTOPE
+          , sgd_NO3_15N_out    &   ! SGD concentration going out through surface: NO3_15N: 15N of NO3 (umol L-1)
+          , sgd_NH4_15N_out    &   ! SGD concentration going out through surface: NH4_15N: 15N of NH4 (umol L-1)
+#    endif
+#   endif
+#  endif
         )
       END DO
       
@@ -2513,7 +2669,7 @@ endif
     ! x[nmol/cm2 s] (umol/1000nmol) (10000cm2/m2) (1/dz)[1/m] (m3/1000L)= x/dz 0.01(umol L-1 s-1)
     ! cff: convaert [nmol cm-2 s-1] to [umol L-1 s-1]
       ! cff=0.01d0 /dz(1) * p_sand ! yt_edit  implement coverage scheme later
-      cff=0.01d0 /dz(1)
+      cff=0.01d0 /dz(1) * p_sedmnt
     ! (umol L-1 s-1) / rho(kg L-1) = (1/rho) (umol kg-1 s-1)
 
       ! dTA_dt (1) = dTA_dt (1) - Flux_TA  * cff ! yt_edit what are the units? do we need to divide by rho?
@@ -2549,13 +2705,14 @@ endif
 !#  endif
 
 !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-      DO k=1,1
+      DO k=1,N
         ! if (isnan() .or. abs() > huge()) then
         if (isnan(dDIC_dt(k)) .or. abs(dDIC_dt(k)) > 1.0d15 .or. DIC(k)+dDIC_dt(k)*dt*dz(k) < -100.0d0) then
           write(*,*) 'yt_debug: mod_reef_ecosys.F dDIC_dt(k)    sediment      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     dDIC_dt(k) =', dDIC_dt(k)
           write(*,*) 'yt_debug:     DIC(k) =', DIC(k)
           write(*,*) 'yt_debug:     DIC(k)+dDIC_dt(k)*dt*dz(k) =', DIC(k)+dDIC_dt(k)*dt*dz(k)
+          error stop
         endif
         ! if (isnan() .or. abs() > huge()) then
         if (isnan(dTA_dt(k)) .or. abs(dTA_dt(k)) > 1.0d15 .or. TA(k)+dTA_dt(k)*dt*dz(k) < -100.0d0) then
@@ -2563,6 +2720,7 @@ endif
           write(*,*) 'yt_debug:     dTA_dt(k) =', dTA_dt(k)
           write(*,*) 'yt_debug:     TA(k) =', TA(k)
           write(*,*) 'yt_debug:     TA(k)+dTA_dt(k)*dt*dz(k) =', TA(k)+dTA_dt(k)*dt*dz(k)
+          error stop
         endif
         ! if (isnan() .or. abs() > huge()) then
         if (isnan(dDOx_dt(k)) .or. abs(dDOx_dt(k)) > 1.0d15 .or. DOx(k)+dDOx_dt(k)*dt*dz(k) < -100.0d0) then
@@ -2570,6 +2728,7 @@ endif
           write(*,*) 'yt_debug:     dDOx_dt(k) =', dDOx_dt(k)
           write(*,*) 'yt_debug:     DOx(k) =', DOx(k)
           write(*,*) 'yt_debug:     DOx(k)+dDOx_dt(k)*dt*dz(k) =', DOx(k)+dDOx_dt(k)*dt*dz(k)
+          error stop
         endif
 #  if defined ORGANIC_MATTER
         DO yt_iter = 1, Ndom
@@ -2581,6 +2740,7 @@ endif
             write(*,*) 'yt_debug:     dDOC_dt(k,Ndom) =', dDOC_dt(k,yt_iter)
             write(*,*) 'yt_debug:     DOC(k,Ndom) =', DOC(k,yt_iter)
             write(*,*) 'yt_debug:     DOC(k,Ndom)+dDOC_dt(k,Ndom)*dt*dz(k) =', DOC(k,yt_iter)+dDOC_dt(k,yt_iter)*dt*dz(k)
+            error stop
           endif
         ENDDO
         DO yt_iter = 1, Npom
@@ -2592,6 +2752,7 @@ endif
             write(*,*) 'yt_debug:     dPOC_dt(k,Npom) =', dPOC_dt(k,yt_iter)
             write(*,*) 'yt_debug:     POC(k,Npom) =', POC(k,yt_iter)
             write(*,*) 'yt_debug:     POC(k,Npom)+dPOC_dt(k,Npom)*dt*dz(k) =', POC(k,yt_iter)+dPOC_dt(k,yt_iter)*dt*dz(k)
+            error stop
           endif
         ENDDO
         DO yt_iter = 1, Nphy
@@ -2603,6 +2764,7 @@ endif
             write(*,*) 'yt_debug:     dPHY_dt(k,Nphy) =', dPHY_dt(k,yt_iter)
             write(*,*) 'yt_debug:     PHY(k,Nphy) =', PHY(k,yt_iter)
             write(*,*) 'yt_debug:     PHY(k,Nphy)+dPHY_dt(k,Nphy)*dt*dz(k) =', PHY(k,yt_iter)+dPHY_dt(k,yt_iter)*dt*dz(k)
+            error stop
           endif
         ENDDO
         DO yt_iter = 1, Nzoo
@@ -2614,6 +2776,7 @@ endif
             write(*,*) 'yt_debug:     dZOO_dt(k,Nzoo) =', dZOO_dt(k,yt_iter)
             write(*,*) 'yt_debug:     ZOO(k,Nzoo) =', ZOO(k,yt_iter)
             write(*,*) 'yt_debug:     ZOO(k,Nzoo)+dZOO_dt(k,Nzoo)*dt*dz(k) =', ZOO(k,yt_iter)+dZOO_dt(k,yt_iter)*dt*dz(k)
+            error stop
           endif
         ENDDO
         DO yt_iter = 1, Npim
@@ -2625,6 +2788,7 @@ endif
             write(*,*) 'yt_debug:     dPIC_dt(k,Npim) =', dPIC_dt(k,yt_iter)
             write(*,*) 'yt_debug:     PIC(k,Npim) =', PIC(k,yt_iter)
             write(*,*) 'yt_debug:     PIC(k,Npim)+dPIC_dt(k,Npim)*dt*dz(k) =', PIC(k,yt_iter)+dPIC_dt(k,yt_iter)*dt*dz(k)
+            error stop
           endif
         ENDDO
 #  endif
@@ -2635,6 +2799,7 @@ endif
           write(*,*) 'yt_debug:     dNO3_dt(k) =', dNO3_dt(k)
           write(*,*) 'yt_debug:     NO3(k) =', NO3(k)
           write(*,*) 'yt_debug:     NO3(k)+dNO3_dt(k)*dt*dz(k) =', NO3(k)+dNO3_dt(k)*dt*dz(k)
+          error stop
         endif
         ! if (isnan() .or. abs() > huge()) then
         if (isnan(dNH4_dt(k)) .or. abs(dNH4_dt(k)) > 1.0d15 .or. NH4(k)+dNH4_dt(k)*dt*dz(k) < -100.0d0) then
@@ -2642,6 +2807,7 @@ endif
           write(*,*) 'yt_debug:     dNH4_dt(k) =', dNH4_dt(k)
           write(*,*) 'yt_debug:     NH4(k) =', NH4(k)
           write(*,*) 'yt_debug:     NH4(k)+dNH4_dt(k)*dt*dz(k) =', NH4(k)+dNH4_dt(k)*dt*dz(k)
+          error stop
         endif
         ! if (isnan() .or. abs() > huge()) then
         if (isnan(dPO4_dt(k)) .or. abs(dPO4_dt(k)) > 1.0d15 .or. PO4(k)+dPO4_dt(k)*dt*dz(k) < -100.0d0) then
@@ -2649,6 +2815,7 @@ endif
           write(*,*) 'yt_debug:     dPO4_dt(k) =', dPO4_dt(k)
           write(*,*) 'yt_debug:     PO4(k) =', PO4(k)
           write(*,*) 'yt_debug:     PO4(k)+dPO4_dt(k)*dt*dz(k) =', PO4(k)+dPO4_dt(k)*dt*dz(k)
+          error stop
         endif
 #  if defined ORGANIC_MATTER
         DO yt_iter = 1, Ndom
@@ -2660,6 +2827,7 @@ endif
             write(*,*) 'yt_debug:     dDON_dt(k,Ndom) =', dDON_dt(k,yt_iter)
             write(*,*) 'yt_debug:     DON(k,Ndom) =', DON(k,yt_iter)
             write(*,*) 'yt_debug:     DON(k,Ndom)+dDON_dt(k,Ndom)*dt*dz(k) =', DON(k,yt_iter)+dDON_dt(k,yt_iter)*dt*dz(k)
+            error stop
           endif
           ! if (isnan() .or. abs() > huge()) then
           if (isnan(dDOP_dt(k,yt_iter)) .or. abs(dDOP_dt(k,yt_iter)) > 1.0d15 &
@@ -2669,6 +2837,7 @@ endif
             write(*,*) 'yt_debug:     dDOP_dt(k,Ndom) =', dDOP_dt(k,yt_iter)
             write(*,*) 'yt_debug:     DOP(k,Ndom) =', DOP(k,yt_iter)
             write(*,*) 'yt_debug:     DOP(k,Ndom)+dDOP_dt(k,Ndom)*dt*dz(k) =', DOP(k,yt_iter)+dDOP_dt(k,yt_iter)*dt*dz(k)
+            error stop
           endif
         ENDDO
         DO yt_iter = 1, Npom
@@ -2680,6 +2849,7 @@ endif
             write(*,*) 'yt_debug:     dPON_dt(k,Npom) =', dPON_dt(k,yt_iter)
             write(*,*) 'yt_debug:     PON(k,Npom) =', PON(k,yt_iter)
             write(*,*) 'yt_debug:     PON(k,Npom)+dPON_dt(k,Npom)*dt*dz(k) =', PON(k,yt_iter)+dPON_dt(k,yt_iter)*dt*dz(k)
+            error stop
           endif
           ! if (isnan() .or. abs() > huge()) then
           if (isnan(dPOP_dt(k,yt_iter)) .or. abs(dPOP_dt(k,yt_iter)) > 1.0d15 &
@@ -2689,6 +2859,7 @@ endif
             write(*,*) 'yt_debug:     dPOP_dt(k,Npom) =', dPOP_dt(k,yt_iter)
             write(*,*) 'yt_debug:     POP(k,Npom) =', POP(k,yt_iter)
             write(*,*) 'yt_debug:     POP(k,Npom)+dPOP_dt(k,Npom)*dt*dz(k) =', POP(k,yt_iter)+dPOP_dt(k,yt_iter)*dt*dz(k)
+            error stop
           endif
         ENDDO
 #  endif
@@ -2699,31 +2870,37 @@ endif
       if (isnan(sspH) .or. abs(sspH) > 1.0d15) then
         write(*,*) 'yt_debug: mod_reef_ecosys.F sspH    sediment      i =', i, '   j =', j
         write(*,*) 'yt_debug:     sspH =', sspH
+        error stop
       endif
       ! if (isnan() .or. abs() > huge()) then
       if (isnan(ssfCO2) .or. abs(ssfCO2) > 1.0d15) then
         write(*,*) 'yt_debug: mod_reef_ecosys.F ssfCO2    sediment      i =', i, '   j =', j
         write(*,*) 'yt_debug:     ssfCO2 =', ssfCO2
+        error stop
       endif
       ! if (isnan() .or. abs() > huge()) then
       if (isnan(ssWarg) .or. abs(ssWarg) > 1.0d15) then
         write(*,*) 'yt_debug: mod_reef_ecosys.F ssWarg    sediment      i =', i, '   j =', j
         write(*,*) 'yt_debug:     ssWarg =', ssWarg
+        error stop
       endif
       ! if (isnan() .or. abs() > huge()) then
       if (isnan(ssCO2flux) .or. abs(ssCO2flux) > 1.0d15) then
         write(*,*) 'yt_debug: mod_reef_ecosys.F ssCO2flux    sediment      i =', i, '   j =', j
         write(*,*) 'yt_debug:     ssCO2flux =', ssCO2flux
+        error stop
       endif
       ! if (isnan() .or. abs() > huge()) then
       if (isnan(ssO2flux) .or. abs(ssO2flux) > 1.0d15) then
         write(*,*) 'yt_debug: mod_reef_ecosys.F ssO2flux    sediment      i =', i, '   j =', j
         write(*,*) 'yt_debug:     ssO2flux =', ssO2flux
+        error stop
       endif
       ! if (isnan() .or. abs() > huge()) then
       if (isnan(PFDbott) .or. abs(PFDbott) > 1.0d15) then
         write(*,*) 'yt_debug: mod_reef_ecosys.F PFDbott    sediment      i =', i, '   j =', j
         write(*,*) 'yt_debug:     PFDbott =', PFDbott
+        error stop
       endif
 !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 

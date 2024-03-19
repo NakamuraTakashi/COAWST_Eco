@@ -1488,6 +1488,13 @@
           SOURCES(ng)%Qsgd=SOURCES(ng)%Qbar(Nsrc(ng))
 #  endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
+! !!! yt_edit SGD with SEDIMENT_ECOSYS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:add
+! #  if defined SEDIMENT_ECOSYS && defined SGD_ON
+!           SOURCES(ng)%Qsgd=SOURCES(ng)%Qbar(Nsrc(ng)) ! yt_debug mass flux is unchanged by sediment model so okay to leave this as is???
+! #  elif defined SGD_ON
+!           SOURCES(ng)%Qsgd=SOURCES(ng)%Qbar(Nsrc(ng))
+! #  endif
+! !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 #  ifdef SOLVE3D
           DO k=1,N(ng)
             DO i=1,Nsrc(ng)
@@ -1558,12 +1565,21 @@
         END DO
 #    endif
 #   endif
-#   ifdef SGD_ON
-        DO itrc=1,NT(ng)
-          SOURCES(ng)%Tsgd(itrc)=SOURCES(ng)%Tsrc(Nsrc(ng),1,itrc)  !!!!!!!!!!!!!!!!!!!!!!!!!!Test case
-        END DO
-#   endif
+! #   ifdef SGD_ON
+!         DO itrc=1,NT(ng)
+!           SOURCES(ng)%Tsgd(itrc)=SOURCES(ng)%Tsrc(Nsrc(ng),1,itrc)  !!!!!!!!!!!!!!!!!!!!!!!!!!Test case
+!         END DO
+! #   endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
+!!! yt_edit SGD with SEDIMENT_ECOSYS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:add
+#  if defined SEDIMENT_ECOSYS && defined SGD_ON
+          ! SOURCES(ng)%Tsgd(i,j,itrc)   is set in reef_ecosys.h
+#  elif defined SGD_ON
+          DO itrc=1,NT(ng)
+            SOURCES(ng)%Tsgd(itrc)=SOURCES(ng)%Tsrc(Nsrc(ng),1,itrc)  !!!!!!!!!!!!!!!!!!!!!!!!!!Test case
+          END DO
+#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 #  endif
       END IF
 # endif

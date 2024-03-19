@@ -124,9 +124,11 @@
       integer  :: iSgSgCBm(Nsg)        ! Seagrass leaf+root carbon-biomass per unit ground area (in seagrass habitat area) [umol.C m-2.sg.hab]
       integer  :: iSgLfCBm(Nsg)        ! Seagrass leaf carbon-biomass per unit ground area (in seagrass habitat area) [umol.lf.C m-2.sg.hab]
       integer  :: iSgRtCBm(Nsg)        ! Seagrass root carbon-biomass per unit ground area (in seagrass habitat area) [umol.rt.C m-2.sg.hab]
+      integer  :: iSgTotSgCBmS(Nsg)    ! SgTotSgCBm of last growth interval (For internal use only, need to save to restart file, but use SgTotSgCBm for output)
       integer  :: iSgTotSgCBm(Nsg)     ! Total seagrass carbon-biomass in grid [mol.C.tot]
       integer  :: iSgTotLfCBm(Nsg)     ! Total seagrass above ground carbon-biomass in grid [mol.C.lf]
       integer  :: iSgTotRtCBm(Nsg)     ! Total seagrass below ground carbon-biomass in grid [mol.C.rt]
+      integer  :: iSgLAI(Nsg)          ! Leaf area index: one-sided green leaf area per unit ground surface area [m2.lf m-2.sg.hab]
       integer  :: iSgTotLA(Nsg)        ! Total one-sided green leaf area in grid [m2.lf]
       integer  :: iSgGridELAP(Nsg)     ! Effective leaf area projection on ground (whole grid) [m2.lf.proj m-2.grid]
       integer  :: iSgGridPhot(Nsg)     ! Seagrass gross photosynthesis rate per unit ground area (whole grid) [umol.C m-2.grid s-1]
@@ -197,7 +199,7 @@
 !
 !  Biological parameters.
 !
-      logical, allocatable :: LReadBioINI(:,:)
+      logical, allocatable :: LReadBioINI(:,:)       ! Switch to control reading of initial conditions from initial/restart nc file; 1 = foodweb (tracer variables); 2 = coral, seagass, macroalgae, sediment, etc.
 
       integer, allocatable :: CrlIter(:)
       integer, allocatable :: SedIter(:)
@@ -542,11 +544,15 @@
         ic=ic+1
         iSgRtCBm(j)=ic
         ic=ic+1
+        iSgTotSgCBmS(j)=ic
+        ic=ic+1
         iSgTotSgCBm(j)=ic
         ic=ic+1
         iSgTotLfCBm(j)=ic
         ic=ic+1
         iSgTotRtCBm(j)=ic
+        ic=ic+1
+        iSgLAI(j)=ic
         ic=ic+1
         iSgTotLA(j)=ic
         ic=ic+1
@@ -1016,9 +1022,11 @@
             SGRASS(ng)%SgCBmF     (isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgSgCBm      (isp) )
             SGRASS(ng)%LfCBm      (isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgLfCBm      (isp) )
             SGRASS(ng)%RtCBm      (isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgRtCBm      (isp) )
+            SGRASS(ng)%TotSgCBm   (isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgTotSgCBmS  (isp) )
             SGRASS(ng)%TotSgCBmF  (isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgTotSgCBm   (isp) )
             SGRASS(ng)%TotLfCBm   (isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgTotLfCBm   (isp) )
             SGRASS(ng)%TotRtCBm   (isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgTotRtCBm   (isp) )
+            SGRASS(ng)%LAI        (isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgLAI        (isp) )
             SGRASS(ng)%TotLA      (isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgTotLA      (isp) )
             SGRASS(ng)%GridELAP   (isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgGridELAP   (isp) )
             SGRASS(ng)%GridPhot   (isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgGridPhot   (isp) )
@@ -1170,9 +1178,11 @@
             OCEAN(ng)%HisBio2d(i,j, iSgSgCBm      (isp) ) = SGRASS(ng)%SgCBmF     (isp,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgLfCBm      (isp) ) = SGRASS(ng)%LfCBm      (isp,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgRtCBm      (isp) ) = SGRASS(ng)%RtCBm      (isp,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgTotSgCBmS  (isp) ) = SGRASS(ng)%TotSgCBm   (isp,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgTotSgCBm   (isp) ) = SGRASS(ng)%TotSgCBmF  (isp,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgTotLfCBm   (isp) ) = SGRASS(ng)%TotLfCBm   (isp,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgTotRtCBm   (isp) ) = SGRASS(ng)%TotRtCBm   (isp,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgLAI        (isp) ) = SGRASS(ng)%LAI        (isp,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgTotLA      (isp) ) = SGRASS(ng)%TotLA      (isp,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgGridELAP   (isp) ) = SGRASS(ng)%GridELAP   (isp,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgGridPhot   (isp) ) = SGRASS(ng)%GridPhot   (isp,i,j)
@@ -1398,6 +1408,7 @@
 # endif
         
         CALL initialize_reef_ecosys(ng, Imin, Imax, Jmin, Jmax  &
+          , .not. LReadBioINI(2,ng)                             &   ! TRUE = initialize coral, seagass, macroalgae, sediment from start; FALSE = continue from previous run
 # ifdef SEAGRASS
           , 1.0d0/(GRID(ng)%pm(Imin:Imax,Jmin:Jmax))            &   ! grid size XI-direction (meters)
           , 1.0d0/(GRID(ng)%pn(Imin:Imax,Jmin:Jmax))            &   ! grid size ETA-direction (meters)

@@ -208,8 +208,8 @@ ad_LBC(isTvar) == Clo     Clo     RadNud  Clo   ! idbio(:), compact
 ! tracers point Sources/Sinks (like river runoff): [NBT,Ngrids] values are
 ! expected. See glossary below for details.
 
-!                                    1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 3 3 3 3 3 3 3 3 3 3 4 4 4 4 4 4 4 4 4 4 5
-!                  1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0
+!                                    1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 3 3 3 3 3 3 3 3 3 3 4 4 4 4 4 4 4 4 4 4 5 5 5 5 5 5 5 5 5 5 6
+!                  1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0
 !  LtracerSrc   == T T T T T T T F F F F F T T T T T T T T T T T ! For no d13C version
 !  LtracerSrc   == T T T T T T T F F F F F T T T T T F F F F F T T T T T T T T T T T ! For d13C version
    LtracerSrc   == 23*F
@@ -223,11 +223,11 @@ ad_LBC(isTvar) == Clo     Clo     RadNud  Clo   ! idbio(:), compact
 !  Hout(idTvar) == 45*T    ! NO3, ...           biological tracer
 !  Hout(idTsur) == 45*F    ! NO3_sflux, ...     surface tracer flux
 
-!                                    1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 3 3 3 3 3 3 3 3 3 3 4 4 4 4 4 4 4 4 4 4 5
-!                  1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0
-  Hout(iHbio2)  == T T T T T T T T T T T T T T T T T T T T T T T T T T T T T F F T F F F F T T T T T
-! Hout(iHbio2)  == 41*T
-! Hout(iHbio2)  == 57*T
+!                                    1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 3 3 3 3 3 3 3 3 3 3 4 4 4 4 4 4 4 4 4 4 5 5 5 5 5 5 5 5 5 5 6
+!                  1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0
+  Hout(iHbio2)  == T T T T T T T T T T T T T T T T T T T T T T T T T T T T T F F F T F F F F F T T T T T
+! Hout(iHbio2)  == 43*T
+! Hout(iHbio2)  == 59*T
 
   Hout(iHbio3)  == 1*F
 
@@ -241,11 +241,11 @@ Hout(iHbiosed3) == 35*F
 ! Qout(idTvar)  == 45*F    ! NO3, ...           biological tracer
 ! Qout(idTsur)  == 45*F    ! NO3_sflux, ...     surface tracer flux
 
-!                                    1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 3 3 3 3 3 3 3 3 3 3 4 4 4 4 4 4 4 4 4 4 5
-!                  1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0
-  Qout(iHbio2)  == F F F F F F F F F F F F F F F F F F F F F F F F F F F F F T T F T T T T F F F F F
-! Qout(iHbio2)  == 41*F
-! Qout(iHbio2)  == 57*F
+!                                    1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 3 3 3 3 3 3 3 3 3 3 4 4 4 4 4 4 4 4 4 4 5 5 5 5 5 5 5 5 5 5 6
+!                  1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0
+  Qout(iHbio2)  == F F F F F F F F F F F F F F F F F F F F F F F F F F F F F T T F F T T T T T F F F F F
+! Qout(iHbio2)  == 43*F
+! Qout(iHbio2)  == 59*F
 
   Qout(iHbio3)  == 1*F
 
@@ -384,16 +384,18 @@ Qout(iHbiosed3) == 35*T
 ! iHbio2(45),            iHbio2(29),         SgSgCBm        Seagrass leaf+root carbon-biomass per unit ground area (in seagrass habitat area) [umol.C m-2.sg.hab]
 ! iHbio2(46),            iHbio2(30),         SgLfCBm        Seagrass leaf carbon-biomass per unit ground area (in seagrass habitat area) [umol.lf.C m-2.sg.hab]
 ! iHbio2(47),            iHbio2(31),         SgRtCBm        Seagrass root carbon-biomass per unit ground area (in seagrass habitat area) [umol.rt.C m-2.sg.hab]
-! iHbio2(48),            iHbio2(32),         SgTotSgCBm     Total seagrass carbon-biomass in grid [mol.C.tot]
-! iHbio2(49),            iHbio2(33),         SgTotLfCBm     Total seagrass above ground carbon-biomass in grid [mol.C.lf]
-! iHbio2(50),            iHbio2(34),         SgTotRtCBm     Total seagrass below ground carbon-biomass in grid [mol.C.rt]
-! iHbio2(51),            iHbio2(35),         SgTotLA        Total one-sided green leaf area in grid [m2.lf]
-! iHbio2(52),            iHbio2(36),         SgGridELAP     Effective leaf area projection on ground (whole grid) [m2.lf.proj m-2.grid]
-! iHbio2(53),            iHbio2(37),         SgGridPhot     Seagrass gross photosynthesis rate per unit ground area (whole grid) [umol.C m-2.grid s-1]
-! iHbio2(54),            iHbio2(38),         SgPhotLim      Seagrass photosynthesis limiting factor: 1 = light; 2 = Carbon uptake; 3 = Nitrogen uptake; 4 = Phosphorus uptake
-! iHbio2(55),            iHbio2(39),         SgGridResp     Seagrass respiration rate per unit ground area (whole grid) [umol.C m-2.grid s-1]
-! iHbio2(56),            iHbio2(40),         SgGridNetPhot  Seagrass net photosynthesis rate per unit ground area (whole grid) [umol.C m-2.grid s-1]
-! iHbio2(57),            iHbio2(41),         SgGridDieoff   Seagrass dieoff rate carbon biomass per unit ground area (whole grid) [umol.C m-2.grid s-1]
+! iHbio2(48),            iHbio2(32),         SgTotSgCBmS    SgTotSgCBm of last growth interval (For internal use only, need to save to restart file, but use SgTotSgCBm for output)
+! iHbio2(49),            iHbio2(33),         SgTotSgCBm     Total seagrass carbon-biomass in grid [mol.C.tot]
+! iHbio2(50),            iHbio2(34),         SgTotLfCBm     Total seagrass above ground carbon-biomass in grid [mol.C.lf]
+! iHbio2(51),            iHbio2(35),         SgTotRtCBm     Total seagrass below ground carbon-biomass in grid [mol.C.rt]
+! iHbio2(52),            iHbio2(36),         SgLAI          Leaf area index: one-sided green leaf area per unit ground surface area [m2.lf m-2.sg.hab]
+! iHbio2(53),            iHbio2(37),         SgTotLA        Total one-sided green leaf area in grid [m2.lf]
+! iHbio2(54),            iHbio2(38),         SgGridELAP     Effective leaf area projection on ground (whole grid) [m2.lf.proj m-2.grid]
+! iHbio2(55),            iHbio2(39),         SgGridPhot     Seagrass gross photosynthesis rate per unit ground area (whole grid) [umol.C m-2.grid s-1]
+! iHbio2(56),            iHbio2(40),         SgPhotLim      Seagrass photosynthesis limiting factor: 1 = light; 2 = Carbon uptake; 3 = Nitrogen uptake; 4 = Phosphorus uptake
+! iHbio2(57),            iHbio2(41),         SgGridResp     Seagrass respiration rate per unit ground area (whole grid) [umol.C m-2.grid s-1]
+! iHbio2(58),            iHbio2(42),         SgGridNetPhot  Seagrass net photosynthesis rate per unit ground area (whole grid) [umol.C m-2.grid s-1]
+! iHbio2(59),            iHbio2(43),         SgGridDieoff   Seagrass dieoff rate carbon biomass per unit ground area (whole grid) [umol.C m-2.grid s-1]
 !!------------------------------------------------------------------------------
 ! Biological Sediment Model 3D Sediment Parameters:
 !
