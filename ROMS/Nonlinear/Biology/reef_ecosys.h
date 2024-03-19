@@ -28,6 +28,9 @@
 #if defined DIAGNOSTICS_BIO
       USE mod_diags
 #endif
+#if defined SEDIMENT_ECOSYS && defined SGD_ON
+      USE mod_sources
+#endif
 
 
 !
@@ -86,6 +89,14 @@
 #endif
 #ifdef SEDIMENT_ECOSYS
      &                   GRID(ng) % p_sand,                             &
+# ifdef SGD_ON
+     &                   GRID(ng) % sgd_src,                            &
+     &                   GRID(ng) % pm,                                 &
+     &                   GRID(ng) % pn,                                 &
+     &                   SOURCES(ng) % Qbar(Nsrc(ng)),                  &
+     &                   SOURCES(ng) % Tsrc(Nsrc(ng),1,:),              &
+     &                   SOURCES(ng) % Tsgd,                            &
+# endif
 #endif
 #ifdef BBL_MODEL
      &                   BBL(ng) % bustrc,                              &
@@ -132,13 +143,21 @@
      &                         p_coral,                                 &
 #endif
 #ifdef SEAGRASS
-     &                         p_sgrass,                              &
+     &                         p_sgrass,                                &
 #endif
 #ifdef MACROALGAE
      &                         p_algae,                                 &
 #endif
 #ifdef SEDIMENT_ECOSYS
      &                         p_sand,                                  &
+# ifdef SGD_ON
+     &                         sgd_src,                                 &
+     &                         pm,                                      &
+     &                         pn,                                      &
+     &                         Qbar,                                    &
+     &                         Tsrc,                                    &
+     &                         Tsgd,                                    &
+# endif
 #endif
 #ifdef BBL_MODEL
      &                         bustrc, bvstrc,                          &
@@ -212,6 +231,14 @@
 # endif
 # ifdef SEDIMENT_ECOSYS
       real(r8), intent(inout) :: p_sand(LBi:UBi,LBj:UBj)
+#  ifdef SGD_ON
+      real(r8), intent(inout) :: sgd_src(LBi:UBi,LBj:UBj)
+      real(r8), intent(in)    :: pm(LBi:UBi,LBj:UBj)
+      real(r8), intent(in)    :: pn(LBi:UBi,LBj:UBj)
+      real(r8), intent(in)    :: Qbar
+      real(r8), intent(in)    :: Tsrc(UBt)
+      real(r8), intent(inout) :: Tsgd(LBi:UBi,LBj:UBj,UBt)
+#  endif
 # endif
 # ifdef BBL_MODEL
       real(r8), intent(in) :: bustrc(LBi:,LBj:)
@@ -259,6 +286,14 @@
 # endif
 # ifdef SEDIMENT_ECOSYS
       real(r8), intent(inout) :: p_sand(LBi:UBi,LBj:UBj)
+#  ifdef SGD_ON
+      real(r8), intent(inout) :: sgd_src(LBi:UBi,LBj:UBj)
+      real(r8), intent(in)    :: pm(LBi:UBi,LBj:UBj)
+      real(r8), intent(in)    :: pn(LBi:UBi,LBj:UBj)
+      real(r8), intent(in)    :: Qbar
+      real(r8), intent(in)    :: Tsrc(UBt)
+      real(r8), intent(inout) :: Tsgd(LBi:UBi,LBj:UBj,UBt)
+#  endif
 # endif
 # ifdef BBL_MODEL
       real(r8), intent(in) :: bustrc(LBi:UBi,LBj:UBj)
@@ -296,6 +331,10 @@
       real(r8) :: R13CH2O
 #endif
       real(r8) :: dtrc_dt(UBk,UBt)
+
+#if defined SEDIMENT_ECOSYS && defined SGD_ON
+      real(r8) :: p_sedmnt(LBi:UBi,LBj:UBj)
+#endif
 
 #include "set_bounds.h"
 
@@ -351,6 +390,16 @@
 #endif
 
 !----- Ecosystem model ----------------------------------------
+#if defined SEDIMENT_ECOSYS && defined SGD_ON
+    p_sedmnt(i,j) = p_sand(i,j)
+# ifdef SEAGRASS
+    p_sedmnt(i,j) = p_sedmnt(i,j) + sum(p_sgrass(:,i,j))
+# endif
+# ifdef MACROALGAE
+    p_sedmnt(i,j) = p_sedmnt(i,j) + p_algae(i,j)
+# endif
+#endif
+
             CALL reef_ecosys           &
 !          input parameters
      &            (ng, i, j            &   ! ng: nested grid number; i,j: position
@@ -425,6 +474,27 @@
      &            ,t(i,j,:,nstp,iCOTe)     &   ! COTe(N): COT starfish egg (umol L-1)
      &            ,t(i,j,:,nstp,iCOTl)     &   ! COTl(N): COT starfish larvae (umol L-1)
 #endif
+#if defined SEDIMENT_ECOSYS && defined SGD_ON
+!        [nondim]     * [m3.water s-1 grid-1] / [m2.grid grid-1] / [m2.sedmnt m-2.grid]   [100 cm m-1] = [cm.water s-1 m-2.sedmnt]
+     & , sgd_src(i,j) * Qbar                  * pm(i,j)*pn(i,j)  / p_sedmnt(i,j)        * 100d0      & ! sumbarine groundwater discharge rate (cm s-1)
+     &            ,Tsrc(iTemp)       &   ! SGD Tmp: Temperature (oC)
+     &            ,Tsrc(iSalt)       &   ! SGD Sal: Salinity (PSU)
+     &            ,Tsrc(iTIC_)       &   ! SGD DIC: Total dissolved inorganic carbon (DIC: umol kg-1)
+     &            ,Tsrc(iTAlk)       &   ! SGD TA : Total alkalinity (TA: umol kg-1)
+     &            ,Tsrc(iOxyg)       &   ! SGD DOx: Dissolved oxygen (umol L-1)
+# if defined CARBON_ISOTOPE
+     &            ,Tsrc(iT13C)       &   ! SGD DI13C : 13C of DIC (umol kg-1)
+# endif
+# if defined NUTRIENTS            
+     &            ,Tsrc(iNO3_)       &   ! SGD NO3: NO3 (umol L-1)
+     &            ,Tsrc(iNH4_)       &   ! SGD NH4: NH4 (umol L-1)
+     &            ,Tsrc(iPO4_)       &   ! SGD PO4: PO4 (umol L-1)
+#  if defined NITROGEN_ISOTOPE
+     &            ,Tsrc(i15NO3)      &   ! SGD NO3_15N: 15N of NO3 (umol L-1)
+     &            ,Tsrc(i15NH4)      &   ! SGD NH4_15N: 15N of NH4 (umol L-1)
+#  endif
+# endif
+#endif
 !          output parameters
      &            ,dtrc_dt(:,iTIC_)        &   ! dDIC_dt(N): dDIC/dt (umol kg-1 s-1)
      &            ,dtrc_dt(:,iTAlk)        &   ! dTA_dt (N): dTA/dt (umol kg-1 s-1)
@@ -472,6 +542,25 @@
 #if defined COT_STARFISH              
      &            ,dtrc_dt(:,iCOTe)        &   ! dCOTe/dt(N): (umol L-1 s-1)
      &            ,dtrc_dt(:,iCOTl)        &   ! dCOTl/dt(N): (umol L-1 s-1)
+#endif
+#if defined SEDIMENT_ECOSYS && defined SGD_ON
+     &            ,Tsgd(i,j,iTemp)       &   ! SGD Tmp: Temperature (oC)
+     &            ,Tsgd(i,j,iSalt)       &   ! SGD Sal: Salinity (PSU)
+     &            ,Tsgd(i,j,iTIC_)       &   ! SGD DIC: Total dissolved inorganic carbon (DIC: umol kg-1)
+     &            ,Tsgd(i,j,iTAlk)       &   ! SGD TA : Total alkalinity (TA: umol kg-1)
+     &            ,Tsgd(i,j,iOxyg)       &   ! SGD DOx: Dissolved oxygen (umol L-1)
+# if defined CARBON_ISOTOPE
+     &            ,Tsgd(i,j,iT13C)       &   ! SGD DI13C : 13C of DIC (umol kg-1)
+# endif
+# if defined NUTRIENTS            
+     &            ,Tsgd(i,j,iNO3_)       &   ! SGD NO3: NO3 (umol L-1)
+     &            ,Tsgd(i,j,iNH4_)       &   ! SGD NH4: NH4 (umol L-1)
+     &            ,Tsgd(i,j,iPO4_)       &   ! SGD PO4: PO4 (umol L-1)
+#  if defined NITROGEN_ISOTOPE
+     &            ,Tsgd(i,j,i15NO3)      &   ! SGD NO3_15N: 15N of NO3 (umol L-1)
+     &            ,Tsgd(i,j,i15NH4)      &   ! SGD NH4_15N: 15N of NH4 (umol L-1)
+#  endif
+# endif
 #endif
      &            ,sspH           &   ! sea surface pH
      &            ,ssfCO2         &   ! sea surface fCO2 (uatm)

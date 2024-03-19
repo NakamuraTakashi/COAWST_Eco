@@ -83,7 +83,13 @@
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
 # ifdef SGD_ON
           real(r8), pointer :: Qsgd
+!!! yt_edit SGD with SEDIMENT_ECOSYS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:add
+#  ifdef SEDIMENT_ECOSYS
+          real(r8), pointer :: Tsgd(:,:,:)
+#  else
           real(r8), pointer :: Tsgd(:)
+#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 # endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 
@@ -93,7 +99,14 @@
 
       CONTAINS
 
+!!! yt_edit SGD with SEDIMENT_ECOSYS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:add
+#  if defined SEDIMENT_ECOSYS && defined SGD_ON
+      SUBROUTINE allocate_sources (ng, LBi, UBi, LBj, UBj)
+#  else
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
       SUBROUTINE allocate_sources (ng)
+#  endif
+
 !
 !=======================================================================
 !                                                                      !
@@ -116,6 +129,12 @@
 !  Imported variable declarations.
 !
       integer :: ng
+!!! yt_edit SGD with SEDIMENT_ECOSYS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:add
+#  if defined SEDIMENT_ECOSYS && defined SGD_ON
+      integer, intent(in) :: LBi, UBi, LBj, UBj
+#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+
 !
 !  Local variable declarations.
 !
@@ -216,8 +235,13 @@
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
 #ifdef SGD_ON
       allocate ( SOURCES(ng) % Qsgd )
-
+!!! yt_edit SGD with SEDIMENT_ECOSYS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:add
+#  ifdef SEDIMENT_ECOSYS
+      allocate ( SOURCES(ng) % Tsgd(LBi:UBi,LBj:UBj,NT(ng)) )
+#  else
       allocate ( SOURCES(ng) % Tsgd(NT(ng)) )
+#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 #endif
 !
 !-----------------------------------------------------------------------
@@ -274,7 +298,13 @@
 #ifdef SGD_ON
       SOURCES(ng) % Qsgd = IniVal
       DO itrc=1,NT(ng)
+!!! yt_edit SGD with SEDIMENT_ECOSYS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:add
+# ifdef SEDIMENT_ECOSYS
+        SOURCES(ng) % Tsgd(LBi:UBi,LBj:UBj,itrc) = IniVal
+# else
         SOURCES(ng) % Tsgd(itrc) = IniVal
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
       END DO
 #endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
