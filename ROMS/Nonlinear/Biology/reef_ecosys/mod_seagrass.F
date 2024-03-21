@@ -548,7 +548,7 @@ MODULE mod_seagrass
     , dt                          &   ! [s]                       time step
     , p_sgrass                    &   ! [m2.sg.hab m-2.grid]      (0~1)  Seagrass coverage (every species)
 # if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE || defined SEAGRASS_ROOT_POM
-    , p_sedmnt                    &   ! [m2.sedmnt m-2.grid]      (0~1)  Sediment coverage
+    , p_sand                      &   ! [m2.sedmnt m-2.grid]      (0~1)  Sediment coverage
 # endif
     , PFD                         &   ! [umol m-2 s-1]            Photon flux density 
     , rho_sw                      &   ! [g cm-3]                  Density of seawater 
@@ -601,7 +601,7 @@ MODULE mod_seagrass
     real(8), intent(in)   :: dt                         ! [s]                         Time step interval duration
     real(8), intent(inout):: p_sgrass(Nsg)              ! [m2.sg.hab m-2.grid]        (0~1)  Seagrass coverage (every species)
 # if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE || defined SEAGRASS_ROOT_POM
-    real(8), intent(in)   :: p_sedmnt                   ! [m2.sedmnt m-2.grid]        (0~1)  Sediment coverage
+    real(8), intent(in)   :: p_sand                     ! [m2.sedmnt m-2.grid]      (0~1)  Sediment coverage
 # endif
     real(8), intent(in)   :: PFD                        ! [umol m-2 s-1]              Photon flux density 
     real(8), intent(in)   :: rho_sw                     ! [g cm-3]                    Density of seawater 
@@ -1048,9 +1048,9 @@ MODULE mod_seagrass
 # if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE || defined SEAGRASS_ROOT_POM
     ! sgrass_per_sedmnt           [m2.sg.hab m-2.sedmnt]      (0~1)  Seagrass coverage per sediment coverage
     ! p_sgrass(Nsg)               [m2.sg.hab m-2.grid]        (0~1)  Seagrass coverage (every species)
-    ! p_sedmnt                    [m2.sedmnt m-2.grid]        (0~1)  Sediment coverage
+    ! p_sand                      [m2.sedmnt m-2.grid]        (0~1)  Sediment coverage
     ! [m2.hab/m2.sedmnt] = [m2.hab/m2.grid] [m2.grid/m2.sedmnt]
-    sgrass_per_sedmnt = p_sgrass(species)   / p_sedmnt
+    sgrass_per_sedmnt = p_sgrass(species)   / p_sand
     ! root_comp_dist_factor(Nsed) [g.rt.comp g-1.tot m2.sg.hab m-2.sedmnt mm-1]    root compartemtent distribution factor equal to f_blw_cur * root_mass_profile(:) * sgrass_per_sedmnt / sed_layer_thickness(:) 
     ! f_blw_cur                   [g.rt.drywt g-1.tot.drywt]  also [mol.C.lf mol-1.C.tot] current below ground biomass to total biomass fraction, calculated on the last growth interval
     ! root_mass_profile(sed)      []                          Mass ratio of roots in each layer (total must sum to 1.0)

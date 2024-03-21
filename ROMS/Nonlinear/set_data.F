@@ -1488,13 +1488,6 @@
           SOURCES(ng)%Qsgd=SOURCES(ng)%Qbar(Nsrc(ng))
 #  endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
-! !!! yt_edit SGD with SEDIMENT_ECOSYS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:add
-! #  if defined SEDIMENT_ECOSYS && defined SGD_ON
-!           SOURCES(ng)%Qsgd=SOURCES(ng)%Qbar(Nsrc(ng)) ! yt_debug mass flux is unchanged by sediment model so okay to leave this as is???
-! #  elif defined SGD_ON
-!           SOURCES(ng)%Qsgd=SOURCES(ng)%Qbar(Nsrc(ng))
-! #  endif
-! !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 #  ifdef SOLVE3D
           DO k=1,N(ng)
             DO i=1,Nsrc(ng)
@@ -1572,8 +1565,11 @@
 ! #   endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !!! yt_edit SGD with SEDIMENT_ECOSYS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:add
-#  if defined SEDIMENT_ECOSYS && defined SGD_ON
-          ! SOURCES(ng)%Tsgd(i,j,itrc)   is set in reef_ecosys.h
+#  if defined SEDIMENT_ECOSYS && defined SEDECO_ADVECTION && defined SGD_ON
+          DO itrc=1,NT(ng)
+            SOURCES(ng)%Tsgd(itrc)=0.0d0  ! tracer concentrations are added as flux to the bottom of sediment, and added reef ecosys concentrations
+          END DO
+          SOURCES(ng)%Tsgd(iTemp)=-273.15d0  ! yt_edit is this correct???
 #  elif defined SGD_ON
           DO itrc=1,NT(ng)
             SOURCES(ng)%Tsgd(itrc)=SOURCES(ng)%Tsrc(Nsrc(ng),1,itrc)  !!!!!!!!!!!!!!!!!!!!!!!!!!Test case

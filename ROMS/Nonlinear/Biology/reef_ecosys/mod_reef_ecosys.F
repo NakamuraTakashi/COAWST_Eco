@@ -236,7 +236,7 @@ END SUBROUTINE allocate_reef_ecosys
     , COTe_in           &   ! COTe(N): COT starfish egg (umol L-1)
     , COTl_in           &   ! COTl(N): COT starfish larvae (umol L-1)
 #endif
-#if defined SEDIMENT_ECOSYS && defined SGD_ON
+#if defined SEDECO_ADVECTION && defined SGD_ON
     , sgd_flux          &   ! sumbarine groundwater discharge rate (cm s-1)  This flux is assumed to be the same throughout the sediment ecosystem layers (no compression/expansion) So volume flux doesn't change but concentrations of tracers do
     , sgd_Tmp_in        &   ! SGD concentration coming in through bottom: Tmp: Temperature (oC)
     , sgd_Sal_in        &   ! SGD concentration coming in through bottom: Sal: Salinity (PSU)
@@ -257,6 +257,8 @@ END SUBROUTINE allocate_reef_ecosys
 # endif
 #endif
 !   output parameters
+    , dTemp_dt       &   ! Tmp(N): Temperature (oC)
+    , dSalt_dt       &   ! Sal(N): Salinity (PSU)
     , dDIC_dt        &   ! dDIC_dt(N): dDIC/dt (umol kg-1 s-1)
     , dTA_dt         &   ! dTA_dt (N): dTA/dt (umol kg-1 s-1)
     , dDOx_dt        &   ! dDOx_dt(N): dDO/dt (umol L-1 s-1)
@@ -306,25 +308,6 @@ END SUBROUTINE allocate_reef_ecosys
 #if defined COT_STARFISH         
     , dCOTe_dt       &   ! dCOTe/dt(N): (umol L-1 s-1)
     , dCOTl_dt       &   ! dCOTl/dt(N): (umol L-1 s-1)
-#endif
-#if defined SEDIMENT_ECOSYS && defined SGD_ON
-    , sgd_Tmp_out        &   ! SGD concentration going out through surface: Tmp: Temperature (oC)
-    , sgd_Sal_out        &   ! SGD concentration going out through surface: Sal: Salinity (PSU)
-    , sgd_DIC_out        &   ! SGD concentration going out through surface: DIC: Total dissolved inorganic carbon (DIC: umol kg-1)
-    , sgd_TA_out         &   ! SGD concentration going out through surface: TA : Total alkalinity (TA: umol kg-1)
-    , sgd_DOx_out        &   ! SGD concentration going out through surface: DOx: Dissolved oxygen (umol L-1)
-# if defined CARBON_ISOTOPE
-    , sgd_DI13C_out      &   ! SGD concentration going out through surface: DI13C : 13C of DIC (umol kg-1)
-# endif
-# if defined NUTRIENTS            
-    , sgd_NO3_out        &   ! SGD concentration going out through surface: NO3: NO3 (umol L-1)
-    , sgd_NH4_out        &   ! SGD concentration going out through surface: NH4: NH4 (umol L-1)
-    , sgd_PO4_out        &   ! SGD concentration going out through surface: PO4: PO4 (umol L-1)
-#  if defined NITROGEN_ISOTOPE
-    , sgd_NO3_15N_out    &   ! SGD concentration going out through surface: NO3_15N: 15N of NO3 (umol L-1)
-    , sgd_NH4_15N_out    &   ! SGD concentration going out through surface: NH4_15N: 15N of NH4 (umol L-1)
-#  endif
-# endif
 #endif
     , sspH           &   ! sea surface pH
     , ssfCO2         &   ! sea surface fCO2 (uatm)
@@ -401,7 +384,6 @@ END SUBROUTINE allocate_reef_ecosys
 #endif
 #ifdef SEDIMENT_ECOSYS
     real(8), intent(in) :: p_sand      
-    real(8)             :: p_sedmnt
 #endif
 
 ! raw tracer inputs
@@ -455,7 +437,7 @@ END SUBROUTINE allocate_reef_ecosys
     real(8), intent(in) :: COTe_in(N)         ! COT starfish egg (umol L-1)
     real(8), intent(in) :: COTl_in(N)         ! COT starfish larvae (umol L-1)
 #endif
-#if defined SEDIMENT_ECOSYS && defined SGD_ON
+#if defined SEDECO_ADVECTION && defined SGD_ON
     real(8), intent(in) :: sgd_flux           ! sumbarine groundwater discharge rate (cm s-1)  This flux is assumed to be the same throughout the sediment ecosystem layers (no compression/expansion) So volume flux doesn't change but concentrations of tracers do
     real(8), intent(in) :: sgd_Tmp_in         ! SGD concentration coming in through bottom: Tmp: Temperature (oC)
     real(8), intent(in) :: sgd_Sal_in         ! SGD concentration coming in through bottom: Sal: Salinity (PSU)
@@ -527,6 +509,8 @@ END SUBROUTINE allocate_reef_ecosys
     real(8) :: COTl(N)         ! COT starfish larvae (umol L-1)
 #endif
 ! output parameters
+    real(8), intent(out) :: dTemp_dt(N)          ! Tmp(N): Temperature (oC)
+    real(8), intent(out) :: dSalt_dt(N)          ! Sal(N): Salinity (PSU)
     real(8), intent(out) :: dDIC_dt(N)     
     real(8), intent(out) :: dTA_dt(N)     
     real(8), intent(out) :: dDOx_dt(N)     
@@ -577,25 +561,6 @@ END SUBROUTINE allocate_reef_ecosys
     real(8), intent(out) :: dCOTe_dt(N)    ! dCOTe/dt (umol L-1 s-1)
     real(8), intent(out) :: dCOTl_dt(N)    ! dCOTl/dt (umol L-1 s-1)
 #endif
-#if defined SEDIMENT_ECOSYS && defined SGD_ON
-    real(8), intent(out) :: sgd_Tmp_out         ! SGD concentration going out through surface: Tmp: Temperature (oC)
-    real(8), intent(out) :: sgd_Sal_out         ! SGD concentration going out through surface: Sal: Salinity (PSU)
-    real(8), intent(out) :: sgd_DIC_out         ! SGD concentration going out through surface: DIC: Total dissolved inorganic carbon (DIC: umol kg-1)
-    real(8), intent(out) :: sgd_TA_out          ! SGD concentration going out through surface: TA : Total alkalinity (TA: umol kg-1)
-    real(8), intent(out) :: sgd_DOx_out         ! SGD concentration going out through surface: DOx: Dissolved oxygen (umol L-1)
-# if defined CARBON_ISOTOPE
-    real(8), intent(out) :: sgd_DI13C_out       ! SGD concentration going out through surface: DI13C : 13C of DIC (umol kg-1)
-# endif
-# if defined NUTRIENTS            
-    real(8), intent(out) :: sgd_NO3_out         ! SGD concentration going out through surface: NO3: NO3 (umol L-1)
-    real(8), intent(out) :: sgd_NH4_out         ! SGD concentration going out through surface: NH4: NH4 (umol L-1)
-    real(8), intent(out) :: sgd_PO4_out         ! SGD concentration going out through surface: PO4: PO4 (umol L-1)
-#  if defined NITROGEN_ISOTOPE
-    real(8), intent(out) :: sgd_NO3_15N_out     ! SGD concentration going out through surface: NO3_15N: 15N of NO3 (umol L-1)
-    real(8), intent(out) :: sgd_NH4_15N_out     ! SGD concentration going out through surface: NH4_15N: 15N of NH4 (umol L-1)
-#  endif
-# endif
-#endif
     real(8), intent(out) :: sspH      
     real(8), intent(out) :: ssfCO2    
     real(8), intent(out) :: ssWarg    
@@ -624,7 +589,7 @@ END SUBROUTINE allocate_reef_ecosys
     real(8) :: PFD, Att, AttFac, ExpAtt, Itop
     real(8) :: cff, cff1, cff2, cff3, cff4, cff5
 
-    ! real(8) :: Flux_Tmp, Flux_Sal
+    real(8) :: Flux_Tmp, Flux_Sal
     real(8) :: Flux_DIC, Flux_TA,  Flux_DO, Flux_CO2sed, Flux_N2  ! yuta_edits_for_masa
 #if defined ORGANIC_MATTER
     real(8) :: Flux_DOC(Ndom), Flux_POC(Npom)
@@ -917,6 +882,8 @@ END SUBROUTINE allocate_reef_ecosys
 
       rho_sw(k) = densSW( Tmp(k),Sal(k) )  ! Density of seawater [g/cm3]
 
+      dTemp_dt(k) = 0.0d0         ! Tmp(N): Temperature (oC)
+      dSalt_dt(k) = 0.0d0         ! Sal(N): Salinity (PSU)
       dDIC_dt(k) = 0.0d0
       dTA_dt(k)  = 0.0d0
       dDOx_dt(k) = 0.0d0
@@ -968,40 +935,38 @@ END SUBROUTINE allocate_reef_ecosys
     ssO2flux  = 0.0d0   ! sea surface O2 flux (mmol m-2 s-1)
     PFDbott   = 0.0d0   ! Bottom photon flux density (umol m-2 s-1)
 
-#ifdef SEDIMENT_ECOSYS
-    p_sedmnt = p_sand
-# ifdef SEAGRASS
-    p_sedmnt = p_sedmnt + sum(p_sgrass)
-# endif
-# ifdef MACROALGAE
-    p_sedmnt = p_sedmnt + p_algae
-# endif
-#endif
 
 !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    if ( sum( (/ 0d0      &
-#ifdef CORAL_POLYP
-      , sum(p_coral(:))   &
-#endif
-#ifdef SEAGRASS
-      , sum(p_sgrass(:))  &
-#endif
-#ifdef MACROALGAE
-      , p_algae           &
-#endif
-#ifdef SEDIMENT_ECOSYS
-      , p_sand            &
-#endif
-    /) ) > 1.0d0 ) then
-      write(*,*) 'yt_debug: mod_reef_ecosys.F    ERROR: Sum of coverage is greater than 1.0      i =', i, '   j =', j
-      write(*,*) 'yt_debug: mod_reef_ecosys.F           p_coral(1)  =', p_coral(1)
-      write(*,*) 'yt_debug: mod_reef_ecosys.F           p_coral(2)  =', p_coral(2)
+
+! #if defined SEAGRASS && defined MACROALGAE && defined SEDIMENT_ECOSYS
+!     if (sum(p_sgrass(:))+p_algae > p_sand ) then
+!       write(*,*) 'yt_debug: mod_reef_ecosys.F    ERROR: Seagrass + &
+!         Macroalgae coverage is greater than sand      i =', i, '   j =', j
+!       write(*,*) 'yt_debug: mod_reef_ecosys.F           p_sgrass(1) =', p_sgrass(1)
+!       write(*,*) 'yt_debug: mod_reef_ecosys.F           p_algae     =', p_algae
+!       write(*,*) 'yt_debug: mod_reef_ecosys.F           p_sand      =', p_sand
+!       error stop
+!     endif
+! #endif
+#if defined SEAGRASS && defined MACROALGAE && defined SEDIMENT_ECOSYS
+    if (sum(p_sgrass(:)) > p_sand ) then
+      write(*,*) 'yt_debug: mod_reef_ecosys.F    ERROR: Seagrass + &
+        coverage is greater than sand      i =', i, '   j =', j
       write(*,*) 'yt_debug: mod_reef_ecosys.F           p_sgrass(1) =', p_sgrass(1)
-      write(*,*) 'yt_debug: mod_reef_ecosys.F           p_algae     =', p_algae
       write(*,*) 'yt_debug: mod_reef_ecosys.F           p_sand      =', p_sand
-      write(*,*) 'yt_debug: mod_reef_ecosys.F           sum         =', sum((/sum(p_coral),sum(p_sgrass),p_algae,p_sand/))
       error stop
     endif
+#endif
+#if defined CORAL_POLYP && defined SEDIMENT_ECOSYS
+    if (sum(p_coral(:)) + p_sand > 1.0d0 ) then
+      write(*,*) 'yt_debug: mod_reef_ecosys.F    ERROR: Coral + &
+        Sand coverage is greater than 1      i =', i, '   j =', j
+      write(*,*) 'yt_debug: mod_reef_ecosys.F           p_coral(1) =', p_coral(1)
+      write(*,*) 'yt_debug: mod_reef_ecosys.F           p_coral(2) =', p_coral(2)
+      write(*,*) 'yt_debug: mod_reef_ecosys.F           p_sand     =', p_sand
+      error stop
+    endif
+#endif
 
     DO k=1,N
       ! if (isnan() .or. abs() > huge()) then
@@ -1822,6 +1787,8 @@ END SUBROUTINE allocate_reef_ecosys
 !!!---------------------------------------------------------------------
 !!!  Benthic interactions.
 !!!---------------------------------------------------------------------
+    Flux_Tmp = 0.0d0
+    Flux_Sal = 0.0d0
     Flux_DIC = 0.0d0
     Flux_TA  = 0.0d0
     Flux_DO  = 0.0d0
@@ -2180,7 +2147,7 @@ endif
           , dt                &   ! Time step (sec)
           , p_sgrass(:)       &   ! seagrass coverage (every species)
 # if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE || defined SEAGRASS_ROOT_POM
-          , p_sedmnt          &   ! Sediment coverage
+          , p_sand            &   ! Sediment coverage
 # endif
           , PFD               &   ! Photon flux density (umol m-2 s-1)
           , rho_sw(1)         &   ! Density of seawater (g cm-3)
@@ -2489,7 +2456,7 @@ endif
 ! Compute sediment ecosystem model.
 !-----------------------------------------------------------------------
 !
-    IF(p_sedmnt .gt. 0.0d0) THEN
+    IF(p_sand .gt. 0.0d0) THEN
 # ifdef SEDIMENT_EMPIRICAL
 !!!  Empirical sediment model
       CALL sedecosys     &
@@ -2589,15 +2556,15 @@ endif
           , -Fdep_POP(iDtr)  &   ! POP deposition flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
 #   endif
 #  endif
-#  if defined SGD_ON
-          , sgd_flux          &   ! sumbarine groundwater discharge rate (cm s-1)  This flux is assumed to be the same throughout the sediment ecosystem layers (no compression/expansion) So volume flux doesn't change but concentrations of tracers do
+#  if defined SEDECO_ADVECTION && defined SGD_ON
+          , sgd_flux/p_sand   &   ! sumbarine groundwater discharge rate (cm s-1)  This flux is assumed to be the same throughout the sediment ecosystem layers (no compression/expansion) So volume flux doesn't change but concentrations of tracers do
           , sgd_Tmp_in        &   ! SGD concentration coming in through bottom: Tmp: Temperature (oC)
           , sgd_Sal_in        &   ! SGD concentration coming in through bottom: Sal: Salinity (PSU)
-          , sgd_DIC_in        &   ! SGD concentration coming in through bottom: DIC: Total dissolved inorganic carbon (DIC: umol kg-1)
-          , sgd_TA_in         &   ! SGD concentration coming in through bottom: TA : Total alkalinity (TA: umol kg-1)
+          , sgd_DIC_in*rho_sw(1) &   ! SGD concentration coming in through bottom: DIC: Total dissolved inorganic carbon (DIC: umol kg-1)
+          , sgd_TA_in*rho_sw(1)  &   ! SGD concentration coming in through bottom: TA : Total alkalinity (TA: umol kg-1)
           , sgd_DOx_in        &   ! SGD concentration coming in through bottom: DOx: Dissolved oxygen (umol L-1)
 #   if defined CARBON_ISOTOPE
-          , sgd_DI13C_in      &   ! SGD concentration coming in through bottom: DI13C : 13C of DIC (umol kg-1)
+          , sgd_DI13C_in*rho_sw(1)&   ! SGD concentration coming in through bottom: DI13C : 13C of DIC (umol kg-1)
 #   endif
 #   if defined NUTRIENTS            
           , sgd_NO3_in        &   ! SGD concentration coming in through bottom: NO3: NO3 (umol L-1)
@@ -2610,8 +2577,8 @@ endif
 #   endif
 #  endif
 !         output parameters
-        ! , Flux_Tmp       &   ! Temperature flux (K cm-2 s-1)  * direction of water column to sediment is positive
-        ! , Flux_Sal       &   ! Salinity  flux (cm-2 s-1)  * direction of water column to sediment is positive
+          , Flux_Tmp       &   ! Temperature flux (K cm-2 s-1)  * direction of water column to sediment is positive
+          , Flux_Sal       &   ! Salinity  flux PSU (cm-2 s-1)  * direction of water column to sediment is positive
           , Flux_TA        &   ! Total Alkalinity flux (??? cm-2 s-1)  * direction of water column to sediment is positive
           , Flux_DO        &   ! DO  flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
           , Flux_CO2sed    &   ! CO2 flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
@@ -2643,25 +2610,6 @@ endif
         ! , Flux_S0        &   ! S0 flux    (nmol cm-2 s-1) * direction of water column to sediment is positive  ! yt_edit diffusion is not modeled so flux is zero
           , Flux_SO4       &   ! SO4 flux   (nmol cm-2 s-1) * direction of water column to sediment is positive
 #  endif
-#  if defined SGD_ON
-          , sgd_Tmp_out        &   ! SGD concentration going out through surface: Tmp: Temperature (oC)
-          , sgd_Sal_out        &   ! SGD concentration going out through surface: Sal: Salinity (PSU)
-          , sgd_DIC_out        &   ! SGD concentration going out through surface: DIC: Total dissolved inorganic carbon (DIC: umol kg-1)
-          , sgd_TA_out         &   ! SGD concentration going out through surface: TA : Total alkalinity (TA: umol kg-1)
-          , sgd_DOx_out        &   ! SGD concentration going out through surface: DOx: Dissolved oxygen (umol L-1)
-#   if defined CARBON_ISOTOPE
-          , sgd_DI13C_out      &   ! SGD concentration going out through surface: DI13C : 13C of DIC (umol kg-1)
-#   endif
-#   if defined NUTRIENTS            
-          , sgd_NO3_out        &   ! SGD concentration going out through surface: NO3: NO3 (umol L-1)
-          , sgd_NH4_out        &   ! SGD concentration going out through surface: NH4: NH4 (umol L-1)
-          , sgd_PO4_out        &   ! SGD concentration going out through surface: PO4: PO4 (umol L-1)
-#    if defined NITROGEN_ISOTOPE
-          , sgd_NO3_15N_out    &   ! SGD concentration going out through surface: NO3_15N: 15N of NO3 (umol L-1)
-          , sgd_NH4_15N_out    &   ! SGD concentration going out through surface: NH4_15N: 15N of NH4 (umol L-1)
-#    endif
-#   endif
-#  endif
         )
       END DO
       
@@ -2669,8 +2617,14 @@ endif
     ! x[nmol/cm2 s] (umol/1000nmol) (10000cm2/m2) (1/dz)[1/m] (m3/1000L)= x/dz 0.01(umol L-1 s-1)
     ! cff: convaert [nmol cm-2 s-1] to [umol L-1 s-1]
       ! cff=0.01d0 /dz(1) * p_sand ! yt_edit  implement coverage scheme later
-      cff=0.01d0 /dz(1) * p_sedmnt
+      cff=0.01d0 /dz(1) * p_sand
     ! (umol L-1 s-1) / rho(kg L-1) = (1/rho) (umol kg-1 s-1)
+
+      ! [K/L s]   =               [K/cm2 s] * [1/m]   (10000cm2/m2) (m3/1000L)
+      dTemp_dt(1) = dTemp_dt(1) + Flux_Tmp  / dz(1) * p_sand * 10d0        ! Temperature change (K L-1) 
+
+      ! [PSU/L s] =               [PSU/cm2 s] * [1/m]   (10000cm2/m2) (m3/1000L)
+      dSalt_dt(1) = dSalt_dt(1) + Flux_Sal    / dz(1) * p_sand * 10d0      ! Sal(N): Salinity (PSU)
 
       ! dTA_dt (1) = dTA_dt (1) - Flux_TA  * cff ! yt_edit what are the units? do we need to divide by rho?
       dDOx_dt(1) = dDOx_dt(1) - Flux_DO  * cff

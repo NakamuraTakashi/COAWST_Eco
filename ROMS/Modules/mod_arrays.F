@@ -196,13 +196,7 @@
 #endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
           IF (LuvSrc(ng).or.LwSrc(ng).or.ANY(LtracerSrc(:,ng))) THEN
-!!! yt_edit SGD with SEDIMENT_ECOSYS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:add
-#  if defined SEDIMENT_ECOSYS && defined SGD_ON
-            CALL allocate_sources (ng, LBi, UBi, LBj, UBj)
-#  else
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
             CALL allocate_sources (ng)
-#  endif
           END IF
 #if defined TRC_PSOURCE
           CALL allocate_trc_sources (ng)

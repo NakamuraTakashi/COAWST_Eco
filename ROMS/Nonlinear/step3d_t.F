@@ -1297,14 +1297,7 @@
           DO i=I_RANGE
             cff=dt(ng)*pm(i,j)*pn(i,j)
             IF (LtracerSrc(itrc,ng)) THEN
-!!! yt_edit SGD with SEDIMENT_ECOSYS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:add
-#  if defined SEDIMENT_ECOSYS
-              cff3=SOURCES(ng)%Tsgd(i,j,itrc)
-              ! write(*,*) 'yt_debug: step3d_t.F  SOURCES(ng)%Tsgd(i,j,itrc)', SOURCES(ng)%Tsgd(i,j,itrc)
-#  else
               cff3=SOURCES(ng)%Tsgd(itrc)
-#  endif
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
             ELSE
               cff3=t(i,j,1,3,itrc)
             END IF
