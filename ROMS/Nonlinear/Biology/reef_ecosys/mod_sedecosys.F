@@ -492,9 +492,9 @@ CONTAINS
     do k = 1,Nsed(ng)
         ! SEDECO(ng)%poro(:,:,k) = coefa_poro + coefb_poro * exp(coefc_poro * SEDECO(ng)%z(k))
         !! --- Shizugawa --- !!
-        SEDECO(ng)%poro(:,:,k) = 0.6007d0 - 0.006d0 * log(SEDECO(ng)%z(k))
-        !! --- Shiraho --- !!
         ! SEDECO(ng)%poro(:,:,k) = 0.6007d0 - 0.006d0 * log(SEDECO(ng)%z(k))
+        !! --- Shiraho --- !!
+        SEDECO(ng)%poro(:,:,k) = 0.6007d0 - 0.006d0 * log(SEDECO(ng)%z(k))
         !! --- Fukido --- !!
         ! SEDECO(ng)%poro(:,:,k) = 0.6007d0 - 0.006d0 * log(SEDECO(ng)%z(k))
     enddo
@@ -1846,10 +1846,10 @@ CONTAINS
 !!!     Advection term
 ! ***************************** !
 # if defined SEDECO_ADVECTION
-    if( sgd_flux * dt > min(SEDECO(ng)%dz) ) then
+    if( sgd_flux * dt > minval(SEDECO(ng)%dz/poro(i,j,:)) ) then
         write(*,*) 'SEDIMENT_ECOSYS: Error: advection volume exceeds layer volume in time step.' 
         write(*,*) '                 advection flux = ', sgd_flux, 'cm s-1'
-        write(*,*) '                 smallest layer thickness = ', min(SEDECO(ng)%dz), 'cm'
+        write(*,*) '                 smallest layer thickness = ', minval(SEDECO(ng)%dz), 'cm'
         write(*,*) '                 time step (dt*SedIter) = ', dt, 's'
         write(*,*) '  Confirm advection flux, then consider increasing the layer thickness or SedIter'
         error stop
@@ -3175,6 +3175,9 @@ CONTAINS
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,miscSO4(k))
         !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ! if (isnan(SEDECO(ng)%SO4(i,j,k)) .or. abs(SEDECO(ng)%SO4(i,j,k)) > huge(SEDECO(ng)%SO4(i,j,k))) then
+        if (SEDECO(ng)%SO4(i,j,k) > 1.0d8) then
+          SEDECO(ng)%SO4(i,j,k) = 1.0d8 ! Cap SO4 concetration (effectively infinite)
+        endif
         if (isnan(SEDECO(ng)%SO4(i,j,k)) .or. SEDECO(ng)%SO4(i,j,k) > 1.0d8 .or. SEDECO(ng)%SO4(i,j,k) < 0.0d0) then
           write(*,*) 'yt_debug: sedecosys SEDECO(ng)%SO4(i,j,k)      i =', i, '   j =', j, '   k =', k
           write(*,*) 'yt_debug:     SEDECO(ng)%SO4(i,j,k) =', SEDECO(ng)%SO4(i,j,k)
