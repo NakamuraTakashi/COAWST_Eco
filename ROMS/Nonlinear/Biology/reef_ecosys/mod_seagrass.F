@@ -462,7 +462,7 @@ MODULE mod_seagrass
             
             ! SGRASS(ng)%LAI(species,i,j) = (-1*log(1.0-0.85)/SGRASS(ng)%k_proj(species))
             ! SGRASS(ng)%LAI(species,i,j) = (-1*log(1.0d0-0.30433574d0)/SGRASS(ng)%k_proj(species))
-            SGRASS(ng)%LAI(species,i,j) = 0.05d0
+            SGRASS(ng)%LAI(species,i,j) = 0.001d0
 
             ! [umol.C/m2.hab]              
             SGRASS(ng)%LfCBm(species,i,j)  &
