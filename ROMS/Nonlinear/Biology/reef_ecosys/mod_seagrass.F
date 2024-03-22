@@ -86,8 +86,9 @@ MODULE mod_seagrass
 # endif
     ! respiration: required
     real(8), pointer :: R_basal                                 (:    )   ! [umol.C m-2.leaf s-1]       Maximum respiration rate
+    real(8), pointer :: Turnover_rate                           (:    )   ! [umol.C umol-1.C day-1]     Base mass turnover rate (dieoff) in fraction of mass per day
     ! dieoff when respiration is insufficient
-    real(8), pointer :: max_dieoff_rate                         (:    )   ! [mol.C mol-1.C day-1]       maximum dieoff in fraction of mass per day, represents atypical modes of survival such as anaerobic respiration and cellular canibalism which limits extreme death rates
+    real(8), pointer :: max_anoxic_dieoff_rate                  (:    )   ! [mol.C mol-1.C day-1]       maximum dieoff due to anoxia in fraction of mass per day, represents atypical modes of survival such as anaerobic respiration and cellular canibalism which limits extreme death rates
     ! Update at end of growth interval
     ! allocate growth
     ! update bed-density/habitat area
@@ -221,8 +222,9 @@ MODULE mod_seagrass
 # endif
     ! respiration: required
     allocate( SGRASS(ng)%R_basal                                    (Nsg)                  ) ! [umol.C m-2.leaf s-1]       Maximum respiration rate
+    allocate( SGRASS(ng)%Turnover_rate                              (Nsg)                  ) ! [umol.C umol-1.C day-1]     Base mass turnover rate (dieoff) in fraction of mass per day
     ! dieoff when respiration is insufficient
-    allocate( SGRASS(ng)%max_dieoff_rate                            (Nsg)                  ) ! [mol.C mol-1.C day-1]       maximum dieoff in fraction of mass per day, represents atypical modes of survival such as anaerobic respiration and cellular canibalism which limits extreme death rates
+    allocate( SGRASS(ng)%max_anoxic_dieoff_rate                     (Nsg)                  ) ! [mol.C mol-1.C day-1]       maximum dieoff due to anoxia in fraction of mass per day, represents atypical modes of survival such as anaerobic respiration and cellular canibalism which limits extreme death rates
     ! Growth interval
     allocate( SGRASS(ng)%trans_rate                                 (Nsg)                  ) ! [mol.C mol-1.C day-1]       Maximum translocation rate as fraction of mass translocatable per day
     allocate( SGRASS(ng)%opt_sg_bed_density                         (Nsg)                  ) ! [g.drywt m-2.hab]           Ideal seagrass bed density (represents guerilla vs phallanx strategy)
@@ -365,8 +367,9 @@ MODULE mod_seagrass
 # endif
     ! respiration: required
     SGRASS(ng)%R_basal                              = [ 2.5265d0 ]                                    ! [umol.C m-2.leaf s-1]       Maximum respiration rate                                                                                      ! tuning: half-life in complete darkness is ~7.0 days.
+    SGRASS(ng)%Turnover_rate                        = [0.05      ]                                    ! [umol.C umol-1.C day-1]     Base mass turnover rate (dieoff) in fraction of mass per day
     ! dieoff when respiration is insufficient
-    SGRASS(ng)%max_dieoff_rate                      = [ 0.5d0    ]                                    ! [mol.C mol-1.C day-1]       maximum dieoff in fraction of mass per day, represents atypical modes of survival such as anaerobic respiration and cellular canibalism which limits extreme death rates ! tuning
+    SGRASS(ng)%max_anoxic_dieoff_rate               = [ 0.5d0    ]                                    ! [mol.C mol-1.C day-1]       maximum dieoff due to anoxia in fraction of mass per day, represents atypical modes of survival such as anaerobic respiration and cellular canibalism which limits extreme death rates ! tuning
 
     ! Growth interval
     SGRASS(ng)%trans_rate                           = [ 0.05d0   ]                                    ! [mol.C mol-1.C day-1]       Maximum translocation rate as fraction of mass translocatable per day                                         ! yt_edit tuning: translocation 10% per day
@@ -682,8 +685,9 @@ MODULE mod_seagrass
 # endif
     ! respiration: required
     real(8), pointer      :: R_basal                    ! [umol.C m-2.leaf s-1]       Maximum respiration rate
+    real(8), pointer      :: Turnover_rate              ! [umol.C umol-1.C day-1]     Base mass turnover rate (dieoff) in fraction of mass per day
     ! dieoff when respiration is insufficient
-    real(8), pointer      :: max_dieoff_rate            ! [mol.C mol-1.C day-1]       maximum dieoff in fraction of mass per day, represents atypical modes of survival such as anaerobic respiration and cellular canibalism which limits extreme death rates
+    real(8), pointer      :: max_anoxic_dieoff_rate     ! [mol.C mol-1.C day-1]       maximum dieoff due to anoxia in fraction of mass per day, represents atypical modes of survival such as anaerobic respiration and cellular canibalism which limits extreme death rates
     ! Update at end of growth interval
     ! allocate growth
     ! update bed-density/habitat area
@@ -818,7 +822,7 @@ MODULE mod_seagrass
     ! respiration: required
     real(8)               :: Resp_req                   ! [umol.C m-2.sg.hab s-1]     Respiration rate required for maintenance in this time step
     ! respiration: dieoff
-    real(8)               :: dieoff                     ! [umol.C m-2.sg.hab]         Seagrass dieoff this time step
+    real(8)               :: anoxic_dieoff              ! [umol.C m-2.sg.hab]         Seagrass dieoff due to anoxia this time step
     real(8)               :: dieoff_rate                ! [umol.C m-2.sg.hab s-1]     Seagrass dieoff rate
     ! Update at end of growth interval
     ! update total carbon-biomass
@@ -914,8 +918,9 @@ MODULE mod_seagrass
 # endif
     ! respiration: required
     R_basal             =>  SGRASS(ng)%R_basal                (species)     ! [umol.C m-2.leaf s-1]       Maximum respiration rate
+    Turnover_rate       =>  SGRASS(ng)%Turnover_rate          (species)     ! [umol.C umol-1.C day-1]     Base mass turnover rate (dieoff) in fraction of mass per day
     ! dieoff when respiration is insufficient
-    max_dieoff_rate     =>  SGRASS(ng)%max_dieoff_rate        (species)     ! [mol.C mol-1.C day-1]       maximum dieoff in fraction of mass per day, represents atypical modes of survival such as anaerobic respiration and cellular canibalism which limits extreme death rates
+    max_anoxic_dieoff_rate =>  SGRASS(ng)%max_anoxic_dieoff_rate(species)   ! [mol.C mol-1.C day-1]       maximum dieoff due to anoxia in fraction of mass per day, represents atypical modes of survival such as anaerobic respiration and cellular canibalism which limits extreme death rates
     ! Update at end of growth interval
     ! allocate growth
     ! update bed-density/habitat area
@@ -1447,16 +1452,21 @@ MODULE mod_seagrass
     ! write(*,*) 'yt_debug: Growth_rate = ', Growth_rate, '   Resp_rate = ', &
     !   Resp_rate, 'Resp_req = ', Resp_req, 'Resp_pos = ', Resp_pos
 
-
-! Dieoff when respiration is insufficient ------------------------------------------------------------
+! Dieoff from base turnover rate rate -------------------------------------------------------------------------
 
     ! dieoff_rate                 [umol.C m-2.sg.hab s-1]     Seagrass dieoff rate
-    dieoff_rate = 0.0d0
+    ! Turnover_rate               [umol.C umol-1.C day-1]     Base mass turnover rate (dieoff) in fraction of mass per day
+    ! SgCBmF                      [umol.C m-2.sg.hab]         Seagrass leaf+root carbon-biomass per unit ground area (in seagrass habitat area) updates on fine time interval
+    ! [umol.C.dead/m2.hab s] = [umol.C.dead/umol.C.tot day] [umol.C.tot/m2.hab] [day/86400s]
+    dieoff_rate              = Turnover_rate                *                   / 86400.0d0
+
+
+! Dieoff when respiration is insufficient ------------------------------------------------------------
 
     ! Resp_req                    [umol.C m-2.sg.hab s-1]     Respiration rate required for maintenance in this time step
     ! Resp_pos                    [umol.C m-2.sg.hab s-1]     Respiration rate possible in this time step
     if (Resp_req .gt. Resp_pos) then
-      ! dieoff                    [umol.C m-2.sg.hab]         Seagrass dieoff this time step
+      ! anoxic_dieoff             [umol.C m-2.sg.hab]         Seagrass dieoff due to anoxia this time step
       ! Resp_pos                  [umol.C m-2.sg.hab s-1]     Respiration rate possible in this time step
       ! HabArea                   [m2.sg.hab]                 Seagrass habitat ground area in grid cell (such that seagrass coverage (p_sgrass) times the grid area equals the habitat area)
       ! R_basal                   [umol.C m-2.leaf s-1]       Maximum respiration rate
@@ -1472,22 +1482,22 @@ MODULE mod_seagrass
       ! solve for SgCBm_maintainable:
       ! SgCBm_maintainable = Resp_pos / (R_basal             / rho_lf         * SgMperC       * 0.000000001d0)
 
-      ! dieoff = SgCBmF - SgCBm_maintainable
+      ! anoxic_dieoff = SgCBmF - SgCBm_maintainable
 
-      dieoff = SgCBmF - (Resp_pos / (R_basal             / rho_lf         * SgMperC       * 0.000000001d0))
+      anoxic_dieoff = SgCBmF - (Resp_pos / (R_basal             / rho_lf         * SgMperC       * 0.000000001d0))
 
       ! limit dieoff rate (especially for when DO intake is zero)
-      ! max_dieoff_rate             [mol.C mol-1.C day-1]       maximum dieoff in fraction of mass per day, represents atypical modes of survival such as anaerobic respiration and cellular canibalism which limits extreme death rates
+      ! max_anoxic_dieoff_rate      [mol.C mol-1.C day-1]       maximum dieoff due to anoxia in fraction of mass per day, represents atypical modes of survival such as anaerobic respiration and cellular canibalism which limits extreme death rates
       ! [mol.C mol-1.C]     = [mol.C mol-1.C day-1] [s]  (day/86400s)
-      ! max_dieoff_per_step = max_dieoff_rate       * dt / 86400
-      if (dieoff/SgCBmF .gt. max_dieoff_rate*dt/86400d0) then
-        dieoff = SgCBmF * max_dieoff_rate*dt/86400d0
+      ! max_dieoff_per_step = max_anoxic_dieoff_rate       * dt / 86400
+      if (anoxic_dieoff/SgCBmF .gt. max_anoxic_dieoff_rate*dt/86400d0) then
+        anoxic_dieoff = SgCBmF * max_anoxic_dieoff_rate*dt/86400d0
       endif
 
       ! dieoff_rate                 [umol.C m-2.sg.hab s-1]     Seagrass dieoff rate
-      dieoff_rate = dieoff /dt
+      dieoff_rate = dieoff_rate + anoxic_dieoff /dt
 
-      ! delta_SgCBmF                 [umol.C m-2.sg.hab s-1]     Rate of change in SgCBmF
+      ! delta_SgCBmF                [umol.C m-2.sg.hab s-1]     Rate of change in SgCBmF
       ! dieoff_rate                 [umol.C m-2.sg.hab s-1]     Seagrass dieoff rate
       delta_SgCBmF = delta_SgCBmF - dieoff_rate
 
