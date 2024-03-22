@@ -1846,6 +1846,15 @@ CONTAINS
 !!!     Advection term
 ! ***************************** !
 # if defined SEDECO_ADVECTION
+    if( sgd_flux * dt > min(SEDECO(ng)%dz) ) then
+        write(*,*) 'SEDIMENT_ECOSYS: Error: advection volume exceeds layer volume in time step.' 
+        write(*,*) '                 advection flux = ', sgd_flux, 'cm s-1'
+        write(*,*) '                 smallest layer thickness = ', min(SEDECO(ng)%dz), 'cm'
+        write(*,*) '                 time step (dt*SedIter) = ', dt, 's'
+        write(*,*) '  Confirm advection flux, then consider increasing the layer thickness or SedIter'
+        error stop
+    endif
+
     !! Advection Flux calculation 
     AdvecVelo = -1.0d0 * sgd_flux ! [cm s-1]       advection velocity (advection downwards is positive)
     !! surface layer k = 1

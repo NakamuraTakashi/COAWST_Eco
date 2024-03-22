@@ -438,7 +438,7 @@ END SUBROUTINE allocate_reef_ecosys
     real(8), intent(in) :: COTl_in(N)         ! COT starfish larvae (umol L-1)
 #endif
 #if defined SEDECO_ADVECTION && defined SGD_ON
-    real(8), intent(in) :: sgd_flux           ! sumbarine groundwater discharge rate (cm s-1)  This flux is assumed to be the same throughout the sediment ecosystem layers (no compression/expansion) So volume flux doesn't change but concentrations of tracers do
+    real(8), intent(in) :: sgd_flux           ! sumbarine groundwater discharge rate of grid (cm s-1)  
     real(8), intent(in) :: sgd_Tmp_in         ! SGD concentration coming in through bottom: Tmp: Temperature (oC)
     real(8), intent(in) :: sgd_Sal_in         ! SGD concentration coming in through bottom: Sal: Salinity (PSU)
     real(8), intent(in) :: sgd_DIC_in         ! SGD concentration coming in through bottom: DIC: Total dissolved inorganic carbon (DIC: umol kg-1)
@@ -2557,7 +2557,7 @@ endif
 #   endif
 #  endif
 #  if defined SEDECO_ADVECTION && defined SGD_ON
-          , sgd_flux/p_sand   &   ! sumbarine groundwater discharge rate (cm s-1)  This flux is assumed to be the same throughout the sediment ecosystem layers (no compression/expansion) So volume flux doesn't change but concentrations of tracers do
+          , sgd_flux/p_sand   &   ! sumbarine groundwater discharge rate of sediment (cm s-1)  This flux is assumed to be the same throughout the sediment ecosystem layers (no compression/expansion) So volume flux doesn't change but concentrations of tracers do
           , sgd_Tmp_in        &   ! SGD concentration coming in through bottom: Tmp: Temperature (oC)
           , sgd_Sal_in        &   ! SGD concentration coming in through bottom: Sal: Salinity (PSU)
           , sgd_DIC_in*rho_sw(1) &   ! SGD concentration coming in through bottom: DIC: Total dissolved inorganic carbon (DIC: umol kg-1)

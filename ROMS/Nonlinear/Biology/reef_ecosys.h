@@ -458,8 +458,8 @@
      &            ,t(i,j,:,nstp,iCOTl)     &   ! COTl(N): COT starfish larvae (umol L-1)
 #endif
 #if defined SEDECO_ADVECTION && defined SGD_ON
-!        [nondim]     * [m3.water s-1 grid-1] / [m2.grid grid-1] / [m2.sedmnt m-2.grid]   [100 cm m-1] = [cm.water s-1 m-2.sedmnt]
-     & , sgd_src(i,j) * Qbar                  * pm(i,j)*pn(i,j)  / p_sand(i,j)        * 100d0      & ! sumbarine groundwater discharge rate (cm s-1)
+!        [nondim]     * [m3.water s-1 grid-1] / [m2.grid grid-1] [100 cm m-1] = [cm.water s-1]
+     & , sgd_src(i,j) * Qbar                  * pm(i,j)*pn(i,j)  * 100d0      & ! sumbarine groundwater discharge rate of grid (cm s-1)
      &            ,Tsrc(iTemp)       &   ! SGD Tmp: Temperature (oC)
      &            ,Tsrc(iSalt)       &   ! SGD Sal: Salinity (PSU)
      &            ,Tsrc(iTIC_)       &   ! SGD DIC: Total dissolved inorganic carbon (DIC: umol kg-1)
