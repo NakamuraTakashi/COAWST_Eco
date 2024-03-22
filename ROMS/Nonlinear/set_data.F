@@ -1558,24 +1558,12 @@
         END DO
 #    endif
 #   endif
-! #   ifdef SGD_ON
-!         DO itrc=1,NT(ng)
-!           SOURCES(ng)%Tsgd(itrc)=SOURCES(ng)%Tsrc(Nsrc(ng),1,itrc)  !!!!!!!!!!!!!!!!!!!!!!!!!!Test case
-!         END DO
-! #   endif
+#   if defined SGD_ON  && !defined SEDECO_ADVECTION
+        DO itrc=1,NT(ng)
+          SOURCES(ng)%Tsgd(itrc)=SOURCES(ng)%Tsrc(Nsrc(ng),1,itrc)  !!!!!!!!!!!!!!!!!!!!!!!!!!Test case
+        END DO
+#   endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
-!!! yt_edit SGD with SEDIMENT_ECOSYS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:add
-#  if defined SEDIMENT_ECOSYS && defined SEDECO_ADVECTION && defined SGD_ON
-          DO itrc=1,NT(ng)
-            SOURCES(ng)%Tsgd(itrc)=0.0d0  ! tracer concentrations are added as flux to the bottom of sediment, and added reef ecosys concentrations
-          END DO
-          SOURCES(ng)%Tsgd(iTemp)=-273.15d0  ! yt_edit is this correct???
-#  elif defined SGD_ON
-          DO itrc=1,NT(ng)
-            SOURCES(ng)%Tsgd(itrc)=SOURCES(ng)%Tsrc(Nsrc(ng),1,itrc)  !!!!!!!!!!!!!!!!!!!!!!!!!!Test case
-          END DO
-#  endif
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 #  endif
       END IF
 # endif
