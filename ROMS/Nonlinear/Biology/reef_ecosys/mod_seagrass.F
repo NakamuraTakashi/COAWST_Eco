@@ -338,7 +338,7 @@ MODULE mod_seagrass
     SGRASS(ng)%root_mass_profile                    = SeagrassRootProf(ng, :, :)                      ! Mass ratio of roots in each layer (total must sum to 1.0)
 
     ! write(*,*) 'yt_debug: mod_seagrass.F initialize_seagrass() after root_mass_profile assigment'
-    write(*,*) 'yt_debug: mod_seagrass.F initialize_seagrass() root_mass_profile = ', SGRASS(ng)%root_mass_profile
+    ! write(*,*) 'yt_debug: mod_seagrass.F initialize_seagrass() root_mass_profile = ', SGRASS(ng)%root_mass_profile
 # endif
 
     ! photoynthesis: light-limit
@@ -1491,12 +1491,12 @@ MODULE mod_seagrass
     Resp_rate = min(Resp_pos, Resp_req)
 
     if (Resp_rate .lt. 0d0) then ! error handling
-      write(*,*) 'yt_debug: negative value error in respiration. Time =', &
-        date, 'Position =', i, j
-      write(*,*) 'yt_debug:     Resp_rate =', Resp_rate
-      write(*,*) 'yt_debug:     Resp_pos  =', Resp_pos
-      write(*,*) 'yt_debug:     Resp_req  =', Resp_req
-      write(*,*) 'yt_debug:     DO_uptake_possible =', DO_uptake_possible
+      ! write(*,*) 'yt_debug: negative value error in respiration. Time =', &
+      !   date, 'Position =', i, j
+      ! write(*,*) 'yt_debug:     Resp_rate =', Resp_rate
+      ! write(*,*) 'yt_debug:     Resp_pos  =', Resp_pos
+      ! write(*,*) 'yt_debug:     Resp_req  =', Resp_req
+      ! write(*,*) 'yt_debug:     DO_uptake_possible =', DO_uptake_possible
       Resp_rate = 0.0d0
     endif
 
@@ -2077,175 +2077,175 @@ MODULE mod_seagrass
 ! End
 ! ====================================================================================================
 
-    !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    if (isnan(SGRASS(ng)%SgCBmF(species,i,j)) .or. SGRASS(ng)%SgCBmF(species,i,j) > 1.0d30 &
-      .or. SGRASS(ng)%SgCBmF(species,i,j) < 0.0d0) then
-      write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
-      write(*,*) 'yt_debug:     SgCBmF =', SGRASS(ng)%SgCBmF(species,i,j)
-      error stop
-    endif
-    if (isnan(SGRASS(ng)%LfCBm(species,i,j)) .or. SGRASS(ng)%LfCBm(species,i,j) > 1.0d30 &
-      .or. SGRASS(ng)%LfCBm(species,i,j) < 0.0d0) then
-      write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
-      write(*,*) 'yt_debug:     LfCBm =', SGRASS(ng)%LfCBm(species,i,j)
-      error stop
-    endif
-    if (isnan(SGRASS(ng)%RtCBm(species,i,j)) .or. SGRASS(ng)%RtCBm(species,i,j) > 1.0d30 &
-      .or. SGRASS(ng)%RtCBm(species,i,j) < 0.0d0) then
-      write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
-      write(*,*) 'yt_debug:     RtCBm =', SGRASS(ng)%RtCBm(species,i,j)
-      error stop
-    endif
-    if (isnan(SGRASS(ng)%TotSgCBm(species,i,j)) .or. SGRASS(ng)%TotSgCBm(species,i,j) > 1.0d30 &
-      .or. SGRASS(ng)%TotSgCBm(species,i,j) < 0.0d0) then
-      write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
-      write(*,*) 'yt_debug:     TotSgCBm =', SGRASS(ng)%TotSgCBm(species,i,j)
-      error stop
-    endif
-    if (isnan(SGRASS(ng)%TotLfCBm(species,i,j)) .or. SGRASS(ng)%TotLfCBm(species,i,j) > 1.0d30 &
-      .or. SGRASS(ng)%TotLfCBm(species,i,j) < 0.0d0) then
-      write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
-      write(*,*) 'yt_debug:     TotLfCBm =', SGRASS(ng)%TotLfCBm(species,i,j)
-      error stop
-    endif
-    if (isnan(SGRASS(ng)%TotRtCBm(species,i,j)) .or. SGRASS(ng)%TotRtCBm(species,i,j) > 1.0d30 &
-      .or. SGRASS(ng)%TotRtCBm(species,i,j) < 0.0d0) then
-      write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
-      write(*,*) 'yt_debug:     TotRtCBm =', SGRASS(ng)%TotRtCBm(species,i,j)
-      error stop
-    endif
-    if (isnan(SGRASS(ng)%HabArea(species,i,j)) .or. SGRASS(ng)%HabArea(species,i,j) > 1.0d30 &
-      .or. SGRASS(ng)%HabArea(species,i,j) < 0.0d0) then
-      write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
-      write(*,*) 'yt_debug:     HabArea =', SGRASS(ng)%HabArea(species,i,j)
-      error stop
-    endif
-    if (isnan(SGRASS(ng)%TotSgDryBm(species,i,j)) .or. SGRASS(ng)%TotSgDryBm(species,i,j) > 1.0d30 &
-      .or. SGRASS(ng)%TotSgDryBm(species,i,j) < 0.0d0) then
-      write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
-      write(*,*) 'yt_debug:     TotSgDryBm =', SGRASS(ng)%TotSgDryBm(species,i,j)
-      error stop
-    endif
-    if (isnan(SGRASS(ng)%TotLfDryBm(species,i,j)) .or. SGRASS(ng)%TotLfDryBm(species,i,j) > 1.0d30 &
-      .or. SGRASS(ng)%TotLfDryBm(species,i,j) < 0.0d0) then
-      write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
-      write(*,*) 'yt_debug:     TotLfDryBm =', SGRASS(ng)%TotLfDryBm(species,i,j)
-      error stop
-    endif
-    if (isnan(SGRASS(ng)%TotRtDryBm(species,i,j)) .or. SGRASS(ng)%TotRtDryBm(species,i,j) > 1.0d30 &
-      .or. SGRASS(ng)%TotRtDryBm(species,i,j) < 0.0d0) then
-      write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
-      write(*,*) 'yt_debug:     TotRtDryBm =', SGRASS(ng)%TotRtDryBm(species,i,j)
-      error stop
-    endif
-    if (isnan(SGRASS(ng)%SgDryBm(species,i,j)) .or. SGRASS(ng)%SgDryBm(species,i,j) > 1.0d30 &
-      .or. SGRASS(ng)%SgDryBm(species,i,j) < 0.0d0) then
-      write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
-      write(*,*) 'yt_debug:     SgDryBm =', SGRASS(ng)%SgDryBm(species,i,j)
-      error stop
-    endif
-    if (isnan(SGRASS(ng)%LfDryBm(species,i,j)) .or. SGRASS(ng)%LfDryBm(species,i,j) > 1.0d30 &
-      .or. SGRASS(ng)%LfDryBm(species,i,j) < 0.0d0) then
-      write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
-      write(*,*) 'yt_debug:     LfDryBm =', SGRASS(ng)%LfDryBm(species,i,j)
-      error stop
-    endif
-    if (isnan(SGRASS(ng)%RtDryBm(species,i,j)) .or. SGRASS(ng)%RtDryBm(species,i,j) > 1.0d30 &
-      .or. SGRASS(ng)%RtDryBm(species,i,j) < 0.0d0) then
-      write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
-      write(*,*) 'yt_debug:     RtDryBm =', SGRASS(ng)%RtDryBm(species,i,j)
-      error stop
-    endif
-    if (isnan(SGRASS(ng)%LAI(species,i,j)) .or. SGRASS(ng)%LAI(species,i,j) > 1.0d30 &
-      .or. SGRASS(ng)%LAI(species,i,j) < 0.0d0) then
-      write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
-      write(*,*) 'yt_debug:     LAI =', SGRASS(ng)%LAI(species,i,j)
-      error stop
-    endif
+!     !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+!     if (isnan(SGRASS(ng)%SgCBmF(species,i,j)) .or. SGRASS(ng)%SgCBmF(species,i,j) > 1.0d30 &
+!       .or. SGRASS(ng)%SgCBmF(species,i,j) < 0.0d0) then
+!       write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
+!       write(*,*) 'yt_debug:     SgCBmF =', SGRASS(ng)%SgCBmF(species,i,j)
+!       error stop
+!     endif
+!     if (isnan(SGRASS(ng)%LfCBm(species,i,j)) .or. SGRASS(ng)%LfCBm(species,i,j) > 1.0d30 &
+!       .or. SGRASS(ng)%LfCBm(species,i,j) < 0.0d0) then
+!       write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
+!       write(*,*) 'yt_debug:     LfCBm =', SGRASS(ng)%LfCBm(species,i,j)
+!       error stop
+!     endif
+!     if (isnan(SGRASS(ng)%RtCBm(species,i,j)) .or. SGRASS(ng)%RtCBm(species,i,j) > 1.0d30 &
+!       .or. SGRASS(ng)%RtCBm(species,i,j) < 0.0d0) then
+!       write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
+!       write(*,*) 'yt_debug:     RtCBm =', SGRASS(ng)%RtCBm(species,i,j)
+!       error stop
+!     endif
+!     if (isnan(SGRASS(ng)%TotSgCBm(species,i,j)) .or. SGRASS(ng)%TotSgCBm(species,i,j) > 1.0d30 &
+!       .or. SGRASS(ng)%TotSgCBm(species,i,j) < 0.0d0) then
+!       write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
+!       write(*,*) 'yt_debug:     TotSgCBm =', SGRASS(ng)%TotSgCBm(species,i,j)
+!       error stop
+!     endif
+!     if (isnan(SGRASS(ng)%TotLfCBm(species,i,j)) .or. SGRASS(ng)%TotLfCBm(species,i,j) > 1.0d30 &
+!       .or. SGRASS(ng)%TotLfCBm(species,i,j) < 0.0d0) then
+!       write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
+!       write(*,*) 'yt_debug:     TotLfCBm =', SGRASS(ng)%TotLfCBm(species,i,j)
+!       error stop
+!     endif
+!     if (isnan(SGRASS(ng)%TotRtCBm(species,i,j)) .or. SGRASS(ng)%TotRtCBm(species,i,j) > 1.0d30 &
+!       .or. SGRASS(ng)%TotRtCBm(species,i,j) < 0.0d0) then
+!       write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
+!       write(*,*) 'yt_debug:     TotRtCBm =', SGRASS(ng)%TotRtCBm(species,i,j)
+!       error stop
+!     endif
+!     if (isnan(SGRASS(ng)%HabArea(species,i,j)) .or. SGRASS(ng)%HabArea(species,i,j) > 1.0d30 &
+!       .or. SGRASS(ng)%HabArea(species,i,j) < 0.0d0) then
+!       write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
+!       write(*,*) 'yt_debug:     HabArea =', SGRASS(ng)%HabArea(species,i,j)
+!       error stop
+!     endif
+!     if (isnan(SGRASS(ng)%TotSgDryBm(species,i,j)) .or. SGRASS(ng)%TotSgDryBm(species,i,j) > 1.0d30 &
+!       .or. SGRASS(ng)%TotSgDryBm(species,i,j) < 0.0d0) then
+!       write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
+!       write(*,*) 'yt_debug:     TotSgDryBm =', SGRASS(ng)%TotSgDryBm(species,i,j)
+!       error stop
+!     endif
+!     if (isnan(SGRASS(ng)%TotLfDryBm(species,i,j)) .or. SGRASS(ng)%TotLfDryBm(species,i,j) > 1.0d30 &
+!       .or. SGRASS(ng)%TotLfDryBm(species,i,j) < 0.0d0) then
+!       write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
+!       write(*,*) 'yt_debug:     TotLfDryBm =', SGRASS(ng)%TotLfDryBm(species,i,j)
+!       error stop
+!     endif
+!     if (isnan(SGRASS(ng)%TotRtDryBm(species,i,j)) .or. SGRASS(ng)%TotRtDryBm(species,i,j) > 1.0d30 &
+!       .or. SGRASS(ng)%TotRtDryBm(species,i,j) < 0.0d0) then
+!       write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
+!       write(*,*) 'yt_debug:     TotRtDryBm =', SGRASS(ng)%TotRtDryBm(species,i,j)
+!       error stop
+!     endif
+!     if (isnan(SGRASS(ng)%SgDryBm(species,i,j)) .or. SGRASS(ng)%SgDryBm(species,i,j) > 1.0d30 &
+!       .or. SGRASS(ng)%SgDryBm(species,i,j) < 0.0d0) then
+!       write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
+!       write(*,*) 'yt_debug:     SgDryBm =', SGRASS(ng)%SgDryBm(species,i,j)
+!       error stop
+!     endif
+!     if (isnan(SGRASS(ng)%LfDryBm(species,i,j)) .or. SGRASS(ng)%LfDryBm(species,i,j) > 1.0d30 &
+!       .or. SGRASS(ng)%LfDryBm(species,i,j) < 0.0d0) then
+!       write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
+!       write(*,*) 'yt_debug:     LfDryBm =', SGRASS(ng)%LfDryBm(species,i,j)
+!       error stop
+!     endif
+!     if (isnan(SGRASS(ng)%RtDryBm(species,i,j)) .or. SGRASS(ng)%RtDryBm(species,i,j) > 1.0d30 &
+!       .or. SGRASS(ng)%RtDryBm(species,i,j) < 0.0d0) then
+!       write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
+!       write(*,*) 'yt_debug:     RtDryBm =', SGRASS(ng)%RtDryBm(species,i,j)
+!       error stop
+!     endif
+!     if (isnan(SGRASS(ng)%LAI(species,i,j)) .or. SGRASS(ng)%LAI(species,i,j) > 1.0d30 &
+!       .or. SGRASS(ng)%LAI(species,i,j) < 0.0d0) then
+!       write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
+!       write(*,*) 'yt_debug:     LAI =', SGRASS(ng)%LAI(species,i,j)
+!       error stop
+!     endif
 
-    if (isnan(DIC_uptake_rate_from_ocean) .or. DIC_uptake_rate_from_ocean > 1.0d30 &
-      .or. ocean_DIC_conc - DIC_uptake_rate_from_ocean*dt/dz < 0.0d0) then
-      write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
-      write(*,*) 'yt_debug:     DIC_uptake_rate_from_ocean =', DIC_uptake_rate_from_ocean
-      write(*,*) 'yt_debug:     ocean_DIC_conc =', ocean_DIC_conc
-      write(*,*) 'yt_debug:     ocean_DIC_conc - DIC_uptake_rate_from_ocean*dt/dz =' &
-        , ocean_DIC_conc - DIC_uptake_rate_from_ocean*dt/dz
-      error stop
-    endif
-    if (isnan(DO__uptake_rate_from_ocean) .or. DO__uptake_rate_from_ocean > 1.0d30 &
-      .or. ocean_DO__conc - DO__uptake_rate_from_ocean*dt/dz < 0.0d0) then
-      write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
-      write(*,*) 'yt_debug:     DO__uptake_rate_from_ocean =', DO__uptake_rate_from_ocean
-      write(*,*) 'yt_debug:     ocean_DO__conc =', ocean_DO__conc
-      write(*,*) 'yt_debug:     ocean_DO__conc - DO__uptake_rate_from_ocean*dt/dz =' &
-        , ocean_DO__conc - DO__uptake_rate_from_ocean*dt/dz ! [umol/L] - [mmol  m-2 s-1][s/m](m3/1000L)(1000umol/mmol)
-      write(*,*) 'yt_debug:     dt =', dt
-      write(*,*) 'yt_debug:     dz =', dz
-      write(*,*) 'yt_debug:     DO_uptake_possible(0) =', DO_uptake_possible(0)
-      write(*,*) 'yt_debug:     0.5*ocean_DO__conc*dz/dt*1000', 0.5d0*ocean_DO__conc*dz/dt*1000.0d0
-      write(*,*) 'yt_debug:     Resp_rate*0.001 =', Resp_rate*0.001d0
-      write(*,*) 'yt_debug:     Resp_pos*0.001 =', Resp_pos*0.001d0
-      write(*,*) 'yt_debug:     Resp_req*0.001 =', Resp_req*0.001d0
-      write(*,*) 'yt_debug:     -Growth_rate*0.001', -1d0*Growth_rate*0.001d0
-#  if defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
-      write(*,*) 'yt_debug:     2 * sum(delta_sed_NO3(:))', 2d0 * sum(delta_sed_NO3(:))
-#  endif
-      error stop
-    endif
-# if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE
-    if (isnan(NO3_uptake_rate_from_ocean) .or. NO3_uptake_rate_from_ocean > 1.0d30 &
-      .or. ocean_NO3_conc - NO3_uptake_rate_from_ocean*dt/dz < 0.0d0) then
-      write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
-      write(*,*) 'yt_debug:     NO3_uptake_rate_from_ocean =', NO3_uptake_rate_from_ocean
-      write(*,*) 'yt_debug:     ocean_NO3_conc =', ocean_NO3_conc
-      write(*,*) 'yt_debug:     ocean_NO3_conc - NO3_uptake_rate_from_ocean*dt/dz =' &
-        , ocean_NO3_conc - NO3_uptake_rate_from_ocean*dt/dz
-      error stop
-    endif
-    if (isnan(NH4_uptake_rate_from_ocean) .or. NH4_uptake_rate_from_ocean > 1.0d30 &
-      .or. ocean_NH4_conc - NH4_uptake_rate_from_ocean*dt/dz < 0.0d0) then
-      write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
-      write(*,*) 'yt_debug:     NH4_uptake_rate_from_ocean =', NH4_uptake_rate_from_ocean
-      write(*,*) 'yt_debug:     ocean_NH4_conc =', ocean_NH4_conc
-      write(*,*) 'yt_debug:     ocean_NH4_conc - NH4_uptake_rate_from_ocean*dt/dz =' &
-        , ocean_NH4_conc - NH4_uptake_rate_from_ocean*dt/dz
-      error stop
-    endif
-    if (isnan(PO4_uptake_rate_from_ocean) .or. PO4_uptake_rate_from_ocean > 1.0d30 &
-      .or. ocean_PO4_conc - PO4_uptake_rate_from_ocean*dt/dz < 0.0d0) then
-      write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
-      write(*,*) 'yt_debug:     PO4_uptake_rate_from_ocean =', PO4_uptake_rate_from_ocean
-      write(*,*) 'yt_debug:     ocean_PO4_conc =', ocean_PO4_conc
-      write(*,*) 'yt_debug:     ocean_PO4_conc - PO4_uptake_rate_from_ocean*dt/dz =' &
-        , ocean_PO4_conc - PO4_uptake_rate_from_ocean*dt/dz
-      error stop
-    endif
-# endif
-# if defined SEAGRASS_LEAF_POM
-    if (isnan(POC_uptake_rate_from_ocean) .or. abs(POC_uptake_rate_from_ocean) > 1.0d30 &
-      .or. POC_uptake_rate_from_ocean > 0.0d0) then
-      write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
-      write(*,*) 'yt_debug:     POC_uptake_rate_from_ocean =', POC_uptake_rate_from_ocean
-      error stop
-    endif
-#  if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
-    if (isnan(PON_uptake_rate_from_ocean) .or. abs(PON_uptake_rate_from_ocean) > 1.0d30 &
-      .or. PON_uptake_rate_from_ocean > 0.0d0) then
-      write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
-      write(*,*) 'yt_debug:     PON_uptake_rate_from_ocean =', PON_uptake_rate_from_ocean
-      error stop
-    endif
-    if (isnan(POP_uptake_rate_from_ocean) .or. abs(POP_uptake_rate_from_ocean) > 1.0d30 &
-      .or. POP_uptake_rate_from_ocean > 0.0d0) then
-      write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
-      write(*,*) 'yt_debug:     POP_uptake_rate_from_ocean =', POP_uptake_rate_from_ocean
-      error stop
-    endif
-#  endif
-# endif
+!     if (isnan(DIC_uptake_rate_from_ocean) .or. DIC_uptake_rate_from_ocean > 1.0d30 &
+!       .or. ocean_DIC_conc - DIC_uptake_rate_from_ocean*dt/dz < 0.0d0) then
+!       write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
+!       write(*,*) 'yt_debug:     DIC_uptake_rate_from_ocean =', DIC_uptake_rate_from_ocean
+!       write(*,*) 'yt_debug:     ocean_DIC_conc =', ocean_DIC_conc
+!       write(*,*) 'yt_debug:     ocean_DIC_conc - DIC_uptake_rate_from_ocean*dt/dz =' &
+!         , ocean_DIC_conc - DIC_uptake_rate_from_ocean*dt/dz
+!       error stop
+!     endif
+!     if (isnan(DO__uptake_rate_from_ocean) .or. DO__uptake_rate_from_ocean > 1.0d30 &
+!       .or. ocean_DO__conc - DO__uptake_rate_from_ocean*dt/dz < 0.0d0) then
+!       write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
+!       write(*,*) 'yt_debug:     DO__uptake_rate_from_ocean =', DO__uptake_rate_from_ocean
+!       write(*,*) 'yt_debug:     ocean_DO__conc =', ocean_DO__conc
+!       write(*,*) 'yt_debug:     ocean_DO__conc - DO__uptake_rate_from_ocean*dt/dz =' &
+!         , ocean_DO__conc - DO__uptake_rate_from_ocean*dt/dz ! [umol/L] - [mmol  m-2 s-1][s/m](m3/1000L)(1000umol/mmol)
+!       write(*,*) 'yt_debug:     dt =', dt
+!       write(*,*) 'yt_debug:     dz =', dz
+!       write(*,*) 'yt_debug:     DO_uptake_possible(0) =', DO_uptake_possible(0)
+!       write(*,*) 'yt_debug:     0.5*ocean_DO__conc*dz/dt*1000', 0.5d0*ocean_DO__conc*dz/dt*1000.0d0
+!       write(*,*) 'yt_debug:     Resp_rate*0.001 =', Resp_rate*0.001d0
+!       write(*,*) 'yt_debug:     Resp_pos*0.001 =', Resp_pos*0.001d0
+!       write(*,*) 'yt_debug:     Resp_req*0.001 =', Resp_req*0.001d0
+!       write(*,*) 'yt_debug:     -Growth_rate*0.001', -1d0*Growth_rate*0.001d0
+! #  if defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
+!       write(*,*) 'yt_debug:     2 * sum(delta_sed_NO3(:))', 2d0 * sum(delta_sed_NO3(:))
+! #  endif
+!       error stop
+!     endif
+! # if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE
+!     if (isnan(NO3_uptake_rate_from_ocean) .or. NO3_uptake_rate_from_ocean > 1.0d30 &
+!       .or. ocean_NO3_conc - NO3_uptake_rate_from_ocean*dt/dz < 0.0d0) then
+!       write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
+!       write(*,*) 'yt_debug:     NO3_uptake_rate_from_ocean =', NO3_uptake_rate_from_ocean
+!       write(*,*) 'yt_debug:     ocean_NO3_conc =', ocean_NO3_conc
+!       write(*,*) 'yt_debug:     ocean_NO3_conc - NO3_uptake_rate_from_ocean*dt/dz =' &
+!         , ocean_NO3_conc - NO3_uptake_rate_from_ocean*dt/dz
+!       error stop
+!     endif
+!     if (isnan(NH4_uptake_rate_from_ocean) .or. NH4_uptake_rate_from_ocean > 1.0d30 &
+!       .or. ocean_NH4_conc - NH4_uptake_rate_from_ocean*dt/dz < 0.0d0) then
+!       write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
+!       write(*,*) 'yt_debug:     NH4_uptake_rate_from_ocean =', NH4_uptake_rate_from_ocean
+!       write(*,*) 'yt_debug:     ocean_NH4_conc =', ocean_NH4_conc
+!       write(*,*) 'yt_debug:     ocean_NH4_conc - NH4_uptake_rate_from_ocean*dt/dz =' &
+!         , ocean_NH4_conc - NH4_uptake_rate_from_ocean*dt/dz
+!       error stop
+!     endif
+!     if (isnan(PO4_uptake_rate_from_ocean) .or. PO4_uptake_rate_from_ocean > 1.0d30 &
+!       .or. ocean_PO4_conc - PO4_uptake_rate_from_ocean*dt/dz < 0.0d0) then
+!       write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
+!       write(*,*) 'yt_debug:     PO4_uptake_rate_from_ocean =', PO4_uptake_rate_from_ocean
+!       write(*,*) 'yt_debug:     ocean_PO4_conc =', ocean_PO4_conc
+!       write(*,*) 'yt_debug:     ocean_PO4_conc - PO4_uptake_rate_from_ocean*dt/dz =' &
+!         , ocean_PO4_conc - PO4_uptake_rate_from_ocean*dt/dz
+!       error stop
+!     endif
+! # endif
+! # if defined SEAGRASS_LEAF_POM
+!     if (isnan(POC_uptake_rate_from_ocean) .or. abs(POC_uptake_rate_from_ocean) > 1.0d30 &
+!       .or. POC_uptake_rate_from_ocean > 0.0d0) then
+!       write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
+!       write(*,*) 'yt_debug:     POC_uptake_rate_from_ocean =', POC_uptake_rate_from_ocean
+!       error stop
+!     endif
+! #  if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
+!     if (isnan(PON_uptake_rate_from_ocean) .or. abs(PON_uptake_rate_from_ocean) > 1.0d30 &
+!       .or. PON_uptake_rate_from_ocean > 0.0d0) then
+!       write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
+!       write(*,*) 'yt_debug:     PON_uptake_rate_from_ocean =', PON_uptake_rate_from_ocean
+!       error stop
+!     endif
+!     if (isnan(POP_uptake_rate_from_ocean) .or. abs(POP_uptake_rate_from_ocean) > 1.0d30 &
+!       .or. POP_uptake_rate_from_ocean > 0.0d0) then
+!       write(*,*) 'yt_debug: mod_seagrass.F      i =', i, '   j =', j
+!       write(*,*) 'yt_debug:     POP_uptake_rate_from_ocean =', POP_uptake_rate_from_ocean
+!       error stop
+!     endif
+! #  endif
+! # endif
 
 
-    !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+!     !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     RETURN
     
@@ -2343,9 +2343,9 @@ MODULE mod_seagrass
     if (date .gt. real(int(Day*24), 8)/24) then
       is_growth_interval = .true.
       Day = real(int(date*24+1), 8)/24d0
-      if(i == 50 .and. j == 50) then
-        write(*,*) "yt_debug:    Day = ", Day, "   date = ", date
-      endif
+      ! if(i == 50 .and. j == 50) then
+      !   write(*,*) "yt_debug:    Day = ", Day, "   date = ", date
+      ! endif
     endif
 
 ! ====================================================================================================
