@@ -1455,7 +1455,7 @@ CONTAINS
 !!!  Upper boundary is defined as constant concentrations in water column in main.F
 !!!  Bottom boundary (nmol cm-2 s-1) --------------------------
 !    Closed boundary condition 
-# if defined SEDECO_CLOSED_BOTTOM_BOUNDARY
+# if defined SEDECO_CLOSED_BOTTOM_DIFFUSION_BOUNDARY
 !! set boundary-1 to boundary and calculate below vvv in ficks law to get zero diffusion
     ! SEDECO(ng)%Tmp(i,j,Nsed) = SEDECO(ng)%Tmp(i,j,Nsed-1)
     ! SEDECO(ng)%Sal(i,j,Nsed) = SEDECO(ng)%Sal(i,j,Nsed-1)
@@ -2340,7 +2340,7 @@ CONTAINS
 # endif
     ENDDO
 
-# if defined SEDECO_CLOSED_BOTTOM_BOUNDARY
+# if defined SEDECO_CLOSED_BOTTOM_DIFFUSION_BOUNDARY
     !! DBL Flux (k = Nsed+1) (Closed bottom boundary for diffusion and biodiffusion.)
     FT_O2(Nsed+1)    = 0.0d0
     FT_CO2(Nsed+1)   = 0.0d0
