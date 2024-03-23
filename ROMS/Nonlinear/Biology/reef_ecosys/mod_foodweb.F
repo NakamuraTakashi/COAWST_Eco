@@ -533,8 +533,10 @@ CONTAINS
 
 #endif
       Ap(k) = MIN( Ap(k), 0.1d0*DIC/dt ) !!! yt_edit Error handling  assimilation should not exceed 10% DIC concentration in a timestep
-      Ap(k) = MIN( Ap(k), 0.1d0*(NO3_NH4)*rCNp/dt ) !!! yt_edit Error handling  assimilation should not exceed 10% N concentration in a timestep
-      Ap(k) = MIN( Ap(k), 0.1d0*PO4*rCPp/dt ) !!! yt_edit Error handling  assimilation should not exceed 10% PO4 concentration in a timestep
+#if defined NUTRIENTS
+      Ap(k) = MIN( Ap(k), 0.1d0*(NO3+NH4)*rCNp(k)/dt ) !!! yt_edit Error handling  assimilation should not exceed 10% N concentration in a timestep
+      Ap(k) = MIN( Ap(k), 0.1d0*PO4*rCPp(k)/dt ) !!! yt_edit Error handling  assimilation should not exceed 10% PO4 concentration in a timestep
+#endif
 
 !     === Mass barance ===
 
