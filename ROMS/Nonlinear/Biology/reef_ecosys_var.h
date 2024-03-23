@@ -475,12 +475,6 @@
                 iHbio3(id13C)=varid
 #endif
 #if defined DIAGNOSTICS_BIO
-
-              CASE ('iDbio2(ipHt_)')
-                iDbio2(ipHt_)=varid
-              CASE ('iDbio2(iWarg)')
-                iDbio2(iWarg)=varid
-
               CASE ('iDbio2(iCO2fx)')
                 iDbio2(iCO2fx)=varid
               CASE ('iDbio2(ipCO2)')
@@ -494,6 +488,12 @@
               CASE ('iDbio2(iTau_)')
                 iDbio2(iTau_)=varid
 
+              CASE ('iDbio3(ipHt_)')
+                iDbio3(ipHt_)=varid
+              CASE ('iDbio3(iWarg)')
+                iDbio3(iWarg)=varid
+              CASE ('iDbio3(iWcal)')
+                iDbio3(iWcal)=varid
 # ifdef CARBON_ISOTOPE
               CASE ('iDbio3(id13C)')
                 iDbio3(id13C)=varid

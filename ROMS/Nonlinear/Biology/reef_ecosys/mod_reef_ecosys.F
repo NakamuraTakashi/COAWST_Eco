@@ -283,9 +283,10 @@ END SUBROUTINE allocate_reef_ecosys
     , dCOTe_dt       &   ! dCOTe/dt(N): (umol L-1 s-1)
     , dCOTl_dt       &   ! dCOTl/dt(N): (umol L-1 s-1)
 #endif
-    , sspH           &   ! sea surface pH
+    , pH             &   ! pH
+    , Warg           &   ! aragonite saturation state
+    , Wcal           &   ! calcite saturation state
     , ssfCO2         &   ! sea surface fCO2 (uatm)
-    , ssWarg         &   ! sea surface aragonite saturation state
     , ssCO2flux      &   ! sea surface CO2 flux (mmol m-2 s-1)
     , ssO2flux       &   ! sea surface O2 flux (mmol m-2 s-1)
     , PFDbott        &   ! Bottom photon flux density (umol m-2 s-1)
@@ -515,9 +516,10 @@ END SUBROUTINE allocate_reef_ecosys
     real(8), intent(out) :: dCOTe_dt(N)    ! dCOTe/dt (umol L-1 s-1)
     real(8), intent(out) :: dCOTl_dt(N)    ! dCOTl/dt (umol L-1 s-1)
 #endif
-    real(8), intent(out) :: sspH      
+    real(8), intent(out) :: pH(N)
+    real(8), intent(out) :: Warg(N)
+    real(8), intent(out) :: Wcal(N)
     real(8), intent(out) :: ssfCO2    
-    real(8), intent(out) :: ssWarg    
     real(8), intent(out) :: ssCO2flux 
     real(8), intent(out) :: ssO2flux  
     real(8), intent(out) :: PFDbott   
@@ -879,10 +881,11 @@ END SUBROUTINE allocate_reef_ecosys
 #  endif
 # endif
 #endif
+      pH(k)   = 8.0d0   ! sea surface pH
+      Warg(k) = 4.0d0   ! aragonite saturation state
+      Wcal(k) = 4.0d0   ! calcite saturation state
     END DO
-    sspH      = 8.0d0   ! sea surface pH
-    ssfCO2    = 380.0d0   ! sea surface fCO2 (uatm)
-    ssWarg    = 4.0d0   ! sea surface aragonite saturation state
+    ssfCO2    = 380.0d0 ! sea surface fCO2 (uatm)
     ssCO2flux = 0.0d0   ! sea surface CO2 flux (mmol m-2 s-1)
     ssO2flux  = 0.0d0   ! sea surface O2 flux (mmol m-2 s-1)
     PFDbott   = 0.0d0   ! Bottom photon flux density (umol m-2 s-1)
@@ -994,36 +997,6 @@ END SUBROUTINE allocate_reef_ecosys
 # endif
 #endif
     ENDDO
-    ! if (isnan() .or. abs() > huge()) then
-    if (isnan(sspH) .or. abs(sspH) > 1.0d15) then
-      write(*,*) 'yt_debug: mod_reef_ecosys.F sspH    input      i =', i, '   j =', j
-      write(*,*) 'yt_debug:     sspH =', sspH
-    endif
-    ! if (isnan() .or. abs() > huge()) then
-    if (isnan(ssfCO2) .or. abs(ssfCO2) > 1.0d15) then
-      write(*,*) 'yt_debug: mod_reef_ecosys.F ssfCO2    input      i =', i, '   j =', j
-      write(*,*) 'yt_debug:     ssfCO2 =', ssfCO2
-    endif
-    ! if (isnan() .or. abs() > huge()) then
-    if (isnan(ssWarg) .or. abs(ssWarg) > 1.0d15) then
-      write(*,*) 'yt_debug: mod_reef_ecosys.F ssWarg    input      i =', i, '   j =', j
-      write(*,*) 'yt_debug:     ssWarg =', ssWarg
-    endif
-    ! if (isnan() .or. abs() > huge()) then
-    if (isnan(ssCO2flux) .or. abs(ssCO2flux) > 1.0d15) then
-      write(*,*) 'yt_debug: mod_reef_ecosys.F ssCO2flux    input      i =', i, '   j =', j
-      write(*,*) 'yt_debug:     ssCO2flux =', ssCO2flux
-    endif
-    ! if (isnan() .or. abs() > huge()) then
-    if (isnan(ssO2flux) .or. abs(ssO2flux) > 1.0d15) then
-      write(*,*) 'yt_debug: mod_reef_ecosys.F ssO2flux    input      i =', i, '   j =', j
-      write(*,*) 'yt_debug:     ssO2flux =', ssO2flux
-    endif
-    ! if (isnan() .or. abs() > huge()) then
-    if (isnan(PFDbott) .or. abs(PFDbott) > 1.0d15) then
-      write(*,*) 'yt_debug: mod_reef_ecosys.F PFDbott    input      i =', i, '   j =', j
-      write(*,*) 'yt_debug:     PFDbott =', PFDbott
-    endif
 !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
@@ -1048,18 +1021,18 @@ END SUBROUTINE allocate_reef_ecosys
 
 !----------- CO2 system in ambient seawater -------------------
 
-    sspH = pH_fromATCT( TA(N), DIC(N),TmpK, Sal(N) )
-    cCO2aq = cCO2aq_fromCTpH( DIC(N), sspH, TmpK, Sal(N) )
-!    cHCO3 = cHCO3_fromCTpH( DIC(N), sspH, TmpK, Sal(N) )
-    cCO3 = cCO3_fromCTpH( DIC(N), sspH, TmpK, Sal(N) )
+    pH(N) = pH_fromATCT( TA(N), DIC(N),TmpK, Sal(N) )
+    cCO2aq = cCO2aq_fromCTpH( DIC(N), pH(N), TmpK, Sal(N) )
+!    cHCO3 = cHCO3_fromCTpH( DIC(N), pH(N), TmpK, Sal(N) )
+!    cCO3 = cCO3_fromCTpH( DIC(N), pH(N), TmpK, Sal(N) )
     ssfCO2 = fCO2_fromcCO2aq( cCO2aq, TmpK, Sal(N) )  !! for output
-    ssWarg = Warg_fromcCO3( cCO3, TmpK, Sal(N) )
+!    Warg(N) = Warg_fromcCO3( cCO3, TmpK, Sal(N) )
 
 !----------- CO2 gas exchange rate (mmol m-2 s-1). -------------------
     ssCO2flux = Flux_CO2(ssfCO2, pCO2air, U10, TmpK, Sal(N) )  ! sea to air is positive
 
     IF(ssCO2flux*0.0d0 /= 0.0d0) THEN  !!!---------Error Handling: Check NAN
-!      write(50,*) ssCO2flux, TA(N), DIC(N),TmpK, Sal(N), sspH, cCO3, ssWarg
+!      write(50,*) ssCO2flux, TA(N), DIC(N),TmpK, Sal(N), pH(N)
       ssCO2flux = 0.0d0
     END IF
     
@@ -1221,6 +1194,9 @@ END SUBROUTINE allocate_reef_ecosys
         , dCOTe(k)       &   ! dCOTe/dt (umol L-1 s-1)
         , dCOTl(k)       &   ! dCOTl/dt (umol L-1 s-1)
 # endif
+        , pH(k)          &   ! pH
+        , Wcal(k)        &   ! Calcite saturation state
+        , Warg(k)        &   ! Aragonite saturation state
         )
     
 !----- Mass balance equation -----------------------------------------------------------
@@ -1419,36 +1395,6 @@ END SUBROUTINE allocate_reef_ecosys
       ENDDO
 # endif
 #endif
-      ! if (isnan() .or. abs() > huge()) then
-      if (isnan(sspH) .or. abs(sspH) > 1.0d15) then
-        write(*,*) 'yt_debug: mod_reef_ecosys.F sspH    foodweb      i =', i, '   j =', j
-        write(*,*) 'yt_debug:     sspH =', sspH
-      endif
-      ! if (isnan() .or. abs() > huge()) then
-      if (isnan(ssfCO2) .or. abs(ssfCO2) > 1.0d15) then
-        write(*,*) 'yt_debug: mod_reef_ecosys.F ssfCO2    foodweb      i =', i, '   j =', j
-        write(*,*) 'yt_debug:     ssfCO2 =', ssfCO2
-      endif
-      ! if (isnan() .or. abs() > huge()) then
-      if (isnan(ssWarg) .or. abs(ssWarg) > 1.0d15) then
-        write(*,*) 'yt_debug: mod_reef_ecosys.F ssWarg    foodweb      i =', i, '   j =', j
-        write(*,*) 'yt_debug:     ssWarg =', ssWarg
-      endif
-      ! if (isnan() .or. abs() > huge()) then
-      if (isnan(ssCO2flux) .or. abs(ssCO2flux) > 1.0d15) then
-        write(*,*) 'yt_debug: mod_reef_ecosys.F ssCO2flux    foodweb      i =', i, '   j =', j
-        write(*,*) 'yt_debug:     ssCO2flux =', ssCO2flux
-      endif
-      ! if (isnan() .or. abs() > huge()) then
-      if (isnan(ssO2flux) .or. abs(ssO2flux) > 1.0d15) then
-        write(*,*) 'yt_debug: mod_reef_ecosys.F ssO2flux    foodweb      i =', i, '   j =', j
-        write(*,*) 'yt_debug:     ssO2flux =', ssO2flux
-      endif
-      ! if (isnan() .or. abs() > huge()) then
-      if (isnan(PFDbott) .or. abs(PFDbott) > 1.0d15) then
-        write(*,*) 'yt_debug: mod_reef_ecosys.F PFDbott    foodweb      i =', i, '   j =', j
-        write(*,*) 'yt_debug:     PFDbott =', PFDbott
-      endif
 !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
@@ -1671,19 +1617,9 @@ END SUBROUTINE allocate_reef_ecosys
 #endif
     ENDDO
     ! if (isnan() .or. abs() > huge()) then
-    if (isnan(sspH) .or. abs(sspH) > 1.0d15) then
-      write(*,*) 'yt_debug: mod_reef_ecosys.F sspH    advection      i =', i, '   j =', j
-      write(*,*) 'yt_debug:     sspH =', sspH
-    endif
-    ! if (isnan() .or. abs() > huge()) then
     if (isnan(ssfCO2) .or. abs(ssfCO2) > 1.0d15) then
       write(*,*) 'yt_debug: mod_reef_ecosys.F ssfCO2    advection      i =', i, '   j =', j
       write(*,*) 'yt_debug:     ssfCO2 =', ssfCO2
-    endif
-    ! if (isnan() .or. abs() > huge()) then
-    if (isnan(ssWarg) .or. abs(ssWarg) > 1.0d15) then
-      write(*,*) 'yt_debug: mod_reef_ecosys.F ssWarg    advection      i =', i, '   j =', j
-      write(*,*) 'yt_debug:     ssWarg =', ssWarg
     endif
     ! if (isnan() .or. abs() > huge()) then
     if (isnan(ssCO2flux) .or. abs(ssCO2flux) > 1.0d15) then
@@ -2008,36 +1944,6 @@ DO k=1,1
 # endif
 ENDDO
 
-! if (isnan() .or. abs() > huge()) then
-if (isnan(sspH) .or. abs(sspH) > 1.0d15) then
-  write(*,*) 'yt_debug: mod_reef_ecosys.F sspH    coral      i =', i, '   j =', j
-  write(*,*) 'yt_debug:     sspH =', sspH
-endif
-! if (isnan() .or. abs() > huge()) then
-if (isnan(ssfCO2) .or. abs(ssfCO2) > 1.0d15) then
-  write(*,*) 'yt_debug: mod_reef_ecosys.F ssfCO2    coral      i =', i, '   j =', j
-  write(*,*) 'yt_debug:     ssfCO2 =', ssfCO2
-endif
-! if (isnan() .or. abs() > huge()) then
-if (isnan(ssWarg) .or. abs(ssWarg) > 1.0d15) then
-  write(*,*) 'yt_debug: mod_reef_ecosys.F ssWarg    coral      i =', i, '   j =', j
-  write(*,*) 'yt_debug:     ssWarg =', ssWarg
-endif
-! if (isnan() .or. abs() > huge()) then
-if (isnan(ssCO2flux) .or. abs(ssCO2flux) > 1.0d15) then
-  write(*,*) 'yt_debug: mod_reef_ecosys.F ssCO2flux    coral      i =', i, '   j =', j
-  write(*,*) 'yt_debug:     ssCO2flux =', ssCO2flux
-endif
-! if (isnan() .or. abs() > huge()) then
-if (isnan(ssO2flux) .or. abs(ssO2flux) > 1.0d15) then
-  write(*,*) 'yt_debug: mod_reef_ecosys.F ssO2flux    coral      i =', i, '   j =', j
-  write(*,*) 'yt_debug:     ssO2flux =', ssO2flux
-endif
-! if (isnan() .or. abs() > huge()) then
-if (isnan(PFDbott) .or. abs(PFDbott) > 1.0d15) then
-  write(*,*) 'yt_debug: mod_reef_ecosys.F PFDbott    coral      i =', i, '   j =', j
-  write(*,*) 'yt_debug:     PFDbott =', PFDbott
-endif
 !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
       
@@ -2280,37 +2186,6 @@ endif
 #  endif
 # endif
     ENDDO
-
-    ! if (isnan() .or. abs() > huge()) then
-    if (isnan(sspH) .or. abs(sspH) > 1.0d15) then
-      write(*,*) 'yt_debug: mod_reef_ecosys.F sspH    seagrass      i =', i, '   j =', j
-      write(*,*) 'yt_debug:     sspH =', sspH
-    endif
-    ! if (isnan() .or. abs() > huge()) then
-    if (isnan(ssfCO2) .or. abs(ssfCO2) > 1.0d15) then
-      write(*,*) 'yt_debug: mod_reef_ecosys.F ssfCO2    seagrass      i =', i, '   j =', j
-      write(*,*) 'yt_debug:     ssfCO2 =', ssfCO2
-    endif
-    ! if (isnan() .or. abs() > huge()) then
-    if (isnan(ssWarg) .or. abs(ssWarg) > 1.0d15) then
-      write(*,*) 'yt_debug: mod_reef_ecosys.F ssWarg    seagrass      i =', i, '   j =', j
-      write(*,*) 'yt_debug:     ssWarg =', ssWarg
-    endif
-    ! if (isnan() .or. abs() > huge()) then
-    if (isnan(ssCO2flux) .or. abs(ssCO2flux) > 1.0d15) then
-      write(*,*) 'yt_debug: mod_reef_ecosys.F ssCO2flux    seagrass      i =', i, '   j =', j
-      write(*,*) 'yt_debug:     ssCO2flux =', ssCO2flux
-    endif
-    ! if (isnan() .or. abs() > huge()) then
-    if (isnan(ssO2flux) .or. abs(ssO2flux) > 1.0d15) then
-      write(*,*) 'yt_debug: mod_reef_ecosys.F ssO2flux    seagrass      i =', i, '   j =', j
-      write(*,*) 'yt_debug:     ssO2flux =', ssO2flux
-    endif
-    ! if (isnan() .or. abs() > huge()) then
-    if (isnan(PFDbott) .or. abs(PFDbott) > 1.0d15) then
-      write(*,*) 'yt_debug: mod_reef_ecosys.F PFDbott    seagrass      i =', i, '   j =', j
-      write(*,*) 'yt_debug:     PFDbott =', PFDbott
-    endif
 !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
@@ -2694,37 +2569,6 @@ endif
 #  endif
 # endif
       ENDDO
-      
-      ! if (isnan() .or. abs() > huge()) then
-      if (isnan(sspH) .or. abs(sspH) > 1.0d15) then
-        write(*,*) 'yt_debug: mod_reef_ecosys.F sspH    sediment      i =', i, '   j =', j
-        write(*,*) 'yt_debug:     sspH =', sspH
-      endif
-      ! if (isnan() .or. abs() > huge()) then
-      if (isnan(ssfCO2) .or. abs(ssfCO2) > 1.0d15) then
-        write(*,*) 'yt_debug: mod_reef_ecosys.F ssfCO2    sediment      i =', i, '   j =', j
-        write(*,*) 'yt_debug:     ssfCO2 =', ssfCO2
-      endif
-      ! if (isnan() .or. abs() > huge()) then
-      if (isnan(ssWarg) .or. abs(ssWarg) > 1.0d15) then
-        write(*,*) 'yt_debug: mod_reef_ecosys.F ssWarg    sediment      i =', i, '   j =', j
-        write(*,*) 'yt_debug:     ssWarg =', ssWarg
-      endif
-      ! if (isnan() .or. abs() > huge()) then
-      if (isnan(ssCO2flux) .or. abs(ssCO2flux) > 1.0d15) then
-        write(*,*) 'yt_debug: mod_reef_ecosys.F ssCO2flux    sediment      i =', i, '   j =', j
-        write(*,*) 'yt_debug:     ssCO2flux =', ssCO2flux
-      endif
-      ! if (isnan() .or. abs() > huge()) then
-      if (isnan(ssO2flux) .or. abs(ssO2flux) > 1.0d15) then
-        write(*,*) 'yt_debug: mod_reef_ecosys.F ssO2flux    sediment      i =', i, '   j =', j
-        write(*,*) 'yt_debug:     ssO2flux =', ssO2flux
-      endif
-      ! if (isnan() .or. abs() > huge()) then
-      if (isnan(PFDbott) .or. abs(PFDbott) > 1.0d15) then
-        write(*,*) 'yt_debug: mod_reef_ecosys.F PFDbott    sediment      i =', i, '   j =', j
-        write(*,*) 'yt_debug:     PFDbott =', PFDbott
-      endif
 !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 # endif
@@ -2794,7 +2638,7 @@ endif
         , dDOP_dt(1,1), dPOP_dt(1,1)                              &
 #  endif
 # endif
-        , sspH, ssfCO2, ssWarg, U10, ssCO2flux, ssO2flux
+        , pH(N), ssfCO2, Warg(N), U10, ssCO2flux, ssO2flux
         
     dsec=dsec+OUTPUT_INTERVAL*60.
 

@@ -138,6 +138,9 @@ CONTAINS
     , dCOTe_dt       &   ! dCOTe/dt (umol L-1 s-1)
     , dCOTl_dt       &   ! dCOTl/dt (umol L-1 s-1)
 #endif
+    , pH             &   ! pH
+    , Wcal           &   ! Calcite saturation state
+    , Warg           &   ! Aragonite saturation state
     )
 
 !-----------------------------------------------------------------------
@@ -238,6 +241,9 @@ CONTAINS
     real(8), intent(out) :: dCOTe_dt      ! dCOTe/dt (umol L-1 s-1)
     real(8), intent(out) :: dCOTl_dt      ! dCOTl/dt (umol L-1 s-1)
 #endif
+    real(8), intent(out) :: pH             ! pH
+    real(8), intent(out) :: Wcal           ! Calcite saturation state
+    real(8), intent(out) :: Warg           ! Aragonite saturation state
 
 !!!------------Set parameters  ----------------------------------
 
@@ -366,7 +372,7 @@ CONTAINS
     real(8) :: Gdoc2z(Ndom,Nzoo), Gpoc2z(Npom,Nzoo)
     real(8) :: Ddoc(Ndom), Dpoc(Npom), Dp2doc(Npom,Ndom)
     real(8) :: Dcpoc2dtr
-    real(8) :: pH, CO3, Wcal, Dissol
+    real(8) :: CO3, Dissol
 #if defined CARBON_ISOTOPE
     real(8) :: rDI13C, rPO13C(Npom), rDO13C(Ndom)
     real(8) :: rPHY13C(Nphy), rZOO13C(Nzoo), rPI13C(Npim)
@@ -937,6 +943,7 @@ CONTAINS
     pH     = pH_fromATCT( TA, DIC, Tmp+273.15d0, Sal )   ! pH
     CO3   = cCO3_fromCTpH( DIC, pH, Tmp+273.15d0, Sal )  ! CO32- concentration
     Wcal   = Wcal_fromcCO3( CO3, Tmp+273.15d0, Sal )  ! Calcite saturation state
+    Warg   = Warg_fromcCO3( CO3, Tmp+273.15d0, Sal )  ! Calcite saturation state
     IF ( Wcal < 1.0d0 ) THEN
       Dissol = 1.3d7*(1.d0-Wcal)**2.8d0 * PIC(iCaCO3)  !! [umol L-1 s-1] Low-Mg Calcite dissolution rate (Walter and Morse, 1985)
     ELSE
