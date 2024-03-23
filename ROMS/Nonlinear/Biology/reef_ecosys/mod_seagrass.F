@@ -1548,50 +1548,14 @@ MODULE mod_seagrass
       ! dieoff_rate                 [umol.C m-2.sg.hab s-1]     Seagrass dieoff rate
       dieoff_rate = dieoff_rate + anoxic_dieoff /dt
 
-      ! delta_SgCBmF                [umol.C m-2.sg.hab s-1]     Rate of change in SgCBmF
-      ! dieoff_rate                 [umol.C m-2.sg.hab s-1]     Seagrass dieoff rate
-      delta_SgCBmF = delta_SgCBmF - dieoff_rate
-
-# if defined SEAGRASS_LEAF_POM
-      ! POX_uptake_rate_from_ocean  [mmol.X m-2.sg.hab s-1]     Particulate organic (carbon, nitrogen, or phosphorus) uptake rate     * direction of ocean to seagrass is positive
-      ! f_abv_cur                   [g.lf.drywt g-1.tot.drywt]  also [mol.C.lf mol-1.C.tot] current above ground biomass to total biomass fraction, calculated on the last growth interval
-      ! SgXperC                     [mol.X mol-1.C]             Species specific seagrass Nitrogen or Phosphorus to Carbon ratio
-      ! dieoff_rate                 [umol.C m-2.sg.hab s-1]     Seagrass dieoff rate
-      ! [mmol.X/m2.hab s]        = [mmol.X/m2.hab s]          - [X/C]   [  ]        [umol.C/m2.hab s] (mmol/1000umol)
-      POC_uptake_rate_from_ocean = POC_uptake_rate_from_ocean -           f_abv_cur * dieoff_rate     * 0.001d0
-#  if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
-      PON_uptake_rate_from_ocean = PON_uptake_rate_from_ocean - SgNperC * f_abv_cur * dieoff_rate     * 0.001d0
-      POP_uptake_rate_from_ocean = POP_uptake_rate_from_ocean - SgPperC * f_abv_cur * dieoff_rate     * 0.001d0
-#  endif
-# endif
-
-# if defined SEAGRASS_ROOT_POM
-      ! delta_sed_POX(Nsed)         [umol.C L-1 s-1]            Rate of change in POX due to root death in sediment (positive means seagrass to sediment)
-      ! SgXperC                     [mol.X mol-1.C]             Species specific seagrass Nitrogen or Phosphorus to Carbon ratio
-      ! f_blw_cur                   [g.rt.drywt g-1.tot.drywt]  also [mol.C.lf mol-1.C.tot] current below ground biomass to total biomass fraction, calculated on the last growth interval
-      ! root_mass_profile(sed)      []                          Mass ratio of roots in each layer (total must sum to 1.0)
-      ! sgrass_per_sedmnt           [m2.sg.hab m-2.sedmnt]      (0~1)  Seagrass coverage per sediment coverage
-      ! sed_layer_thickness(Nsed)   [mm]                        Thickness of each sediment layer
-      ! root_comp_dist_factor(Nsed) [g.rt.comp g-1.tot m2.sg.hab m-2.sedmnt mm-1]    root compartemtent distribution factor equal to f_blw_cur * root_mass_profile(:) * sgrass_per_sedmnt / sed_layer_thickness(:) 
-      ! dieoff_rate                 [umol.C m-2.sg.hab s-1]     Seagrass dieoff rate
-      ! [umol.X/L s]   = [umol.X/L s]     + [X/C]   [umol.C/m2.hab s] [g.rt.comp/g.tot][m2.hab/m2.sedmnt mm] (m2.sedmnt*mm/L)
-      delta_sed_POC(:) = delta_sed_POC(:) +           dieoff_rate     * root_comp_dist_factor(:)
-#  if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
-      delta_sed_PON(:) = delta_sed_PON(:) + SgNperC * dieoff_rate     * root_comp_dist_factor(:)
-      delta_sed_POP(:) = delta_sed_POP(:) + SgPperC * dieoff_rate     * root_comp_dist_factor(:)
-#  endif
-# endif
-
-    else
+    endif
 
 ! Mass balance ---------------------------------------------------------------------------------------
 
-      ! respiration consumes CH2O in biomass
-      ! delta_SgCBmF                [umol.C m-2.sg.hab s-1]     Rate of change in SgCBmF
-      ! Resp_rate                   [umol.C m-2.sg.hab s-1]     Gross respiration/un-growth rate
-      delta_SgCBmF = delta_SgCBmF - Resp_rate
-
-    endif
+    ! respiration consumes CH2O in biomass
+    ! delta_SgCBmF                [umol.C m-2.sg.hab s-1]     Rate of change in SgCBmF
+    ! Resp_rate                   [umol.C m-2.sg.hab s-1]     Gross respiration/un-growth rate
+    delta_SgCBmF = delta_SgCBmF - Resp_rate
 
 # if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE
     ! CHEM_uptake_rate from_ocean [mmol m-2 s-1]              direction of ocean to seagrass is positive
@@ -1669,6 +1633,41 @@ MODULE mod_seagrass
     delta_sed_PO4(:) = delta_sed_PO4(:) + SgPperC * Resp_rate * root_comp_dist_factor(:)
 # else
     ! nothing
+# endif
+
+
+    ! delta_SgCBmF                [umol.C m-2.sg.hab s-1]     Rate of change in SgCBmF
+    ! dieoff_rate                 [umol.C m-2.sg.hab s-1]     Seagrass dieoff rate
+    delta_SgCBmF = delta_SgCBmF - dieoff_rate
+
+# if defined SEAGRASS_LEAF_POM
+    ! POX_uptake_rate_from_ocean  [mmol.X m-2.sg.hab s-1]     Particulate organic (carbon, nitrogen, or phosphorus) uptake rate     * direction of ocean to seagrass is positive
+    ! f_abv_cur                   [g.lf.drywt g-1.tot.drywt]  also [mol.C.lf mol-1.C.tot] current above ground biomass to total biomass fraction, calculated on the last growth interval
+    ! SgXperC                     [mol.X mol-1.C]             Species specific seagrass Nitrogen or Phosphorus to Carbon ratio
+    ! dieoff_rate                 [umol.C m-2.sg.hab s-1]     Seagrass dieoff rate
+    ! [mmol.X/m2.hab s]        = [mmol.X/m2.hab s]          - [X/C]   [  ]        [umol.C/m2.hab s] (mmol/1000umol)
+    POC_uptake_rate_from_ocean = POC_uptake_rate_from_ocean -           f_abv_cur * dieoff_rate     * 0.001d0
+#  if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
+    PON_uptake_rate_from_ocean = PON_uptake_rate_from_ocean - SgNperC * f_abv_cur * dieoff_rate     * 0.001d0
+    POP_uptake_rate_from_ocean = POP_uptake_rate_from_ocean - SgPperC * f_abv_cur * dieoff_rate     * 0.001d0
+#  endif
+# endif
+
+# if defined SEAGRASS_ROOT_POM
+    ! delta_sed_POX(Nsed)         [umol.C L-1 s-1]            Rate of change in POX due to root death in sediment (positive means seagrass to sediment)
+    ! SgXperC                     [mol.X mol-1.C]             Species specific seagrass Nitrogen or Phosphorus to Carbon ratio
+    ! f_blw_cur                   [g.rt.drywt g-1.tot.drywt]  also [mol.C.lf mol-1.C.tot] current below ground biomass to total biomass fraction, calculated on the last growth interval
+    ! root_mass_profile(sed)      []                          Mass ratio of roots in each layer (total must sum to 1.0)
+    ! sgrass_per_sedmnt           [m2.sg.hab m-2.sedmnt]      (0~1)  Seagrass coverage per sediment coverage
+    ! sed_layer_thickness(Nsed)   [mm]                        Thickness of each sediment layer
+    ! root_comp_dist_factor(Nsed) [g.rt.comp g-1.tot m2.sg.hab m-2.sedmnt mm-1]    root compartemtent distribution factor equal to f_blw_cur * root_mass_profile(:) * sgrass_per_sedmnt / sed_layer_thickness(:) 
+    ! dieoff_rate                 [umol.C m-2.sg.hab s-1]     Seagrass dieoff rate
+    ! [umol.X/L s]   = [umol.X/L s]     + [X/C]   [umol.C/m2.hab s] [g.rt.comp/g.tot][m2.hab/m2.sedmnt mm] (m2.sedmnt*mm/L)
+    delta_sed_POC(:) = delta_sed_POC(:) +           dieoff_rate     * root_comp_dist_factor(:)
+#  if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
+    delta_sed_PON(:) = delta_sed_PON(:) + SgNperC * dieoff_rate     * root_comp_dist_factor(:)
+    delta_sed_POP(:) = delta_sed_POP(:) + SgPperC * dieoff_rate     * root_comp_dist_factor(:)
+#  endif
 # endif
 
 ! update saved output values -------------------------------------------------------------------------
@@ -1845,6 +1844,9 @@ MODULE mod_seagrass
     endif
   
 # endif
+
+    write(*,*) 'yt_debug: delta_sed_POC = ',delta_sed_POC(:)
+
 
 
 

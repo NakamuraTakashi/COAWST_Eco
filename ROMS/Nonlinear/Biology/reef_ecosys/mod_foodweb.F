@@ -532,6 +532,9 @@ CONTAINS
       Ap(k) = (1.0d0-k_Ep(k)) * Pp(k)
 
 #endif
+      Ap(k) = MIN( Ap(k), 0.1d0*DIC/dt ) !!! yt_edit Error handling  assimilation should not exceed 10% DIC concentration in a timestep
+      Ap(k) = MIN( Ap(k), 0.1d0*(NO3_NH4)*rCNp/dt ) !!! yt_edit Error handling  assimilation should not exceed 10% N concentration in a timestep
+      Ap(k) = MIN( Ap(k), 0.1d0*PO4*rCPp/dt ) !!! yt_edit Error handling  assimilation should not exceed 10% PO4 concentration in a timestep
 
 !     === Mass barance ===
 
@@ -564,6 +567,8 @@ CONTAINS
 #else
       Ep(k) = k_Ep(k) * Pp(k)
 #endif
+      Ep(k) = MIN( Ep(k), 0.1d0*DIC/dt ) !!! yt_edit Error handling  excretion should not exceed 10% DIC concentration in a timestep
+
 
 !     === Mass barance ===
 
@@ -592,11 +597,9 @@ CONTAINS
       ! IF(DOx <= 0.0d0) THEN !-----For Error handling
       !   Rp(k) = 0.0d0
       ! ENDIF
-      IF(DOx/dt < Rp(k)) THEN !-----For Error handling ! yt_edit maybe this needs to be changed to kill off ZOO when respiration is insufficient?
-        Rp(k) = DOx/dt                                 ! yt_edit decomposition rate should not exceed DO concentration in a time step
-      ENDIF                                            ! yt_edit
       Rp(k) = MAX( Rp(k), 0.0d0 )  !!! Error handling
-      Rp(k) = MIN( Rp(k), PHY(k)/dt ) !!! yt_edit Error handling  respiration should not exceed PHY concentration in a timestep
+      Rp(k) = MIN( Rp(k), 0.1d0*PHY(k)/dt ) !!! yt_edit Error handling  respiration should not exceed 10% PHY concentration in a timestep
+      Rp(k) = MIN( Rp(k), 0.1d0*DOx/dt )    !!! yt_edit Error handling  respiration should not consume over 10% DO concentration in a time step
 
 !     === Mass barance ===
 
@@ -618,7 +621,7 @@ CONTAINS
       Mp(k) = k_Mp(k) * exp(b_Mp(k)*Tmp) * MAX(PHY(k),0.0d0)*MAX(PHY(k),0.0d0)
 !      Mphy = k_Mphy * exp(b_Mphy*Tmp) * PHY
       Mp(k) = MAX( Mp(k), 0.0d0 )  !!! Error handling
-      Mp(k) = MIN( Mp(k), PHY(k)/dt ) !!! yt_edit Error handling  mortality should not exceed PHY concentration in a timestep
+      Mp(k) = MIN( Mp(k), 0.1d0*PHY(k)/dt ) !!! yt_edit Error handling  mortality should not exceed 10% PHY concentration in a timestep
 
 !     === Mass barance ===
 
@@ -652,7 +655,7 @@ CONTAINS
           Gp2z(m,k) = 0.0d0
         ENDIF
         Gp2z(m,k) = MAX( Gp2z(m,k), 0.0d0 )  !!! Error handling
-        Gp2z(m,k) = MIN( Gp2z(m,k), PHY(m)/dt ) !!! yt_edit Error handling  grazing should not exceed PHY concentration in a timestep
+        Gp2z(m,k) = MIN( Gp2z(m,k), 0.1d0*PHY(m)/dt ) !!! yt_edit Error handling  grazing should not exceed 10% PHY concentration in a timestep
 
 !     === Mass barance ===
 
@@ -681,7 +684,7 @@ CONTAINS
 #endif
         Gdoc2z(m,k) = k_Gdoc2z(m,k) * exp(b_Gdoc2z(m,k)*Tmp) * cf1 * ZOO(k) ! yt_edit consider making this michaelis-menten dependent on ZOO to not exceed exceed 100% uptake
         Gdoc2z(m,k) = MAX( Gdoc2z(m,k), 0.0d0 )  !!! Error handling
-        Gdoc2z(m,k) = MIN( Gdoc2z(m,k), cf1/dt ) !!! yt_edit Error handling  grazing should not exceed total of limiting factor concentration in a timestep
+        Gdoc2z(m,k) = MIN( Gdoc2z(m,k), 0.1d0*cf1/dt ) !!! yt_edit Error handling  grazing should not exceed 10% total of limiting factor concentration in a timestep
 
 !     === Mass barance ===
         dZOO_dt(k) = dZOO_dt(k) + Gdoc2z(m,k)*e_Gdoc2z(m,k)
@@ -709,7 +712,7 @@ CONTAINS
 #endif
         Gpoc2z(m,k) = k_Gpoc2z(m,k) * exp(b_Gpoc2z(m,k)*Tmp) * cf1 * ZOO(k)
         Gpoc2z(m,k) = MAX( Gpoc2z(m,k), 0.0d0 )  !!! Error handling
-        Gpoc2z(m,k) = MIN( Gpoc2z(m,k), cf1/dt ) !!! yt_edit Error handling  grazing should not exceed total of limiting factor concentration in a timestep
+        Gpoc2z(m,k) = MIN( Gpoc2z(m,k), 0.1d0*cf1/dt ) !!! yt_edit Error handling  grazing should not exceed 10% total of limiting factor concentration in a timestep
 
 !     === Mass barance ===
         dZOO_dt(k) = dZOO_dt(k) + Gpoc2z(m,k)*e_Gpoc2z(m,k)
@@ -734,11 +737,9 @@ CONTAINS
       ! IF(DOx <= 0.0d0) THEN !-----For Error handling
       !   Rz(k) = 0.0d0
       ! ENDIF
-      IF(DOx/dt < Rz(k)) THEN !-----For Error handling ! yt_edit maybe this needs to be changed to kill off ZOO when respiration is insufficient?
-        Rz(k) = DOx/dt                                 ! yt_edit decomposition rate should not exceed DO concentration in a time step
-      ENDIF                                            ! yt_edit
       Rz(k) = MAX( Rz(k), 0.0d0 )  !!! Error handling
-      Rz(k) = MIN( Rz(k), ZOO(k)/dt )  !!! yt_edit Error handling  respiration should not exceed total ZOO in a timestep
+      Rz(k) = MIN( Rz(k), 0.1d0*ZOO(k)/dt )  !!! yt_edit Error handling  respiration should not exceed 10% ZOO in a timestep
+      Rz(k) = MIN( Rz(k), 0.1d0*DOx/dt )     !!! yt_edit Error handling  respiration should not consume over 10% DO concentration in a time step
 
 !     === Mass barance ===
 
@@ -759,7 +760,7 @@ CONTAINS
 
       Mz(k) = k_Mz(k) * exp(b_Mz(k)*Tmp) * ZOO(k)*ZOO(k)
       Mz(k) = MAX( Mz(k), 0.0d0 )  !!! Error handling
-      Mz(k) = MIN( Mz(k), ZOO(k)/dt )  !!! yt_edit Error handling mortality should not exceed total ZOO in a timestep
+      Mz(k) = MIN( Mz(k), 0.1d0*ZOO(k)/dt )  !!! yt_edit Error handling mortality should not exceed 10% ZOO in a timestep
 
 !     === Mass barance ===
 
@@ -784,11 +785,10 @@ CONTAINS
       ! IF(DOx <= 0.0d0) THEN !-----For Error handling
       !   Ddoc(k) = 0.0d0
       ! ENDIF
-      IF(DOx/dt < Ddoc(k)) THEN !-----For Error handling ! yt_edit
-        Ddoc(k) = DOx/dt                                 ! yt_edit decomposition rate should not exceed DO concentration in a time step
-      ENDIF                                              ! yt_edit
       Ddoc(k) = MAX( Ddoc(k), 0.0d0 )  !!! Error handling
-      Ddoc(k) = MIN( Ddoc(k), DOC(k)/dt )  !!! yt_edit Error handling decomposition should not exceed total DOC concentration in a timestep
+      Ddoc(k) = MIN( Ddoc(k), 0.1d0*DOC(k)/dt )  !!! yt_edit Error handling decomposition should not exceed 10% DOC concentration in a timestep
+      Ddoc(k) = MIN( Ddoc(k), 0.1d0*DOx/dt )     !!! yt_edit Error handling decomposition should not consume over 10% DO concentration in a time step
+
 
 !     === Mass barance ===
 
@@ -805,14 +805,14 @@ CONTAINS
         Ddon(k) = 0.0d0
       ENDIF
       Ddon(k) = MAX( Ddon(k), 0.0d0 )  !!! Error handling
-      Ddon(k) = MIN( Ddon(k), DON(k)/dt )  !!! yt_edit Error handling decomposition should not exceed total DON concentration in a timestep
+      Ddon(k) = MIN( Ddon(k), 0.1d0*DON(k)/dt )  !!! yt_edit Error handling decomposition should not exceed 10% DON concentration in a timestep
 
       Ddop(k) = k_Ddop(k) * exp(b_Ddop(k)*Tmp) * DOP(k)
       IF(DOx <= 0.0d0) THEN !-----For Error handling
         Ddop(k) = 0.0d0
       ENDIF
       Ddop(k) = MAX( Ddop(k), 0.0d0 )  !!! Error handling
-      Ddop(k) = MIN( Ddop(k), DOP(k)/dt )  !!! yt_edit Error handling decomposition should not exceed total DOP concentration in a timestep
+      Ddop(k) = MIN( Ddop(k), 0.1d0*DOP(k)/dt )  !!! yt_edit Error handling decomposition should not exceed 10% DOP concentration in a timestep
 
 !     === Mass barance ===
 
@@ -831,11 +831,9 @@ CONTAINS
       ! IF(DOx <= 0.0d0) THEN !-----For Error handling
       !   Dpoc(k) = 0.0d0
       ! ENDIF
-      IF(DOx/dt < Dpoc(k)) THEN !-----For Error handling ! yt_edit
-        Dpoc(k) = DOx/dt                                 ! yt_edit decomposition rate should not exceed DO concentration in a time step
-      ENDIF                                              ! yt_edit
       Dpoc(k) = MAX( Dpoc(k), 0.0d0 )  !!! Error handling
-      Dpoc(k) = MIN( Dpoc(k), POC(k)/dt )  !!! yt_edit Error handling decomposition should not exceed total POC concentration in a timestep
+      Dpoc(k) = MIN( Dpoc(k), 0.1d0*POC(k)/dt )  !!! yt_edit Error handling decomposition should not exceed 10% POC concentration in a timestep
+      Dpoc(k) = MIN( Dpoc(k), 0.1d0*DOx/dt )     !!! yt_edit Error handling decomposition should not consume over 10% DO concentration in a time step
 
 !     === Mass barance ===
 
@@ -853,14 +851,14 @@ CONTAINS
         Dpon(k) = 0.0d0
       ENDIF
       Dpon(k) = MAX( Dpon(k), 0.0d0 )  !!! Error handling
-      Dpon(k) = MIN( Dpon(k), PON(k)/dt )  !!! yt_edit Error handling decomposition should not exceed total PON concentration in a timestep
+      Dpon(k) = MIN( Dpon(k), 0.1d0*PON(k)/dt )  !!! yt_edit Error handling decomposition should not exceed 10% PON concentration in a timestep
 
       Dpop(k) = k_Dpop(k) * exp(b_Dpop(k)*Tmp) * POP(k)
       IF(DOx <= 0.0d0) THEN !-----For Error handling
         Dpop(k) = 0.0d0
       ENDIF
       Dpop(k) = MAX( Dpop(k), 0.0d0 )  !!! Error handling
-      Dpop(k) = MIN( Dpop(k), POP(k)/dt )  !!! yt_edit Error handling decomposition should not exceed total POP concentration in a timestep
+      Dpop(k) = MIN( Dpop(k), 0.1d0*POP(k)/dt )  !!! yt_edit Error handling decomposition should not exceed 10% POP concentration in a timestep
 
 !     === Mass barance ===
 
@@ -881,7 +879,7 @@ CONTAINS
           Dp2doc(m,k) = 0.0d0
         ENDIF
         Dp2doc(m,k) = MAX( Dp2doc(m,k), 0.0d0 )  !!! Error handling
-        Dp2doc(m,k) = MIN( Dp2doc(m,k), POC(m)/dt )  !!! yt_edit Error handling decomposition should not exceed total POC concentration in a timestep
+        Dp2doc(m,k) = MIN( Dp2doc(m,k), 0.1d0*POC(m)/dt )  !!! yt_edit Error handling decomposition should not exceed 10% POC concentration in a timestep
 
 !     === Mass barance ===
 
@@ -897,14 +895,14 @@ CONTAINS
           Dp2don(m,k) = 0.0d0
         ENDIF
         Dp2don(m,k) = MAX( Dp2don(m,k), 0.0d0 )  !!! Error handling
-        Dp2don(m,k) = MIN( Dp2don(m,k), PON(m)/dt )  !!! yt_edit Error handling decomposition should not exceed total PON concentration in a timestep
+        Dp2don(m,k) = MIN( Dp2don(m,k), 0.1d0*PON(m)/dt )  !!! yt_edit Error handling decomposition should not exceed 10% PON concentration in a timestep
 
         Dp2dop(m,k) = k_Dp2dop(m,k) * exp(b_Dp2dop(m,k)*Tmp) * MAX(POP(m),0.0d0)
         IF(DOx <= 0.0d0) THEN !-----For Error handling
           Dp2dop(m,k) = 0.0d0
         ENDIF
         Dp2dop(m,k) = MAX( Dp2dop(m,k), 0.0d0 )  !!! Error handling
-        Dp2dop(m,k) = MIN( Dp2dop(m,k), POP(m)/dt )  !!! yt_edit Error handling decomposition should not exceed total POP concentration in a timestep
+        Dp2dop(m,k) = MIN( Dp2dop(m,k), 0.1d0*POP(m)/dt )  !!! yt_edit Error handling decomposition should not exceed 10% POP concentration in a timestep
 
 !     === Mass barance ===
 
@@ -921,7 +919,7 @@ CONTAINS
 
     Dcpoc2dtr = k_Dcpoc2dtr * exp(b_Dcpoc2dtr*Tmp) * POC(iCPOM)
     Dcpoc2dtr = MAX( Dcpoc2dtr, 0.0d0 )  !!! Error handling
-    Dcpoc2dtr = MIN( Dcpoc2dtr, POC(iCPOM)/dt )  !!! yt_edit Error handling decomposition should not exceed total POC(iCPOM) concentration in a timestep
+    Dcpoc2dtr = MIN( Dcpoc2dtr, 0.1d0*POC(iCPOM)/dt )  !!! yt_edit Error handling decomposition should not exceed 10% POC(iCPOM) concentration in a timestep
 
   !     === Mass barance ===
   
@@ -934,11 +932,11 @@ CONTAINS
 #if defined NUTRIENTS
     Dcpon2dtr = k_Dcpon2dtr * exp(b_Dcpon2dtr*Tmp) * PON(iCPOM)
     Dcpon2dtr = MAX( Dcpon2dtr, 0.0d0 )  !!! Error handling
-    Dcpon2dtr = MIN( Dcpon2dtr, PON(iCPOM)/dt )  !!! yt_edit Error handling decomposition should not exceed total PON(iCPOM) concentration in a timestep
+    Dcpon2dtr = MIN( Dcpon2dtr, 0.1d0*PON(iCPOM)/dt )  !!! yt_edit Error handling decomposition should not exceed 10% PON(iCPOM) concentration in a timestep
 
     Dcpop2dtr = k_Dcpop2dtr * exp(b_Dcpop2dtr*Tmp) * POP(iCPOM)
     Dcpop2dtr = MAX( Dcpop2dtr, 0.0d0 )  !!! Error handling
-    Dcpop2dtr = MIN( Dcpop2dtr, POP(iCPOM)/dt )  !!! yt_edit Error handling decomposition should not exceed total POP(iCPOM) concentration in a timestep
+    Dcpop2dtr = MIN( Dcpop2dtr, 0.1d0*POP(iCPOM)/dt )  !!! yt_edit Error handling decomposition should not exceed 10% POP(iCPOM) concentration in a timestep
   
   !     === Mass barance ===
   
@@ -961,8 +959,8 @@ CONTAINS
         Nit = 0.0d0
     ENDIF
     Nit = MAX( Nit, 0.0d0 )  !!! Error handling
-    Nit = MIN( Nit, NH4/dt )  !!! yt_edit Error handling nitrification should not exceed total NH4 concentration in a timestep
-    Nit = MIN( Nit, DOx/dt/2.0d0 )  !!! yt_edit Error handling nitrification should not exceed total NH4 concentration in a timestep
+    Nit = MIN( Nit, 0.1d0*NH4/dt )  !!! yt_edit Error handling nitrification should not exceed 10% NH4 concentration in a timestep
+    Nit = MIN( Nit, 0.1d0*DOx/dt/2.0d0 )  !!! yt_edit Error handling nitrification should not exceed 10% DOx concentration in a timestep
 
 
 !     === Mass barance ===
@@ -985,12 +983,8 @@ CONTAINS
       Dissol = 0.0d0
     END IF
     Dissol = MAX( Dissol, 0.0d0 )  !!! Error handling
-    ! yt_edit >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    ! arbitrarily limit Dissolution rate to 80% of PIC per time step to prevent negative PIC values
-    IF (0.8d0*PIC(iCaCO3) - Dissol*dt < 0.0d0) THEN
-      Dissol = 0.8d0*PIC(iCaCO3)/dt
-    ENDIF
-    ! yt_edit <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    Dissol = MIN( Dissol, 0.1d0*PIC(iCaCO3)/dt )  !!! yt_edit Error handling  carbonate dissolution should not exceed 10% PIC(iCaCO3) in a timestep
+
 
 !     === Mass barance ===
 
