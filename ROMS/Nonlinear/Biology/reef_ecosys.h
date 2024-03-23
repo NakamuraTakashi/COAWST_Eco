@@ -316,9 +316,10 @@
       real(r8) :: tau, tau_u, tau_v        
       real(r8) :: u10        
       
-      real(r8) :: sspH      
+      real(r8) :: pH(UBk)      
+      real(r8) :: Warg(UBk)    
+      real(r8) :: Wcal(UBk)    
       real(r8) :: ssfCO2    
-      real(r8) :: ssWarg    
       real(r8) :: ssCO2flux 
       real(r8) :: ssO2flux  
       real(r8) :: PFDbott   
@@ -339,12 +340,6 @@
 ! Set initial zero 
           dtrc_dt(:,:)=0.0_r8
           
-          sspH      = 8.0_r8         ! sea surface pH
-          ssfCO2    = 400.0_r8         ! sea surface fCO2 (uatm)
-          ssWarg    = 3.8_r8         ! sea surface aragonite saturation state
-          ssCO2flux = 0.0_r8         ! sea surface CO2 flux (mmol m-2 s-1)
-          ssO2flux  = 0.0_r8         ! sea surface O2 flux (mmol m-2 s-1)
-          PFDbott   = 0.0_r8
 #ifdef MASKING
           IF (rmask(i,j).eq.1.0_r8) THEN
 # endif
@@ -528,12 +523,13 @@
      &            ,dtrc_dt(:,iCOTe)        &   ! dCOTe/dt(N): (umol L-1 s-1)
      &            ,dtrc_dt(:,iCOTl)        &   ! dCOTl/dt(N): (umol L-1 s-1)
 #endif
-     &            ,sspH           &   ! sea surface pH
-     &            ,ssfCO2         &   ! sea surface fCO2 (uatm)
-     &            ,ssWarg         &   ! sea surface aragonite saturation state
-     &            ,ssCO2flux      &   ! sea surface CO2 flux (mmol m-2 s-1)
-     &            ,ssO2flux       &   ! sea surface O2 flux (mmol m-2 s-1)
-     &            ,PFDbott        &   ! Bottom photon flux density (umol m-2 s-1)
+     &            , pH                     &   ! pH
+     &            , Warg                   &   ! aragonite saturation state
+     &            , Wcal                   &   ! calcite saturation state
+     &            , ssfCO2                 &   ! sea surface fCO2 (uatm)
+     &            , ssCO2flux              &   ! sea surface CO2 flux (mmol m-2 s-1)
+     &            , ssO2flux               &   ! sea surface O2 flux (mmol m-2 s-1)
+     &            , PFDbott                &   ! Bottom photon flux density (umol m-2 s-1)
      &             )
 !
 #ifdef MASKING
@@ -541,8 +537,10 @@
 #endif
 
 #if defined DIAGNOSTICS_BIO
-            DiaBio2d(i,j,ipHt_) = sspH
-            DiaBio2d(i,j,iWarg) = ssWarg
+            DiaBio3d(i,j,:,ipHt_) = pH(:)
+            DiaBio3d(i,j,:,iWarg) = Warg(:)
+            DiaBio3d(i,j,:,iWcal) = Wcal(:)
+
             DiaBio2d(i,j,iCO2fx) = ssCO2flux
             DiaBio2d(i,j,ipCO2) = ssfCO2
             DiaBio2d(i,j,iO2fx) = ssO2flux
@@ -606,9 +604,11 @@
               
             END DO
 
-#if defined CARBON_ISOTOPE
+#if defined DIAGNOSTICS_BIO
+# if defined CARBON_ISOTOPE
 ! Carbon isotope ratio calculation
             DiaBio3d(i,j,k,id13C)=d13C_fromR13C(t(i,j,k,nnew,iT13C)/t(i,j,k,nnew,iTIC_))
+# endif
 #endif
           END DO
 
