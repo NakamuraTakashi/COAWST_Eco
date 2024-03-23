@@ -679,17 +679,17 @@ CONTAINS
 !     === Mass barance ===
         dZOO_dt(k) = dZOO_dt(k) + Gdoc2z(m,k)*e_Gdoc2z(m,k)
         dDOC_dt(m) = dDOC_dt(m) - Gdoc2z(m,k)
-        dDOC_dt(iLbl) = dDOC_dt(iLbl) - Gdoc2z(m,k)*(1.0d0-e_Gdoc2z(m,k))
+        dDOC_dt(iLbl) = dDOC_dt(iLbl) + Gdoc2z(m,k)*(1.0d0-e_Gdoc2z(m,k))
 #if defined CARBON_ISOTOPE
         dZOO13C_dt(k) = dZOO13C_dt(k) + Gdoc2z(m,k)*e_Gdoc2z(m,k)*a_grz*rDO13C(m)
         dDO13C_dt(m) = dDO13C_dt(m) - Gdoc2z(m,k)*rDO13C(m)
-        dDO13C_dt(iLbl) = dDO13C_dt(iLbl) - Gdoc2z(m,k)*(1.0d0-e_Gdoc2z(m,k)*a_grz)*rDO13C(m)
+        dDO13C_dt(iLbl) = dDO13C_dt(iLbl) + Gdoc2z(m,k)*(1.0d0-e_Gdoc2z(m,k)*a_grz)*rDO13C(m)
 #endif
 #if defined NUTRIENTS
         dDON_dt(m) = dDON_dt(m) - Gdoc2z(m,k)/rCNz(k)
-        dDON_dt(iLbl) = dDON_dt(iLbl) - Gdoc2z(m,k)*(1.0d0-e_Gdoc2z(m,k))/rCNz(k)
+        dDON_dt(iLbl) = dDON_dt(iLbl) + Gdoc2z(m,k)*(1.0d0-e_Gdoc2z(m,k))/rCNz(k)
         dDOP_dt(m) = dDOP_dt(m) - Gdoc2z(m,k)/rCPz(k)
-        dDOP_dt(iLbl) = dDOP_dt(iLbl) - Gdoc2z(m,k)*(1.0d0-e_Gdoc2z(m,k))/rCPz(k)
+        dDOP_dt(iLbl) = dDOP_dt(iLbl) + Gdoc2z(m,k)*(1.0d0-e_Gdoc2z(m,k))/rCPz(k)
 #endif
       END DO
 
@@ -706,17 +706,17 @@ CONTAINS
 !     === Mass barance ===
         dZOO_dt(k) = dZOO_dt(k) + Gpoc2z(m,k)*e_Gpoc2z(m,k)
         dPOC_dt(m) = dPOC_dt(m) - Gpoc2z(m,k)
-        dPOC_dt(iDtr) = dPOC_dt(iDtr) - Gpoc2z(m,k)*(1.0d0-e_Gpoc2z(m,k))
+        dPOC_dt(iDtr) = dPOC_dt(iDtr) + Gpoc2z(m,k)*(1.0d0-e_Gpoc2z(m,k))
 #if defined CARBON_ISOTOPE
         dZOO13C_dt(k) = dZOO13C_dt(k) + Gpoc2z(m,k)*e_Gpoc2z(m,k)*a_grz*rPO13C(m)
         dPO13C_dt(m) = dPO13C_dt(m) - Gpoc2z(m,k)*rPO13C(m)  !!!!****Need check
-        dPO13C_dt(iDtr) = dPO13C_dt(iDtr) - Gpoc2z(m,k)*(1.0d0-e_Gpoc2z(m,k)*a_grz)*rPO13C(m)  !!!!****Need check
+        dPO13C_dt(iDtr) = dPO13C_dt(iDtr) + Gpoc2z(m,k)*(1.0d0-e_Gpoc2z(m,k)*a_grz)*rPO13C(m)  !!!!****Need check
 #endif
 #if defined NUTRIENTS
         dPON_dt(m) = dPON_dt(m) - Gpoc2z(m,k)/rCNz(k)
-        dPON_dt(iDtr) = dPON_dt(iDtr) - Gpoc2z(m,k)*(1.0d0-e_Gpoc2z(m,k))/rCNz(k)
+        dPON_dt(iDtr) = dPON_dt(iDtr) + Gpoc2z(m,k)*(1.0d0-e_Gpoc2z(m,k))/rCNz(k)
         dPOP_dt(m) = dPOP_dt(m) - Gpoc2z(m,k)/rCPz(k)
-        dPOP_dt(iDtr) = dPOP_dt(iDtr) - Gpoc2z(m,k)*(1.0d0-e_Gpoc2z(m,k))/rCPz(k)
+        dPOP_dt(iDtr) = dPOP_dt(iDtr) + Gpoc2z(m,k)*(1.0d0-e_Gpoc2z(m,k))/rCPz(k)
 #endif
       END DO
   
