@@ -910,11 +910,15 @@ CONTAINS
 #endif               
 #if defined NUTRIENTS
     Dcpon2dtr = k_Dcpon2dtr * exp(b_Dcpon2dtr*Tmp) * PON(iCPOM)
+    Dcpon2dtr = MAX( Dcpon2dtr, 0.0d0 )  !!! Error handling
     Dcpop2dtr = k_Dcpop2dtr * exp(b_Dcpop2dtr*Tmp) * POP(iCPOM)
+    Dcpop2dtr = MAX( Dcpop2dtr, 0.0d0 )  !!! Error handling
   
   !     === Mass barance ===
   
     dPON_dt(iCPOM) = dPON_dt(iCPOM) - Dcpon2dtr
+    dPON_dt(iDtr ) = dPON_dt(iDtr ) + Dcpon2dtr
+    dPOP_dt(iCPOM) = dPOP_dt(iCPOM) - Dcpop2dtr
     dPOP_dt(iDtr ) = dPOP_dt(iDtr ) + Dcpop2dtr
   
 #endif
