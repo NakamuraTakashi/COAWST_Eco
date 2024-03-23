@@ -154,8 +154,6 @@
 !
       integer, allocatable :: iDbio2(:)       ! 2D biological terms
 
-      integer  :: ipHt_                       ! sea surface pH (total scale)
-      integer  :: iWarg                       ! sea surface aragonite saturation state
       integer  :: iCO2fx                      ! air-sea CO2 flux
       integer  :: ipCO2                       ! partial pressure of CO2
       integer  :: iO2fx                       ! air-sea O2 flux
@@ -191,6 +189,9 @@
 !  Biological 3D Diagnostic variable IDs.
 !
       integer, allocatable :: iDbio3(:)       ! 3D biological terms
+      integer  :: ipHt_                       ! pH (total scale)
+      integer  :: iWarg                       ! aragonite saturation state
+      integer  :: iWcal                       ! calcite saturation state
 
 # ifdef CARBON_ISOTOPE
       integer  :: id13C                       ! d13C of total inorganic carbon
@@ -717,11 +718,6 @@
       ic=0     ! ic reset
 
       ic=ic+1
-      ipHt_=ic
-      ic=ic+1
-      iWarg=ic
-
-      ic=ic+1
       iCO2fx=ic
       ic=ic+1
       ipCO2=ic
@@ -793,6 +789,13 @@
 !  Initialize 3D biology indices.
 !
       ic=0     ! ic reset
+
+      ic=ic+1
+      ipHt_=ic
+      ic=ic+1
+      iWarg=ic
+      ic=ic+1
+      iWcal=ic
 
 # ifdef CARBON_ISOTOPE
       ic=ic+1
