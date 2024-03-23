@@ -133,8 +133,10 @@ MODULE mod_seagrass
 # if defined NET_ZERO_MASS_START
 ! >>> Calculate initial seagrass mass balance and destroy (erase) equivalent amount of mass output until net zero is reached, before switching to normal flux <<< !
     real(8), pointer :: InitialC                                (:,:,:)   ! [mmol.C]                    Initial carbon remaining to destroy until net zero
+#  if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
     real(8), pointer :: InitialN                                (:,:,:)   ! [mmol.N]                    Initial nitrogen remaining to destroy until net zero
     real(8), pointer :: InitialP                                (:,:,:)   ! [mmol.P]                    Initial phosphorus remaining to destroy until net zero
+#  endif
 # endif
 
 
@@ -272,8 +274,10 @@ MODULE mod_seagrass
 # if defined NET_ZERO_MASS_START
 ! >>> Calculate initial seagrass mass balance and destroy (erase) equivalent amount of mass output until net zero is reached, before switching to normal flux <<< !
     allocate( SGRASS(ng)%InitialC                                   (Nsg,LBi:UBi,LBj:UBj)  ) ! [mmol.C]                    Initial carbon remaining to destroy until net zero
+#  if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
     allocate( SGRASS(ng)%InitialN                                   (Nsg,LBi:UBi,LBj:UBj)  ) ! [mmol.N]                    Initial nitrogen remaining to destroy until net zero
     allocate( SGRASS(ng)%InitialP                                   (Nsg,LBi:UBi,LBj:UBj)  ) ! [mmol.P]                    Initial phosphorus remaining to destroy until net zero
+#  endif
 # endif
 
     ! write(*,*) 'yt_debug: mod_seagrass.F initialize_seagrass() after array allocations'
@@ -531,8 +535,10 @@ MODULE mod_seagrass
             ! SgPperC                     [mol.P mol-1.C]             Species specific seagrass Phosphorus to Carbon ratio
             ! [mmol.X]                       = [mol.C]                          [mol.X/mol.C]                 [1000 mmol/mol]
             SGRASS(ng)%InitialC(species,i,j) = SGRASS(ng)%TotSgCBm(species,i,j)                               * 1000.0d0 ! yt_edit to_do need to add this to save/restart parameters?
+#  if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
             SGRASS(ng)%InitialN(species,i,j) = SGRASS(ng)%TotSgCBm(species,i,j) * SGRASS(ng)%SgNperC(species) * 1000.0d0
             SGRASS(ng)%InitialP(species,i,j) = SGRASS(ng)%TotSgCBm(species,i,j) * SGRASS(ng)%SgPperC(species) * 1000.0d0
+#  endif
 # endif
 
           enddo
@@ -775,8 +781,10 @@ MODULE mod_seagrass
 # if defined NET_ZERO_MASS_START
 ! >>> Calculate initial seagrass mass balance and destroy (erase) equivalent amount of mass output until net zero is reached, before switching to normal flux <<< !
     real(8), pointer      :: InitialC                   ! [mmol.C]                    Initial carbon remaining to destroy until net zero
+#  if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
     real(8), pointer      :: InitialN                   ! [mmol.N]                    Initial nitrogen remaining to destroy until net zero
     real(8), pointer      :: InitialP                   ! [mmol.P]                    Initial phosphorus remaining to destroy until net zero
+#  endif
 # endif
 ! >>> Delta Values <<< !      amount to add to stored variables at end of the calculation time step to update values: positive adds, negative subtracts (erased each time step)
     real(8)               :: delta_SgCBmF               ! [umol.C m-2.sg.hab s-1]     Rate of change in SgCBmF
@@ -1018,8 +1026,10 @@ MODULE mod_seagrass
 # if defined NET_ZERO_MASS_START
 ! >>> Calculate initial seagrass mass balance and destroy (erase) equivalent amount of mass output until net zero is reached, before switching to normal flux <<< !
     InitialC            =>  SGRASS(ng)%InitialC               (species,i,j) ! [mmol.C]                    Initial carbon remaining to destroy until net zero
+#  if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
     InitialN            =>  SGRASS(ng)%InitialN               (species,i,j) ! [mmol.N]                    Initial nitrogen remaining to destroy until net zero
     InitialP            =>  SGRASS(ng)%InitialP               (species,i,j) ! [mmol.P]                    Initial phosphorus remaining to destroy until net zero
+#  endif
 # endif
 
 ! >>> Delta Values <<< !      amount to add to stored variables at end of the calculation time step to update values: positive adds, negative subtracts (erased each time step)
@@ -1727,14 +1737,14 @@ MODULE mod_seagrass
         InitialC   = InitialC + DIC_uptake_rate_from_ocean * HabArea * dt
         DIC_uptake_rate_from_ocean = 0.0d0
       endif
-# if defined SEAGRASS_LEAF_POM
+#  if defined SEAGRASS_LEAF_POM
       if (POC_uptake_rate_from_ocean < 0) then
         ! [mmol.C] = [mmol.C] + [mmol.C/m2.hab s]          [m2.hab]  [s]
         InitialC   = InitialC + POC_uptake_rate_from_ocean * HabArea * dt
         POC_uptake_rate_from_ocean = 0.0d0
       endif
-# endif
-# if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE
+#  endif
+#  if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE
       do k=1,Nsed
         if (delta_sed_DIC(k) > 0 ) then
           ! [mmol.C] = [mmol.C] - [umol.C/L.sed s] [mm.sed]                 [m2.sed/m2.hab]     [m2.hab]  [s]  [1000 L.sed/m3.sed] [m.sed / 1000 mm.sed] 
@@ -1742,8 +1752,8 @@ MODULE mod_seagrass
           delta_sed_DIC(k) = 0.0d0
         endif
       enddo
-# endif
-# if defined SEAGRASS_ROOT_POM
+#  endif
+#  if defined SEAGRASS_ROOT_POM
       do k=1,Nsed
         if (delta_sed_POC(k) > 0 ) then
           ! [mmol.C] = [mmol.C] - [umol.C/L.sed s] [mm.sed]                 [m2.sed/m2.hab]     [m2.hab]  [s]  [1000 L.sed/m3.sed] [m.sed / 1000 mm.sed] 
@@ -1751,11 +1761,11 @@ MODULE mod_seagrass
           delta_sed_POC(k) = 0.0d0
         endif
       enddo
-# endif
+#  endif
     endif
 
     if (InitialN > 0.0d0) then
-# if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE         
+#  if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE         
       if (NO3_uptake_rate_from_ocean < 0) then
         ! [mmol.N] = [mmol.N] + [mmol.N/m2.hab s]          [m2.hab]  [s]
         InitialN   = InitialN + NO3_uptake_rate_from_ocean * HabArea * dt
@@ -1766,15 +1776,15 @@ MODULE mod_seagrass
         InitialN   = InitialN + NH4_uptake_rate_from_ocean * HabArea * dt
         NH4_uptake_rate_from_ocean = 0.0d0
       endif
-# endif
-# if defined SEAGRASS_LEAF_POM && (defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE)
+#  endif
+#  if defined SEAGRASS_LEAF_POM && (defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE)
       if (PON_uptake_rate_from_ocean < 0) then
         ! [mmol.N] = [mmol.N] + [mmol.N/m2.hab s]          [m2.hab]  [s]
         InitialN   = InitialN + PON_uptake_rate_from_ocean * HabArea * dt
         PON_uptake_rate_from_ocean = 0.0d0
       endif
-# endif
-# if defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
+#  endif
+#  if defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
       do k=1,Nsed
         if (delta_sed_NO3(k) > 0 ) then
           ! [mmol.N] = [mmol.N] - [umol.N/L.sed s] [mm.sed]                 [m2.sed/m2.hab]     [m2.hab]  [s]  [1000 L.sed/m3.sed] [m.sed / 1000 mm.sed] 
@@ -1787,8 +1797,8 @@ MODULE mod_seagrass
           delta_sed_NH4(k) = 0.0d0
         endif
       enddo
-# endif
-# if defined SEAGRASS_ROOT_POM && (defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE)
+#  endif
+#  if defined SEAGRASS_ROOT_POM && (defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE)
       do k=1,Nsed
         if (delta_sed_PON(k) > 0 ) then
           ! [mmol.N] = [mmol.N] - [umol.N/L.sed s] [mm.sed]                 [m2.sed/m2.hab]     [m2.hab]  [s]  [1000 L.sed/m3.sed] [m.sed / 1000 mm.sed] 
@@ -1796,25 +1806,25 @@ MODULE mod_seagrass
           delta_sed_PON(k) = 0.0d0
         endif
       enddo
-# endif
+#  endif
     endif
 
     if (InitialP > 0.0d0) then
-# if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE         
+#  if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE         
       if (PO4_uptake_rate_from_ocean < 0) then
         ! [mmol.P] = [mmol.P] + [mmol.P/m2.hab s]          [m2.hab]  [s]
         InitialP   = InitialP + PO4_uptake_rate_from_ocean * HabArea * dt
         PO4_uptake_rate_from_ocean = 0.0d0
       endif
-# endif
-# if defined SEAGRASS_LEAF_POM && (defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE)
+#  endif
+#  if defined SEAGRASS_LEAF_POM && (defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE)
       if (POP_uptake_rate_from_ocean < 0) then
         ! [mmol.P] = [mmol.P] + [mmol.P/m2.hab s]          [m2.hab]  [s]
         InitialP   = InitialP + POP_uptake_rate_from_ocean * HabArea * dt
         POP_uptake_rate_from_ocean = 0.0d0
       endif
-# endif
-# if defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
+#  endif
+#  if defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
       do k=1,Nsed
         if (delta_sed_PO4(k) > 0 ) then
           ! [mmol.P] = [mmol.P] - [umol.P/L.sed s] [mm.sed]                 [m2.sed/m2.hab]     [m2.hab]  [s]  [1000 L.sed/m3.sed] [m.sed / 1000 mm.sed] 
@@ -1822,8 +1832,8 @@ MODULE mod_seagrass
           delta_sed_PO4(k) = 0.0d0
         endif
       enddo
-# endif
-# if defined SEAGRASS_ROOT_POM && (defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE)
+#  endif
+#  if defined SEAGRASS_ROOT_POM && (defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE)
       do k=1,Nsed
         if (delta_sed_POP(k) > 0 ) then
           ! [mmol.P] = [mmol.P] - [umol.P/L.sed s] [mm.sed]                 [m2.sed/m2.hab]     [m2.hab]  [s]  [1000 L.sed/m3.sed] [m.sed / 1000 mm.sed] 
@@ -1831,7 +1841,7 @@ MODULE mod_seagrass
           delta_sed_POP(k) = 0.0d0
         endif
       enddo
-# endif
+#  endif
     endif
   
 # endif

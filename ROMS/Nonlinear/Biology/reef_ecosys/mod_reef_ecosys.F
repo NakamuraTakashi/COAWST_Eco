@@ -589,7 +589,7 @@ END SUBROUTINE allocate_reef_ecosys
     real(8) :: PFD, Att, AttFac, ExpAtt, Itop
     real(8) :: cff, cff1, cff2, cff3, cff4, cff5
 
-    real(8) :: Flux_Tmp, Flux_Sal
+    real(8) :: SGD_Temp, Flux_Sal
     real(8) :: Flux_DIC, Flux_TA,  Flux_DO, Flux_CO2sed, Flux_N2  ! yuta_edits_for_masa
 #if defined ORGANIC_MATTER
     real(8) :: Flux_DOC(Ndom), Flux_POC(Npom)
@@ -1787,7 +1787,7 @@ END SUBROUTINE allocate_reef_ecosys
 !!!---------------------------------------------------------------------
 !!!  Benthic interactions.
 !!!---------------------------------------------------------------------
-    Flux_Tmp = 0.0d0
+    SGD_Temp = 0.0d0
     Flux_Sal = 0.0d0
     Flux_DIC = 0.0d0
     Flux_TA  = 0.0d0
@@ -2577,7 +2577,7 @@ endif
 #   endif
 #  endif
 !         output parameters
-          , Flux_Tmp       &   ! Temperature flux (K cm-2 s-1)  * direction of water column to sediment is positive
+          , SGD_Temp       &   ! Temperature flux (K cm-2 s-1)  * direction of water column to sediment is positive
           , Flux_Sal       &   ! Salinity  flux PSU (cm-2 s-1)  * direction of water column to sediment is positive
           , Flux_TA        &   ! Total Alkalinity flux (??? cm-2 s-1)  * direction of water column to sediment is positive
           , Flux_DO        &   ! DO  flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
@@ -2612,16 +2612,23 @@ endif
 #  endif
         )
       END DO
+
+      ! [oC s]    =              
+      ! ocean_temp = Tmp(1)
+      ! sgd_temp = sgd_temp
+      ! ocean_vol = dz(1)*gridarea
+      ! sgd_vol = sgd_flux*0.01*dt*gridarea  [cm/s][0.01m/cm][s][m2]
+      ! avg_temp = ( ocean_temp * ocean_vol + sgd_temp * sgd_vol) / (ocean_vol + sgd_vol)
+      ! dTemp_dt = ( avg_temp - ocean_temp ) / dt
       
+      dTemp_dt(1) = ( ((Tmp(1)*dz(1) + sgd_temp*sgd_flux*0.01d0*dt)/(dz(1) + sgd_flux*0.01d0*dt)) - Tmp(1) ) / dt
+
     ! 1 nmol cm-2 s-1 = 0.01 mmol m-2 s-1, 1 mmol m-3 = 1 umol L-1 = 1/1.024 umol kg-1
     ! x[nmol/cm2 s] (umol/1000nmol) (10000cm2/m2) (1/dz)[1/m] (m3/1000L)= x/dz 0.01(umol L-1 s-1)
     ! cff: convaert [nmol cm-2 s-1] to [umol L-1 s-1]
       ! cff=0.01d0 /dz(1) * p_sand ! yt_edit  implement coverage scheme later
       cff=0.01d0 /dz(1) * p_sand
     ! (umol L-1 s-1) / rho(kg L-1) = (1/rho) (umol kg-1 s-1)
-
-      ! [K/L s]   =               [K/cm2 s] * [1/m]   (10000cm2/m2) (m3/1000L)
-      dTemp_dt(1) = dTemp_dt(1) + Flux_Tmp  / dz(1) * p_sand * 10d0        ! Temperature change (K L-1) 
 
       ! [PSU/L s] =               [PSU/cm2 s] * [1/m]   (10000cm2/m2) (m3/1000L)
       dSalt_dt(1) = dSalt_dt(1) + Flux_Sal    / dz(1) * p_sand * 10d0      ! Sal(N): Salinity (PSU)

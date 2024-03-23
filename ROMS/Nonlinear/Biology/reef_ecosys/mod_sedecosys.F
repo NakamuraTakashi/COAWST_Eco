@@ -513,16 +513,18 @@ CONTAINS
 #  if defined ORGANIC_MATTER
         SEDECO(ng)%DOCf(:,:,:)  = 0.0d0       !DOCf  (µmol L-1) 
         SEDECO(ng)%DOCs(:,:,:)  = 2000.0d0       !DOCs  (µmol L-1) 
-        SEDECO(ng)%POCf(:,:,:)  = 0.0d0       !DOCf  (µmol L-1) 
-        ! SEDECO(ng)%POCf(:,:,:)  = 1.0d6      !POCf  (nmol g-1)          2.0d6
-        ! SEDECO(ng)%POCf(:,:,:)  = 3.0d6      !POCf  (nmol g-1)
-        ! SEDECO(ng)%POCs(:,:,:)  = 1.1d6      !DOCf  (µmol L-1) 
-        ! SEDECO(ng)%POCs(:,:,:)  = 1.0d6      !POCs  (nmol g-1)          1.0d6
-        ! SEDECO(ng)%POCs(:,:,:)  = 8.0d5      !POCs  (nmol g-1)
-        SEDECO(ng)%POCs(:,:,:)  = 8.5d5       !POCs  (nmol g-1)
-        ! SEDECO(ng)%POCn(:,:,:)  = 1.0d6       !DOCf  (µmol L-1)
-        SEDECO(ng)%POCn(:,:,:)  = 8.5d5      !DOCf  (µmol L-1)
-        ! SEDECO(ng)%POCn(:,:,:)  = 4.0d5      !DOCf  (µmol L-1)
+        SEDECO(ng)%POCf(:,:,:)  = 0.0d0       !POCf  (nmol g-1) 
+        ! ! SEDECO(ng)%POCf(:,:,:)  = 1.0d6      !POCf  (nmol g-1)          2.0d6
+        ! ! SEDECO(ng)%POCf(:,:,:)  = 3.0d6      !POCf  (nmol g-1)
+        ! ! SEDECO(ng)%POCs(:,:,:)  = 1.1d6      !DOCf  (µmol L-1) 
+        ! ! SEDECO(ng)%POCs(:,:,:)  = 1.0d6      !POCs  (nmol g-1)          1.0d6
+        ! ! SEDECO(ng)%POCs(:,:,:)  = 8.0d5      !POCs  (nmol g-1)
+        ! SEDECO(ng)%POCs(:,:,:)  = 8.5d5       !POCs  (nmol g-1)
+        ! ! SEDECO(ng)%POCn(:,:,:)  = 1.0d6       !DOCf  (µmol L-1)
+        ! SEDECO(ng)%POCn(:,:,:)  = 8.5d5      !DOCf  (µmol L-1)
+        ! ! SEDECO(ng)%POCn(:,:,:)  = 4.0d5      !DOCf  (µmol L-1)
+        SEDECO(ng)%POCs(:,:,:)  = 1000.0d0      !POCs  (nmol g-1)
+        SEDECO(ng)%POCn(:,:,:)  = 1000.0d0      !POCn  (nmol g-1)
 #  endif
         ! Nutrient dynamics
 #  if defined NUTRIENTS
@@ -767,7 +769,7 @@ CONTAINS
 #  endif
 # endif
 !   output parameters
-    , Flux_Tmp       &   ! Temperature flux (K cm-2 s-1)  * direction of water column to sediment is positive
+    , Tmp_out        &   ! Temperature of discharged water (oC)
     , Flux_Sal       &   ! Salinity flux (cm-2 s-1)  * direction of water column to sediment is positive
     , Flux_TA        &   ! Total Alkalinity flux (???? cm-2 s-1)  * direction of water column to sediment is positive
     , Flux_DO        &   ! DO  flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
@@ -878,7 +880,7 @@ CONTAINS
 # endif
 
 !! output parameters (Flux)
-    real(8), intent(out) :: Flux_Tmp
+    real(8), intent(out) :: Tmp_out
     real(8), intent(out) :: Flux_Sal
     real(8), intent(out) :: Flux_TA
 
@@ -3199,8 +3201,8 @@ CONTAINS
 ! ***************************** !
 
 !! Return total flux of water --> DBL
-  ! [K/cm2s] = [K/L]               * [cm/s]   * [L/1000cm3]
-    Flux_Tmp = (sgd_Tmp_in+273.15) * sgd_flux / 1000    ! yt_edit is this correct???   right now, groundwater temp is passed directly to reef_ecosys. still need to add propper diffusion
+  ! [oC]    = [oC]
+    Tmp_out = sgd_Tmp_in
   ! [PSU/cm2s] = [PSU/L]    * [cm/s]   * [L/1000cm3]
     Flux_Sal   = sgd_Sal_in * sgd_flux / 1000d0         ! yt_edit is this correct???   right now, groundwater salt is passed directly to reef_ecosys. still need to add propper diffusion
     Flux_DO  = FT_O2(1) 
