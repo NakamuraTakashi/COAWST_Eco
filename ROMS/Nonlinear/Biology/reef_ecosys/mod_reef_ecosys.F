@@ -2486,7 +2486,7 @@ END SUBROUTINE allocate_reef_ecosys
           , Flux_SO4       &   ! SO4 flux   (nmol cm-2 s-1) * direction of water column to sediment is positive
 #  endif
         )
-      END DOz
+      END DO
 
       ! [oC s]    =              
       ! ocean_temp = Tmp(1)
