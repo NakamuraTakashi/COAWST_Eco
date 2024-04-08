@@ -28,6 +28,9 @@
 #if defined DIAGNOSTICS_BIO
       USE mod_diags
 #endif
+#if defined SEDECO_ADVECTION && defined SGD_ON
+      USE mod_sources
+#endif
 
 
 !
@@ -86,6 +89,13 @@
 #endif
 #ifdef SEDIMENT_ECOSYS
      &                   GRID(ng) % p_sand,                             &
+# if defined SEDECO_ADVECTION && defined SGD_ON
+     &                   GRID(ng) % sgd_src,                            &
+     &                   GRID(ng) % pm,                                 &
+     &                   GRID(ng) % pn,                                 &
+     &                   SOURCES(ng) % Qbar(Nsrc(ng)),                  &
+     &                   SOURCES(ng) % Tsrc(Nsrc(ng),1,:),              &
+# endif
 #endif
 #ifdef BBL_MODEL
      &                   BBL(ng) % bustrc,                              &
@@ -132,13 +142,20 @@
      &                         p_coral,                                 &
 #endif
 #ifdef SEAGRASS
-     &                         p_sgrass,                              &
+     &                         p_sgrass,                                &
 #endif
 #ifdef MACROALGAE
      &                         p_algae,                                 &
 #endif
 #ifdef SEDIMENT_ECOSYS
      &                         p_sand,                                  &
+# if defined SEDECO_ADVECTION && defined SGD_ON
+     &                         sgd_src,                                 &
+     &                         pm,                                      &
+     &                         pn,                                      &
+     &                         Qbar,                                    &
+     &                         Tsrc,                                    &
+# endif
 #endif
 #ifdef BBL_MODEL
      &                         bustrc, bvstrc,                          &
@@ -212,6 +229,13 @@
 # endif
 # ifdef SEDIMENT_ECOSYS
       real(r8), intent(inout) :: p_sand(LBi:UBi,LBj:UBj)
+#  if defined SEDECO_ADVECTION && defined SGD_ON
+      real(r8), intent(inout) :: sgd_src(LBi:UBi,LBj:UBj)
+      real(r8), intent(in)    :: pm(LBi:UBi,LBj:UBj)
+      real(r8), intent(in)    :: pn(LBi:UBi,LBj:UBj)
+      real(r8), intent(in)    :: Qbar
+      real(r8), intent(in)    :: Tsrc(UBt)
+#  endif
 # endif
 # ifdef BBL_MODEL
       real(r8), intent(in) :: bustrc(LBi:,LBj:)
@@ -259,6 +283,13 @@
 # endif
 # ifdef SEDIMENT_ECOSYS
       real(r8), intent(inout) :: p_sand(LBi:UBi,LBj:UBj)
+#  if defined SEDECO_ADVECTION && defined SGD_ON
+      real(r8), intent(inout) :: sgd_src(LBi:UBi,LBj:UBj)
+      real(r8), intent(in)    :: pm(LBi:UBi,LBj:UBj)
+      real(r8), intent(in)    :: pn(LBi:UBi,LBj:UBj)
+      real(r8), intent(in)    :: Qbar
+      real(r8), intent(in)    :: Tsrc(UBt)
+#  endif
 # endif
 # ifdef BBL_MODEL
       real(r8), intent(in) :: bustrc(LBi:UBi,LBj:UBj)
@@ -346,6 +377,7 @@
 #endif
 
 !----- Ecosystem model ----------------------------------------
+
             CALL reef_ecosys           &
 !          input parameters
      &            (ng, i, j            &   ! ng: nested grid number; i,j: position
@@ -420,7 +452,30 @@
      &            ,t(i,j,:,nstp,iCOTe)     &   ! COTe(N): COT starfish egg (umol L-1)
      &            ,t(i,j,:,nstp,iCOTl)     &   ! COTl(N): COT starfish larvae (umol L-1)
 #endif
+#if defined SEDECO_ADVECTION && defined SGD_ON
+!        [nondim]     * [m3.water s-1 grid-1] / [m2.grid grid-1] [100 cm m-1] = [cm.water s-1]
+     & , sgd_src(i,j) * Qbar                  * pm(i,j)*pn(i,j)  * 100d0      & ! sumbarine groundwater discharge rate of grid (cm s-1)
+     &            ,Tsrc(iTemp)       &   ! SGD Tmp: Temperature (oC)
+     &            ,Tsrc(iSalt)       &   ! SGD Sal: Salinity (PSU)
+     &            ,Tsrc(iTIC_)       &   ! SGD DIC: Total dissolved inorganic carbon (DIC: umol kg-1)
+     &            ,Tsrc(iTAlk)       &   ! SGD TA : Total alkalinity (TA: umol kg-1)
+     &            ,Tsrc(iOxyg)       &   ! SGD DOx: Dissolved oxygen (umol L-1)
+# if defined CARBON_ISOTOPE
+     &            ,Tsrc(iT13C)       &   ! SGD DI13C : 13C of DIC (umol kg-1)
+# endif
+# if defined NUTRIENTS            
+     &            ,Tsrc(iNO3_)       &   ! SGD NO3: NO3 (umol L-1)
+     &            ,Tsrc(iNH4_)       &   ! SGD NH4: NH4 (umol L-1)
+     &            ,Tsrc(iPO4_)       &   ! SGD PO4: PO4 (umol L-1)
+#  if defined NITROGEN_ISOTOPE
+     &            ,Tsrc(i15NO3)      &   ! SGD NO3_15N: 15N of NO3 (umol L-1)
+     &            ,Tsrc(i15NH4)      &   ! SGD NH4_15N: 15N of NH4 (umol L-1)
+#  endif
+# endif
+#endif
 !          output parameters
+     &            ,dtrc_dt(:,iTemp)     &   ! Tmp(N): Temperature (oC)
+     &            ,dtrc_dt(:,iSalt)     &   ! Sal(N): Salinity (PSU)
      &            ,dtrc_dt(:,iTIC_)        &   ! dDIC_dt(N): dDIC/dt (umol kg-1 s-1)
      &            ,dtrc_dt(:,iTAlk)        &   ! dTA_dt (N): dTA/dt (umol kg-1 s-1)
      &            ,dtrc_dt(:,iOxyg)        &   ! dDOx_dt(N): dDO/dt (umol L-1 s-1)
@@ -513,14 +568,14 @@
             DO itrc=1,NBT
               ibio=idbio(itrc)
               
-              !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-              ! if (isnan(dtrc_dt(k,ibio)) .or. abs(dtrc_dt(k,ibio)) > huge(dtrc_dt(k,ibio))) then
-              if (isnan(dtrc_dt(k,ibio)) .or. abs(dtrc_dt(k,ibio)) > 1.0d20) then
-                write(*,*) 'yt_debug: reef_ecosys.h      i =', i, '   j =', j, '   k =', k, '   ibio =', ibio
-                write(*,*) 'yt_debug:     dtrc_dt(k,ibio) =', dtrc_dt(k,ibio)
-                error stop
-              endif
-              !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+              ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+              ! ! if (isnan(dtrc_dt(k,ibio)) .or. abs(dtrc_dt(k,ibio)) > huge(dtrc_dt(k,ibio))) then
+              ! if (isnan(dtrc_dt(k,ibio)) .or. abs(dtrc_dt(k,ibio)) > 1.0d20) then
+              !   write(*,*) 'yt_debug: reef_ecosys.h      i =', i, '   j =', j, '   k =', k, '   ibio =', ibio
+              !   write(*,*) 'yt_debug:     dtrc_dt(k,ibio) =', dtrc_dt(k,ibio)
+              !   error stop
+              ! endif
+              ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
               IF(dtrc_dt(k,ibio)*0.0_r8 /= 0.0_r8) THEN  !!!---------Error Handling: Check NAN
 !                write(50,*) i,j,k,itrc,dtrc_dt(k,ibio),ssO2flux, ssCO2flux,rmask(i,j) 
@@ -532,18 +587,18 @@
               t(i,j,k,nnew,ibio)=t(i,j,k,nnew,ibio)                    &
     &                              +dtrc_dt(k,ibio)*dt(ng)*Hz(i,j,k)
     
-              !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-              ! if (isnan(t(i,j,k,nnew,ibio)) .or. abs(t(i,j,k,nnew,ibio)) > huge(t(i,j,k,nnew,ibio))) then
+              ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+              ! ! if (isnan(t(i,j,k,nnew,ibio)) .or. abs(t(i,j,k,nnew,ibio)) > huge(t(i,j,k,nnew,ibio))) then
+              ! ! if (isnan(t(i,j,k,nnew,ibio)) .or. abs(t(i,j,k,nnew,ibio)) > 1.0d22) then
               ! if (isnan(t(i,j,k,nnew,ibio)) .or. abs(t(i,j,k,nnew,ibio)) > 1.0d22) then
-              if (isnan(t(i,j,k,nnew,ibio)) .or. abs(t(i,j,k,nnew,ibio)) > 1.0d22) then
-                write(*,*) 'yt_debug: reef_ecosys.h      i =', i, '   j =', j, '   k =', k, '   ibio =', ibio
-                write(*,*) 'yt_debug:     t(i,j,k,nnew,ibio) =', t(i,j,k,nnew,ibio)
-                error stop
-              else if (t(i,j,k,nnew,ibio) < -100d0) then
-                write(*,*) 'yt_debug: reef_ecosys.h      i =', i, '   j =', j, '   k =', k, '   ibio =', ibio &
-                , '   t(i,j,k,nnew,ibio) =', t(i,j,k,nnew,ibio)
-              endif
-              !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+              !   write(*,*) 'yt_debug: reef_ecosys.h      i =', i, '   j =', j, '   k =', k, '   ibio =', ibio
+              !   write(*,*) 'yt_debug:     t(i,j,k,nnew,ibio) =', t(i,j,k,nnew,ibio)
+              !   error stop
+              ! else if (t(i,j,k,nnew,ibio) < -100d0) then
+              !   write(*,*) 'yt_debug: reef_ecosys.h      i =', i, '   j =', j, '   k =', k, '   ibio =', ibio &
+              !   , '   t(i,j,k,nnew,ibio) =', t(i,j,k,nnew,ibio)
+              ! endif
+              ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
               t(i,j,k,nnew,ibio)=MAX(0.0_r8,t(i,j,k,nnew,ibio))!!!---------Error Handling
               

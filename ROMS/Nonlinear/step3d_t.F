@@ -1290,19 +1290,23 @@
             END DO
           END IF
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
-# ifdef SGD_ON
+# if defined SGD_ON && !defined SEDECO_ADVECTION
 !
 !  Apply mass point sources - Volume influx.
 !
           DO i=I_RANGE
+            !   [s]   * [1/m] [1/m]
             cff=dt(ng)*pm(i,j)*pn(i,j)
             IF (LtracerSrc(itrc,ng)) THEN
-              cff3=SOURCES(ng)%Tsgd(itrc)
+              !    [mol/L]
+              cff3=SOURCES(ng)%Tsgd(itrc) ! if tracer defined, concentration in from river input
             ELSE
-              cff3=t(i,j,1,3,itrc)
+              cff3=t(i,j,1,3,itrc)  ! if tracer not defined, concentration in is equal to current concentration
             END IF
+            ![m mol/L]      = [m mol/L]          +
             t(i,j,1,nnew,itrc)=t(i,j,1,nnew,itrc)+                 &
-     &                         cff*SOURCES(ng)%Qsgd*sgd_src(i,j)*  &
+            !                  [s/m2][m3/s]           []           [mol/L]
+     &                         cff   *SOURCES(ng)%Qsgd*sgd_src(i,j)*  &
      &                         cff3
 !  Old version
 !            FC(i,0)=FC(i,0)+SOURCES(ng)%Qsgd*                           &

@@ -116,6 +116,7 @@
 !  Imported variable declarations.
 !
       integer :: ng
+
 !
 !  Local variable declarations.
 !
@@ -216,7 +217,6 @@
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
 #ifdef SGD_ON
       allocate ( SOURCES(ng) % Qsgd )
-
       allocate ( SOURCES(ng) % Tsgd(NT(ng)) )
 #endif
 !
