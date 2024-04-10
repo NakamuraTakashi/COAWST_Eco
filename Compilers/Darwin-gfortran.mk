@@ -28,7 +28,7 @@
 # First the defaults
 #
                FC := gfortran
-           FFLAGS := -frepack-arrays -fallow-argument-mismatch
+           FFLAGS := -frepack-arrays
               CPP := /usr/bin/cpp
          CPPFLAGS := -P -traditional
                CC := gcc

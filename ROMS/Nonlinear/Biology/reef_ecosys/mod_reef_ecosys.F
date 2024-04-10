@@ -2497,6 +2497,7 @@ END SUBROUTINE allocate_reef_ecosys
       ! dTemp_dt = ( avg_temp - ocean_temp ) / dt
       
       dTemp_dt(1) = ( ((Tmp(1)*dz(1) + sgd_temp*sgd_flux*0.01d0*dt)/(dz(1) + sgd_flux*0.01d0*dt)) - Tmp(1) ) / dt
+      ! dTemp_dt(1) = 0.001d0 ! yt_debug
 
     ! 1 nmol cm-2 s-1 = 0.01 mmol m-2 s-1, 1 mmol m-3 = 1 umol L-1 = 1/1.024 umol kg-1
     ! x[nmol/cm2 s] (umol/1000nmol) (10000cm2/m2) (1/dz)[1/m] (m3/1000L)= x/dz 0.01(umol L-1 s-1)
