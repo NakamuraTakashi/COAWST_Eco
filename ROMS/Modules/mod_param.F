@@ -428,13 +428,6 @@
 !                                                 ----W(i,j,k-1)----
       integer, allocatable :: N(:)
 
-!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
-# ifdef SEDIMENT_ECOSYS
-      integer, allocatable :: Nsed(:)
-      real(8), allocatable :: SedEcoLayerDepths(:, :) ! (ng, k)        ! depth (cm) from surface at bottom of each biological sediment layer
-# endif
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
-
 !
 !-----------------------------------------------------------------------
 !  Tracers parameters.
@@ -559,6 +552,11 @@
 #endif
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
 #ifdef REEF_ECOSYS
+!
+!-----------------------------------------------------------------------
+!  Reef ecosys fields parameters.
+!-----------------------------------------------------------------------
+!
 !
 !  Number of biological history fields.  Currenly, only available for
 !  the Fennel model.
@@ -696,6 +694,13 @@
 !  Allocate dimension parameters.
 !-----------------------------------------------------------------------
 !
+
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+# ifdef SEDIMENT_ECOSYS
+      USE mod_sedecosys, ONLY : Nsed
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+
       allocate ( Lm(Ngrids) )
       allocate ( Mm(Ngrids) )
 

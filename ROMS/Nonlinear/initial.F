@@ -83,7 +83,8 @@
 #endif
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
 #if defined BIOLOGY && defined REEF_ECOSYS
-      USE mod_biology,       ONLY : LReadBioINI
+      USE mod_biology,       ONLY : LReadBioINI, call_initialize_reef_ecosys_wrapper
+      USE mod_reef_ecosys,   ONLY : initialize_reef_ecosys
 #endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
@@ -1153,6 +1154,22 @@
 !$OMP BARRIER
       END DO
 #endif
+
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#ifdef REEF_ECOSYS
+!
+!!!----------------------------------------------------------------------
+!!!  Initialize reef ecosys model parameters ! yt_edit this subroutine 
+!!!----------------------------------------------------------------------
+!
+      DO ng=1,Ngrids
+        DO tile=first_tile(ng),last_tile(ng),+1
+          CALL call_initialize_reef_ecosys_wrapper(ng, tile)
+        END DO
+!$OMP BARRIER
+      END DO
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 
       RETURN
       END SUBROUTINE initial

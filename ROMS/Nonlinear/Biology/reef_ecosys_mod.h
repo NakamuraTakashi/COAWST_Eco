@@ -121,7 +121,21 @@
 # endif
 #endif
 #ifdef SEAGRASS
-
+      integer  :: iSgSgCBm(Nsg)        ! Seagrass leaf+root carbon-biomass per unit ground area (in seagrass habitat area) [umol.C m-2.sg.hab]
+      integer  :: iSgLfCBm(Nsg)        ! Seagrass leaf carbon-biomass per unit ground area (in seagrass habitat area) [umol.lf.C m-2.sg.hab]
+      integer  :: iSgRtCBm(Nsg)        ! Seagrass root carbon-biomass per unit ground area (in seagrass habitat area) [umol.rt.C m-2.sg.hab]
+      integer  :: iSgTotSgCBmS(Nsg)    ! SgTotSgCBm of last growth interval (For internal use only, need to save to restart file, but use SgTotSgCBm for output)
+      integer  :: iSgTotSgCBm(Nsg)     ! Total seagrass carbon-biomass in grid [mol.C.tot]
+      integer  :: iSgTotLfCBm(Nsg)     ! Total seagrass above ground carbon-biomass in grid [mol.C.lf]
+      integer  :: iSgTotRtCBm(Nsg)     ! Total seagrass below ground carbon-biomass in grid [mol.C.rt]
+      integer  :: iSgLAI(Nsg)          ! Leaf area index: one-sided green leaf area per unit ground surface area [m2.lf m-2.sg.hab]
+      integer  :: iSgTotLA(Nsg)        ! Total one-sided green leaf area in grid [m2.lf]
+      integer  :: iSgGridELAP(Nsg)     ! Effective leaf area projection on ground (whole grid) [m2.lf.proj m-2.grid]
+      integer  :: iSgGridPhot(Nsg)     ! Seagrass gross photosynthesis rate per unit ground area (whole grid) [umol.C m-2.grid s-1]
+      integer  :: iSgPhotLim(Nsg)      ! Seagrass photosynthesis limiting factor: 1 = light; 2 = Carbon uptake; 3 = Nitrogen uptake; 4 = Phosphorus uptake
+      integer  :: iSgGridResp(Nsg)     ! Seagrass respiration rate per unit ground area (whole grid) [umol.C m-2.grid s-1]
+      integer  :: iSgGridNetPhot(Nsg)  ! Seagrass net photosynthesis rate per unit ground area (whole grid) [umol.C m-2.grid s-1]
+      integer  :: iSgGridDieoff(Nsg)   ! Seagrass dieoff rate carbon biomass per unit ground area (whole grid) [umol.C m-2.grid s-1]    
 #endif
 #ifdef MACROALGAE
 
@@ -140,8 +154,6 @@
 !
       integer, allocatable :: iDbio2(:)       ! 2D biological terms
 
-      integer  :: ipHt_                       ! sea surface pH (total scale)
-      integer  :: iWarg                       ! sea surface aragonite saturation state
       integer  :: iCO2fx                      ! air-sea CO2 flux
       integer  :: ipCO2                       ! partial pressure of CO2
       integer  :: iO2fx                       ! air-sea O2 flux
@@ -167,9 +179,6 @@
 #  endif
 # endif
 # ifdef SEAGRASS
-      integer  :: iSgPg(Nsg)                   ! seagrass gross photosynthesis rate
-      integer  :: iSg_R(Nsg)                   ! seagrass respiration rate
-      integer  :: iSgPn(Nsg)                   ! seagrass net photosynthesis rate
 # endif
 # ifdef MACROALGAE
       integer  :: iAgPg(Nag)                  ! Algal gross photosynthesis rate
@@ -180,6 +189,9 @@
 !  Biological 3D Diagnostic variable IDs.
 !
       integer, allocatable :: iDbio3(:)       ! 3D biological terms
+      integer  :: ipHt_                       ! pH (total scale)
+      integer  :: iWarg                       ! aragonite saturation state
+      integer  :: iWcal                       ! calcite saturation state
 
 # ifdef CARBON_ISOTOPE
       integer  :: id13C                       ! d13C of total inorganic carbon
@@ -188,7 +200,7 @@
 !
 !  Biological parameters.
 !
-      logical, allocatable :: LReadBioINI(:,:)
+      logical, allocatable :: LReadBioINI(:,:)       ! Switch to control reading of initial conditions from initial/restart nc file; 1 = foodweb (tracer variables); 2 = coral, seagass, macroalgae, sediment, etc.
 
       integer, allocatable :: CrlIter(:)
       integer, allocatable :: SedIter(:)
@@ -480,7 +492,7 @@
         iClDOcoe(j)=ic
         ic=ic+1
         iClQC(j)=ic
-#if defined CORAL_NONE_CO2_EQ
+# if defined CORAL_NONE_CO2_EQ
         ic=ic+1
         iClCO2cal(j)=ic
         ic=ic+1
@@ -526,7 +538,36 @@
 #endif
 #ifdef SEAGRASS
       DO j=1,Nsg
-        
+        ic=ic+1
+        iSgSgCBm(j)=ic
+        ic=ic+1
+        iSgLfCBm(j)=ic
+        ic=ic+1
+        iSgRtCBm(j)=ic
+        ic=ic+1
+        iSgTotSgCBmS(j)=ic
+        ic=ic+1
+        iSgTotSgCBm(j)=ic
+        ic=ic+1
+        iSgTotLfCBm(j)=ic
+        ic=ic+1
+        iSgTotRtCBm(j)=ic
+        ic=ic+1
+        iSgLAI(j)=ic
+        ic=ic+1
+        iSgTotLA(j)=ic
+        ic=ic+1
+        iSgGridELAP(j)=ic
+        ic=ic+1
+        iSgGridPhot(j)=ic
+        ic=ic+1
+        iSgPhotLim(j)=ic
+        ic=ic+1
+        iSgGridResp(j)=ic
+        ic=ic+1
+        iSgGridNetPhot(j)=ic
+        ic=ic+1
+        iSgGridDieoff(j)=ic
       END DO
 #endif
 #ifdef MACROALGAE
@@ -677,11 +718,6 @@
       ic=0     ! ic reset
 
       ic=ic+1
-      ipHt_=ic
-      ic=ic+1
-      iWarg=ic
-
-      ic=ic+1
       iCO2fx=ic
       ic=ic+1
       ipCO2=ic
@@ -726,12 +762,6 @@
 # endif
 # ifdef SEAGRASS
       DO j=1,Nsg
-        ic=ic+1
-        iSgPg(j)=ic
-        ic=ic+1
-        iSg_R(j)=ic
-        ic=ic+1
-        iSgPn(j)=ic
       END DO
 # endif
 # ifdef MACROALGAE
@@ -759,6 +789,13 @@
 !  Initialize 3D biology indices.
 !
       ic=0     ! ic reset
+
+      ic=ic+1
+      ipHt_=ic
+      ic=ic+1
+      iWarg=ic
+      ic=ic+1
+      iWcal=ic
 
 # ifdef CARBON_ISOTOPE
       ic=ic+1
@@ -914,10 +951,10 @@
 !
 !=======================================================================
 !                                                                      !
-!  This routine sets reef_ecosys arraies to roms arralies for          !
-!  his nc output.                                                      !
-!  This routine is called in mod_arrays.F and only used for initial    !
-!  condotion setting.                                                  !
+!  This routine sets reef_ecosys arrays to roms arrays for             !
+!  his nc input.                                                       !
+!  This routine is called in get_state.F and only used for initial     !
+!  condition setting.                                                  !
 !                                                                      !
 !=======================================================================
 !
@@ -985,7 +1022,21 @@
 
 #ifdef SEAGRASS  
           DO isp=1,Nsg
-          !  :  (To be updated)
+            SGRASS(ng)%SgCBmF     (isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgSgCBm      (isp) )
+            SGRASS(ng)%LfCBm      (isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgLfCBm      (isp) )
+            SGRASS(ng)%RtCBm      (isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgRtCBm      (isp) )
+            SGRASS(ng)%TotSgCBm   (isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgTotSgCBmS  (isp) )
+            SGRASS(ng)%TotSgCBmF  (isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgTotSgCBm   (isp) )
+            SGRASS(ng)%TotLfCBm   (isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgTotLfCBm   (isp) )
+            SGRASS(ng)%TotRtCBm   (isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgTotRtCBm   (isp) )
+            SGRASS(ng)%LAI        (isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgLAI        (isp) )
+            SGRASS(ng)%TotLA      (isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgTotLA      (isp) )
+            SGRASS(ng)%GridELAP   (isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgGridELAP   (isp) )
+            SGRASS(ng)%GridPhot   (isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgGridPhot   (isp) )
+            SGRASS(ng)%PhotLim    (isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgPhotLim    (isp) )
+            SGRASS(ng)%GridResp   (isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgGridResp   (isp) )
+            SGRASS(ng)%GridNetPhot(isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgGridNetPhot(isp) )
+            SGRASS(ng)%GridDieoff (isp,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgGridDieoff (isp) )
           END DO
 #endif
 #ifdef MACROALGAE  
@@ -1057,10 +1108,10 @@
 !
 !=======================================================================
 !                                                                      !
-!  This routine sets reef_ecosys arraies to roms arralies for          !
+!  This routine sets reef_ecosys arrays to roms arrays for             !
 !  his nc output.                                                      !
 !  This routine is called in mod_arrays.F and only used for initial    !
-!  condotion setting.                                                  !
+!  condition setting.                                                  !
 !                                                                      !
 !=======================================================================
 !
@@ -1127,7 +1178,21 @@
 #endif
 #ifdef SEAGRASS
           DO isp=1,Nsg
-          !  :  (To be updated)
+            OCEAN(ng)%HisBio2d(i,j, iSgSgCBm      (isp) ) = SGRASS(ng)%SgCBmF     (isp,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgLfCBm      (isp) ) = SGRASS(ng)%LfCBm      (isp,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgRtCBm      (isp) ) = SGRASS(ng)%RtCBm      (isp,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgTotSgCBmS  (isp) ) = SGRASS(ng)%TotSgCBm   (isp,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgTotSgCBm   (isp) ) = SGRASS(ng)%TotSgCBmF  (isp,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgTotLfCBm   (isp) ) = SGRASS(ng)%TotLfCBm   (isp,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgTotRtCBm   (isp) ) = SGRASS(ng)%TotRtCBm   (isp,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgLAI        (isp) ) = SGRASS(ng)%LAI        (isp,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgTotLA      (isp) ) = SGRASS(ng)%TotLA      (isp,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgGridELAP   (isp) ) = SGRASS(ng)%GridELAP   (isp,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgGridPhot   (isp) ) = SGRASS(ng)%GridPhot   (isp,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgPhotLim    (isp) ) = SGRASS(ng)%PhotLim    (isp,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgGridResp   (isp) ) = SGRASS(ng)%GridResp   (isp,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgGridNetPhot(isp) ) = SGRASS(ng)%GridNetPhot(isp,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgGridDieoff (isp) ) = SGRASS(ng)%GridDieoff (isp,i,j)
           END DO
 #endif
 #ifdef MACROALGAE
@@ -1262,9 +1327,6 @@
 
 # ifdef SEAGRASS
           DO isp=1,Nsg
-            DIAGS(ng)%DiaBio2d(i,j, iSgPg(isp) ) = SGRASS(ng)%Pg(isp,i,j)
-            DIAGS(ng)%DiaBio2d(i,j, iSg_R(isp) ) = SGRASS(ng)%R (isp,i,j)
-            DIAGS(ng)%DiaBio2d(i,j, iSgPn(isp) ) = SGRASS(ng)%Pg(isp,i,j)-SGRASS(ng)%R (isp,i,j)
           END DO
 # endif
 
@@ -1302,3 +1364,65 @@
 
       END SUBROUTINE send_reef_ecosys2roms_dia
 #endif
+
+!!! yuta_edits >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+#ifdef REEF_ECOSYS
+      ! yt_edit this subroutine wraps the logic for getting tile bounds and ROMS inputs with the actual initialize_reef_ecosys() call
+      SUBROUTINE call_initialize_reef_ecosys_wrapper(ng, tile)
+
+        USE mod_grid,         ONLY : GRID
+        USE mod_reef_ecosys,  ONLY : initialize_reef_ecosys
+
+        implicit none
+        integer, intent(in) :: ng, tile
+        integer :: i, j
+        integer :: Imin, Imax, Jmin, Jmax
+        !
+# include "tile.h"
+        !
+        !  Set array initialization range.
+        !
+# ifdef _OPENMP
+        IF (DOMAIN(ng)%Western_Edge(tile)) THEN
+          Imin=BOUNDS(ng)%LBi(tile)
+        ELSE
+          Imin=Istr
+        END IF
+        IF (DOMAIN(ng)%Eastern_Edge(tile)) THEN
+          Imax=BOUNDS(ng)%UBi(tile)
+        ELSE
+          Imax=Iend
+        END IF
+        IF (DOMAIN(ng)%Southern_Edge(tile)) THEN
+          Jmin=BOUNDS(ng)%LBj(tile)
+        ELSE
+          Jmin=Jstr
+        END IF
+        IF (DOMAIN(ng)%Northern_Edge(tile)) THEN
+          Jmax=BOUNDS(ng)%UBj(tile)
+        ELSE
+          Jmax=Jend
+        END IF
+# else
+        Imin=LBi
+        Imax=UBi
+        Jmin=LBj
+        Jmax=UBj
+# endif
+        
+        CALL initialize_reef_ecosys(ng, Imin, Imax, Jmin, Jmax  &
+          , .not. LReadBioINI(2,ng)                             &   ! TRUE = initialize coral, seagass, macroalgae, sediment from start; FALSE = continue from previous run
+# ifdef SEAGRASS
+          , 1.0d0/(GRID(ng)%pm(Imin:Imax,Jmin:Jmax))            &   ! grid size XI-direction (meters)
+          , 1.0d0/(GRID(ng)%pn(Imin:Imax,Jmin:Jmax))            &   ! grid size ETA-direction (meters)
+          , GRID(ng)%p_sgrass                                   &   ! seagrass coverage (habitat area in grid / grid area)
+# endif
+          )
+
+        CALL send_reef_ecosys2roms_his (ng, LBi, UBi, LBj, UBj)
+        write(*,*) 'yt_debug: mod_reef_ecosys.F initialize_reef_ecosys() finished send_reef_ecosys2roms_his'
+    
+      END SUBROUTINE call_initialize_reef_ecosys_wrapper
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+

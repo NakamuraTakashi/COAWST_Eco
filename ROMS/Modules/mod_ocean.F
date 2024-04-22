@@ -397,6 +397,12 @@
 !=======================================================================
 !
       USE mod_param
+!!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+#  if defined SEDIMENT_ECOSYS
+      USE mod_sedecosys, ONLY : Nsed
+#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+
 !
 !  Imported variable declarations.
 !

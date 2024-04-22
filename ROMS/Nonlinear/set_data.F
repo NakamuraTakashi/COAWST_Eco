@@ -1558,7 +1558,7 @@
         END DO
 #    endif
 #   endif
-#   ifdef SGD_ON
+#   if defined SGD_ON  && !defined SEDECO_ADVECTION
         DO itrc=1,NT(ng)
           SOURCES(ng)%Tsgd(itrc)=SOURCES(ng)%Tsrc(Nsrc(ng),1,itrc)  !!!!!!!!!!!!!!!!!!!!!!!!!!Test case
         END DO

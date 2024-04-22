@@ -1626,6 +1626,26 @@ contains
     return
   end function FCp
 
+
+  !! --- Advection Flux calculation --- !!
+  ! Dissolved compounds
+  real(8) function FCa(poro1,poro2,u,C1,C2) ! (nmol cm-2 s-1)
+    implicit none
+    real(8), intent(in) :: poro1 ! [cm_w3/cm_s3]  porosity of layer above
+    real(8), intent(in) :: poro2 ! [cm_w3/cm_s3]  porosity of layer below
+    real(8), intent(in) :: u     ! [cm s-1]       advection velocity (advection downwards is positive)
+    real(8), intent(in) :: C1    ! [umol L_w-1]   compound concentration of layer above
+    real(8), intent(in) :: C2    ! [umol L_w-1]   compound concentration of layer below (µmol L-1 = nmol cm-3)
+    if (u >= 0) then
+    ! [nmol/cm_s2 s] = [cm_w3/cm_s3] [cm_s/s] [nmol/cm_w3]
+      Fca            = poro1         * u      * C1
+    else
+      Fca            = poro2         * u      * C2
+    endif
+    return
+  end function FCa
+
+
   !! --- Reaction rate --- !!
   ! reaction with solute * solute
   real(8) function Vdd(k,poro,Cd1,Cd2)
@@ -1662,19 +1682,20 @@ contains
 
   !! Mass balance calculation in sediment column
   !! solutes (dissolved)
-  real(8) function massbalance_sed_d(C,FTin,FTout,R,dz,poro,dt)
+  real(8) function massbalance_sed_d(C,FTin,FTout,R,dz,poro,dt,misc_sources)
     implicit none
-    real(8),intent(in) :: C        ! concentration                   (µmol L-1 = nmol cm-3)
-    real(8),intent(in) :: FTin     ! total flux (IN)                 (nmol cm-2 s-1)
-    real(8),intent(in) :: FTout    ! total flux (OUT)                (nmol cm-2 s-1)
-    real(8),intent(in) :: R        ! Net prodution and consumption   (nmol cm-3 s-1)
-    real(8),intent(in) :: dz       ! layer thickness                 (cm)
-    real(8),intent(in) :: poro     ! porosity                        (cm_w3 cm_s-3)
-    real(8),intent(in) :: dt       ! time step                       (s)
+    real(8),intent(in) :: C             ! concentration                   (µmol L-1 = nmol cm-3)
+    real(8),intent(in) :: FTin          ! total flux (IN)                 (nmol cm-2 s-1)
+    real(8),intent(in) :: FTout         ! total flux (OUT)                (nmol cm-2 s-1)
+    real(8),intent(in) :: R             ! Net prodution and consumption   (nmol cm-3 s-1)
+    real(8),intent(in) :: dz            ! layer thickness                 (cm)
+    real(8),intent(in) :: poro          ! porosity                        (cm_w3 cm_s-3)
+    real(8),intent(in) :: dt            ! time step                       (s)
+    real(8),intent(in) :: misc_sources  ! other sources (like seagrass)   (µmol L-1 s-1)
     real(8) :: Ccal
 
-       Ccal    =      C      +  ((FTin - FTout) / dz    +        R       )/   poro        *  dt
-!  [nmol cm-3]    [nmol cm-3]   ([nmol cm-2 s-1]/(cm)   + [nmol cm-3 s-1])/[cm_w3 cm_s-3] * [s]
+       Ccal      =       C       +   ((FTin - FTout) / dz    +        R         )/   poro        *  dt + misc_sources * dt
+!  [nmol cm_w-3] = [nmol cm_w-3]   ([nmol cm_s-2 s-1]/(cm_s) + [nmol cm_s-3 s-1])/[cm_w3 cm_s-3] * [s] + [nmol g-1 s-1] [s]
     Ccal = max(Ccal,0.0d0)
     ! Ccal = min(Ccal,3.0d4)
     ! Ccal = min(Ccal,1.0d4)
@@ -1685,20 +1706,21 @@ contains
   end function massbalance_sed_d
 
   !! solids (particulate)
-  real(8) function massbalance_sed_p(C,FTin,FTout,R,dz,poro,dt,rho_s)
+  real(8) function massbalance_sed_p(C,FTin,FTout,R,dz,poro,dt,rho_s,misc_sources)
     implicit none
-    real(8),intent(in) :: C        ! concentration                  (nmol g-1)
-    real(8),intent(in) :: FTin     ! total flux  (IN)               (nmol cm-2 s-1)
-    real(8),intent(in) :: FTout    ! total flux  (OUT)              (nmol cm-2 s-1)
-    real(8),intent(in) :: R        ! Net prodution and consumption  (nmol cm-3 s-1)
-    real(8),intent(in) :: dz       ! layer thickness                (cm)
-    real(8),intent(in) :: poro     ! porosity                       (cm_w3 cm_s-3)
-    real(8),intent(in) :: dt       ! time step                      (s)
-    real(8),intent(in) :: rho_s    ! soil(wet) density              (g cm_w-3)
+    real(8),intent(in) :: C             ! concentration                  (nmol g-1)
+    real(8),intent(in) :: FTin          ! total flux  (IN)               (nmol cm-2 s-1)
+    real(8),intent(in) :: FTout         ! total flux  (OUT)              (nmol cm-2 s-1)
+    real(8),intent(in) :: R             ! Net prodution and consumption  (nmol cm-3 s-1)
+    real(8),intent(in) :: dz            ! layer thickness                (cm)
+    real(8),intent(in) :: poro          ! porosity                       (cm_w3 cm_s-3)
+    real(8),intent(in) :: dt            ! time step                      (s)
+    real(8),intent(in) :: rho_s         ! soil(wet) density              (g cm_w-3)
+    real(8),intent(in) :: misc_sources  ! other sources (like seagrass)  (nmol g-1 s-1)
     real(8) :: Ccal
 
-       Ccal     =      C    +    ( (FTin -FTout)  /dz  +       R        )/(rho_s      *  (1d0 - poro) ) * dt
-  ! [nmol g-1]      [nmol g-1] + ([nmol cm-2 s-1]/[cm] + [nmol cm-3 s-1])/([g cm_w-3] * [cm_w3 cm_s-3]) * [s]
+       Ccal     =      C    +    ( (FTin -FTout)  /dz  +       R        )/(rho_s      *  (1d0 - poro) ) * dt  + misc_sources * dt
+  ! [nmol g-1]      [nmol g-1] + ([nmol cm-2 s-1]/[cm] + [nmol cm-3 s-1])/([g cm_w-3] * [cm_w3 cm_s-3]) * [s] + [nmol g-1 s-1] [s]
     Ccal = max(Ccal,0.0d0)
     ! Ccal = min(Ccal,1.0d4)
     ! Ccal = min(Ccal,1.0d7)

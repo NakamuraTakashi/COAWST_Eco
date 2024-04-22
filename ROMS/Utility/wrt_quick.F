@@ -416,8 +416,8 @@
      &                 __FILE__)) THEN
           IF (Master) THEN
             WRITE (stdout,10) TRIM(Vname(1,idRzet)), QCK(ng)%Rindex
-      END IF
-exit_flag=3
+          END IF
+          exit_flag=3
           ioerror=status
           RETURN
         END IF
@@ -483,8 +483,8 @@ exit_flag=3
      &                 __FILE__)) THEN
           IF (Master) THEN
             WRITE (stdout,10) TRIM(Vname(1,idRu2d)), QCK(ng)%Rindex
-      END IF
-exit_flag=3
+          END IF
+          exit_flag=3
           ioerror=status
           RETURN
         END IF
@@ -603,7 +603,7 @@ exit_flag=3
      &                 __FILE__)) THEN
           IF (Master) THEN
             WRITE (stdout,10) TRIM(Vname(1,idRv2d)), QCK(ng)%Rindex
-      END IF
+          END IF
           exit_flag=3
           ioerror=status
           RETURN
@@ -786,7 +786,7 @@ exit_flag=3
      &                 __FILE__)) THEN
           IF (Master) THEN
             WRITE (stdout,10) TRIM(Vname(1,idRu3d)), QCK(ng)%Rindex
-      END IF
+          END IF
           exit_flag=3
           ioerror=status
           RETURN
@@ -908,41 +908,41 @@ exit_flag=3
      &                    OCEAN(ng) % v(:,:,:,NOUT),                    &
      &                    Ur3d, Vr3d)
 
-          scale=1.0_r8
-          gtype=gfactor*r3dvar
-          status=nf_fwrite3d(ng, iNLM, QCK(ng)%ncid, QCK(ng)%Vid(idu3dE), &
+        scale=1.0_r8
+        gtype=gfactor*r3dvar
+        status=nf_fwrite3d(ng, iNLM, QCK(ng)%ncid, QCK(ng)%Vid(idu3dE), &
      &                     QCK(ng)%Rindex, gtype,                       &
      &                     LBi, UBi, LBj, UBj, 1, N(ng), scale,         &
 # ifdef MASKING
      &                     GRID(ng) % rmask_full,                       &
 # endif
      &                     Ur3d)
-          IF (FoundError(status, nf90_noerr, __LINE__,                    &
+        IF (FoundError(status, nf90_noerr, __LINE__,                    &
      &                 __FILE__)) THEN
-            IF (Master) THEN
-              WRITE (stdout,10) TRIM(Vname(1,idu3dE)), QCK(ng)%Rindex
-            END IF
-            exit_flag=3
-            ioerror=status
-            RETURN
+          IF (Master) THEN
+            WRITE (stdout,10) TRIM(Vname(1,idu3dE)), QCK(ng)%Rindex
           END IF
+          exit_flag=3
+          ioerror=status
+          RETURN
+        END IF
 
-          status=nf_fwrite3d(ng, iNLM, QCK(ng)%ncid, QCK(ng)%Vid(idv3dN), &
+        status=nf_fwrite3d(ng, iNLM, QCK(ng)%ncid, QCK(ng)%Vid(idv3dN), &
      &                     QCK(ng)%Rindex, gtype,                       &
      &                     LBi, UBi, LBj, UBj, 1, N(ng), scale,         &
 # ifdef MASKING
      &                     GRID(ng) % rmask_full,                       &
 # endif
      &                     Vr3d)
-          IF (FoundError(status, nf90_noerr, __LINE__,                    &
+        IF (FoundError(status, nf90_noerr, __LINE__,                    &
      &                 __FILE__)) THEN
-            IF (Master) THEN
-              WRITE (stdout,10) TRIM(Vname(1,idv3dN)), QCK(ng)%Rindex
-            END IF
-            exit_flag=3
-            ioerror=status
-            RETURN
-                  END IF
+          IF (Master) THEN
+            WRITE (stdout,10) TRIM(Vname(1,idv3dN)), QCK(ng)%Rindex
+          END IF
+          exit_flag=3
+          ioerror=status
+          RETURN
+        END IF
         deallocate (Ur3d)
         deallocate (Vr3d)
       END IF

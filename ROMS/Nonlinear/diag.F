@@ -284,8 +284,15 @@
      &              dt(ng)/Hz(i,j,k)
               my_C=my_Cu+my_Cv+my_Cw
 
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: add
               IF(u2v2*0.0_r8 /= 0.0_r8) write(*,*) 'u2v2', u2v2,i,j,k  !!!---------Error Handling: Check NAN !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
               IF(Hz(i,j,k)*0.0_r8 /= 0.0_r8) write(*,*) 'Hz', Hz(i,j,k),i,j,k  !!!---------Error Handling: Check NAN !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+              IF(rho(i,j,k)*0.0_r8 /= 0.0_r8) then !!!---------Error Handling: Check NAN !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                  write(*,*) 'rho ', rho(i,j,k),i,j,k 
+                  write(*,*) 'temp', t(i,j,k,nstp,itemp),i,j,k
+                  write(*,*) 'salt', t(i,j,k,nstp,isalt),i,j,k
+              END IF
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
 
               IF (my_C.gt.my_max_C) THEN
                 my_max_C =my_C
@@ -305,6 +312,9 @@
             DO ibt=1,NBT
               itrc=idbio(ibt)
               DO i=Istr,Iend
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: add
+                IF(t(i,j,k,nstp,itrc)*0.0_r8 /= 0.0_r8) write(*,*) 'bio_t', t(i,j,k,nstp,itrc),i,j,k,itrc  !!!---------Error Handling: Check NAN !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
                 my_maxbio(ibt)=MAX(my_maxbio(ibt),t(i,j,k,nstp,itrc))
                 my_minbio(ibt)=MIN(my_minbio(ibt),t(i,j,k,nstp,itrc)) !!!<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
               END DO
@@ -612,7 +622,7 @@
 !  Stop computations if exceeding maximum speed allowed.  This will be
 !  useful during debugging to avoid NaNs in output NetCDF files.
 !
-          IF (maxspeed(ng).gt.max_speed) THEN
+          IF ((maxspeed(ng).gt.max_speed).or.(maxspeed(ng)*0.0_r8/=0.0_r8))THEN  !!!<<<<<<<< TN: add check NAN
             exit_flag=1
             IF (Master) print *, 'DIAG speed trouble ', maxspeed(ng)
             ii_max = Istr
@@ -632,7 +642,7 @@
                 END DO
               END DO
             END DO
-            IF (uv_max.gt.max_speed) THEN
+            IF ((uv_max.gt.max_speed).or.(uv_max*0.0_r8/=0.0_r8))THEN  !!!<<<<<<<< TN: add check NAN
               print *, 'DIAG speed ijk ', uv_max, ii_max, jj_max, kk_max, ng
             END IF
 #else
@@ -658,13 +668,13 @@
 !  salinity.  This is a good way to screen for very bad values which
 !  indicates that the model is blowing-up.
 !
-          IF (maxrho(ng).gt.max_rho) THEN
+          IF ((maxrho(ng).gt.max_rho).or.(maxrho(ng)*0.0_r8/=0.0_r8))THEN  !!!<<<<<<<< TN: add check NAN
             exit_flag=1
             IF (Master) print *, 'DIAG rho trouble ', maxrho(ng), ng
           END IF
 # ifdef BIOLOGY
 !          DO ibt=1,NBT
-!            IF (maxbio(ibt,ng).gt.max_bio(ibt)) THEN
+!            IF ((maxbio(ibt,ng).gt.max_bio(ibt)).or.(maxbio(ibt,ng)*0.0_r8/=0.0_r8)) THEN
 !              IF (Master) print *, 'BIO trouble in DIAG ', maxbio(:,ng)
 !!              exit_flag=1  !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: rm
 !              EXIT   !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
@@ -672,7 +682,7 @@
 !          END DO
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: add
 !          DO ibt=1,NBT
-!            IF (minbio(ibt,ng) < min_bio(ibt)) THEN
+!            IF ((minbio(ibt,ng) < min_bio(ibt)).or.(minbio(ibt,ng)*0.0_r8/=0.0_r8)) THEN
 !              IF (Master) print *, 'BIO trouble in DIAG ', minbio(:,ng)
 !              EXIT
 !            END IF

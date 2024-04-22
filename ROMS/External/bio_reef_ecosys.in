@@ -53,8 +53,8 @@
 !    2: coral, seagass, macroalgae, sediment, etc.
 !
 !               1 2   
-!LReadBioINI == F F
- LReadBioINI == T T
+ LReadBioINI == F F
+!LReadBioINI == T T
 
 ! Maximum number of iterations to achieve convergence of the nonlinear
 ! solution.
@@ -64,7 +64,8 @@
 ! Maximum number of iterations to achieve convergence of the nonlinear
 ! solution.
 
-     SedIter == 5   !!!!!!!!!
+!    SedIter == 5   !!!!!!!!!
+     SedIter == 1   !!!!!!!!!
 
 ! Fraction of shortwave radiation that is photosynthetically active
 ! (nondimensional), {0.43d0}.
@@ -119,16 +120,25 @@
        COTl0 == 0.0d0        ! COTS larvae (umol L-1) 
 
 !!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+!!! yuta_seagrass >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
 ! Nsed is the number of biological sediment layers. Ex. Nsed == 5
+!   Nsed must come before SedEcoLayerDepths
 ! SedEcoLayerDepths is the list of depths in cm (bottom of the layer) of each layer from the surface towards deeper. Ex. SedEcoLayerDepths == 0.5d0 1.0d0 2.0d0 3.0d0 5.0d0
-! you can use different number of layers for each Ngrid (might not work though, haven't debugged yet) Ex. Nsed == 5 3
-! add the next set of depths to the list (make sure the totals match) Ex. SedEcoLayerDepths == 0.5d0 1.0d0 2.0d0 3.0d0 5.0d0 0.1d0 1.0d0 10.0d0
+!   you can use different number of layers for each Ngrid (might not work though, haven't debugged yet) Ex. Nsed == 5 3
+!   add the next set of depths to the list (make sure the totals match) Ex. SedEcoLayerDepths == 0.5d0 1.0d0 2.0d0 3.0d0 5.0d0 0.1d0 1.0d0 10.0d0
+!   split long lines into multiple rows assigned to 'SedEcoLayerDepths =='. The values will be read in sequence by row.
+! SeagrassRootProf is the fraction of root biomass in each sediment layer, representing the vertical root distribution profile. 
+!   the SeagrassRootProf layers correspond to the SedEcoLayerDepths layers, and must sum to 1.0 for each Ngrid. Ex. if roots are evenly distributed vertically (straight taproots) until 5cm, then SeagrassRootProf == 1.0d0 1.0d0 2.0d0 2.0d0 4.0d0 0.02d0 0.18d0 0.8d0
+!   if there are multiple species, append those within eache Ngrid such that [ ng1[ sp1[values] sp2[values] ] ng2[ sp1[values] sp2[values] ] ]
 
             !  Nsed == 101         ! Number of vertical biological sediment layers for SEDIMENT_ECOSYS
-             Nsed == 19          ! Number of vertical biological sediment layers for SEDIMENT_ECOSYS
-SedEcoLayerDepths == 0.1d0 0.2d0 0.3d0 0.4d0 0.5d0 0.6d0 0.7d0 0.8d0 0.9d0 1.0d0 2.0d0 3.0d0 4.0d0 5.0d0 6.0d0 7.0d0 8.0d0 9.0d0 10.0d0  ! depth (cm) from surface at bottom of each biological sediment layer
-
+             Nsed == 20          ! Number of vertical biological sediment layers for SEDIMENT_ECOSYS
+SedEcoLayerDepths == 0.1d0    0.2d0    0.3d0    0.4d0    0.5d0    0.6d0    0.7d0    0.8d0    0.9d0    1.0d0    
+SedEcoLayerDepths == 1.5d0    2.0d0    3.0d0    4.0d0    5.0d0    6.0d0    7.0d0    8.0d0    9.0d0   10.0d0     ! depth (cm) from surface at bottom of each biological sediment layer
+ SeagrassRootProf == 0.0125d0 0.0125d0 0.0125d0 0.0125d0 0.0125d0 0.0125d0 0.0125d0 0.0125d0 0.0125d0 0.0125d0
+ SeagrassRootProf == 0.0625d0 0.0625d0 0.125d0  0.125d0  0.125d0  0.125d0  0.125d0  0.125d0  0.0d0    0.0d0     ! even vertical distribution (straight roots) until 8 cm depth
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+
 
 ! Harmonic/biharmonic horizontal diffusion of biological tracer for
 ! nonlinear model and adjoint-based algorithms: [1:NBT,Ngrids].
@@ -198,45 +208,62 @@ ad_LBC(isTvar) == Clo     Clo     RadNud  Clo   ! idbio(:), compact
 ! tracers point Sources/Sinks (like river runoff): [NBT,Ngrids] values are
 ! expected. See glossary below for details.
 
-!                                 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 3 3 3 3
-!               1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3
-!
-!  LtracerSrc == 34*F
-!  LtracerSrc == 45*T
-  LtracerSrc == T T T T T T T F F F F F T T T T T T T T T T T ! For no d13C version
-!  LtracerSrc == T T T T T T T F F F F F T T T T T F F F F F T T T T T T T T T T T ! For d13C version
+!                                    1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 3 3 3 3 3 3 3 3 3 3 4 4 4 4 4 4 4 4 4 4 5 5 5 5 5 5 5 5 5 5 6
+!                  1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0
+!  LtracerSrc   == T T T T T T T F F F F F T T T T T T T T T T T ! For no d13C version
+!  LtracerSrc   == T T T T T T T F F F F F T T T T T F F F F F T T T T T T T T T T T ! For d13C version
+   LtracerSrc   == 23*F
+!  LtracerSrc   == 45*T
 
 ! Logical switches (TRUE/FALSE) to activate writing of biological fields
 ! into HISTORY output file: [1:NBT,Ngrids].
 
-Hout(idTvar) == 45*T    ! NO3, ...           biological tracer
-Hout(idTsur) == 45*F    ! NO3_sflux, ...     surface tracer flux
+   Hout(idTvar) == 23*T    ! NO3, ...           biological tracer
+   Hout(idTsur) == 23*F    ! NO3_sflux, ...     surface tracer flux
+!  Hout(idTvar) == 45*T    ! NO3, ...           biological tracer
+!  Hout(idTsur) == 45*F    ! NO3_sflux, ...     surface tracer flux
 
-Hout(iHbio2) == 31*T ! yuta_edits_for_masa   !!!!!!!!!!!!!!!!!! Check number
-Hout(iHbio3) == 3*F                            !!!!!!!!!!!!!!!!!! Check number
-Hout(iHbiosed3) == 35*F ! yuta_edits_for_masa
+!                                    1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 3 3 3 3 3 3 3 3 3 3 4 4 4 4 4 4 4 4 4 4 5 5 5 5 5 5 5 5 5 5 6
+!                  1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0
+  Hout(iHbio2)  == T T T T T T T T T T T T T T T T T T T T T T T T T T T T T F F F T F F F F F T T T T T
+! Hout(iHbio2)  == 43*T
+! Hout(iHbio2)  == 59*T
+
+  Hout(iHbio3)  == 1*F
+
+Hout(iHbiosed3) == 35*F
 
 ! Logical switches (TRUE/FALSE) to activate writing of biological fields
 ! into QUICK output file: [1:NBT,Ngrids].
 
-Qout(idTvar) == 45*F    ! NO3, ...           biological tracer
-Qout(idTsur) == 45*F    ! NO3_sflux, ...     surface tracer flux
+  Qout(idTvar)  == 23*F    ! NO3, ...           biological tracer
+  Qout(idTsur)  == 23*F    ! NO3_sflux, ...     surface tracer flux
+! Qout(idTvar)  == 45*F    ! NO3, ...           biological tracer
+! Qout(idTsur)  == 45*F    ! NO3_sflux, ...     surface tracer flux
 
-Qout(iHbio2) == 31*F ! yuta_edits_for_masa   !!!!!!!!!!!!!!!!!! Check number
-Qout(iHbio3) == 3*F
-Qout(iHbiosed3) == 35*T ! yuta_edits_for_masa  !!!!!!!!!!!!!!!!!! Check number
+!                                    1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 3 3 3 3 3 3 3 3 3 3 4 4 4 4 4 4 4 4 4 4 5 5 5 5 5 5 5 5 5 5 6
+!                  1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0
+  Qout(iHbio2)  == F F F F F F F F F F F F F F F F F F F F F F F F F F F F F T T F F T T T T T F F F F F
+! Qout(iHbio2)  == 43*F
+! Qout(iHbio2)  == 59*F
+
+  Qout(iHbio3)  == 1*F
+
+Qout(iHbiosed3) == 35*T 
 
 ! Logical switches (TRUE/FALSE) to activate writing of time-averaged fields
 ! into AVERAGE output file: [1:NBT,Ngrids].
 
-Aout(idTvar) == 45*F    ! NO3, ...           biological tracer
+   Aout(idTvar) == 23*F    ! NO3, ...           biological tracer
+!  Aout(idTvar) == 45*F    ! NO3, ...           biological tracer
 
 ! Logical switches (TRUE/FALSE) to activate writing of time-averaged,
 ! biological tracer diagnostic terms into DIAGNOSTIC output file:
 ! [1:NBT,Ngrids].
 
-Dout(iDbio2) == 31*T  !!!!!!!!!!!!!!!!!! Check number
-Dout(iDbio3) == 3*F   !!!!!!!!!!!!!!!!!! Check number
+   Dout(iDbio2) == 28*T
+!  Dout(iDbio2) == 30*T
+!  Dout(iDbio3) == 1*F
 
 ! Logical switches (TRUE/FALSE) to activate writing of time-averaged,
 ! biological processes diagnostics terms into DIAGNOSTIC output file [Ngrids].
@@ -246,55 +273,214 @@ Dout(iDbio3) == 3*F   !!!!!!!!!!!!!!!!!! Check number
 !  =========
 !
 !------------------------------------------------------------------------------
-! Coral Reef Ecosystem Model Parameters. Currently,
+! Reef Ecosystem Model Tracer Parameters. Currently,
 ! it can be configured with 45 biological tracers:
 !
-! idbio( 1), idbio( 1), idbio( 1), idbio( 1),   alkalinity
-! idbio( 2), idbio( 2), idbio( 2), idbio( 2),   TIC
-! idbio( 3), idbio( 3), idbio( 3), idbio( 3),   oxygen
-! idbio( 4), idbio( 4), idbio( 4), idbio( 4),   DOC_01
-! idbio( 5), idbio( 5), idbio( 5), idbio( 5),   DOC_02
-! idbio( 6), idbio( 6), idbio( 6), idbio( 6),   POC_01
-! idbio( 7), idbio( 7), idbio( 7), idbio( 7),   POC_02
-! idbio( 8), idbio( 8), idbio( 8), idbio( 8),   Phytoplankton_01
-! idbio( 9), idbio( 9), idbio( 9), idbio( 9),   Phytoplankton_02
-! idbio(10), idbio(10), idbio(10), idbio(10),   phytoplankton_03
-! idbio(11), idbio(11), idbio(11), idbio(11),   zooplankton_01
-! idbio(12), idbio(12), idbio(12), idbio(12),   PIC_01
-! idbio(13), idbio(13), idbio(13),              TI13C
-! idbio(14), idbio(14), idbio(14),              DO13C_01
-! idbio(15), idbio(15), idbio(15),              DO13C_02
-! idbio(16), idbio(16), idbio(16),              PO13C_01
-! idbio(17), idbio(17), idbio(17),              PO13C_02
-! idbio(18), idbio(18), idbio(18),              Phyt13C_01
-! idbio(19), idbio(19), idbio(19),              Phyt13C_02
-! idbio(20), idbio(20), idbio(20),              phyt13C_03
-! idbio(21), idbio(21), idbio(21),              zoop13C_01
-! idbio(22), idbio(22), idbio(22),              PI13C_01
-! idbio(23), idbio(23), idbio(23), idbio(13),   NO3
-! idbio(24), idbio(24), idbio(24), idbio(14),   NH4
-! idbio(25), idbio(25), idbio(25), idbio(15),   PO4
-! idbio(26), idbio(26), idbio(26), idbio(16),   DON_01
-! idbio(27), idbio(27), idbio(27), idbio(17),   DON_02
-! idbio(28), idbio(28), idbio(28), idbio(18),   PON_01
-! idbio(29), idbio(29), idbio(29), idbio(19),   PON_02
-! idbio(30), idbio(30), idbio(30), idbio(20),   DOP_01
-! idbio(31), idbio(31), idbio(31), idbio(21),   DOP_02
-! idbio(32), idbio(32), idbio(32), idbio(22),   POP_01
-! idbio(33), idbio(33), idbio(33), idbio(23),   POP_02
-! idbio(34), idbio(34),                         NO3_15N
-! idbio(35), idbio(35),                         NH4_15N
-! idbio(36), idbio(36),                         DO15N_01
-! idbio(37), idbio(37),                         DO15N_02
-! idbio(38), idbio(38),                         PO15N_01
-! idbio(39), idbio(39),                         PO15N_02
-! idbio(40), idbio(40),                         Phyt15N_01
-! idbio(41), idbio(41),                         Phyt15N_02
-! idbio(42), idbio(42),                         phyt15N_03
-! idbio(43), idbio(43),                         zoop15N_01
-! idbio(44),                                    COTS eggs
-! idbio(45),                                    COTS larvae
+! ORGANIC_MATTER    ORGANIC_MATTER      ORGANIC_MATTER      ORGANIC_MATTER
+! CARBON_ISOTOPE    CARBON_ISOTOPE      CARBON_ISOTOPE
+! NUTRIENTS         NUTRIENTS           NUTRIENTS           NUTRIENTS
+! NITROGEN_ISOTOPE  
+! COT_STARFISH      
+! 
+! idbio( 1),        idbio( 1),          idbio( 1),          idbio( 1),     TIC
+! idbio( 2),        idbio( 2),          idbio( 2),          idbio( 2),     alkalinity
+! idbio( 3),        idbio( 3),          idbio( 3),          idbio( 3),     oxygen
+! idbio( 4),        idbio( 4),          idbio( 4),          idbio( 4),     DOC_01
+! idbio( 5),        idbio( 5),          idbio( 5),          idbio( 5),     DOC_02
+! idbio( 6),        idbio( 6),          idbio( 6),          idbio( 6),     POC_01
+! idbio( 7),        idbio( 7),          idbio( 7),          idbio( 7),     POC_02
+! idbio( 8),        idbio( 8),          idbio( 8),          idbio( 8),     Phytoplankton_01
+! idbio( 9),        idbio( 9),          idbio( 9),          idbio( 9),     Phytoplankton_02
+! idbio(10),        idbio(10),          idbio(10),          idbio(10),     Phytoplankton_03
+! idbio(11),        idbio(11),          idbio(11),          idbio(11),     Zooplankton_01
+! idbio(12),        idbio(12),          idbio(12),          idbio(12),     PIC_01
+! idbio(13),        idbio(13),          idbio(13),                         TI13C
+! idbio(14),        idbio(14),          idbio(14),                         DO13C_01
+! idbio(15),        idbio(15),          idbio(15),                         DO13C_02
+! idbio(16),        idbio(16),          idbio(16),                         PO13C_01
+! idbio(17),        idbio(17),          idbio(17),                         PO13C_02
+! idbio(18),        idbio(18),          idbio(18),                         Phyt13C_01
+! idbio(19),        idbio(19),          idbio(19),                         Phyt13C_02
+! idbio(20),        idbio(20),          idbio(20),                         Phyt13C_03
+! idbio(21),        idbio(21),          idbio(21),                         Zoop13C_01
+! idbio(22),        idbio(22),          idbio(22),                         PI13C_01
+! idbio(23),        idbio(23),          idbio(23),          idbio(13),     NO3
+! idbio(24),        idbio(24),          idbio(24),          idbio(14),     NH4
+! idbio(25),        idbio(25),          idbio(25),          idbio(15),     PO4
+! idbio(26),        idbio(26),          idbio(26),          idbio(16),     DON_01
+! idbio(27),        idbio(27),          idbio(27),          idbio(17),     DON_02
+! idbio(28),        idbio(28),          idbio(28),          idbio(18),     PON_01
+! idbio(29),        idbio(29),          idbio(29),          idbio(19),     PON_02
+! idbio(30),        idbio(30),          idbio(30),          idbio(20),     DOP_01
+! idbio(31),        idbio(31),          idbio(31),          idbio(21),     DOP_02
+! idbio(32),        idbio(32),          idbio(32),          idbio(22),     POP_01
+! idbio(33),        idbio(33),          idbio(33),          idbio(23),     POP_02
+! idbio(34),        idbio(34),                                             NO3_15N
+! idbio(35),        idbio(35),                                             NH4_15N
+! idbio(36),        idbio(36),                                             DO15N_01
+! idbio(37),        idbio(37),                                             DO15N_02
+! idbio(38),        idbio(38),                                             PO15N_01
+! idbio(39),        idbio(39),                                             PO15N_02
+! idbio(40),        idbio(40),                                             Phyt15N_01
+! idbio(41),        idbio(41),                                             Phyt15N_02
+! idbio(42),        idbio(42),                                             Phyt15N_03
+! idbio(43),        idbio(43),                                             Zoop15N_01
+! idbio(44),                                                               COTS eggs
+! idbio(45),                                                               COTS larvae
 !------------------------------------------------------------------------------
+! Reef Ecosystem Model 2D History Parameters. 
+!
+! CORAL_POLYP            CORAL_POLYP
+! CORAL_NONE_CO2_EQ
+! CORAL_CARBON_ISOTOPE   
+! CORAL_ZOOXANTHELLAE    CORAL_ZOOXANTHELLAE
+! SEAGRASS               SEAGRASS
+! MACROALGAE             MACROALGAE
+!
+! iHbio2( 1),            iHbio2( 1),         ClTAcal_01
+! iHbio2( 2),            iHbio2( 2),         ClTAcoe_01
+! iHbio2( 3),            iHbio2( 3),         ClDICcal_01
+! iHbio2( 4),            iHbio2( 4),         ClDICcoe_01
+! iHbio2( 5),            iHbio2( 5),         ClDOcoe_01
+! iHbio2( 6),            iHbio2( 6),         ClQC_01
+! iHbio2( 7),                                ClCO2cal_01
+! iHbio2( 8),                                ClCO2coe_01
+! iHbio2( 9),                                ClDI13Ccal_01
+! iHbio2(10),                                ClDI13Ccoe_01
+! iHbio2(11),                                ClQ13C_01
+! iHbio2(12),                                Cl13CO2cal_01
+! iHbio2(13),                                Cl13CO2coe_01
+! iHbio2(14),            iHbio2( 7),         ClROS_01
+! iHbio2(15),            iHbio2( 8),         ZxDns_01
+! iHbio2(16),            iHbio2( 9),         ZxQC_01
+! iHbio2(17),            iHbio2(10),         ZxChl_01
+! iHbio2(18),            iHbio2(11),         ZxQAo_01
+! iHbio2(19),            iHbio2(12),         ZxQAr_01
+! iHbio2(20),            iHbio2(13),         ZxQAi_01
+! iHbio2(21),            iHbio2(14),         ZxQAid_01
+! iHbio2(22),                                ZxQ13C_01
+! iHbio2(23),            iHbio2(15),         ClTAcal_02
+! iHbio2(24),            iHbio2(16),         ClTAcoe_02
+! iHbio2(25),            iHbio2(17),         ClDICcal_02
+! iHbio2(26),            iHbio2(18),         ClDICcoe_02
+! iHbio2(27),            iHbio2(19),         ClDOcoe_02
+! iHbio2(28),            iHbio2(20),         ClQC_02
+! iHbio2(29),                                ClCO2cal_02
+! iHbio2(30),                                ClCO2coe_02
+! iHbio2(31),                                ClDI13Ccal_02
+! iHbio2(32),                                ClDI13Ccoe_02
+! iHbio2(33),                                ClQ13C_02
+! iHbio2(34),                                Cl13CO2cal_02
+! iHbio2(35),                                Cl13CO2coe_02
+! iHbio2(36),            iHbio2(21),         ClROS_02
+! iHbio2(37),            iHbio2(22),         ZxDns_02
+! iHbio2(38),            iHbio2(23),         ZxQC_02
+! iHbio2(39),            iHbio2(24),         ZxChl_02
+! iHbio2(40),            iHbio2(25),         ZxQAo_02
+! iHbio2(41),            iHbio2(26),         ZxQAr_02
+! iHbio2(42),            iHbio2(27),         ZxQAi_02
+! iHbio2(43),            iHbio2(28),         ZxQAid_02
+! iHbio2(44),                                ZxQ13C_02
+! iHbio2(45),            iHbio2(29),         SgSgCBm        Seagrass leaf+root carbon-biomass per unit ground area (in seagrass habitat area) [umol.C m-2.sg.hab]
+! iHbio2(46),            iHbio2(30),         SgLfCBm        Seagrass leaf carbon-biomass per unit ground area (in seagrass habitat area) [umol.lf.C m-2.sg.hab]
+! iHbio2(47),            iHbio2(31),         SgRtCBm        Seagrass root carbon-biomass per unit ground area (in seagrass habitat area) [umol.rt.C m-2.sg.hab]
+! iHbio2(48),            iHbio2(32),         SgTotSgCBmS    SgTotSgCBm of last growth interval (For internal use only, need to save to restart file, but use SgTotSgCBm for output)
+! iHbio2(49),            iHbio2(33),         SgTotSgCBm     Total seagrass carbon-biomass in grid [mol.C.tot]
+! iHbio2(50),            iHbio2(34),         SgTotLfCBm     Total seagrass above ground carbon-biomass in grid [mol.C.lf]
+! iHbio2(51),            iHbio2(35),         SgTotRtCBm     Total seagrass below ground carbon-biomass in grid [mol.C.rt]
+! iHbio2(52),            iHbio2(36),         SgLAI          Leaf area index: one-sided green leaf area per unit ground surface area [m2.lf m-2.sg.hab]
+! iHbio2(53),            iHbio2(37),         SgTotLA        Total one-sided green leaf area in grid [m2.lf]
+! iHbio2(54),            iHbio2(38),         SgGridELAP     Effective leaf area projection on ground (whole grid) [m2.lf.proj m-2.grid]
+! iHbio2(55),            iHbio2(39),         SgGridPhot     Seagrass gross photosynthesis rate per unit ground area (whole grid) [umol.C m-2.grid s-1]
+! iHbio2(56),            iHbio2(40),         SgPhotLim      Seagrass photosynthesis limiting factor: 1 = light; 2 = Carbon uptake; 3 = Nitrogen uptake; 4 = Phosphorus uptake
+! iHbio2(57),            iHbio2(41),         SgGridResp     Seagrass respiration rate per unit ground area (whole grid) [umol.C m-2.grid s-1]
+! iHbio2(58),            iHbio2(42),         SgGridNetPhot  Seagrass net photosynthesis rate per unit ground area (whole grid) [umol.C m-2.grid s-1]
+! iHbio2(59),            iHbio2(43),         SgGridDieoff   Seagrass dieoff rate carbon biomass per unit ground area (whole grid) [umol.C m-2.grid s-1]
+!!------------------------------------------------------------------------------
+! Biological Sediment Model 3D Sediment Parameters:
+!
+! SEDIMENT_ECOSYS
+! ORGANIC_MATTER
+! NUTRIENTS
+! SULFATE
+!
+! iHbiosed3( 1),       poro         Porosity (cm_w3 cm_s-3)
+! iHbiosed3( 2),       Tmp          Temperature    (ºC)
+! iHbiosed3( 3),       Sal          Salinity       (PSU)
+! iHbiosed3( 4),       TA           Total Alkanity (umol kg-1)
+! iHbiosed3( 5),       O2           Dissolved Oxygen    (µmol l-1)
+! iHbiosed3( 6),       CO2          Carbon dyoxide      (µmol l-1)
+! iHbiosed3( 7),       N2           Nitrogen            (µmol l-1)
+! iHbiosed3( 8),       DOCf         Dissolved organic carbon   (fast :Labile)       (µmol l-1)
+! iHbiosed3( 9),       DOCs         Dissolved organic carbon   (slow :Refractory)   (µmol l-1)
+! iHbiosed3(10),       POCf         Particulate organic carbon (fast :Labile)       (nmol g-1)
+! iHbiosed3(11),       POCs         Particulate organic carbon (slow :Refractory)   (nmol g-1)
+! iHbiosed3(12),       POCn         Particulate organic carbon (non-degradable)     (nmol g-1)
+! iHbiosed3(13),       NO3          Nitrate     (µmol l-1)
+! iHbiosed3(14),       NH4          Ammonium    (µmol l-1)
+! iHbiosed3(15),       PO4          Phosphate   (µmol l-1)
+! iHbiosed3(16),       DONf         Dissolved organic nitrogen   (fast :Labile)       (µmol l-1)
+! iHbiosed3(17),       DONs         Dissolved organic nitrogen   (slow :Refractory)   (µmol l-1)
+! iHbiosed3(18),       PONf         Particulate organic nitrogen (fast :Labile)       (nmol g-1)
+! iHbiosed3(19),       PONs         Particulate organic nitrogen (slow :Refractory)   (nmol g-1)
+! iHbiosed3(20),       PONn         Particulate organic nitrogen (non-degradable)     (nmol g-1)
+! iHbiosed3(21),       DOPf         Dissolved organic phosphorus   (fast :Labile)       (µmol l-1)
+! iHbiosed3(22),       DOPs         Dissolved organic phosphorus   (slow :Refractory)   (µmol l-1)
+! iHbiosed3(23),       POPf         Particulate organic phosphorus (fast :Labile)       (nmol g-1)
+! iHbiosed3(24),       POPs         Particulate organic phosphorus (slow :Refractory)   (nmol g-1)
+! iHbiosed3(25),       POPn         Particulate organic phosphorus (non-degradable)     (nmol g-1)
+! iHbiosed3(26),       Mn2          Manganese ion        (µmol l-1)
+! iHbiosed3(27),       MnO2         Manganese dioxide    (nmol g-1)
+! iHbiosed3(28),       Fe2          iron(II)          (µmol l-1)
+! iHbiosed3(29),       FeS          iron sulfide      (nmol g-1)
+! iHbiosed3(30),       FeS2         pyrite            (nmol g-1)
+! iHbiosed3(31),       FeOOH        iron hydroxide    (nmol g-1)
+! iHbiosed3(32),       FeOOH_PO4    iron-bound phosphate (FeOOH=PO43-)   (nmol g-1)
+! iHbiosed3(33),       H2S          hydrogen sulfide         (µmol l-1)
+! iHbiosed3(34),       SO4          sulfate   (µmol l-1)
+! iHbiosed3(35),       S0           sulfur    (nmol g-1)
+!------------------------------------------------------------------------------
+! Reef Ecosystem Model 2D Diagnostic Parameters:
+!
+! CORAL_POLYP            CORAL_POLYP
+! CORAL_CARBON_ISOTOPE
+! CORAL_ZOOXANTHELLAE    CORAL_ZOOXANTHELLAE
+! CORAL_SIZE_DYNAMICS    CORAL_SIZE_DYNAMICS
+! SEAGRASS               SEAGRASS
+! MACROALGAE             MACROALGAE
+!
+! iDbio2( 1),            iDbio2( 1),         ipHt_
+! iDbio2( 2),            iDbio2( 2),         iWarg
+! iDbio2( 3),            iDbio2( 3),         iCO2fx
+! iDbio2( 4),            iDbio2( 4),         ipCO2
+! iDbio2( 5),            iDbio2( 5),         iO2fx
+! iDbio2( 6),            iDbio2( 6),         iPARb
+! iDbio2( 7),            iDbio2( 7),         iTau_
+! iDbio2( 8),            iDbio2( 8),         iClPg_01
+! iDbio2( 9),            iDbio2( 9),         iCl_R_01
+! iDbio2(10),            iDbio2(10),         iCl_G_01
+! iDbio2(11),            iDbio2(11),         iClPn_01
+! iDbio2(12),                                iClQCd13C_01
+! iDbio2(13),            iDbio2(12),         iZxPg_01
+! iDbio2(14),            iDbio2(13),         iZx_R_01
+! iDbio2(15),            iDbio2(14),         iZxPn_01
+! iDbio2(16),            iDbio2(15),         iClmt_01
+! iDbio2(17),            iDbio2(16),         iClgw_01
+! iDbio2(18),            iDbio2(17),         iClPg_02
+! iDbio2(19),            iDbio2(18),         iCl_R_02
+! iDbio2(20),            iDbio2(19),         iCl_G_02
+! iDbio2(21),            iDbio2(20),         iClPn_02
+! iDbio2(22),                                iClQCd13C_02
+! iDbio2(23),            iDbio2(21),         iZxPg_02
+! iDbio2(24),            iDbio2(22),         iZx_R_02
+! iDbio2(25),            iDbio2(23),         iZxPn_02
+! iDbio2(26),            iDbio2(24),         iClmt_02
+! iDbio2(27),            iDbio2(25),         iClgw_02
+! iDbio2(28),            iDbio2(26),         iAgPg
+! iDbio2(29),            iDbio2(27),         iAg_R
+! iDbio2(30),            iDbio2(28),         iAgPn
+!
+!!------------------------------------------------------------------------------
 !
 !  Lbiology       Switch to control the computation of a particular module
 !                   within nested and/or multiple connected grids. By default

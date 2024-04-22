@@ -8,6 +8,8 @@
 !!!**** MODULE OF FOOD WEB *******************************************
 
 MODULE mod_foodweb
+#if defined FOODWEB
+
   implicit none
 
   integer, parameter :: Ndom = 2     ! Number of Dissolved Organic Matter types
@@ -136,6 +138,9 @@ CONTAINS
     , dCOTe_dt       &   ! dCOTe/dt (umol L-1 s-1)
     , dCOTl_dt       &   ! dCOTl/dt (umol L-1 s-1)
 #endif
+    , pH             &   ! pH
+    , Wcal           &   ! Calcite saturation state
+    , Warg           &   ! Aragonite saturation state
     )
 
 !-----------------------------------------------------------------------
@@ -236,6 +241,9 @@ CONTAINS
     real(8), intent(out) :: dCOTe_dt      ! dCOTe/dt (umol L-1 s-1)
     real(8), intent(out) :: dCOTl_dt      ! dCOTl/dt (umol L-1 s-1)
 #endif
+    real(8), intent(out) :: pH             ! pH
+    real(8), intent(out) :: Wcal           ! Calcite saturation state
+    real(8), intent(out) :: Warg           ! Aragonite saturation state
 
 !!!------------Set parameters  ----------------------------------
 
@@ -277,7 +285,7 @@ CONTAINS
     real(8), parameter :: lam(Nzoo)  = [ 0.211d0   ]  ! ((umol C L-1)-1) zooplankton Ivlev constant for PHY1 (1.4L/umolN.0.211; Kishi et al., 2007)
     real(8), parameter :: t_Gp2z(Nphy,Nzoo) = reshape( [ 0.265d0,   0.265d0,   0.265d0   ], [Nphy,Nzoo] ) ! (umol C L-1)       PHY1 threshold value for grazing by ZOO (0.04umolN/L0.265; Kishi et al., 2007)
 !------- Microbial loop parameters  -------
-    real(8), parameter :: k_Gdoc2z(Ndom,Nzoo) = reshape( [ 1.0d-8,    1.0d-8   ], [Ndom,Nzoo] ) ! (s-1)          Maximum grazing rate of DOC by ZOO at 0 oC (0.3d0 d-1; Kawamiya et al., 1995)
+    real(8), parameter :: k_Gdoc2z(Ndom,Nzoo) = reshape( [ 1.0d-8,    0.0d0    ], [Ndom,Nzoo] ) ! (s-1)          Maximum grazing rate of DOC by ZOO at 0 oC (0.3d0 d-1; Kawamiya et al., 1995)
     real(8), parameter :: b_Gdoc2z(Ndom,Nzoo) = reshape( [ 0.0693d0,  0.0693d0 ], [Ndom,Nzoo] ) ! (degC-1)       Temperature coefficient of DOC grazing by ZOO (Kawamiya et al., 1995)
 
     real(8), parameter :: k_Gpoc2z(Npom,Nzoo) = reshape( [ 1.0d-7,    1.0d-7   ], [Ndom,Nzoo] ) ! (s-1)          Maximum grazing rate of POC by ZOO at 0 oC (0.3d0 d-1; Kawamiya et al., 1995)
@@ -364,7 +372,7 @@ CONTAINS
     real(8) :: Gdoc2z(Ndom,Nzoo), Gpoc2z(Npom,Nzoo)
     real(8) :: Ddoc(Ndom), Dpoc(Npom), Dp2doc(Npom,Ndom)
     real(8) :: Dcpoc2dtr
-    real(8) :: pH, CO3, Wcal, Dissol
+    real(8) :: CO3, Dissol
 #if defined CARBON_ISOTOPE
     real(8) :: rDI13C, rPO13C(Npom), rDO13C(Ndom)
     real(8) :: rPHY13C(Nphy), rZOO13C(Nzoo), rPI13C(Npim)
@@ -530,6 +538,11 @@ CONTAINS
       Ap(k) = (1.0d0-k_Ep(k)) * Pp(k)
 
 #endif
+      Ap(k) = MIN( Ap(k), 0.1d0*DIC/dt ) !!! yt_edit Error handling  assimilation should not exceed 10% DIC concentration in a timestep
+#if defined NUTRIENTS
+      Ap(k) = MIN( Ap(k), 0.1d0*(NO3+NH4)*rCNp(k)/dt ) !!! yt_edit Error handling  assimilation should not exceed 10% N concentration in a timestep
+      Ap(k) = MIN( Ap(k), 0.1d0*PO4*rCPp(k)/dt ) !!! yt_edit Error handling  assimilation should not exceed 10% PO4 concentration in a timestep
+#endif
 
 !     === Mass barance ===
 
@@ -542,14 +555,17 @@ CONTAINS
       dDI13C_dt = dDI13C_dt - Ap(k)*a_phot*rDI13C - Ap(k)*rCCp(k)*a_calc*rDI13C
 #endif
 #if defined NUTRIENTS
-      dNO3_dt = dNO3_dt - Ap(k)*Vp_NO3(k)/(Vp_NH4(k)+Vp_NO3(k))/rCNp(k)
-      dNH4_dt = dNH4_dt - Ap(k)*Vp_NH4(k)/(Vp_NH4(k)+Vp_NO3(k))/rCNp(k)
-      dPO4_dt = dPO4_dt - Ap(k)/rCPp(k)
-
-      dDOx_dt = dDOx_dt + 2.0d0 * Ap(k)*Vp_NO3(k)/(Vp_NH4(k)+Vp_NO3(k))/rCNp(k)   !!!*********************
-      dTA_dt = dTA_dt + 1.0d0 * Ap(k)*Vp_NO3(k)/(Vp_NH4(k)+Vp_NO3(k))/rCNp(k)  &  ! increase of alkalinity by 1 mole when nitrate or nitrite is the N source
-                      - 1.0d0 * Ap(k)*Vp_NH4(k)/(Vp_NH4(k)+Vp_NO3(k))/rCNp(k)  &  ! decrease of alkalinity by 1 mole when ammonia is used
-                      + 2.0d0 * Ap(k)/rCPp(k)  ! increases alkalinity by 2 mole per mole HPO42-
+      if(Vp_NO3(k) /= 0.0d0) then ! yt_edit prevent div by 0
+        dNO3_dt = dNO3_dt -         Ap(k)*Vp_NO3(k)/(Vp_NH4(k)+Vp_NO3(k))/rCNp(k)
+        dDOx_dt = dDOx_dt + 2.0d0 * Ap(k)*Vp_NO3(k)/(Vp_NH4(k)+Vp_NO3(k))/rCNp(k)  !!!*********************
+        dTA_dt  = dTA_dt  + 1.0d0 * Ap(k)*Vp_NO3(k)/(Vp_NH4(k)+Vp_NO3(k))/rCNp(k)  ! increase of alkalinity by 1 mole when nitrate or nitrite is the N source
+      endif
+      if(Vp_NH4(k) /= 0.0d0) then ! yt_edit prevent div by 0
+        dNH4_dt = dNH4_dt -         Ap(k)*Vp_NH4(k)/(Vp_NH4(k)+Vp_NO3(k))/rCNp(k)
+        dTA_dt  = dTA_dt  - 1.0d0 * Ap(k)*Vp_NH4(k)/(Vp_NH4(k)+Vp_NO3(k))/rCNp(k)  ! decrease of alkalinity by 1 mole when ammonia is used
+      endif
+      dPO4_dt   = dPO4_dt -         Ap(k)/rCPp(k)
+      dTA_dt    = dTA_dt  + 2.0d0 * Ap(k)/rCPp(k)  ! increases alkalinity by 2 mole per mole HPO42-
 #endif
 
 !----- Excretion rate (umolC L-1 s-1) -----------------
@@ -559,6 +575,8 @@ CONTAINS
 #else
       Ep(k) = k_Ep(k) * Pp(k)
 #endif
+      Ep(k) = MIN( Ep(k), 0.1d0*DIC/dt ) !!! yt_edit Error handling  excretion should not exceed 10% DIC concentration in a timestep
+
 
 !     === Mass barance ===
 
@@ -584,10 +602,12 @@ CONTAINS
 !----- Respiration rate (umolC L-1 s-1) -----------------
 
       Rp(k) = k_Rp(k) * exp(b_Rp(k)*Tmp) * MAX(PHY(k), 0.0d0)
-      IF(DOx <= 0.0d0) THEN !-----For Error handling
-        Rp(k) = 0.0d0
-      ENDIF
+      ! IF(DOx <= 0.0d0) THEN !-----For Error handling
+      !   Rp(k) = 0.0d0
+      ! ENDIF
       Rp(k) = MAX( Rp(k), 0.0d0 )  !!! Error handling
+      Rp(k) = MIN( Rp(k), 0.1d0*PHY(k)/dt ) !!! yt_edit Error handling  respiration should not exceed 10% PHY concentration in a timestep
+      Rp(k) = MIN( Rp(k), 0.1d0*DOx/dt )    !!! yt_edit Error handling  respiration should not consume over 10% DO concentration in a time step
 
 !     === Mass barance ===
 
@@ -609,6 +629,7 @@ CONTAINS
       Mp(k) = k_Mp(k) * exp(b_Mp(k)*Tmp) * MAX(PHY(k),0.0d0)*MAX(PHY(k),0.0d0)
 !      Mphy = k_Mphy * exp(b_Mphy*Tmp) * PHY
       Mp(k) = MAX( Mp(k), 0.0d0 )  !!! Error handling
+      Mp(k) = MIN( Mp(k), 0.1d0*PHY(k)/dt ) !!! yt_edit Error handling  mortality should not exceed 10% PHY concentration in a timestep
 
 !     === Mass barance ===
 
@@ -642,6 +663,7 @@ CONTAINS
           Gp2z(m,k) = 0.0d0
         ENDIF
         Gp2z(m,k) = MAX( Gp2z(m,k), 0.0d0 )  !!! Error handling
+        Gp2z(m,k) = MIN( Gp2z(m,k), 0.1d0*PHY(m)/dt ) !!! yt_edit Error handling  grazing should not exceed 10% PHY concentration in a timestep
 
 !     === Mass barance ===
 
@@ -668,19 +690,24 @@ CONTAINS
 #if defined NUTRIENTS
         cf1 =  MIN( MIN(DOC(m),DON(m)*rCNz(k)) , DOP(m)*rCPz(k) )
 #endif
-        Gdoc2z(m,k) = k_Gdoc2z(m,k) * exp(b_Gdoc2z(m,k)*Tmp) * cf1 * ZOO(k)
+        Gdoc2z(m,k) = k_Gdoc2z(m,k) * exp(b_Gdoc2z(m,k)*Tmp) * cf1 * ZOO(k) ! yt_edit consider making this michaelis-menten dependent on ZOO to not exceed exceed 100% uptake
         Gdoc2z(m,k) = MAX( Gdoc2z(m,k), 0.0d0 )  !!! Error handling
+        Gdoc2z(m,k) = MIN( Gdoc2z(m,k), 0.1d0*cf1/dt ) !!! yt_edit Error handling  grazing should not exceed 10% total of limiting factor concentration in a timestep
 
 !     === Mass barance ===
         dZOO_dt(k) = dZOO_dt(k) + Gdoc2z(m,k)*e_Gdoc2z(m,k)
-        dDOC_dt(m) = dDOC_dt(m) - Gdoc2z(m,k)*(1.0d0-e_Gdoc2z(m,k))
+        dDOC_dt(m) = dDOC_dt(m) - Gdoc2z(m,k)
+        dDOC_dt(iLbl) = dDOC_dt(iLbl) + Gdoc2z(m,k)*(1.0d0-e_Gdoc2z(m,k))
 #if defined CARBON_ISOTOPE
         dZOO13C_dt(k) = dZOO13C_dt(k) + Gdoc2z(m,k)*e_Gdoc2z(m,k)*a_grz*rDO13C(m)
-        dDO13C_dt(m) = dDO13C_dt(m) - Gdoc2z(m,k)*(1.0d0-e_Gdoc2z(m,k)*a_grz)*rDO13C(m)
+        dDO13C_dt(m) = dDO13C_dt(m) - Gdoc2z(m,k)*rDO13C(m)
+        dDO13C_dt(iLbl) = dDO13C_dt(iLbl) + Gdoc2z(m,k)*(1.0d0-e_Gdoc2z(m,k)*a_grz)*rDO13C(m)
 #endif
 #if defined NUTRIENTS
-        dDON_dt(m) = dDON_dt(m) - Gdoc2z(m,k)*(1.0d0-e_Gdoc2z(m,k))/rCNz(k)
-        dDOP_dt(m) = dDOP_dt(m) - Gdoc2z(m,k)*(1.0d0-e_Gdoc2z(m,k))/rCPz(k)
+        dDON_dt(m) = dDON_dt(m) - Gdoc2z(m,k)/rCNz(k)
+        dDON_dt(iLbl) = dDON_dt(iLbl) + Gdoc2z(m,k)*(1.0d0-e_Gdoc2z(m,k))/rCNz(k)
+        dDOP_dt(m) = dDOP_dt(m) - Gdoc2z(m,k)/rCPz(k)
+        dDOP_dt(iLbl) = dDOP_dt(iLbl) + Gdoc2z(m,k)*(1.0d0-e_Gdoc2z(m,k))/rCPz(k)
 #endif
       END DO
 
@@ -693,27 +720,34 @@ CONTAINS
 #endif
         Gpoc2z(m,k) = k_Gpoc2z(m,k) * exp(b_Gpoc2z(m,k)*Tmp) * cf1 * ZOO(k)
         Gpoc2z(m,k) = MAX( Gpoc2z(m,k), 0.0d0 )  !!! Error handling
+        Gpoc2z(m,k) = MIN( Gpoc2z(m,k), 0.1d0*cf1/dt ) !!! yt_edit Error handling  grazing should not exceed 10% total of limiting factor concentration in a timestep
 
 !     === Mass barance ===
         dZOO_dt(k) = dZOO_dt(k) + Gpoc2z(m,k)*e_Gpoc2z(m,k)
-        dPOC_dt(m) = dPOC_dt(m) - Gpoc2z(m,k)*(1.0d0-e_Gpoc2z(m,k))
+        dPOC_dt(m) = dPOC_dt(m) - Gpoc2z(m,k)
+        dPOC_dt(iDtr) = dPOC_dt(iDtr) + Gpoc2z(m,k)*(1.0d0-e_Gpoc2z(m,k))
 #if defined CARBON_ISOTOPE
         dZOO13C_dt(k) = dZOO13C_dt(k) + Gpoc2z(m,k)*e_Gpoc2z(m,k)*a_grz*rPO13C(m)
-        dPO13C_dt(m) = dPO13C_dt(m) - Gpoc2z(m,k)*(1.0d0-e_Gpoc2z(m,k)*a_grz)*rPO13C(m)  !!!!****Need check
+        dPO13C_dt(m) = dPO13C_dt(m) - Gpoc2z(m,k)*rPO13C(m)  !!!!****Need check
+        dPO13C_dt(iDtr) = dPO13C_dt(iDtr) + Gpoc2z(m,k)*(1.0d0-e_Gpoc2z(m,k)*a_grz)*rPO13C(m)  !!!!****Need check
 #endif
 #if defined NUTRIENTS
-        dPON_dt(m) = dPON_dt(m) - Gpoc2z(m,k)*(1.0d0-e_Gpoc2z(m,k))/rCNz(k)
-        dPOP_dt(m) = dPOP_dt(m) - Gpoc2z(m,k)*(1.0d0-e_Gpoc2z(m,k))/rCPz(k)
+        dPON_dt(m) = dPON_dt(m) - Gpoc2z(m,k)/rCNz(k)
+        dPON_dt(iDtr) = dPON_dt(iDtr) + Gpoc2z(m,k)*(1.0d0-e_Gpoc2z(m,k))/rCNz(k)
+        dPOP_dt(m) = dPOP_dt(m) - Gpoc2z(m,k)/rCPz(k)
+        dPOP_dt(iDtr) = dPOP_dt(iDtr) + Gpoc2z(m,k)*(1.0d0-e_Gpoc2z(m,k))/rCPz(k)
 #endif
       END DO
   
 !----- Respiration rate (umolC L-1 s-1) -----------------
 
       Rz(k) = k_Rz(k) * exp(b_Rz(k)*Tmp) * ZOO(k)
-      IF(DOx <= 0.0d0) THEN !-----For Error handling
-        Rz(k) = 0.0d0
-      ENDIF
+      ! IF(DOx <= 0.0d0) THEN !-----For Error handling
+      !   Rz(k) = 0.0d0
+      ! ENDIF
       Rz(k) = MAX( Rz(k), 0.0d0 )  !!! Error handling
+      Rz(k) = MIN( Rz(k), 0.1d0*ZOO(k)/dt )  !!! yt_edit Error handling  respiration should not exceed 10% ZOO in a timestep
+      Rz(k) = MIN( Rz(k), 0.1d0*DOx/dt )     !!! yt_edit Error handling  respiration should not consume over 10% DO concentration in a time step
 
 !     === Mass barance ===
 
@@ -734,6 +768,7 @@ CONTAINS
 
       Mz(k) = k_Mz(k) * exp(b_Mz(k)*Tmp) * ZOO(k)*ZOO(k)
       Mz(k) = MAX( Mz(k), 0.0d0 )  !!! Error handling
+      Mz(k) = MIN( Mz(k), 0.1d0*ZOO(k)/dt )  !!! yt_edit Error handling mortality should not exceed 10% ZOO in a timestep
 
 !     === Mass barance ===
 
@@ -755,10 +790,13 @@ CONTAINS
 
     DO k=1, Ndom
       Ddoc(k) = k_Ddoc(k) * exp(b_Ddoc(k)*Tmp) * DOC(k)
-      IF(DOx <= 0.0d0) THEN !-----For Error handling
-        Ddoc(k) = 0.0d0
-      ENDIF
+      ! IF(DOx <= 0.0d0) THEN !-----For Error handling
+      !   Ddoc(k) = 0.0d0
+      ! ENDIF
       Ddoc(k) = MAX( Ddoc(k), 0.0d0 )  !!! Error handling
+      Ddoc(k) = MIN( Ddoc(k), 0.1d0*DOC(k)/dt )  !!! yt_edit Error handling decomposition should not exceed 10% DOC concentration in a timestep
+      Ddoc(k) = MIN( Ddoc(k), 0.1d0*DOx/dt )     !!! yt_edit Error handling decomposition should not consume over 10% DO concentration in a time step
+
 
 !     === Mass barance ===
 
@@ -775,12 +813,14 @@ CONTAINS
         Ddon(k) = 0.0d0
       ENDIF
       Ddon(k) = MAX( Ddon(k), 0.0d0 )  !!! Error handling
+      Ddon(k) = MIN( Ddon(k), 0.1d0*DON(k)/dt )  !!! yt_edit Error handling decomposition should not exceed 10% DON concentration in a timestep
 
       Ddop(k) = k_Ddop(k) * exp(b_Ddop(k)*Tmp) * DOP(k)
       IF(DOx <= 0.0d0) THEN !-----For Error handling
         Ddop(k) = 0.0d0
       ENDIF
       Ddop(k) = MAX( Ddop(k), 0.0d0 )  !!! Error handling
+      Ddop(k) = MIN( Ddop(k), 0.1d0*DOP(k)/dt )  !!! yt_edit Error handling decomposition should not exceed 10% DOP concentration in a timestep
 
 !     === Mass barance ===
 
@@ -796,10 +836,12 @@ CONTAINS
 
     DO k=1, Npom
       Dpoc(k) = k_Dpoc(k) * exp(b_Dpoc(k)*Tmp) * POC(k)
-      IF(DOx <= 0.0d0) THEN !-----For Error handling
-        Dpoc(k) = 0.0d0
-      ENDIF
+      ! IF(DOx <= 0.0d0) THEN !-----For Error handling
+      !   Dpoc(k) = 0.0d0
+      ! ENDIF
       Dpoc(k) = MAX( Dpoc(k), 0.0d0 )  !!! Error handling
+      Dpoc(k) = MIN( Dpoc(k), 0.1d0*POC(k)/dt )  !!! yt_edit Error handling decomposition should not exceed 10% POC concentration in a timestep
+      Dpoc(k) = MIN( Dpoc(k), 0.1d0*DOx/dt )     !!! yt_edit Error handling decomposition should not consume over 10% DO concentration in a time step
 
 !     === Mass barance ===
 
@@ -817,12 +859,14 @@ CONTAINS
         Dpon(k) = 0.0d0
       ENDIF
       Dpon(k) = MAX( Dpon(k), 0.0d0 )  !!! Error handling
+      Dpon(k) = MIN( Dpon(k), 0.1d0*PON(k)/dt )  !!! yt_edit Error handling decomposition should not exceed 10% PON concentration in a timestep
 
       Dpop(k) = k_Dpop(k) * exp(b_Dpop(k)*Tmp) * POP(k)
       IF(DOx <= 0.0d0) THEN !-----For Error handling
         Dpop(k) = 0.0d0
       ENDIF
       Dpop(k) = MAX( Dpop(k), 0.0d0 )  !!! Error handling
+      Dpop(k) = MIN( Dpop(k), 0.1d0*POP(k)/dt )  !!! yt_edit Error handling decomposition should not exceed 10% POP concentration in a timestep
 
 !     === Mass barance ===
 
@@ -843,7 +887,8 @@ CONTAINS
           Dp2doc(m,k) = 0.0d0
         ENDIF
         Dp2doc(m,k) = MAX( Dp2doc(m,k), 0.0d0 )  !!! Error handling
-  
+        Dp2doc(m,k) = MIN( Dp2doc(m,k), 0.1d0*POC(m)/dt )  !!! yt_edit Error handling decomposition should not exceed 10% POC concentration in a timestep
+
 !     === Mass barance ===
 
         dDOC_dt(k) = dDOC_dt(k) + Dp2doc(m,k)
@@ -858,12 +903,14 @@ CONTAINS
           Dp2don(m,k) = 0.0d0
         ENDIF
         Dp2don(m,k) = MAX( Dp2don(m,k), 0.0d0 )  !!! Error handling
+        Dp2don(m,k) = MIN( Dp2don(m,k), 0.1d0*PON(m)/dt )  !!! yt_edit Error handling decomposition should not exceed 10% PON concentration in a timestep
 
         Dp2dop(m,k) = k_Dp2dop(m,k) * exp(b_Dp2dop(m,k)*Tmp) * MAX(POP(m),0.0d0)
         IF(DOx <= 0.0d0) THEN !-----For Error handling
           Dp2dop(m,k) = 0.0d0
         ENDIF
         Dp2dop(m,k) = MAX( Dp2dop(m,k), 0.0d0 )  !!! Error handling
+        Dp2dop(m,k) = MIN( Dp2dop(m,k), 0.1d0*POP(m)/dt )  !!! yt_edit Error handling decomposition should not exceed 10% POP concentration in a timestep
 
 !     === Mass barance ===
 
@@ -880,7 +927,8 @@ CONTAINS
 
     Dcpoc2dtr = k_Dcpoc2dtr * exp(b_Dcpoc2dtr*Tmp) * POC(iCPOM)
     Dcpoc2dtr = MAX( Dcpoc2dtr, 0.0d0 )  !!! Error handling
-  
+    Dcpoc2dtr = MIN( Dcpoc2dtr, 0.1d0*POC(iCPOM)/dt )  !!! yt_edit Error handling decomposition should not exceed 10% POC(iCPOM) concentration in a timestep
+
   !     === Mass barance ===
   
     dPOC_dt(iCPOM) = dPOC_dt(iCPOM) - Dcpoc2dtr
@@ -891,12 +939,22 @@ CONTAINS
 #endif               
 #if defined NUTRIENTS
     Dcpon2dtr = k_Dcpon2dtr * exp(b_Dcpon2dtr*Tmp) * PON(iCPOM)
+    Dcpon2dtr = MAX( Dcpon2dtr, 0.0d0 )  !!! Error handling
+    Dcpon2dtr = MIN( Dcpon2dtr, 0.1d0*PON(iCPOM)/dt )  !!! yt_edit Error handling decomposition should not exceed 10% PON(iCPOM) concentration in a timestep
+
     Dcpop2dtr = k_Dcpop2dtr * exp(b_Dcpop2dtr*Tmp) * POP(iCPOM)
+    Dcpop2dtr = MAX( Dcpop2dtr, 0.0d0 )  !!! Error handling
+    Dcpop2dtr = MIN( Dcpop2dtr, 0.1d0*POP(iCPOM)/dt )  !!! yt_edit Error handling decomposition should not exceed 10% POP(iCPOM) concentration in a timestep
   
   !     === Mass barance ===
   
-    dPON_dt(iCPOM) = dPON_dt(iCPOM) - Dcpon2dtr
-    dPOP_dt(iDtr ) = dPOP_dt(iDtr ) + Dcpop2dtr
+    ! dPON_dt(iCPOM) = dPON_dt(iCPOM) - Dcpon2dtr
+    ! dPOP_dt(iDtr ) = dPOP_dt(iDtr ) + Dcpop2dtr
+    dPON_dt(iCPOM) = dPON_dt(iCPOM) - Dcpon2dtr ! yt_edit above is missing equations???
+    dPON_dt(iDtr ) = dPON_dt(iDtr ) + Dcpon2dtr ! yt_edit above is missing equations???
+    dPOP_dt(iCPOM) = dPOP_dt(iCPOM) - Dcpop2dtr ! yt_edit above is missing equations???
+    dPOP_dt(iDtr ) = dPOP_dt(iDtr ) + Dcpop2dtr ! yt_edit above is missing equations???
+    
   
 #endif
 
@@ -909,6 +967,9 @@ CONTAINS
         Nit = 0.0d0
     ENDIF
     Nit = MAX( Nit, 0.0d0 )  !!! Error handling
+    Nit = MIN( Nit, 0.1d0*NH4/dt )  !!! yt_edit Error handling nitrification should not exceed 10% NH4 concentration in a timestep
+    Nit = MIN( Nit, 0.1d0*DOx/dt/2.0d0 )  !!! yt_edit Error handling nitrification should not exceed 10% DOx concentration in a timestep
+
 
 !     === Mass barance ===
 
@@ -924,18 +985,15 @@ CONTAINS
     pH     = pH_fromATCT( TA, DIC, Tmp+273.15d0, Sal )   ! pH
     CO3   = cCO3_fromCTpH( DIC, pH, Tmp+273.15d0, Sal )  ! CO32- concentration
     Wcal   = Wcal_fromcCO3( CO3, Tmp+273.15d0, Sal )  ! Calcite saturation state
+    Warg   = Warg_fromcCO3( CO3, Tmp+273.15d0, Sal )  ! Calcite saturation state
     IF ( Wcal < 1.0d0 ) THEN
       Dissol = 1.3d7*(1.d0-Wcal)**2.8d0 * PIC(iCaCO3)  !! [umol L-1 s-1] Low-Mg Calcite dissolution rate (Walter and Morse, 1985)
     ELSE
       Dissol = 0.0d0
     END IF
     Dissol = MAX( Dissol, 0.0d0 )  !!! Error handling
-    ! yt_edit >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    ! arbitrarily limit Dissolution rate to 80% of PIC per time step to prevent negative PIC values
-    IF (0.8d0*PIC(iCaCO3) - Dissol*dt < 0.0d0) THEN
-      Dissol = 0.8d0*PIC(iCaCO3)/dt
-    ENDIF
-    ! yt_edit <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    Dissol = MIN( Dissol, 0.1d0*PIC(iCaCO3)/dt )  !!! yt_edit Error handling  carbonate dissolution should not exceed 10% PIC(iCaCO3) in a timestep
+
 
 !     === Mass barance ===
 
@@ -955,7 +1013,7 @@ CONTAINS
     RETURN
 
   END SUBROUTINE foodweb
-
+#endif
 END MODULE mod_foodweb
 
 
