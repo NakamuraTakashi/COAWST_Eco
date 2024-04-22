@@ -565,6 +565,50 @@
 !-----------------------------------------------------------------------
 
           DO k=1,N(ng)
+
+            DO itrc=1,NAT
+              
+              ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+              ! ! if (isnan(dtrc_dt(k,itrc)) .or. abs(dtrc_dt(k,itrc)) > huge(dtrc_dt(k,itrc))) then
+              ! if (isnan(dtrc_dt(k,itrc)) .or. abs(dtrc_dt(k,itrc)) > 1.0d20) then
+              !   write(*,*) 'yt_debug: reef_ecosys.h      i =', i, '   j =', j, '   k =', k, '   itrc =', itrc
+              !   write(*,*) 'yt_debug:     dtrc_dt(k,itrc) =', dtrc_dt(k,itrc)
+              !   error stop
+              ! endif
+              ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+              IF(dtrc_dt(k,itrc)*0.0_r8 /= 0.0_r8) THEN  !!!---------Error Handling: Check NAN
+!                write(50,*) i,j,k,itrc,dtrc_dt(k,itrc),ssO2flux, ssCO2flux,rmask(i,j) 
+!                write(50,*) t(i,j,k,nnew,:)
+!                write(50,*) t(i,j,k,nstp,:)
+                dtrc_dt(k,itrc)=0.0_r8
+              END IF
+              
+              t(i,j,k,nnew,itrc)=t(i,j,k,nnew,itrc)                    &
+    &                              +dtrc_dt(k,itrc)*dt(ng)*Hz(i,j,k)
+
+              ! if (i == 20 .and. j == 50) then
+              !   write(*,*) 'yt_debug: t(i,j,k,nnew,itrc)/Hz(i,j,k) = ',t(i,j,k,nnew,itrc)/Hz(i,j,k)
+              !   write(*,*) 'yt_debug:       dtrc_dt(k,itrc)*dt(ng) = ',dtrc_dt(k,itrc)*dt(ng)
+              ! endif
+    
+              ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+              ! ! if (isnan(t(i,j,k,nnew,itrc)) .or. abs(t(i,j,k,nnew,itrc)) > huge(t(i,j,k,nnew,itrc))) then
+              ! ! if (isnan(t(i,j,k,nnew,itrc)) .or. abs(t(i,j,k,nnew,itrc)) > 1.0d22) then
+              ! if (isnan(t(i,j,k,nnew,itrc)) .or. abs(t(i,j,k,nnew,itrc)) > 1.0d22) then
+              !   write(*,*) 'yt_debug: reef_ecosys.h      i =', i, '   j =', j, '   k =', k, '   itrc =', itrc
+              !   write(*,*) 'yt_debug:     t(i,j,k,nnew,itrc) =', t(i,j,k,nnew,itrc)
+              !   error stop
+              ! else if (t(i,j,k,nnew,itrc) < -100d0) then
+              !   write(*,*) 'yt_debug: reef_ecosys.h      i =', i, '   j =', j, '   k =', k, '   itrc =', itrc &
+              !   , '   t(i,j,k,nnew,itrc) =', t(i,j,k,nnew,itrc)
+              ! endif
+              ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+              
+
+            END DO
+
+
             DO itrc=1,NBT
               ibio=idbio(itrc)
               
@@ -601,6 +645,7 @@
               ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
               t(i,j,k,nnew,ibio)=MAX(0.0_r8,t(i,j,k,nnew,ibio))!!!---------Error Handling
+
               
             END DO
 
