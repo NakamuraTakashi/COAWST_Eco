@@ -1649,12 +1649,12 @@
               !   iHbiosed3(iSdpH)=varid
               CASE ('iHbiosed3(iSdTA)')
                 iHbiosed3(iSdTA)=varid
-              ! CASE ('iHbiosed3(iSdDIC)')
-              !   iHbiosed3(iSdDIC)=varid
+              CASE ('iHbiosed3(iSdDIC)')
+                iHbiosed3(iSdDIC)=varid
               CASE ('iHbiosed3(iSdO2)')
                 iHbiosed3(iSdO2)=varid
-              CASE ('iHbiosed3(iSdCO2)')
-                iHbiosed3(iSdCO2)=varid
+              ! CASE ('iHbiosed3(iSdCO2)')
+              !   iHbiosed3(iSdCO2)=varid
               CASE ('iHbiosed3(iSdN2)')
                 iHbiosed3(iSdN2)=varid
 # if defined ORGANIC_MATTER

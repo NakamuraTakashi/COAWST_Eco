@@ -976,7 +976,7 @@ MODULE mod_seagrass
     sed_layer_thickness(:) = SEDECO(ng)%dz(:)/10d0                          ! [mm]                        Thickness of each sediment layer
 # endif
 # if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE
-    sed_DIC(:)     =   SEDECO(ng)%CO2(i,j,:)                                ! [umol.DIC L-1]              DIC consentration of sediment (in each sediment layer)
+    sed_DIC(:)     =   SEDECO(ng)%DIC(i,j,:)                                ! [umol.DIC L-1]              DIC consentration of sediment (in each sediment layer)
     where (sed_DIC .le. 0.0d0) sed_DIC = 0.0d0                              !                             error-correct negative values to become zero
     sed_DO (:)     =   SEDECO(ng)%O2 (i,j,:)                                ! [umol.DO L-1]               DO  consentration of sediment (in each sediment layer)
     where (sed_DO .le. 0.0d0) sed_DO = 0.0d0                                !                             error-correct negative values to become zero

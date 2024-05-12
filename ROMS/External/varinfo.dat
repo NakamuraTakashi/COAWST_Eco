@@ -11132,14 +11132,14 @@
   'd3dvar'
   1.0d0
 
-! 'sediment_DIC'                                             ! Input/Output
-!   'SedEco: dissolved inorganic carbon'
-!   'umolC kg-1'                                 ! (µmol kg-1)
-!   'sediment_pH, scalar, series'
-!   'ocean_time'
-!   'iHbiosed3(iSdDIC)'
-!   'd3dvar'
-!   1.0d0
+'sediment_DIC'                                             ! Input/Output
+  'SedEco: dissolved inorganic carbon'
+  'umolC kg-1'                                 ! (µmol kg-1)
+  'sediment_DIC, scalar, series'
+  'ocean_time'
+  'iHbiosed3(iSdDIC)'
+  'd3dvar'
+  1.0d0
 
 'sediment_O2'                                             ! Input/Output
   'SedEco: dissolved oxygen'
@@ -11150,14 +11150,14 @@
   'd3dvar'
   1.0d0
 
-'sediment_CO2'                                             ! Input/Output
-  'SedEco: dissolved carbon dioxide'
-  'umolCO2 L-1'                                 ! (µmol l-1)
-  'sediment_CO2, scalar, series'
-  'ocean_time'
-  'iHbiosed3(iSdCO2)'
-  'd3dvar'
-  1.0d0
+!'sediment_CO2'                                             ! Input/Output
+!  'SedEco: dissolved carbon dioxide'
+!  'umolCO2 L-1'                                 ! (µmol l-1)
+!  'sediment_CO2, scalar, series'
+!  'ocean_time'
+!  'iHbiosed3(iSdCO2)'
+!  'd3dvar'
+!  1.0d0
 
 'sediment_N2'                                             ! Input/Output
   'SedEco: dissolved nitrogen'

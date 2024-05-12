@@ -285,12 +285,19 @@
               my_C=my_Cu+my_Cv+my_Cw
 
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: add
-              IF(u2v2*0.0_r8 /= 0.0_r8) write(*,*) 'u2v2', u2v2,i,j,k  !!!---------Error Handling: Check NAN !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-              IF(Hz(i,j,k)*0.0_r8 /= 0.0_r8) write(*,*) 'Hz', Hz(i,j,k),i,j,k  !!!---------Error Handling: Check NAN !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-              IF(rho(i,j,k)*0.0_r8 /= 0.0_r8) then !!!---------Error Handling: Check NAN !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+              IF(u2v2*0.0_r8 /= 0.0_r8) THEN
+                  write(*,*) 'u2v2', u2v2,i,j,k  !!!---------Error Handling: Check NAN !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                  exit_flag=1
+              END IF
+              IF(Hz(i,j,k)*0.0_r8 /= 0.0_r8) THEN
+                  write(*,*) 'Hz', Hz(i,j,k),i,j,k  !!!---------Error Handling: Check NAN !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                  exit_flag=1
+              END IF
+              IF(rho(i,j,k)*0.0_r8 /= 0.0_r8) THEN !!!---------Error Handling: Check NAN !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                   write(*,*) 'rho ', rho(i,j,k),i,j,k 
                   write(*,*) 'temp', t(i,j,k,nstp,itemp),i,j,k
                   write(*,*) 'salt', t(i,j,k,nstp,isalt),i,j,k
+                  exit_flag=1
               END IF
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
 
@@ -313,7 +320,11 @@
               itrc=idbio(ibt)
               DO i=Istr,Iend
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: add
-                IF(t(i,j,k,nstp,itrc)*0.0_r8 /= 0.0_r8) write(*,*) 'bio_t', t(i,j,k,nstp,itrc),i,j,k,itrc  !!!---------Error Handling: Check NAN !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                IF(t(i,j,k,nstp,itrc)*0.0_r8 /= 0.0_r8)  THEN
+                  write(*,*) 'bio_t', t(i,j,k,nstp,itrc),i,j,k,ibt  !!!---------Error Handling: Check NAN !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                  exit_flag=1
+                  STOP
+                END IF
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
                 my_maxbio(ibt)=MAX(my_maxbio(ibt),t(i,j,k,nstp,itrc))
                 my_minbio(ibt)=MIN(my_minbio(ibt),t(i,j,k,nstp,itrc)) !!!<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add

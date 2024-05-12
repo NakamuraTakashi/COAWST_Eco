@@ -267,9 +267,9 @@
       integer :: iSdSal    !! Salinity       (PSU)
       ! integer :: iSdpH     !! pH   
       integer :: iSdTA     !! Total Alkalinity
-      ! integer :: iSdDIC    !! Dissolved inorganic carbon
+      integer :: iSdDIC    !! Dissolved inorganic carbon
       integer :: iSdO2     !! Dissolved Oxygen    (µmol l-1)
-      integer :: iSdCO2    !! Carbon dyoxide      (µmol l-1)
+      ! integer :: iSdCO2    !! Carbon dyoxide      (µmol l-1)
       integer :: iSdN2     !! Nitrogen            (µmol l-1)
 ! Organic matters
 # if defined ORGANIC_MATTER
@@ -620,12 +620,12 @@
       ! iSdpH=ic
       ic=ic+1
       iSdTA=ic
-      ! ic=ic+1
-      ! iSdDIC=ic
+      ic=ic+1
+      iSdDIC=ic
       ic=ic+1
       iSdO2=ic
-      ic=ic+1
-      iSdCO2=ic
+      ! ic=ic+1
+      ! iSdCO2=ic
       ic=ic+1
       iSdN2=ic
 # if defined ORGANIC_MATTER
@@ -1056,9 +1056,9 @@
             SEDECO(ng)%Sal (i,j,k) = OCEAN(ng)%HisBiosed3d(i,j,k,iSdSal ) 
             ! SEDECO(ng)%pH  (i,j,k) = OCEAN(ng)%HisBiosed3d(i,j,k,iSdpH  ) 
             SEDECO(ng)%TA  (i,j,k) = OCEAN(ng)%HisBiosed3d(i,j,k,iSdTA  ) 
-            ! SEDECO(ng)%DIC (i,j,k) = OCEAN(ng)%HisBiosed3d(i,j,k,iSdDIC ) 
+            SEDECO(ng)%DIC (i,j,k) = OCEAN(ng)%HisBiosed3d(i,j,k,iSdDIC ) 
             SEDECO(ng)%O2  (i,j,k) = OCEAN(ng)%HisBiosed3d(i,j,k,iSdO2  ) 
-            SEDECO(ng)%CO2 (i,j,k) = OCEAN(ng)%HisBiosed3d(i,j,k,iSdCO2 ) 
+            ! SEDECO(ng)%CO2 (i,j,k) = OCEAN(ng)%HisBiosed3d(i,j,k,iSdCO2 ) 
             SEDECO(ng)%N2  (i,j,k) = OCEAN(ng)%HisBiosed3d(i,j,k,iSdN2  ) 
 # if defined ORGANIC_MATTER
             SEDECO(ng)%DOCf(i,j,k) = OCEAN(ng)%HisBiosed3d(i,j,k,iSdDOCf) 
@@ -1212,9 +1212,9 @@
             OCEAN(ng)%HisBiosed3d(i,j,k,iSdSal ) = SEDECO(ng)%Sal (i,j,k)
             ! OCEAN(ng)%HisBiosed3d(i,j,k,iSdpH  ) = SEDECO(ng)%pH  (i,j,k)
             OCEAN(ng)%HisBiosed3d(i,j,k,iSdTA  ) = SEDECO(ng)%TA  (i,j,k)
-            ! OCEAN(ng)%HisBiosed3d(i,j,k,iSdDIC ) = SEDECO(ng)%DIC (i,j,k)
+            OCEAN(ng)%HisBiosed3d(i,j,k,iSdDIC ) = SEDECO(ng)%DIC (i,j,k)
             OCEAN(ng)%HisBiosed3d(i,j,k,iSdO2  ) = SEDECO(ng)%O2  (i,j,k)
-            OCEAN(ng)%HisBiosed3d(i,j,k,iSdCO2 ) = SEDECO(ng)%CO2 (i,j,k)
+            ! OCEAN(ng)%HisBiosed3d(i,j,k,iSdCO2 ) = SEDECO(ng)%CO2 (i,j,k)
             OCEAN(ng)%HisBiosed3d(i,j,k,iSdN2  ) = SEDECO(ng)%N2  (i,j,k)
 # if defined ORGANIC_MATTER
             OCEAN(ng)%HisBiosed3d(i,j,k,iSdDOCf) = SEDECO(ng)%DOCf(i,j,k)

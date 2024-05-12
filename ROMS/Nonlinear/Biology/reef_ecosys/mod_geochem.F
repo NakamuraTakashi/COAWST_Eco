@@ -1569,7 +1569,7 @@ contains
     return
   end function Dsed
 
-  !! Fick's law (diffusion)
+  !! Ficks law (diffusion)
   ! General
   real(8) function Ficks(D,C1,C2,dz)
     implicit none

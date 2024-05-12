@@ -259,7 +259,7 @@ MODULE mod_sedecosys
     real(8), pointer :: TA (:,:,:)    !! Total Alkanity (umol kg-1)
 
     real(8), pointer :: O2 (:,:,:)    !! Dissolved Oxygen    (µmol l-1)
-    real(8), pointer :: CO2(:,:,:)    !! Carbon dyoxide      (µmol l-1)
+    real(8), pointer :: DIC(:,:,:)    !! Carbon dyoxide      (µmol l-1)
     real(8), pointer :: N2 (:,:,:)    !! Nitrogen            (µmol l-1)
 
 ! Organic matters
@@ -336,7 +336,8 @@ CONTAINS
 !!! **********************************************************************
 
   SUBROUTINE allocate_sedecosys(ng, Ngrids, LBi, UBi, LBj, UBj  &
-# if defined SEAGRASS && (defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE || defined SEAGRASS_ROOT_POM)
+# if defined SEAGRASS && (defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || \
+     defined SEAGRASS_ROOT_NUTRIENT_UPTAKE || defined SEAGRASS_ROOT_POM)
                                 , Nsg                           &
 # endif
     )
@@ -348,7 +349,8 @@ CONTAINS
 
     ! input parameters
     integer, intent(in) :: ng, Ngrids, LBi, UBi, LBj, UBj
-# if defined SEAGRASS && (defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE || defined SEAGRASS_ROOT_POM)
+# if defined SEAGRASS && (defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || \
+     defined SEAGRASS_ROOT_NUTRIENT_UPTAKE || defined SEAGRASS_ROOT_POM)
     integer, intent(in) :: Nsg
 # endif
 
@@ -363,7 +365,7 @@ CONTAINS
     allocate( SEDECO(ng)%TA  (LBi:UBi,LBj:UBj,Nsed(ng)) )
     
     allocate( SEDECO(ng)%O2  (LBi:UBi,LBj:UBj,Nsed(ng)) )
-    allocate( SEDECO(ng)%CO2 (LBi:UBi,LBj:UBj,Nsed(ng)) )
+    allocate( SEDECO(ng)%DIC (LBi:UBi,LBj:UBj,Nsed(ng)) )
     allocate( SEDECO(ng)%N2  (LBi:UBi,LBj:UBj,Nsed(ng)) )
     !! Organic Matter(Carbon)
 # if defined ORGANIC_MATTER
@@ -502,12 +504,12 @@ CONTAINS
     if ( start_of_new_run ) then
     !!! ------------------- For determinating initial concentration ----------------------- !!!
         ! General
-        SEDECO(ng)%Tmp(:,:,:)  = 0.0d0     
+        SEDECO(ng)%Tmp(:,:,:)  = 20.0d0     
         SEDECO(ng)%Sal(:,:,:)  = 0.0d0
         SEDECO(ng)%TA(:,:,:)  = 2232.0d0 ! TA (umol kg-1)
 
         SEDECO(ng)%O2 (:,:,:)  = 0.0d0        !DO  (µmol L-1)
-        SEDECO(ng)%CO2(:,:,:)  = 2000.0d0        !CO2  (µmol L-1)
+        SEDECO(ng)%DIC(:,:,:)  = 2000.0d0        !DIC  (µmol L-1)
         SEDECO(ng)%N2 (:,:,:)  = 0.0d0        !N2  (µmol L-1)
         ! OM
 #  if defined ORGANIC_MATTER
@@ -566,7 +568,7 @@ CONTAINS
 !         SEDECO(ng)%Sal(:,:,:)  = 0.0d0
 
 !         SEDECO(ng)%O2 (:,:,:)  = 0.0d0        !DO  (µmol L-1)
-!         SEDECO(ng)%CO2(:,:,:)  = 0.0d0        !CO2  (µmol L-1)
+!         SEDECO(ng)%DIC(:,:,:)  = 0.0d0        !DIC  (µmol L-1)
 !         SEDECO(ng)%N2 (:,:,:)  = 0.0d0        !N2  (µmol L-1)
 ! ! OM
 ! #  if defined ORGANIC_MATTER
@@ -719,7 +721,7 @@ CONTAINS
     , TAamb          &   ! TA: Total Alkalinity (kg L-1)
 
     , O2amb          &   ! O2: Dissolved oxygen (umol L-1)
-    , CO2amb         &   ! CO2: carbon dioxide  (µmol L-1)
+    , DICamb         &   ! DIC: carbon dioxide  (µmol L-1)
     , N2amb          &   ! N2: Nitrogen         (µmol L-1)
 # if defined ORGANIC_MATTER
     , POCamb         &   ! POC: Particulate organic carbon (nmol g-1)
@@ -773,21 +775,18 @@ CONTAINS
     , Flux_Sal       &   ! Salinity flux (cm-2 s-1)  * direction of water column to sediment is positive
     , Flux_TA        &   ! Total Alkalinity flux (???? cm-2 s-1)  * direction of water column to sediment is positive
     , Flux_DO        &   ! DO  flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
-    , Flux_CO2sed    &   ! CO2 flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
+    , Flux_DICsed    &   ! DIC flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
     , Flux_N2        &   ! N2  flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
 # if defined ORGANIC_MATTER
-    , Flux_POCf       &   ! POCf flux (nmol cm-2 s-1) * direction of water column to sediment is positive
-    , Flux_POCs       &   ! POCs flux (nmol cm-2 s-1) * direction of water column to sediment is positive
+    , Flux_POC       &   ! POC(f,s,n) fluxes (nmol cm-2 s-1) * direction of water column to sediment is positive
 # endif
 # if defined NUTRIENTS
     , Flux_NO3       &   ! NO3 flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
     , Flux_NH4       &   ! NH4 flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
     , Flux_PO4       &   ! PO4 flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
 #  if defined ORGANIC_MATTER
-    , Flux_PONf       &   ! PONf flux (nmol cm-2 s-1) * direction of water column to sediment is positive
-    , Flux_PONs       &   ! PONs flux (nmol cm-2 s-1) * direction of water column to sediment is positive
-    , Flux_POPf       &   ! POPf flux (nmol cm-2 s-1) * direction of water column to sediment is positive
-    , Flux_POPs       &   ! POPs flux (nmol cm-2 s-1) * direction of water column to sediment is positive
+    , Flux_PON       &   ! PON(f,s,n) fluxes (nmol cm-2 s-1) * direction of water column to sediment is positive
+    , Flux_POP       &   ! POP(f,s,n) fluxes (nmol cm-2 s-1) * direction of water column to sediment is positive
 #  endif
 # endif
 # if defined SULFATE
@@ -811,7 +810,7 @@ CONTAINS
     implicit none
 
 ! ***********************************************************************************
-!!! 宣言文 declarative statement
+!!! Declarative statement
 !! These variable names are different from those in mod_reef_ecosys.F
 
     !! General
@@ -822,7 +821,7 @@ CONTAINS
     real(8), intent(in) :: TAamb     
 
     real(8), intent(in) :: O2amb
-    real(8), intent(in) :: CO2amb
+    real(8), intent(in) :: DICamb
     real(8), intent(in) :: N2amb
     !! Organic matters (Carbon)
 # if defined ORGANIC_MATTER
@@ -885,21 +884,18 @@ CONTAINS
     real(8), intent(out) :: Flux_TA
 
     real(8), intent(out) :: Flux_DO
-    real(8), intent(out) :: Flux_CO2sed
+    real(8), intent(out) :: Flux_DICsed
     real(8), intent(out) :: Flux_N2 
 # if defined ORGANIC_MATTER
-    real(8), intent(out) :: Flux_POCf
-    real(8), intent(out) :: Flux_POCs
+    real(8), intent(out) :: Flux_POC(3)
 # endif
 # if defined NUTRIENTS
     real(8), intent(out) :: Flux_NO3
     real(8), intent(out) :: Flux_NH4
     real(8), intent(out) :: Flux_PO4
 #  if defined ORGANIC_MATTER
-    real(8), intent(out) :: Flux_PONf
-    real(8), intent(out) :: Flux_PONs
-    real(8), intent(out) :: Flux_POPf
-    real(8), intent(out) :: Flux_POPs
+    real(8), intent(out) :: Flux_PON(3)
+    real(8), intent(out) :: Flux_POP(3)
 #  endif
 # endif
 # if defined SULFATE
@@ -931,7 +927,7 @@ CONTAINS
 !! -- Diffusion coefficient -----------------------------------------
     !! General diffusion in pure seawater  (cm2 s-1)
     real(8) :: Dw_DOM(Nsed,2)    ! 1:labile, 2:refractory
-    real(8) :: Dw_O2(Nsed),Dw_CO2(Nsed),Dw_N2(Nsed)
+    real(8) :: Dw_O2(Nsed),Dw_DIC(Nsed),Dw_N2(Nsed)
 # if defined NUTRIENTS
     real(8) :: Dw_NO3(Nsed), Dw_NH4(Nsed), Dw_PO4(Nsed)
 # endif
@@ -940,7 +936,7 @@ CONTAINS
 # endif
     !! Molecular Diffusion coefficients (cm2 s-1)
     real(8) :: Ds_DOM(2:Nsed,2)    ! 1:labile, 2:refractory
-    real(8) :: Ds_O2(2:Nsed),Ds_CO2(2:Nsed),Ds_N2(2:Nsed)
+    real(8) :: Ds_O2(2:Nsed),Ds_DIC(2:Nsed),Ds_N2(2:Nsed)
 # if defined NUTRIENTS
     real(8) :: Ds_NO3(2:Nsed), Ds_NH4(2:Nsed), Ds_PO4(2:Nsed)
 ! #  if defined ORGANIC_MATTER
@@ -975,7 +971,7 @@ CONTAINS
     ! real(8) :: Fd_Sal(Nsed), Fb_sal(2:Nsed) ! yt_edit unused?
 
     real(8) :: Fd_O2 (Nsed), Fb_O2(2:Nsed)
-    real(8) :: Fd_CO2(Nsed), Fb_CO2(2:Nsed)
+    real(8) :: Fd_DIC(Nsed), Fb_DIC(2:Nsed)
     real(8) :: Fd_N2 (Nsed), Fb_N2(2:Nsed)
 # if defined ORGANIC_MATTER
     real(8) :: Fd_DOC(2:Nsed,2),Fb_DOC(2:Nsed,2)    ! 1:labile, 2:refractory
@@ -1012,7 +1008,7 @@ CONTAINS
     ! real(8) :: Fc_sal(2:Nsed) ! yt_edit unused?
 
     real(8) :: Fc_O2 (2:Nsed+1)
-    real(8) :: Fc_CO2(2:Nsed+1)
+    real(8) :: Fc_DIC(2:Nsed+1)
     real(8) :: Fc_N2 (2:Nsed+1)
 #  if defined ORGANIC_MATTER
     real(8) :: Fc_DOC(2:Nsed+1,2)    ! 1:labile, 2:refractory
@@ -1050,7 +1046,7 @@ CONTAINS
     ! real(8) :: Fa_sal(2:Nsed) ! yt_edit unused?
 
     real(8) :: Fa_O2 (1:Nsed+1)
-    real(8) :: Fa_CO2(1:Nsed+1)
+    real(8) :: Fa_DIC(1:Nsed+1)
     real(8) :: Fa_N2 (1:Nsed+1)
 #  if defined ORGANIC_MATTER
     real(8) :: Fa_DOC(1:Nsed+1,2)    ! 1:labile, 2:refractory
@@ -1086,7 +1082,7 @@ CONTAINS
     ! real(8) :: FT_Tmp(Nsed+1) ! yt_edit unused?
     ! real(8) :: FT_Sal(Nsed+1) ! yt_edit unused?
     real(8) :: FT_O2 (Nsed+1)
-    real(8) :: FT_CO2(Nsed+1)
+    real(8) :: FT_DIC(Nsed+1)
     real(8) :: FT_N2 (Nsed+1)
 # if defined ORGANIC_MATTER
     real(8) :: FT_DOC(Nsed+1,2)    ! 1:labile, 2:refractory
@@ -1245,7 +1241,7 @@ CONTAINS
 !! Net Production and Consumption  -------------------------------------------
     !! unit: (nmol cm-3 s-1)
 
-    real(8) :: R_O2 (Nsed), R_CO2(Nsed), R_N2(Nsed)
+    real(8) :: R_O2 (Nsed), R_DIC(Nsed), R_N2(Nsed)
 # if defined ORGANIC_MATTER
     real(8) :: R_DOC(Nsed,2), R_POC(Nsed,2)    ! 1:labile, 2:refractory
 # endif
@@ -1339,94 +1335,7 @@ CONTAINS
 
 
 ! ***********************************************************************************
-!!! 実行文 executable statement
-
-! ***************************** !
-!!! Check for input errors (yt_edit comment out for faster production runs)
-! ***************************** !
-
-!     !! General   
-!     if(Tamb < 0.0d0) then
-!         write(*,*) 'yt_debug:   i =', i, '   j =', j, '   Tamb =', Tamb
-!     endif
-!     if(Samb < 0.0d0) then
-!         write(*,*) 'yt_debug:   i =', i, '   j =', j, '   Samb =', Samb
-!     endif
-!     if(TAamb < 0.0d0) then
-!         write(*,*) 'yt_debug:   i =', i, '   j =', j, '   TAamb =', TAamb
-!     endif
-
-!     if(O2amb < 0.0d0) then
-!         write(*,*) 'yt_debug:   i =', i, '   j =', j, '   O2amb =', O2amb
-!     endif
-!     if(CO2amb < 0.0d0) then
-!         write(*,*) 'yt_debug:   i =', i, '   j =', j, '   CO2amb =', CO2amb
-!     endif
-!     if(N2amb < 0.0d0) then
-!         write(*,*) 'yt_debug:   i =', i, '   j =', j, '   N2amb =', N2amb
-!     endif
-!     !! Organic matters (Carbon)
-! # if defined ORGANIC_MATTER
-!     if(POCamb < 0.0d0) then
-!         write(*,*) 'yt_debug:   i =', i, '   j =', j, '   POCamb =', POCamb
-!     endif
-! # endif
-!     !! Nutrient
-! # if defined NUTRIENTS
-!     if(NO3amb < 0.0d0) then
-!         write(*,*) 'yt_debug:   i =', i, '   j =', j, '   NO3amb =', NO3amb
-!     endif
-!     if(NH4amb < 0.0d0) then
-!         write(*,*) 'yt_debug:   i =', i, '   j =', j, '   NH4amb =', NH4amb
-!     endif
-!     if(PO4amb < 0.0d0) then
-!         write(*,*) 'yt_debug:   i =', i, '   j =', j, '   PO4amb =', PO4amb
-!     endif
-! #  if defined ORGANIC_MATTER
-!     if(PONamb < 0.0d0) then
-!         write(*,*) 'yt_debug:   i =', i, '   j =', j, '   PONamb =', PONamb
-!     endif
-!     if(POPamb < 0.0d0) then
-!         write(*,*) 'yt_debug:   i =', i, '   j =', j, '   POPamb =', POPamb
-!     endif
-! #  endif
-! # endif
-!     !! Sulfate
-! # if defined SULFATE
-!     if(Mn2amb < 0.0d0) then
-!         write(*,*) 'yt_debug:   i =', i, '   j =', j, '   Mn2amb =', Mn2amb
-!     endif
-!     if(Fe2amb < 0.0d0) then
-!         write(*,*) 'yt_debug:   i =', i, '   j =', j, '   Fe2amb =', Fe2amb
-!     endif
-!     if(H2Samb < 0.0d0) then
-!         write(*,*) 'yt_debug:   i =', i, '   j =', j, '   H2Samb =', H2Samb
-!     endif
-!     if(SO4amb < 0.0d0) then
-!         write(*,*) 'yt_debug:   i =', i, '   j =', j, '   SO4amb =', SO4amb
-!     endif
-!     !! Deposition Flux (test) Kasih 2009 -------- 
-!     if(Fdep_MnO2 < 0.0d0) then
-!         write(*,*) 'yt_debug:   i =', i, '   j =', j, '   Fdep_MnO2 =', Fdep_MnO2
-!     endif
-!     if(Fdep_FeOOH < 0.0d0) then
-!         write(*,*) 'yt_debug:   i =', i, '   j =', j, '   Fdep_FeOOH =', Fdep_FeOOH
-!     endif
-! # endif
-! # if defined ORGANIC_MATTER
-!     if(Fdep_POC < 0.0d0) then
-!         write(*,*) 'yt_debug:   i =', i, '   j =', j, '   Fdep_POC =', Fdep_POC
-!     endif
-! #  if defined NUTRIENTS
-!     if(Fdep_PON < 0.0d0) then
-!         write(*,*) 'yt_debug:   i =', i, '   j =', j, '   Fdep_PON =', Fdep_PON
-!     endif
-!     if(Fdep_POP < 0.0d0) then
-!         write(*,*) 'yt_debug:   i =', i, '   j =', j, '   Fdep_POP =', Fdep_POP
-!     endif
-! #  endif
-! # endif
-
+!!! executable statement
 
 ! ***************************** !
 !!! physical properties of sediment layers 
@@ -1455,109 +1364,58 @@ CONTAINS
 !!!  Upper boundary is defined as constant concentrations in water column in main.F
 !!!  Bottom boundary (nmol cm-2 s-1) --------------------------
 !    Closed boundary condition 
-# if defined SEDECO_CLOSED_BOTTOM_DIFFUSION_BOUNDARY
-!! set boundary-1 to boundary and calculate below vvv in ficks law to get zero diffusion
-    ! SEDECO(ng)%Tmp(i,j,Nsed) = SEDECO(ng)%Tmp(i,j,Nsed-1)
-    ! SEDECO(ng)%Sal(i,j,Nsed) = SEDECO(ng)%Sal(i,j,Nsed-1)
-
-    ! SEDECO(ng)%O2(i,j,Nsed) = SEDECO(ng)%O2(i,j,Nsed-1)
-    ! SEDECO(ng)%CO2(i,j,Nsed) = SEDECO(ng)%CO2(i,j,Nsed-1)
-    ! SEDECO(ng)%N2(i,j,Nsed) = SEDECO(ng)%N2(i,j,Nsed-1)
-
-    ! yt_edit >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    SEDECO(ng)%Tmp(i,j,Nsed) = min( SEDECO(ng)%Tmp(i,j,Nsed-1), 50.0d0 ) ! yt_edit cap bottom layer value
-    SEDECO(ng)%Sal(i,j,Nsed) = min( SEDECO(ng)%Sal(i,j,Nsed-1), 50.0d0 ) ! yt_edit cap bottom layer value
-
-    SEDECO(ng)%O2 (i,j,Nsed) = min( SEDECO(ng)%O2 (i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
-    SEDECO(ng)%CO2(i,j,Nsed) = min( SEDECO(ng)%CO2(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
-    SEDECO(ng)%N2 (i,j,Nsed) = min( SEDECO(ng)%N2 (i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
-    ! yt_edit <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-#  if defined ORGANIC_MATTER
-    ! SEDECO(ng)%DOCf(i,j,Nsed) = SEDECO(ng)%DOCf(i,j,Nsed-1)
-    ! SEDECO(ng)%DOCs(i,j,Nsed) = SEDECO(ng)%DOCs(i,j,Nsed-1)
-    ! SEDECO(ng)%POCf(i,j,Nsed) = SEDECO(ng)%POCf(i,j,Nsed-1)
-    ! SEDECO(ng)%POCs(i,j,Nsed) = SEDECO(ng)%POCs(i,j,Nsed-1)
-    ! SEDECO(ng)%POCn(i,j,Nsed) = SEDECO(ng)%POCn(i,j,Nsed-1)
-
-    ! yt_edit >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    SEDECO(ng)%DOCf(i,j,Nsed) = min( SEDECO(ng)%DOCf(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
-    SEDECO(ng)%DOCs(i,j,Nsed) = min( SEDECO(ng)%DOCs(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
-    SEDECO(ng)%POCf(i,j,Nsed) = min( SEDECO(ng)%POCf(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
-    SEDECO(ng)%POCs(i,j,Nsed) = min( SEDECO(ng)%POCs(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
-    SEDECO(ng)%POCn(i,j,Nsed) = min( SEDECO(ng)%POCn(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
-    ! yt_edit <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-#  endif
-#  if defined NUTRIENTS
-    ! SEDECO(ng)%NO3(i,j,Nsed) = SEDECO(ng)%NO3(i,j,Nsed-1)
-    ! SEDECO(ng)%NH4(i,j,Nsed) = SEDECO(ng)%NH4(i,j,Nsed-1)
-    ! SEDECO(ng)%PO4(i,j,Nsed) = SEDECO(ng)%PO4(i,j,Nsed-1)
-
-    ! yt_edit >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    SEDECO(ng)%NO3(i,j,Nsed) = min( SEDECO(ng)%NO3(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
-    SEDECO(ng)%NH4(i,j,Nsed) = min( SEDECO(ng)%NH4(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
-    SEDECO(ng)%PO4(i,j,Nsed) = min( SEDECO(ng)%PO4(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
-    ! yt_edit <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-#   if defined ORGANIC_MATTER
-    ! SEDECO(ng)%DONf(i,j,Nsed) = SEDECO(ng)%DONf(i,j,Nsed-1)
-    ! SEDECO(ng)%DONs(i,j,Nsed) = SEDECO(ng)%DONs(i,j,Nsed-1)
-    ! SEDECO(ng)%PONf(i,j,Nsed) = SEDECO(ng)%PONf(i,j,Nsed-1)
-    ! SEDECO(ng)%PONs(i,j,Nsed) = SEDECO(ng)%PONs(i,j,Nsed-1)
-    ! SEDECO(ng)%PONn(i,j,Nsed) = SEDECO(ng)%PONn(i,j,Nsed-1)
-    ! SEDECO(ng)%DOPf(i,j,Nsed) = SEDECO(ng)%DOPf(i,j,Nsed-1)
-    ! SEDECO(ng)%DOPs(i,j,Nsed) = SEDECO(ng)%DOPs(i,j,Nsed-1)
-    ! SEDECO(ng)%POPf(i,j,Nsed) = SEDECO(ng)%POPf(i,j,Nsed-1)
-    ! SEDECO(ng)%POPs(i,j,Nsed) = SEDECO(ng)%POPs(i,j,Nsed-1)
-    ! SEDECO(ng)%POPn(i,j,Nsed) = SEDECO(ng)%POPn(i,j,Nsed-1)
-
-    ! yt_edit >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    SEDECO(ng)%DONf(i,j,Nsed) = min( SEDECO(ng)%DONf(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
-    SEDECO(ng)%DONs(i,j,Nsed) = min( SEDECO(ng)%DONs(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
-    SEDECO(ng)%PONf(i,j,Nsed) = min( SEDECO(ng)%PONf(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
-    SEDECO(ng)%PONs(i,j,Nsed) = min( SEDECO(ng)%PONs(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
-    SEDECO(ng)%PONn(i,j,Nsed) = min( SEDECO(ng)%PONn(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
-    SEDECO(ng)%DOPf(i,j,Nsed) = min( SEDECO(ng)%DOPf(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
-    SEDECO(ng)%DOPs(i,j,Nsed) = min( SEDECO(ng)%DOPs(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
-    SEDECO(ng)%POPf(i,j,Nsed) = min( SEDECO(ng)%POPf(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
-    SEDECO(ng)%POPs(i,j,Nsed) = min( SEDECO(ng)%POPs(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
-    SEDECO(ng)%POPn(i,j,Nsed) = min( SEDECO(ng)%POPn(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
-    ! yt_edit <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-#   endif
-#  endif
-#  if defined SULFATE
-    ! SEDECO(ng)%Mn2(i,j,Nsed)  = SEDECO(ng)%Mn2(i,j,Nsed-1)
-    ! SEDECO(ng)%MnO2(i,j,Nsed) = SEDECO(ng)%MnO2(i,j,Nsed-1)
-
-    ! SEDECO(ng)%Fe2(i,j,Nsed)       = SEDECO(ng)%Fe2(i,j,Nsed-1)
-    ! SEDECO(ng)%FeS(i,j,Nsed)       = SEDECO(ng)%FeS(i,j,Nsed-1)
-    ! SEDECO(ng)%FeS2(i,j,Nsed)      = SEDECO(ng)%FeS2(i,j,Nsed-1)
-    ! SEDECO(ng)%FeOOH(i,j,Nsed)     = SEDECO(ng)%FeOOH(i,j,Nsed-1)
-    ! SEDECO(ng)%FeOOH_PO4(i,j,Nsed) = SEDECO(ng)%FeOOH_PO4(i,j,Nsed-1)
-
-    ! SEDECO(ng)%H2S(i,j,Nsed) = SEDECO(ng)%H2S(i,j,Nsed-1)
-    ! SEDECO(ng)%S0(i,j,Nsed)  = SEDECO(ng)%S0(i,j,Nsed-1)
-    ! SEDECO(ng)%SO4(i,j,Nsed) = SEDECO(ng)%SO4(i,j,Nsed-1)
-
-    ! yt_edit >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    SEDECO(ng)%Mn2      (i,j,Nsed) = min( SEDECO(ng)%Mn2      (i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
-    SEDECO(ng)%MnO2     (i,j,Nsed) = min( SEDECO(ng)%MnO2     (i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
-
-    SEDECO(ng)%Fe2      (i,j,Nsed) = min( SEDECO(ng)%Fe2      (i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
-    SEDECO(ng)%FeS      (i,j,Nsed) = min( SEDECO(ng)%FeS      (i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
-    SEDECO(ng)%FeS2     (i,j,Nsed) = min( SEDECO(ng)%FeS2     (i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
-    SEDECO(ng)%FeOOH    (i,j,Nsed) = min( SEDECO(ng)%FeOOH    (i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
-    SEDECO(ng)%FeOOH_PO4(i,j,Nsed) = min( SEDECO(ng)%FeOOH_PO4(i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
-
-    SEDECO(ng)%H2S      (i,j,Nsed) = min( SEDECO(ng)%H2S      (i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
-    SEDECO(ng)%S0       (i,j,Nsed) = min( SEDECO(ng)%S0       (i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
-    SEDECO(ng)%SO4      (i,j,Nsed) = min( SEDECO(ng)%SO4      (i,j,Nsed-1), 1.0d6 ) ! yt_edit cap bottom layer value
-    ! yt_edit <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-#  endif
-# endif    
+!# if defined SEDECO_CLOSED_BOTTOM_DIFFUSION_BOUNDARY
+!!! set boundary-1 to boundary and calculate below vvv in ficks law to get zero diffusion
+!    SEDECO(ng)%Tmp(i,j,Nsed) = SEDECO(ng)%Tmp(i,j,Nsed-1)
+!    SEDECO(ng)%Sal(i,j,Nsed) = SEDECO(ng)%Sal(i,j,Nsed-1)
+!
+!    SEDECO(ng)%O2(i,j,Nsed) = SEDECO(ng)%O2(i,j,Nsed-1)
+!    SEDECO(ng)%DIC(i,j,Nsed) = SEDECO(ng)%DIC(i,j,Nsed-1)
+!    SEDECO(ng)%N2(i,j,Nsed) = SEDECO(ng)%N2(i,j,Nsed-1)
+!
+!#  if defined ORGANIC_MATTER
+!    SEDECO(ng)%DOCf(i,j,Nsed) = SEDECO(ng)%DOCf(i,j,Nsed-1)
+!    SEDECO(ng)%DOCs(i,j,Nsed) = SEDECO(ng)%DOCs(i,j,Nsed-1)
+!    SEDECO(ng)%POCf(i,j,Nsed) = SEDECO(ng)%POCf(i,j,Nsed-1)
+!    SEDECO(ng)%POCs(i,j,Nsed) = SEDECO(ng)%POCs(i,j,Nsed-1)
+!    SEDECO(ng)%POCn(i,j,Nsed) = SEDECO(ng)%POCn(i,j,Nsed-1)
+!
+!#  endif
+!#  if defined NUTRIENTS
+!    SEDECO(ng)%NO3(i,j,Nsed) = SEDECO(ng)%NO3(i,j,Nsed-1)
+!    SEDECO(ng)%NH4(i,j,Nsed) = SEDECO(ng)%NH4(i,j,Nsed-1)
+!    SEDECO(ng)%PO4(i,j,Nsed) = SEDECO(ng)%PO4(i,j,Nsed-1)
+!
+!#   if defined ORGANIC_MATTER
+!    SEDECO(ng)%DONf(i,j,Nsed) = SEDECO(ng)%DONf(i,j,Nsed-1)
+!    SEDECO(ng)%DONs(i,j,Nsed) = SEDECO(ng)%DONs(i,j,Nsed-1)
+!    SEDECO(ng)%PONf(i,j,Nsed) = SEDECO(ng)%PONf(i,j,Nsed-1)
+!    SEDECO(ng)%PONs(i,j,Nsed) = SEDECO(ng)%PONs(i,j,Nsed-1)
+!    SEDECO(ng)%PONn(i,j,Nsed) = SEDECO(ng)%PONn(i,j,Nsed-1)
+!    SEDECO(ng)%DOPf(i,j,Nsed) = SEDECO(ng)%DOPf(i,j,Nsed-1)
+!    SEDECO(ng)%DOPs(i,j,Nsed) = SEDECO(ng)%DOPs(i,j,Nsed-1)
+!    SEDECO(ng)%POPf(i,j,Nsed) = SEDECO(ng)%POPf(i,j,Nsed-1)
+!    SEDECO(ng)%POPs(i,j,Nsed) = SEDECO(ng)%POPs(i,j,Nsed-1)
+!    SEDECO(ng)%POPn(i,j,Nsed) = SEDECO(ng)%POPn(i,j,Nsed-1)
+!
+!#   endif
+!#  endif
+!#  if defined SULFATE
+!    SEDECO(ng)%Mn2(i,j,Nsed)  = SEDECO(ng)%Mn2(i,j,Nsed-1)
+!    SEDECO(ng)%MnO2(i,j,Nsed) = SEDECO(ng)%MnO2(i,j,Nsed-1)
+!
+!    SEDECO(ng)%Fe2(i,j,Nsed)       = SEDECO(ng)%Fe2(i,j,Nsed-1)
+!    SEDECO(ng)%FeS(i,j,Nsed)       = SEDECO(ng)%FeS(i,j,Nsed-1)
+!    SEDECO(ng)%FeS2(i,j,Nsed)      = SEDECO(ng)%FeS2(i,j,Nsed-1)
+!    SEDECO(ng)%FeOOH(i,j,Nsed)     = SEDECO(ng)%FeOOH(i,j,Nsed-1)
+!    SEDECO(ng)%FeOOH_PO4(i,j,Nsed) = SEDECO(ng)%FeOOH_PO4(i,j,Nsed-1)
+!
+!    SEDECO(ng)%H2S(i,j,Nsed) = SEDECO(ng)%H2S(i,j,Nsed-1)
+!    SEDECO(ng)%S0(i,j,Nsed)  = SEDECO(ng)%S0(i,j,Nsed-1)
+!    SEDECO(ng)%SO4(i,j,Nsed) = SEDECO(ng)%SO4(i,j,Nsed-1)
+!
+!#  endif
+!# endif    
 
 
 ! ***************************** !
@@ -1567,7 +1425,7 @@ CONTAINS
     !! ----- for sediment column ----- !!
     DO k = 1,Nsed
         Dw_O2(k)   = (11.7d0 + 0.344d0*SEDECO(ng)%Tmp(i,j,k) + 0.00505d0*SEDECO(ng)%Tmp(i,j,k)**2d0) *(1.0d-6)
-        Dw_CO2(k)  = (9.39d0 + 0.267d0*SEDECO(ng)%Tmp(i,j,k) + 0.0041d0 *SEDECO(ng)%Tmp(i,j,k)**2d0) *(1.0d-6) 
+        Dw_DIC(k)  = (9.39d0 + 0.267d0*SEDECO(ng)%Tmp(i,j,k) + 0.0041d0 *SEDECO(ng)%Tmp(i,j,k)**2d0) *(1.0d-6) 
         Dw_N2(k)   = (9.52d0 + 0.291d0*SEDECO(ng)%Tmp(i,j,k) + 0.00448d0*SEDECO(ng)%Tmp(i,j,k)**2d0) *(1.0d-6)
 # if defined ORGANIC_MATTER
         Dw_DOM(k,1) = (9.76d0 + 0.398d0*SEDECO(ng)%Tmp(i,j,k)) *(1.0d-7) ! DOMf: DOCf DONf DOPf
@@ -1589,7 +1447,7 @@ CONTAINS
     !! --- Diffusion coefficient in sediment (function Dsed is defined in mod_geochem.F) --- !!
     DO k = 2,Nsed
         Ds_O2(k)   = Dsed(Dw_O2(k),SEDECO(ng)%poro(i,j,k))
-        Ds_CO2(k)  = Dsed(Dw_CO2(k),SEDECO(ng)%poro(i,j,k))
+        Ds_DIC(k)  = Dsed(Dw_DIC(k),SEDECO(ng)%poro(i,j,k))
         Ds_N2(k)   = Dsed(Dw_N2(k),SEDECO(ng)%poro(i,j,k))
 # if defined ORGANIC_MATTER
         Ds_DOM(k,1) = Dsed(Dw_DOM(k,1),SEDECO(ng)%poro(i,j,k)) ! DOMf: DOCf DONf DOPf
@@ -1615,7 +1473,7 @@ CONTAINS
 !     Fd_Tmp(1) = Diff*( Tamb  - SEDECO(ng)%Tmp(i,j,1) )/t_dbl
 !     Fd_Sal(1) = Diff*( Samb  - SEDECO(ng)%Sal(i,j,1) )/t_dbl
     Fd_O2 (1) = Ficks(Dw_O2 (1),O2amb ,SEDECO(ng)%O2 (i,j,1),dbl)
-    Fd_CO2(1) = Ficks(Dw_CO2(1),CO2amb,SEDECO(ng)%CO2(i,j,1),dbl)
+    Fd_DIC(1) = Ficks(Dw_DIC(1),DICamb,SEDECO(ng)%DIC(i,j,1),dbl)
     Fd_N2 (1) = Ficks(Dw_N2 (1),N2amb ,SEDECO(ng)%N2 (i,j,1),dbl)
 # if defined NUTRIENTS
     Fd_NO3(1) = Ficks(Dw_NO3(1),NO3amb,SEDECO(ng)%NO3(i,j,1),dbl)
@@ -1637,7 +1495,7 @@ CONTAINS
         ! Fd_Tmp(k) = Diff*( Tamb  - SEDECO(ng)%Tmp(i,j,1) )/t_dbl
         ! Fd_Sal(k) = Diff*( Samb  - SEDECO(ng)%Sal(i,j,1) )/t_dbl
         Fd_O2(k)    = Ficks_sedd(Ds_O2(k),SEDECO(ng)%O2(i,j,k-1),SEDECO(ng)%O2(i,j,k),dz(k),SEDECO(ng)%poro(i,j,k))
-        Fd_CO2(k)   = Ficks_sedd(Ds_CO2(k),SEDECO(ng)%CO2(i,j,k-1),SEDECO(ng)%CO2(i,j,k),dz(k),SEDECO(ng)%poro(i,j,k))
+        Fd_DIC(k)   = Ficks_sedd(Ds_DIC(k),SEDECO(ng)%DIC(i,j,k-1),SEDECO(ng)%DIC(i,j,k),dz(k),SEDECO(ng)%poro(i,j,k))
         Fd_N2(k)    = Ficks_sedd(Ds_N2(k),SEDECO(ng)%N2(i,j,k-1),SEDECO(ng)%N2(i,j,k),dz(k),SEDECO(ng)%poro(i,j,k))
 # if defined ORGANIC_MATTER
         Fd_DOC(k,1) = Ficks_sedd(Ds_DOM(k,1),SEDECO(ng)%DOCf(i,j,k-1),SEDECO(ng)%DOCf(i,j,k),dz(k),SEDECO(ng)%poro(i,j,k)) ! DOCf
@@ -1677,7 +1535,7 @@ CONTAINS
         ! Fb_Tmp(k) = Diff*( Tamb  - SEDECO(ng)%Tmp(i,j,1) )/t_dbl
         ! Fb_Sal(k) = Diff*( Samb  - SEDECO(ng)%Sal(i,j,1) )/t_dbl
         Fb_O2(k)   = Ficks_sedd(DBd(k),SEDECO(ng)%O2(i,j,k-1),SEDECO(ng)%O2(i,j,k),dz(k),SEDECO(ng)%poro(i,j,k))
-        Fb_CO2(k)  = Ficks_sedd(DBd(k),SEDECO(ng)%CO2(i,j,k-1),SEDECO(ng)%CO2(i,j,k),dz(k),SEDECO(ng)%poro(i,j,k))
+        Fb_DIC(k)  = Ficks_sedd(DBd(k),SEDECO(ng)%DIC(i,j,k-1),SEDECO(ng)%DIC(i,j,k),dz(k),SEDECO(ng)%poro(i,j,k))
         Fb_N2(k)   = Ficks_sedd(DBd(k),SEDECO(ng)%N2(i,j,k-1),SEDECO(ng)%N2(i,j,k),dz(k),SEDECO(ng)%poro(i,j,k))
 # if defined ORGANIC_MATTER
         Fb_DOC(k,1) = Ficks_sedd(DBd(k),SEDECO(ng)%DOCf(i,j,k-1),SEDECO(ng)%DOCf(i,j,k),dz(k),SEDECO(ng)%poro(i,j,k))
@@ -1761,7 +1619,7 @@ CONTAINS
         ! Fc_Tmp(k) = FCd(SEDECO(ng)%poro(i,j,k),u,SEDECO(ng)%O2(i,j,k))
         ! Fc_Sal(k) = FCd(SEDECO(ng)%poro(i,j,k),u,SEDECO(ng)%O2(i,j,k))
         Fc_O2(k)   = FCd(SEDECO(ng)%poro(i,j,k),u,SEDECO(ng)%O2(i,j,k))
-        Fc_CO2(k)  = FCd(SEDECO(ng)%poro(i,j,k),u,SEDECO(ng)%CO2(i,j,k))
+        Fc_DIC(k)  = FCd(SEDECO(ng)%poro(i,j,k),u,SEDECO(ng)%DIC(i,j,k))
         Fc_N2(k)   = FCd(SEDECO(ng)%poro(i,j,k),u,SEDECO(ng)%N2(i,j,k))
 #  if defined ORGANIC_MATTER
         Fc_DOC(k,1)   = FCd(SEDECO(ng)%poro(i,j,k),u,SEDECO(ng)%DOCf(i,j,k))
@@ -1812,7 +1670,7 @@ CONTAINS
     ! Fc_Tmp(Nsed+1) = Fc_Tmp(Nsed)
     ! Fc_Sal(Nsed+1) = Fc_Sal(Nsed)
     Fc_O2(Nsed+1)   = Fc_O2(Nsed)
-    Fc_CO2(Nsed+1)  = Fc_CO2(Nsed)
+    Fc_DIC(Nsed+1)  = Fc_DIC(Nsed)
     Fc_N2(Nsed+1)   = Fc_N2(Nsed)
 #  if defined ORGANIC_MATTER
     Fc_DOC(Nsed+1,:)   = Fc_DOC(Nsed,:)
@@ -1864,7 +1722,7 @@ CONTAINS
     ! Fa_Tmp(k)     = FCa(1.0d0,SEDECO(ng)%poro(i,j,k),AdvecVelo,O2amb,SEDECO(ng)%O2 (i,j,k))
     ! Fa_Sal(k)     = FCa(1.0d0,SEDECO(ng)%poro(i,j,k),AdvecVelo,O2amb,SEDECO(ng)%O2 (i,j,k))
     Fa_O2(k)      = FCa(1.0d0,SEDECO(ng)%poro(i,j,k),AdvecVelo,O2amb,SEDECO(ng)%O2 (i,j,k))
-    Fa_CO2(k)     = FCa(1.0d0,SEDECO(ng)%poro(i,j,k),AdvecVelo,CO2amb,SEDECO(ng)%CO2(i,j,k))
+    Fa_DIC(k)     = FCa(1.0d0,SEDECO(ng)%poro(i,j,k),AdvecVelo,DICamb,SEDECO(ng)%DIC(i,j,k))
     Fa_N2(k)      = FCa(1.0d0,SEDECO(ng)%poro(i,j,k),AdvecVelo,N2amb,SEDECO(ng)%N2 (i,j,k))
 #  if defined ORGANIC_MATTER
     ! Fa_DOC(k,1)   = FCa(1.0d0,SEDECO(ng)%poro(i,j,k),AdvecVelo,O2amb,SEDECO(ng)%DOCf(i,j,k))
@@ -1908,7 +1766,7 @@ CONTAINS
         ! Fa_Tmp(k)     = FCa(SEDECO(ng)%poro(i,j,k-1),SEDECO(ng)%poro(i,j,k),AdvecVelo,SEDECO(ng)%O2 (i,j,k-1),SEDECO(ng)%O2 (i,j,k))
         ! Fa_Sal(k)     = FCa(SEDECO(ng)%poro(i,j,k-1),SEDECO(ng)%poro(i,j,k),AdvecVelo,SEDECO(ng)%O2 (i,j,k-1),SEDECO(ng)%O2 (i,j,k))
         Fa_O2(k)  = FCa(SEDECO(ng)%poro(i,j,k-1),SEDECO(ng)%poro(i,j,k),AdvecVelo,SEDECO(ng)%O2 (i,j,k-1),SEDECO(ng)%O2 (i,j,k))
-        Fa_CO2(k) = FCa(SEDECO(ng)%poro(i,j,k-1),SEDECO(ng)%poro(i,j,k),AdvecVelo,SEDECO(ng)%CO2(i,j,k-1),SEDECO(ng)%CO2(i,j,k))
+        Fa_DIC(k) = FCa(SEDECO(ng)%poro(i,j,k-1),SEDECO(ng)%poro(i,j,k),AdvecVelo,SEDECO(ng)%DIC(i,j,k-1),SEDECO(ng)%DIC(i,j,k))
         Fa_N2(k)  = FCa(SEDECO(ng)%poro(i,j,k-1),SEDECO(ng)%poro(i,j,k),AdvecVelo,SEDECO(ng)%N2 (i,j,k-1),SEDECO(ng)%N2 (i,j,k))
 #  if defined ORGANIC_MATTER
         ! Fa_DOC(k,1)   = FCa(SEDECO(ng)%poro(i,j,k-1),SEDECO(ng)%poro(i,j,k),AdvecVelo,SEDECO(ng)%DOCf(i,j,k-1),SEDECO(ng)%DOCf(i,j,k))
@@ -1947,14 +1805,13 @@ CONTAINS
         Fa_SO4(k) = FCa(SEDECO(ng)%poro(i,j,k-1),SEDECO(ng)%poro(i,j,k),AdvecVelo,SEDECO(ng)%SO4(i,j,k-1),SEDECO(ng)%SO4(i,j,k))
 #  endif
     ENDDO
-# endif
 
     !! bottom layer k = Nsed+1
     k = Nsed+1
     ! Fa_Tmp(k)     = FCa(SEDECO(ng)%poro(i,j,k),1.0d0,AdvecVelo,SEDECO(ng)%O2 (i,j,k),sgd_DOx_in)
     ! Fa_Sal(k)     = FCa(SEDECO(ng)%poro(i,j,k),1.0d0,AdvecVelo,SEDECO(ng)%O2 (i,j,k),sgd_DOx_in)
     Fa_O2(k)      = FCa(SEDECO(ng)%poro(i,j,k),1.0d0,AdvecVelo,SEDECO(ng)%O2 (i,j,k),sgd_DOx_in)
-    Fa_CO2(k)     = FCa(SEDECO(ng)%poro(i,j,k),1.0d0,AdvecVelo,SEDECO(ng)%CO2(i,j,k),sgd_DIC_in)
+    Fa_DIC(k)     = FCa(SEDECO(ng)%poro(i,j,k),1.0d0,AdvecVelo,SEDECO(ng)%DIC(i,j,k),sgd_DIC_in)
     Fa_N2(k)      = FCa(SEDECO(ng)%poro(i,j,k),1.0d0,AdvecVelo,SEDECO(ng)%N2 (i,j,k),8.0d0) ! constant influx of 8.0 [umol.N2 L-1]
 #  if defined ORGANIC_MATTER
     ! Fa_DOC(k,1)   = FCa(SEDECO(ng)%poro(i,j,k),1.0d0,AdvecVelo,SEDECO(ng)%DOCf(i,j,k))
@@ -1994,7 +1851,7 @@ CONTAINS
                       (2.71235d0  / 35.16504d0)   * sgd_Sal_in        * rhos_d(k)          / 96.06d0       * 1000000) ! influx constant ratio of PSU 
     !                 (2.71 g.SO4 / 35.16 g.salt) PSU(g.salt / kg.sw) * rhos_d(kg.sw/L.sw) / (g.SO4/mol.SO4) (1000000 umol/mol)   values from https://www.coastalwiki.org/wiki/Salinity#:~:text=Salinity%20classification%20(Practical%20Salinity%20Scale%20S)%20of%20water%20bodies.&text=The%20salinity%20of%20seawater%20is,)%20or%20%E2%80%B0%20(permil).
 #  endif
-
+# endif
 
 ! ***************************** !
 !!!    Reaction term
@@ -2202,7 +2059,7 @@ CONTAINS
 
     !! Net Production and Consumption from Reactions
     R_O2 (:) = -v1(:) -2d0*v6(:) -v9(:) -v11(:) -2d0*v16(:) -2d0*v17(:) -7d0*v18(:)
-    R_CO2(:) = v1(:) + v2(:) +v3(:) +v4(:) + v5(:)
+    R_DIC(:) = v1(:) + v2(:) +v3(:) +v4(:) + v5(:)
     R_N2(:)  = 0.2d0*v2(:)
 # if defined ORGANIC_MATTER
     R_DOC(:,1) = -vdoc(:,1) + OMFratio*vpoc(:,1) + OMSratio*vpoc(:,2) ! DOCf ! yt_edit confirm this section with masa
@@ -2256,7 +2113,7 @@ CONTAINS
     !! Total Flux : (nmol cm-2 s-1)
     !! DBL Flux (k = 0) (Only surface diffusion is considered. Deposition added in POM.)
     FT_O2(1)    = Fd_O2(1)
-    FT_CO2(1)   = Fd_CO2(1)
+    FT_DIC(1)   = Fd_DIC(1)
     FT_N2(1)    = Fd_N2(1)
 # if defined ORGANIC_MATTER
     FT_DOC(1,1) = 0.0d0 ! no flux with water column
@@ -2300,7 +2157,7 @@ CONTAINS
     !! -- Diffusion and biodiffusion -- !!
     DO k = 2,Nsed
         FT_O2(k)    = Fd_O2(k)    + Fb_O2(k)
-        FT_CO2(k)   = Fd_CO2(k)   + Fb_CO2(k)
+        FT_DIC(k)   = Fd_DIC(k)   + Fb_DIC(k)
         FT_N2(k)    = Fd_N2(k)    + Fb_N2(k)
 # if defined ORGANIC_MATTER
         FT_DOC(k,1) = Fd_DOC(k,1) + Fb_DOC(k,1)
@@ -2343,7 +2200,7 @@ CONTAINS
 # if defined SEDECO_CLOSED_BOTTOM_DIFFUSION_BOUNDARY
     !! DBL Flux (k = Nsed+1) (Closed bottom boundary for diffusion and biodiffusion.)
     FT_O2(Nsed+1)    = 0.0d0
-    FT_CO2(Nsed+1)   = 0.0d0
+    FT_DIC(Nsed+1)   = 0.0d0
     FT_N2(Nsed+1)    = 0.0d0
 #  if defined ORGANIC_MATTER
     FT_DOC(Nsed+1,1) = 0.0d0
@@ -2391,7 +2248,7 @@ CONTAINS
 # if defined SEDECO_BURIAL
     DO k = 2,Nsed+1
         FT_O2(k)    = FT_O2(k)    + Fc_O2(k)
-        FT_CO2(k)   = FT_CO2(k)   + Fc_CO2(k)
+        FT_DIC(k)   = FT_DIC(k)   + Fc_DIC(k)
         FT_N2(k)    = FT_N2(k)    + Fc_N2(k)
 #  if defined ORGANIC_MATTER
         FT_DOC(k,1) = FT_DOC(k,1) + Fc_DOC(k,1)
@@ -2437,7 +2294,7 @@ CONTAINS
 # if defined SEDECO_ADVECTION
     DO k = 1,Nsed+1
         FT_O2(k)    = FT_O2(k)    + Fa_O2(k)
-        FT_CO2(k)   = FT_CO2(k)   + Fa_CO2(k)
+        FT_DIC(k)   = FT_DIC(k)   + Fa_DIC(k)
         FT_N2(k)    = FT_N2(k)    + Fa_N2(k)
 #  if defined ORGANIC_MATTER
         ! FT_DOC(k,1) = FT_DOC(k,1) + Fa_DOC(k,1)
@@ -2566,17 +2423,17 @@ CONTAINS
         ! endif
         ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-        ! -- CO2 -- !
-        SEDECO(ng)%CO2(i,j,k) = massbalance_sed_d(SEDECO(ng)%CO2(i,j,k),FT_CO2(k),FT_CO2(k+1),R_CO2(k), &
+        ! -- DIC -- !
+        SEDECO(ng)%DIC(i,j,k) = massbalance_sed_d(SEDECO(ng)%DIC(i,j,k),FT_DIC(k),FT_DIC(k+1),R_DIC(k), &
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,miscDIC(k))
         ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ! ! if (isnan(SEDECO(ng)%CO2(i,j,k)) .or. abs(SEDECO(ng)%CO2(i,j,k)) > huge(SEDECO(ng)%CO2(i,j,k))) then
-        ! if (isnan(SEDECO(ng)%CO2(i,j,k)) .or. SEDECO(ng)%CO2(i,j,k) > 1.0d8 .or. SEDECO(ng)%CO2(i,j,k) < 0.0d0) then
-        !   write(*,*) 'yt_debug: sedecosys SEDECO(ng)%CO2(i,j,k)      i =', i, '   j =', j, '   k =', k
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%CO2(i,j,k) =', SEDECO(ng)%CO2(i,j,k)
-        !   write(*,*) 'yt_debug:     FT_CO2(k) =', FT_CO2(k)
-        !   write(*,*) 'yt_debug:     FT_CO2(k+1) =', FT_CO2(k+1)
-        !   write(*,*) 'yt_debug:     R_CO2(k) =', R_CO2(k)
+        ! ! if (isnan(SEDECO(ng)%DIC(i,j,k)) .or. abs(SEDECO(ng)%DIC(i,j,k)) > huge(SEDECO(ng)%DIC(i,j,k))) then
+        ! if (isnan(SEDECO(ng)%DIC(i,j,k)) .or. SEDECO(ng)%DIC(i,j,k) > 1.0d8 .or. SEDECO(ng)%DIC(i,j,k) < 0.0d0) then
+        !   write(*,*) 'yt_debug: sedecosys SEDECO(ng)%DIC(i,j,k)      i =', i, '   j =', j, '   k =', k
+        !   write(*,*) 'yt_debug:     SEDECO(ng)%DIC(i,j,k) =', SEDECO(ng)%DIC(i,j,k)
+        !   write(*,*) 'yt_debug:     FT_DIC(k) =', FT_DIC(k)
+        !   write(*,*) 'yt_debug:     FT_DIC(k+1) =', FT_DIC(k+1)
+        !   write(*,*) 'yt_debug:     R_DIC(k) =', R_DIC(k)
         !   write(*,*) 'yt_debug:     dz(k) =', dz(k)
         !   write(*,*) 'yt_debug:     SEDECO(ng)%poro(i,j,k) =', SEDECO(ng)%poro(i,j,k)
         !   write(*,*) 'yt_debug:     dt =', dt
@@ -2766,19 +2623,21 @@ CONTAINS
         ! -- NH4 -- !
         SEDECO(ng)%NH4(i,j,k) = massbalance_sed_d(SEDECO(ng)%NH4(i,j,k),FT_NH4(k),FT_NH4(k+1),R_NH4(k), &
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,miscNH4(k)) 
-        ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ! ! if (isnan(SEDECO(ng)%NH4(i,j,k)) .or. abs(SEDECO(ng)%NH4(i,j,k)) > huge(SEDECO(ng)%NH4(i,j,k))) then
-        ! if (isnan(SEDECO(ng)%NH4(i,j,k)) .or. SEDECO(ng)%NH4(i,j,k) > 1.0d8 .or. SEDECO(ng)%NH4(i,j,k) < 0.0d0) then
-        !   write(*,*) 'yt_debug: sedecosys SEDECO(ng)%NH4(i,j,k)      i =', i, '   j =', j, '   k =', k
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%NH4(i,j,k) =', SEDECO(ng)%NH4(i,j,k)
-        !   write(*,*) 'yt_debug:     FT_NH4(k) =', FT_NH4(k)
-        !   write(*,*) 'yt_debug:     FT_NH4(k+1) =', FT_NH4(k+1)
-        !   write(*,*) 'yt_debug:     R_NH4(k) =', R_NH4(k)
-        !   write(*,*) 'yt_debug:     dz(k) =', dz(k)
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%poro(i,j,k) =', SEDECO(ng)%poro(i,j,k)
-        !   write(*,*) 'yt_debug:     dt =', dt
-        ! endif
-        ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+        !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        ! if (isnan(SEDECO(ng)%NH4(i,j,k)) .or. abs(SEDECO(ng)%NH4(i,j,k)) > huge(SEDECO(ng)%NH4(i,j,k))) then
+!        if (isnan(SEDECO(ng)%NH4(i,j,k)) .or. SEDECO(ng)%NH4(i,j,k) > 1.0d8 .or. SEDECO(ng)%NH4(i,j,k) < 0.0d0) then
+        if (isnan(SEDECO(ng)%NH4(i,j,k))) then
+          write(*,*) 'yt_debug: sedecosys SEDECO(ng)%NH4(i,j,k)      i =', i, '   j =', j, '   k =', k
+          write(*,*) 'yt_debug:     SEDECO(ng)%NH4(i,j,k) =', SEDECO(ng)%NH4(i,j,k)
+          write(*,*) 'yt_debug:     FT_NH4(k) =', FT_NH4(k)
+          write(*,*) 'yt_debug:     FT_NH4(k+1) =', FT_NH4(k+1)
+          write(*,*) 'yt_debug:     R_NH4(k) =', R_NH4(k)
+          write(*,*) 'yt_debug:     dz(k) =', dz(k)
+          write(*,*) 'yt_debug:     SEDECO(ng)%poro(i,j,k) =', SEDECO(ng)%poro(i,j,k)
+          write(*,*) 'yt_debug:     dt =', dt
+          STOP
+        endif
+        !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
         ! -- PO4 -- !
         SEDECO(ng)%PO4(i,j,k) = massbalance_sed_d(SEDECO(ng)%PO4(i,j,k),FT_PO4(k),FT_PO4(k+1),R_PO4(k), &
@@ -3199,28 +3058,26 @@ CONTAINS
 ! ***************************** !
 !!!   set output parameters
 ! ***************************** !
-
+# if defined SEDECO_ADVECTION
 !! Return total flux of water --> DBL
   ! [oC]    = [oC]
     Tmp_out = sgd_Tmp_in
   ! [PSU/cm2s] = [PSU/L]    * [cm/s]   * [L/1000cm3]
     Flux_Sal   = sgd_Sal_in * sgd_flux / 1000d0         ! yt_edit is this correct???   right now, groundwater salt is passed directly to reef_ecosys. still need to add propper diffusion
+# endif
     Flux_DO  = FT_O2(1) 
-    Flux_CO2sed = FT_CO2(1)
+    Flux_DICsed = FT_DIC(1)
     Flux_N2  = FT_N2(1)
 # if defined ORGANIC_MATTER
-    Flux_POCf = FT_POC(1,1)
-    Flux_POCs = FT_POC(1,2)
+    Flux_POC(:) = FT_POC(1,:)
 # endif
 # if defined NUTRIENTS
     Flux_NO3 = FT_NO3(1)
     Flux_NH4 = FT_NH4(1)
     Flux_PO4 = FT_PO4(1)
 #  if defined ORGANIC_MATTER
-    Flux_PONf = FT_PON(1,1)
-    Flux_PONs = FT_PON(1,2)
-    Flux_POPf = FT_POP(1,1)
-    Flux_POPs = FT_POP(1,2)
+    Flux_PON(:) = FT_PON(1,:)
+    Flux_POP(:) = FT_POP(1,:)
 #  endif
 # endif
 # if defined SULFATE
@@ -3247,7 +3104,7 @@ CONTAINS
 !     if(time.ge.dsec) then
 
 !         write(58,*) time/86400.d0, O2amb, SEDECO(ng)%O2(i,j,:)
-!         write(80,*) time/86400.d0, CO2amb, SEDECO(ng)%CO2(i,j,:)
+!         write(80,*) time/86400.d0, DICamb, SEDECO(ng)%DIC(i,j,:)
 !         write(81,*) time/86400.d0, N2amb, SEDECO(ng)%N2(i,j,:)
 
 ! #  if defined ORGANIC_MATTER

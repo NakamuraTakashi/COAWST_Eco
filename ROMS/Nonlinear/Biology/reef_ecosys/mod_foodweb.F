@@ -1,5 +1,5 @@
 
-!!!=== Copyright (c) 2012-2020 Takashi NAKAMURA  =====
+!!!=== Copyright (c) 2012-2024 Takashi NAKAMURA  =====
 !!!      modified by Shinya AMANO, Faisal AMRI
 
 #include "cppdefs.h"
@@ -555,12 +555,10 @@ CONTAINS
       dDI13C_dt = dDI13C_dt - Ap(k)*a_phot*rDI13C - Ap(k)*rCCp(k)*a_calc*rDI13C
 #endif
 #if defined NUTRIENTS
-      if(Vp_NO3(k) /= 0.0d0) then ! yt_edit prevent div by 0
+      if(Vp_NO3(k)+Vp_NH4(k) /= 0.0d0) then ! yt_edit prevent div by 0
         dNO3_dt = dNO3_dt -         Ap(k)*Vp_NO3(k)/(Vp_NH4(k)+Vp_NO3(k))/rCNp(k)
         dDOx_dt = dDOx_dt + 2.0d0 * Ap(k)*Vp_NO3(k)/(Vp_NH4(k)+Vp_NO3(k))/rCNp(k)  !!!*********************
         dTA_dt  = dTA_dt  + 1.0d0 * Ap(k)*Vp_NO3(k)/(Vp_NH4(k)+Vp_NO3(k))/rCNp(k)  ! increase of alkalinity by 1 mole when nitrate or nitrite is the N source
-      endif
-      if(Vp_NH4(k) /= 0.0d0) then ! yt_edit prevent div by 0
         dNH4_dt = dNH4_dt -         Ap(k)*Vp_NH4(k)/(Vp_NH4(k)+Vp_NO3(k))/rCNp(k)
         dTA_dt  = dTA_dt  - 1.0d0 * Ap(k)*Vp_NH4(k)/(Vp_NH4(k)+Vp_NO3(k))/rCNp(k)  ! decrease of alkalinity by 1 mole when ammonia is used
       endif
