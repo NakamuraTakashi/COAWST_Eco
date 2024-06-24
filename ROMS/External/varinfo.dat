@@ -10273,75 +10273,111 @@
   1.0d0
 
 
-'phyt_east_'                                        ! Input
+'phytoplankton_east_'                                        ! Input
   'phytoplankton eastern boundary condition'
   'umolC L-1'                                      ! [umolC L-1]
-  'phyt_east_, scalar, series'
-  'phyt_time'
+  'phytoplankton_east_, scalar, series'
+  'phytoplankton_time'
   'idTbry(ieast,iPhyt(i))'
   'nulvar'
   1.0d0
 
-'phyt_west_'                                        ! Input
+'phytoplankton_west_'                                        ! Input
   'phytoplankton western boundary condition'
   'umolC L-1'                                      ! [umolC L-1]
-  'phyt_west_, scalar, series'
-  'phyt_time'
+  'phytoplankton_west_, scalar, series'
+  'phytoplankton_time'
   'idTbry(iwest,iPhyt(i))'
   'nulvar'
   1.0d0
 
-'phyt_north_'                                        ! Input
+'phytoplankton_north_'                                        ! Input
   'phytoplankton northern boundary condition'
   'umolC L-1'                                      ! [umolC L-1]
-  'phyt_north_, scalar, series'
-  'phyt_time'
+  'phytoplankton_north_, scalar, series'
+  'phytoplankton_time'
   'idTbry(inorth,iPhyt(i))'
   'nulvar'
   1.0d0
 
-'phyt_south_'                                        ! Input
+'phytoplankton_south_'                                        ! Input
   'phytoplankton southern boundary condition'
   'umolC L-1'                                      ! [umolC L-1]
-  'phyt_south_, scalar, series'
-  'phyt_time'
+  'phytoplankton_south_, scalar, series'
+  'phytoplankton_time'
   'idTbry(isouth,iPhyt(i))'
   'nulvar'
   1.0d0
 
-'zoop_east_'                                        ! Input
+'zooplankton_east_'                                        ! Input
   'zooplankton eastern boundary condition'
   'umolC L-1'                                      ! [umolC L-1]
-  'zoop_east_, scalar, series'
-  'zoop_time'
+  'zooplankton_east_, scalar, series'
+  'zooplankton_time'
   'idTbry(ieast,iZoop(i))'
   'nulvar'
   1.0d0
 
-'zoop_west_'                                        ! Input
+'zooplankton_west_'                                        ! Input
   'zooplankton western boundary condition'
   'umolC L-1'                                      ! [umolC L-1]
-  'zoop_west_, scalar, series'
-  'zoop_time'
+  'zooplankton_west_, scalar, series'
+  'zooplankton_time'
   'idTbry(iwest,iZoop(i))'
   'nulvar'
   1.0d0
 
-'zoop_south_'                                       ! Input
+'zooplankton_south_'                                       ! Input
   'zooplankton southern boundary condition'
   'umolC L-1'                                      ! [umolC L-1]
-  'zoop_south_, scalar, series'
-  'zoop_time'
+  'zooplankton_south_, scalar, series'
+  'zooplankton_time'
   'idTbry(isouth,iZoop(i))'
   'nulvar'
   1.0d0
 
-'zoop_north_'                                       ! Input
+'zooplankton_north_'                                       ! Input
   'zooplankton northern boundary condition'
   'umolC L-1'                                      ! [umolC L-1]
-  'zoop_north_, scalar, series'
-  'zoop_time'
+  'zooplankton_north_, scalar, series'
+  'zooplankton_time'
   'idTbry(inorth,iZoop(i))'
+  'nulvar'
+  1.0d0
+
+'PIC_east_'                                        ! Input
+  'PIC eastern boundary condition'
+  'umolC L-1'                                      ! [umolC L-1]
+  'PIC_east_, scalar, series'
+  'PIC_time'
+  'idTbry(ieast,iPIC(i))'
+  'nulvar'
+  1.0d0
+
+'PIC_west_'                                        ! Input
+  'PIC western boundary condition'
+  'umolC L-1'                                      ! [umolC L-1]
+  'PIC_west_, scalar, series'
+  'PIC_time'
+  'idTbry(iwest,iPIC(i))'
+  'nulvar'
+  1.0d0
+
+'PIC_south_'                                       ! Input
+  'PIC southern boundary condition'
+  'umolC L-1'                                      ! [umolC L-1]
+  'PIC_south_, scalar, series'
+  'PIC_time'
+  'idTbry(isouth,iPIC(i))'
+  'nulvar'
+  1.0d0
+
+'PIC_north_'                                       ! Input
+  'PIC northern boundary condition'
+  'umolC L-1'                                      ! [umolC L-1]
+  'PIC_north_, scalar, series'
+  'PIC_time'
+  'idTbry(inorth,iPIC(i))'
   'nulvar'
   1.0d0
 
@@ -10492,6 +10528,41 @@
   'nulvar'
   1.0d0
 
+'PI13C_east_'                                        ! Input
+  'carbon 13 of PIC eastern boundary condition'
+  'umolC L-1'                                      ! [umolC L-1]
+  'PI13C_east_, scalar, series'
+  'PI13C_time'
+  'idTbry(ieast,iPI13C(i))'
+  'nulvar'
+  1.0d0
+
+'PI13C_west_'                                        ! Input
+  'carbon 13 of PIC western boundary condition'
+  'umolC L-1'                                      ! [umolC L-1]
+  'PI13C_west_, scalar, series'
+  'PI13C_time'
+  'idTbry(iwest,iPI13C(i))'
+  'nulvar'
+  1.0d0
+
+'PI13C_south_'                                       ! Input
+  'carbon 13 of PIC southern boundary condition'
+  'umolC L-1'                                      ! [umolC L-1]
+  'PI13C_south_, scalar, series'
+  'PI13C_time'
+  'idTbry(isouth,iPI13C(i))'
+  'nulvar'
+  1.0d0
+
+'PI13C_north_'                                       ! Input
+  'carbon 13 of PIC northern boundary condition'
+  'umolC L-1'                                      ! [umolC L-1]
+  'PI13C_north_, scalar, series'
+  'PI13C_time'
+  'idTbry(inorth,iPI13C(i))'
+  'nulvar'
+  1.0d0
 
 'NO3_east'                                         ! Input
   'nitrate eastern boundary condition'
@@ -10914,19 +10985,19 @@
   'nulvar'
   1.0d0
 
-'river_Phyt_'                                        ! Input
+'river_phytoplankton_'                                        ! Input
   'river runoff phytoplankton'
   'umolC L-1'                     ! [umolC L-1]
-  'river_Phyt_, scalar, series'
+  'river_phytoplankton_, scalar, series'
   'river_time'
   'idRtrc(iPhyt(i))'
   'nulvar'
   1.0d0
 
-'river_Zoop_'                                        ! Input
+'river_zooplankton_'                                        ! Input
   'river runoff zooplankton'
   'umolC L-1'                     ! [umolC L-1]
-  'river_Zoop_, scalar, series'
+  'river_zooplankton_, scalar, series'
   'river_time'
   'idRtrc(iZoop(i))'
   'nulvar'
