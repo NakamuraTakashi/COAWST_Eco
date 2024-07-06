@@ -30,7 +30,8 @@
 # First the defaults
 #
                FC := gfortran
-           FFLAGS := -frepack-arrays
+           FFLAGS := -frepack-arrays -w -fallow-argument-mismatch -mcmodel=large -ffree-line-length-none
+#           FFLAGS := -w -fallow-argument-mismatch
               CPP := /usr/bin/cpp
          CPPFLAGS := -P -traditional
                CC := gcc
@@ -76,7 +77,7 @@ endif
 ifdef USE_MPI
          CPPFLAGS += -DMPI
  ifdef USE_MPIF90
-               FC := mpif90
+               FC := mpifort
  else
              LIBS += -lfmpi -lmpi
  endif
@@ -95,8 +96,10 @@ ifdef USE_DEBUG
 else
            FFLAGS += -O3
 #           I do not use -ffast-math it does not maintain enough accuracy!
-           FFLAGS += -ftree-vectorize -ftree-loop-linear -funroll-loops -w -ffree-form -ffree-line-length-none -frecord-marker=4 -fconvert=big-endian
+#           FFLAGS += -ftree-vectorize -ftree-loop-linear -funroll-loops -w -ffree-form -ffree-line-length-none -frecord-marker=4 -fconvert=big-endian
 ##                   -fconvert=big-endian
+           CFLAGS += -O3
+         CXXFLAGS += -O3
 endif
 
 ifdef USE_MPI
