@@ -193,6 +193,12 @@
       integer  :: iWarg                       ! aragonite saturation state
       integer  :: iWcal                       ! calcite saturation state
 
+!!! mons light model >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>KM:Add
+# ifdef LIGHT_MODEL
+      integer  :: iLight                      ! photon flux density
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<KM:Add
+
 # ifdef CARBON_ISOTOPE
       integer  :: id13C                       ! d13C of total inorganic carbon
 # endif
@@ -594,7 +600,7 @@
       ic=ic+1
       id13C=ic  ! +1
 #endif
-!
+
 !  Set number of 3D history terms.
 !
       NHbio3d=ic
@@ -602,6 +608,7 @@
       IF (.not.allocated(iHbio3)) THEN
         allocate ( iHbio3(NHbio3d) )
       END IF
+
 
 !!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
 !----------------------------------------------------------------------
@@ -797,11 +804,18 @@
       ic=ic+1
       iWcal=ic
 
+!!! mons light model >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>KM:Add
+# ifdef LIGHT_MODEL
+      ic=ic+1
+      iLight=ic
+# endif
+!!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<KM:Add
+
 # ifdef CARBON_ISOTOPE
       ic=ic+1
       id13C=ic  ! +1
 # endif
-!
+
 !  Set number of 3D diagnostic terms.
 !
       NDbio3d=ic

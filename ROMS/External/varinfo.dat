@@ -9613,6 +9613,19 @@
   'r3dvar'
   1.0d0
   
+!!! mons light model >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>KM:Add
+
+'PFD'                                       ! Input/Output
+ 'photon flux density'
+ 'umol m-2 s-1'                             ! [umol m-2 s-1]
+ 'PFD, scalar, series'
+ 'ocean_time'
+ 'iDbio3(iLight)'
+ 'r3dvar'
+ 1.0d0
+
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<KM:Add
+
 'd13C_DIC'                                              ! Input/Output
   'carbon isotope ratio of DIC'
   'per mill VPDB'                                       ! [per mill]

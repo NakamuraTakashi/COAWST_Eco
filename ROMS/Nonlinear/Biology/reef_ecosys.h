@@ -31,7 +31,9 @@
 #if defined SEDECO_ADVECTION && defined SGD_ON
       USE mod_sources
 #endif
-
+#if defined SEDIMENT && defined SUSPLOAD
+      USE mod_sedbed
+#endif
 
 !
 !  Imported variable declarations.
@@ -97,6 +99,10 @@
      &                   SOURCES(ng) % Tsrc(Nsrc(ng),1,:),              &
 # endif
 #endif
+#if defined SEDIMENT && defined SUSPLOAD
+     &                   SEDBED(ng) % ero_flux,                         &
+     &                   SEDBED(ng) % settling_flux,                    &
+#endif
 #ifdef BBL_MODEL
      &                   BBL(ng) % bustrc,                              &
      &                   BBL(ng) % bvstrc,                              &
@@ -156,6 +162,10 @@
      &                         Qbar,                                    &
      &                         Tsrc,                                    &
 # endif
+#endif
+#if defined SEDIMENT && defined SUSPLOAD
+     &                         ero_flux,                                &
+     &                         settling_flux,                           &
 #endif
 #ifdef BBL_MODEL
      &                         bustrc, bvstrc,                          &
@@ -219,23 +229,27 @@
       real(r8), intent(inout) :: DiaBio3d(LBi:,LBj:,:,:)
 # endif
 # ifdef CORAL_POLYP
-      real(r8), intent(inout) :: p_coral(Ncl,LBi:UBi,LBj:UBj)
+      real(r8), intent(inout) :: p_coral(Ncl,LBi:,LBj:)
 # endif
 # ifdef SEAGRASS
-      real(r8), intent(inout) :: p_sgrass(Nsg,LBi:UBi,LBj:UBj)
+      real(r8), intent(inout) :: p_sgrass(Nsg,LBi:,LBj:)
 # endif
 # ifdef MACROALGAE
-      real(r8), intent(inout) :: p_algae(LBi:UBi,LBj:UBj)
+      real(r8), intent(inout) :: p_algae(LBi:,LBj:)
 # endif
 # ifdef SEDIMENT_ECOSYS
-      real(r8), intent(inout) :: p_sand(LBi:UBi,LBj:UBj)
+      real(r8), intent(inout) :: p_sand(LBi:,LBj:)
 #  if defined SEDECO_ADVECTION && defined SGD_ON
-      real(r8), intent(inout) :: sgd_src(LBi:UBi,LBj:UBj)
-      real(r8), intent(in)    :: pm(LBi:UBi,LBj:UBj)
-      real(r8), intent(in)    :: pn(LBi:UBi,LBj:UBj)
+      real(r8), intent(inout) :: sgd_src(LBi:,LBj:)
+      real(r8), intent(in)    :: pm(LBi:,LBj:)
+      real(r8), intent(in)    :: pn(LBi:,LBj:)
       real(r8), intent(in)    :: Qbar
       real(r8), intent(in)    :: Tsrc(UBt)
 #  endif
+# endif
+# if defined SEDIMENT && defined SUSPLOAD
+      real(r8), intent(in)    :: ero_flux(LBi:,LBj:,:)
+      real(r8), intent(in)    :: settling_flux(LBi:,LBj:,:)
 # endif
 # ifdef BBL_MODEL
       real(r8), intent(in) :: bustrc(LBi:,LBj:)
@@ -291,6 +305,10 @@
       real(r8), intent(in)    :: Tsrc(UBt)
 #  endif
 # endif
+# if defined SEDIMENT && defined SUSPLOAD
+      real(r8), intent(in)    :: ero_flux(LBi:UBi,LBj:UBj,NST(ng))
+      real(r8), intent(in)    :: settling_flux(LBi:UBi,LBj:UBj,NST(ng))
+# endif
 # ifdef BBL_MODEL
       real(r8), intent(in) :: bustrc(LBi:UBi,LBj:UBj)
       real(r8), intent(in) :: bvstrc(LBi:UBi,LBj:UBj)
@@ -323,6 +341,11 @@
       real(r8) :: ssCO2flux 
       real(r8) :: ssO2flux  
       real(r8) :: PFDbott   
+!!! mons light model >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>KM:Add
+#if defined LIGHT_MODEL
+      real(r8) :: PFDk(UBk)   
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<KM:Add
 
 #ifdef CORAL_CARBON_ISOTOPE
       real(r8) :: R13CH2O
@@ -473,9 +496,13 @@
 #  endif
 # endif
 #endif
+#if defined SEDIMENT && defined SUSPLOAD
+     &            ,ero_flux          &
+     &            ,settling_flux     &
+#endif
 !          output parameters
-     &            ,dtrc_dt(:,iTemp)     &   ! Tmp(N): Temperature (oC)
-     &            ,dtrc_dt(:,iSalt)     &   ! Sal(N): Salinity (PSU)
+     &            ,dtrc_dt(:,iTemp)        &   ! dTemp_dt(N): Temperature (oC s-1)
+     &            ,dtrc_dt(:,iSalt)        &   ! dSalt_dt(N): Salinity (PSU s-1)
      &            ,dtrc_dt(:,iTIC_)        &   ! dDIC_dt(N): dDIC/dt (umol kg-1 s-1)
      &            ,dtrc_dt(:,iTAlk)        &   ! dTA_dt (N): dTA/dt (umol kg-1 s-1)
      &            ,dtrc_dt(:,iOxyg)        &   ! dDOx_dt(N): dDO/dt (umol L-1 s-1)
@@ -530,6 +557,11 @@
      &            , ssCO2flux              &   ! sea surface CO2 flux (mmol m-2 s-1)
      &            , ssO2flux               &   ! sea surface O2 flux (mmol m-2 s-1)
      &            , PFDbott                &   ! Bottom photon flux density (umol m-2 s-1)
+!!! mons light model >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>KM:Add
+#if defined LIGHT_MODEL
+     &            , PFDk                   &   ! Column photon flux density (umol m-2 s-1)
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<KM:Add
      &             )
 !
 #ifdef MASKING
@@ -540,6 +572,11 @@
             DiaBio3d(i,j,:,ipHt_) = pH(:)
             DiaBio3d(i,j,:,iWarg) = Warg(:)
             DiaBio3d(i,j,:,iWcal) = Wcal(:)
+!!! mons light model >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>KM:Add
+# if defined LIGHT_MODEL
+            DiaBio3d(i,j,:,iLight) = PFDk(:)
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<KM:Add
 
             DiaBio2d(i,j,iCO2fx) = ssCO2flux
             DiaBio2d(i,j,ipCO2) = ssfCO2

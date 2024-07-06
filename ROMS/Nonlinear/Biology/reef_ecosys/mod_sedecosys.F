@@ -563,57 +563,7 @@ CONTAINS
         SEDECO(ng)%SO4(:,:,:) = 28.0d3     !SO4  (µmol L-1)
         SEDECO(ng)%S0(:,:,:)  = 0.0d0     !S0  (nmol g-1)
 #  endif
-       !!    --------------------   !!
-!         SEDECO(ng)%Tmp(:,:,:)  = 0.0d0     
-!         SEDECO(ng)%Sal(:,:,:)  = 0.0d0
 
-!         SEDECO(ng)%O2 (:,:,:)  = 0.0d0        !DO  (µmol L-1)
-!         SEDECO(ng)%DIC(:,:,:)  = 0.0d0        !DIC  (µmol L-1)
-!         SEDECO(ng)%N2 (:,:,:)  = 0.0d0        !N2  (µmol L-1)
-! ! OM
-! #  if defined ORGANIC_MATTER
-!         SEDECO(ng)%DOCf(:,:,:)  = 0.0d0       !DOCf  (µmol L-1) 
-!         SEDECO(ng)%DOCs(:,:,:)  = 0.0d0       !DOCs  (µmol L-1) 
-!         SEDECO(ng)%POCf(:,:,:)  = 0.0d0       !DOCf  (µmol L-1) 
-!         ! SEDECO(ng)%POCf(:,:,:)  = 1.0d6      !POCf  (nmol g-1)          2.0d6
-!         ! SEDECO(ng)%POCf(:,:,:)  = 3.0d6      !POCf  (nmol g-1)
-!         ! SEDECO(ng)%POCs(:,:,:)  = 1.1d6      !DOCf  (µmol L-1) 
-!         ! SEDECO(ng)%POCs(:,:,:)  = 1.0d6      !POCs  (nmol g-1)          1.0d6
-!         SEDECO(ng)%POCs(:,:,:)  = 0.0d0      !POCs  (nmol g-1)
-!         ! SEDECO(ng)%POCs(:,:,:)  = 1.3d6       !POCs  (nmol g-1)
-!         SEDECO(ng)%POCn(:,:,:)  = 8.0d5       !DOCf  (µmol L-1)
-!         ! SEDECO(ng)%POCn(:,:,:)  = 1.0d6      !DOCf  (µmol L-1)
-!         ! SEDECO(ng)%POCn(:,:,:)  = 4.0d5      !DOCf  (µmol L-1)
-! #  endif
-!     ! Nutrient dynamics
-! #  if defined NUTRIENTS
-!         SEDECO(ng)%NO3(:,:,:) = 0.0d0        !NO3  (µmol L-1) 
-!         SEDECO(ng)%NH4(:,:,:) = 0.0d0        !NH4  (µmol L-1) 
-!         SEDECO(ng)%PO4(:,:,:) = 0.0d0        !PO4  (µmol L-1) 
-!     ! #  if defined ORGANIC_MATTER                 
-!     !         SEDECO(ng)%DON(:,:,:) = 0.0d0   !DON  (µmol L-1) 
-!     !         SEDECO(ng)%PON(:,:,:) = 0.0d0   !PON  (µmol L-1) 
-!     !         SEDECO(ng)%DOP(:,:,:) = 0.0d0   !DOP  (µmol L-1) 
-!     !         SEDECO(ng)%POP(:,:,:) = 0.0d0   !POP  (µmol L-1) 
-!     ! #  endif
-! #  endif
-! ! Sulfur dynamics
-! #  if defined SULFATE
-!         SEDECO(ng)%Mn2(:,:,:) = 0.0d0    !Mn2  (µmol L-1) 
-!         SEDECO(ng)%MnO2(:,:,:) = 0.0d0   !MnO2  (nmol g-1) 
-
-!         SEDECO(ng)%Fe2(:,:,:) = 0.0d0          !Fe2  (µmol L-1) 
-!         SEDECO(ng)%FeS(:,:,:) = 0.0d0          !FeS  (nmol g-1) 
-!         SEDECO(ng)%FeS2(:,:,:) = 0.0d0         !FeS2  (nmol g-1) 
-!         SEDECO(ng)%FeOOH(:,:,:) = 0.0d0        !FeOOH  (nmol g-1)
-!         SEDECO(ng)%FeOOH_PO4(:,:,:) = 0.0d0    !FeOOH=PO4  (nmol g-1) 
-
-!         SEDECO(ng)%H2S(:,:,:) = 0.0d0     !H2S  (µmol L-1)
-!         SEDECO(ng)%SO4(:,:,:) = 0.0d0     !SO4  (µmol L-1)
-!         SEDECO(ng)%S0(:,:,:)  = 0.0d0     !S0  (nmol g-1)
-! #  endif
-
-! # else
 !     !!! -------------- initial concentration from sed initial concentration ----------------- !!!
 !         ! ! General
 !         open(199, file='input/sedinitial_DO.txt', status='old')
@@ -771,11 +721,11 @@ CONTAINS
 #  endif
 # endif
 !   output parameters
-    , Tmp_out        &   ! Temperature of discharged water (oC)
-    , Flux_Sal       &   ! Salinity flux (cm-2 s-1)  * direction of water column to sediment is positive
+    , Flux_Tmp       &   ! Heat (temperature) flux (oC cm s-1)
+    , Flux_Sal       &   ! Salinity flux (cm s-1)  * direction of water column to sediment is positive
     , Flux_TA        &   ! Total Alkalinity flux (???? cm-2 s-1)  * direction of water column to sediment is positive
     , Flux_DO        &   ! DO  flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
-    , Flux_DICsed    &   ! DIC flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
+    , Flux_DIC       &   ! DIC flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
     , Flux_N2        &   ! N2  flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
 # if defined ORGANIC_MATTER
     , Flux_POC       &   ! POC(f,s,n) fluxes (nmol cm-2 s-1) * direction of water column to sediment is positive
@@ -879,12 +829,12 @@ CONTAINS
 # endif
 
 !! output parameters (Flux)
-    real(8), intent(out) :: Tmp_out
+    real(8), intent(out) :: Flux_Tmp
     real(8), intent(out) :: Flux_Sal
     real(8), intent(out) :: Flux_TA
 
     real(8), intent(out) :: Flux_DO
-    real(8), intent(out) :: Flux_DICsed
+    real(8), intent(out) :: Flux_DIC
     real(8), intent(out) :: Flux_N2 
 # if defined ORGANIC_MATTER
     real(8), intent(out) :: Flux_POC(3)
@@ -926,8 +876,9 @@ CONTAINS
     
 !! -- Diffusion coefficient -----------------------------------------
     !! General diffusion in pure seawater  (cm2 s-1)
+    real(8) :: Dw_Tmp(Nsed),Dw_Sal(Nsed)
     real(8) :: Dw_DOM(Nsed,2)    ! 1:labile, 2:refractory
-    real(8) :: Dw_O2(Nsed),Dw_DIC(Nsed),Dw_N2(Nsed)
+    real(8) :: Dw_O2(Nsed),Dw_DIC(Nsed),Dw_TA(Nsed),Dw_N2(Nsed)
 # if defined NUTRIENTS
     real(8) :: Dw_NO3(Nsed), Dw_NH4(Nsed), Dw_PO4(Nsed)
 # endif
@@ -935,8 +886,9 @@ CONTAINS
     real(8) :: Dw_Mn2(Nsed), Dw_Fe2(Nsed), Dw_SO4(Nsed), Dw_H2S(Nsed)
 # endif
     !! Molecular Diffusion coefficients (cm2 s-1)
+    real(8) :: Ds_Tmp(Nsed),Ds_Sal(Nsed)
     real(8) :: Ds_DOM(2:Nsed,2)    ! 1:labile, 2:refractory
-    real(8) :: Ds_O2(2:Nsed),Ds_DIC(2:Nsed),Ds_N2(2:Nsed)
+    real(8) :: Ds_O2(2:Nsed),Ds_DIC(2:Nsed),Ds_TA(2:Nsed),Ds_N2(2:Nsed)
 # if defined NUTRIENTS
     real(8) :: Ds_NO3(2:Nsed), Ds_NH4(2:Nsed), Ds_PO4(2:Nsed)
 ! #  if defined ORGANIC_MATTER
@@ -967,12 +919,12 @@ CONTAINS
     !! Diffusion Flux  ----------------------------------------------
        !(Fd :: molecular diffusion flux, Fb :: biodiffusive flux)
        !! unit: (nmol cm-2 s-1)
-    ! real(8) :: Fd_Tmp(Nsed), Fb_Tmp(2:Nsed) ! yt_edit unused?
-    ! real(8) :: Fd_Sal(Nsed), Fb_sal(2:Nsed) ! yt_edit unused?
-
-    real(8) :: Fd_O2 (Nsed), Fb_O2(2:Nsed)
+    real(8) :: Fd_Tmp(Nsed), Fb_Tmp(2:Nsed)
+    real(8) :: Fd_Sal(Nsed), Fb_sal(2:Nsed)
+    real(8) :: Fd_O2 (Nsed), Fb_O2 (2:Nsed)
+    real(8) :: Fd_TA (Nsed), Fb_TA (2:Nsed)
     real(8) :: Fd_DIC(Nsed), Fb_DIC(2:Nsed)
-    real(8) :: Fd_N2 (Nsed), Fb_N2(2:Nsed)
+    real(8) :: Fd_N2 (Nsed), Fb_N2 (2:Nsed)
 # if defined ORGANIC_MATTER
     real(8) :: Fd_DOC(2:Nsed,2),Fb_DOC(2:Nsed,2)    ! 1:labile, 2:refractory
     real(8) ::                  Fb_POC(2:Nsed,3)    ! 1:labile, 2:refractory, 3:non-degratable
@@ -1004,10 +956,10 @@ CONTAINS
     !! Brial Flux (Fc) ----------------------------------- 
     !! unit: (nmol cm-2 s-1)
 # if defined SEDECO_BURIAL
-    ! real(8) :: Fc_Tmp(2:Nsed) ! yt_edit unused?
-    ! real(8) :: Fc_sal(2:Nsed) ! yt_edit unused?
-
+    real(8) :: Fc_Tmp(2:Nsed+1)
+    real(8) :: Fc_sal(2:Nsed+1)
     real(8) :: Fc_O2 (2:Nsed+1)
+    real(8) :: Fc_TA (2:Nsed+1)
     real(8) :: Fc_DIC(2:Nsed+1)
     real(8) :: Fc_N2 (2:Nsed+1)
 #  if defined ORGANIC_MATTER
@@ -1042,10 +994,10 @@ CONTAINS
     !! Advection Flux (Fc) ----------------------------------- 
     !! unit: (nmol cm-2 s-1)
 # if defined SEDECO_ADVECTION && defined SGD_ON
-    ! real(8) :: Fa_Tmp(2:Nsed) ! yt_edit unused?
-    ! real(8) :: Fa_sal(2:Nsed) ! yt_edit unused?
-
+    real(8) :: Fa_Tmp(2:Nsed+1)
+    real(8) :: Fa_sal(2:Nsed+1)
     real(8) :: Fa_O2 (1:Nsed+1)
+    real(8) :: Fa_TA (1:Nsed+1)
     real(8) :: Fa_DIC(1:Nsed+1)
     real(8) :: Fa_N2 (1:Nsed+1)
 #  if defined ORGANIC_MATTER
@@ -1079,9 +1031,10 @@ CONTAINS
 
     !! Total Flux (:: FT) ---------------------------------- 
     !! unit: (nmol cm-2 s-1)
-    ! real(8) :: FT_Tmp(Nsed+1) ! yt_edit unused?
-    ! real(8) :: FT_Sal(Nsed+1) ! yt_edit unused?
+    real(8) :: FT_Tmp(Nsed+1)
+    real(8) :: FT_Sal(Nsed+1)
     real(8) :: FT_O2 (Nsed+1)
+    real(8) :: FT_TA (Nsed+1)
     real(8) :: FT_DIC(Nsed+1)
     real(8) :: FT_N2 (Nsed+1)
 # if defined ORGANIC_MATTER
@@ -1240,8 +1193,8 @@ CONTAINS
 
 !! Net Production and Consumption  -------------------------------------------
     !! unit: (nmol cm-3 s-1)
-
-    real(8) :: R_O2 (Nsed), R_DIC(Nsed), R_N2(Nsed)
+    real(8) :: R_Tmp(Nsed), R_Sal(Nsed)
+    real(8) :: R_O2 (Nsed), R_DIC(Nsed), R_TA(Nsed), R_N2(Nsed)
 # if defined ORGANIC_MATTER
     real(8) :: R_DOC(Nsed,2), R_POC(Nsed,2)    ! 1:labile, 2:refractory
 # endif
@@ -1259,9 +1212,10 @@ CONTAINS
 # endif
 
 !! Miscellaneous Sources  -------------------------------------------
+    real(8) :: miscTmp(Nsed), miscSal(Nsed)
     !! unit: (µmol L-1 s-1 = nmol cm-3 s-1)
     !! unit: (nmol g-1 s-1)
-    real(8) :: miscO2(Nsed), miscDIC(Nsed), miscN2(Nsed)
+    real(8) :: miscO2(Nsed), miscDIC(Nsed), miscTA(Nsed), miscN2(Nsed)
 # if defined ORGANIC_MATTER
     real(8) :: miscDOC(Nsed,2), miscPOC(Nsed,3)    ! 1:labile, 2:refractory 3:non-degratable
 # endif
@@ -1424,7 +1378,10 @@ CONTAINS
 
     !! ----- for sediment column ----- !!
     DO k = 1,Nsed
+        Dw_Tmp(k)  = (9.76d0 + 0.398d0*SEDECO(ng)%Tmp(i,j,k))  *(1.0d-6)  !!! Need check !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        Dw_Sal(k)  = (9.76d0 + 0.398d0*SEDECO(ng)%Tmp(i,j,k))  *(1.0d-6)  !!! Need check !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         Dw_O2(k)   = (11.7d0 + 0.344d0*SEDECO(ng)%Tmp(i,j,k) + 0.00505d0*SEDECO(ng)%Tmp(i,j,k)**2d0) *(1.0d-6)
+        Dw_TA (k)  = (9.39d0 + 0.267d0*SEDECO(ng)%Tmp(i,j,k) + 0.0041d0 *SEDECO(ng)%Tmp(i,j,k)**2d0) *(1.0d-6)  !!! Need check !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         Dw_DIC(k)  = (9.39d0 + 0.267d0*SEDECO(ng)%Tmp(i,j,k) + 0.0041d0 *SEDECO(ng)%Tmp(i,j,k)**2d0) *(1.0d-6) 
         Dw_N2(k)   = (9.52d0 + 0.291d0*SEDECO(ng)%Tmp(i,j,k) + 0.00448d0*SEDECO(ng)%Tmp(i,j,k)**2d0) *(1.0d-6)
 # if defined ORGANIC_MATTER
@@ -1446,9 +1403,12 @@ CONTAINS
 
     !! --- Diffusion coefficient in sediment (function Dsed is defined in mod_geochem.F) --- !!
     DO k = 2,Nsed
-        Ds_O2(k)   = Dsed(Dw_O2(k),SEDECO(ng)%poro(i,j,k))
+        Ds_Tmp(k)  = Dsed(Dw_Tmp(k),SEDECO(ng)%poro(i,j,k))
+        Ds_Sal(k)  = Dsed(Dw_Sal(k),SEDECO(ng)%poro(i,j,k))
+        Ds_O2 (k)  = Dsed(Dw_O2 (k),SEDECO(ng)%poro(i,j,k))
+        Ds_TA (k)  = Dsed(Dw_TA (k),SEDECO(ng)%poro(i,j,k))
         Ds_DIC(k)  = Dsed(Dw_DIC(k),SEDECO(ng)%poro(i,j,k))
-        Ds_N2(k)   = Dsed(Dw_N2(k),SEDECO(ng)%poro(i,j,k))
+        Ds_N2 (k)  = Dsed(Dw_N2 (k),SEDECO(ng)%poro(i,j,k))
 # if defined ORGANIC_MATTER
         Ds_DOM(k,1) = Dsed(Dw_DOM(k,1),SEDECO(ng)%poro(i,j,k)) ! DOMf: DOCf DONf DOPf
         Ds_DOM(k,2) = Dsed(Dw_DOM(k,2),SEDECO(ng)%poro(i,j,k)) ! DOMs: DOCs DONs DOPs
@@ -1470,9 +1430,10 @@ CONTAINS
     ! (0) --> (1)
 
     rho_sw(1) = densSW( Tamb,Samb )  ! Density of seawater [g/cm3]     ! function densSW is defined in mod_geochem
-!     Fd_Tmp(1) = Diff*( Tamb  - SEDECO(ng)%Tmp(i,j,1) )/t_dbl
-!     Fd_Sal(1) = Diff*( Samb  - SEDECO(ng)%Sal(i,j,1) )/t_dbl
+    Fd_Tmp(1) = Ficks(Dw_Tmp(1),Tamb  ,SEDECO(ng)%Tmp(i,j,1),dbl)
+    Fd_Sal(1) = Ficks(Dw_Sal(1),Samb  ,SEDECO(ng)%Sal(i,j,1),dbl)
     Fd_O2 (1) = Ficks(Dw_O2 (1),O2amb ,SEDECO(ng)%O2 (i,j,1),dbl)
+    Fd_TA (1) = Ficks(Dw_TA (1),DICamb,SEDECO(ng)%TA (i,j,1),dbl)
     Fd_DIC(1) = Ficks(Dw_DIC(1),DICamb,SEDECO(ng)%DIC(i,j,1),dbl)
     Fd_N2 (1) = Ficks(Dw_N2 (1),N2amb ,SEDECO(ng)%N2 (i,j,1),dbl)
 # if defined NUTRIENTS
@@ -1492,9 +1453,10 @@ CONTAINS
     DO k = 2,Nsed
         ! function densSW is defined in mod_geochem
         rho_sw(k) = densSW( SEDECO(ng)%Tmp(i,j,k),SEDECO(ng)%Sal(i,j,k) )  ! Density of seawater [g/cm3]   
-        ! Fd_Tmp(k) = Diff*( Tamb  - SEDECO(ng)%Tmp(i,j,1) )/t_dbl
-        ! Fd_Sal(k) = Diff*( Samb  - SEDECO(ng)%Sal(i,j,1) )/t_dbl
+        Fd_Tmp(k) = Ficks_sedd(Ds_Tmp(k),SEDECO(ng)%Tmp(i,j,k-1),SEDECO(ng)%Tmp(i,j,k),dz(k),SEDECO(ng)%poro(i,j,k))
+        Fd_Sal(k) = Ficks_sedd(Ds_Sal(k),SEDECO(ng)%Sal(i,j,k-1),SEDECO(ng)%Sal(i,j,k),dz(k),SEDECO(ng)%poro(i,j,k))
         Fd_O2(k)    = Ficks_sedd(Ds_O2(k),SEDECO(ng)%O2(i,j,k-1),SEDECO(ng)%O2(i,j,k),dz(k),SEDECO(ng)%poro(i,j,k))
+        Fd_TA (k)   = Ficks_sedd(Ds_TA (k),SEDECO(ng)%TA (i,j,k-1),SEDECO(ng)%TA (i,j,k),dz(k),SEDECO(ng)%poro(i,j,k))
         Fd_DIC(k)   = Ficks_sedd(Ds_DIC(k),SEDECO(ng)%DIC(i,j,k-1),SEDECO(ng)%DIC(i,j,k),dz(k),SEDECO(ng)%poro(i,j,k))
         Fd_N2(k)    = Ficks_sedd(Ds_N2(k),SEDECO(ng)%N2(i,j,k-1),SEDECO(ng)%N2(i,j,k),dz(k),SEDECO(ng)%poro(i,j,k))
 # if defined ORGANIC_MATTER
@@ -1532,9 +1494,10 @@ CONTAINS
      ENDDO
 
      DO k = 2,Nsed
-        ! Fb_Tmp(k) = Diff*( Tamb  - SEDECO(ng)%Tmp(i,j,1) )/t_dbl
-        ! Fb_Sal(k) = Diff*( Samb  - SEDECO(ng)%Sal(i,j,1) )/t_dbl
+        Fb_Tmp(k) = Ficks_sedd(DBd(k),SEDECO(ng)%Tmp(i,j,k-1),SEDECO(ng)%DTmp(i,j,k),dz(k),SEDECO(ng)%poro(i,j,k))
+        Fb_Sal(k) = Ficks_sedd(DBd(k),SEDECO(ng)%Sal(i,j,k-1),SEDECO(ng)%Sal(i,j,k),dz(k),SEDECO(ng)%poro(i,j,k))
         Fb_O2(k)   = Ficks_sedd(DBd(k),SEDECO(ng)%O2(i,j,k-1),SEDECO(ng)%O2(i,j,k),dz(k),SEDECO(ng)%poro(i,j,k))
+        Fb_TA (k)  = Ficks_sedd(DBd(k),SEDECO(ng)%TA (i,j,k-1),SEDECO(ng)%TA (i,j,k),dz(k),SEDECO(ng)%poro(i,j,k))
         Fb_DIC(k)  = Ficks_sedd(DBd(k),SEDECO(ng)%DIC(i,j,k-1),SEDECO(ng)%DIC(i,j,k),dz(k),SEDECO(ng)%poro(i,j,k))
         Fb_N2(k)   = Ficks_sedd(DBd(k),SEDECO(ng)%N2(i,j,k-1),SEDECO(ng)%N2(i,j,k),dz(k),SEDECO(ng)%poro(i,j,k))
 # if defined ORGANIC_MATTER
@@ -1616,9 +1579,10 @@ CONTAINS
 # if defined SEDECO_BURIAL
     !! Burial Flux calculation 
     DO k = 2,Nsed
-        ! Fc_Tmp(k) = FCd(SEDECO(ng)%poro(i,j,k),u,SEDECO(ng)%O2(i,j,k))
-        ! Fc_Sal(k) = FCd(SEDECO(ng)%poro(i,j,k),u,SEDECO(ng)%O2(i,j,k))
+        Fc_Tmp(k) = FCd(SEDECO(ng)%poro(i,j,k),u,SEDECO(ng)%Tmp(i,j,k))
+        Fc_Sal(k) = FCd(SEDECO(ng)%poro(i,j,k),u,SEDECO(ng)%Sal(i,j,k))
         Fc_O2(k)   = FCd(SEDECO(ng)%poro(i,j,k),u,SEDECO(ng)%O2(i,j,k))
+        Fc_TA (k)  = FCd(SEDECO(ng)%poro(i,j,k),u,SEDECO(ng)%TA(i,j,k))
         Fc_DIC(k)  = FCd(SEDECO(ng)%poro(i,j,k),u,SEDECO(ng)%DIC(i,j,k))
         Fc_N2(k)   = FCd(SEDECO(ng)%poro(i,j,k),u,SEDECO(ng)%N2(i,j,k))
 #  if defined ORGANIC_MATTER
@@ -1667,9 +1631,10 @@ CONTAINS
         Fc_Fe2(k) = Fc_Fe2(k) + FCp(SEDECO(ng)%poro(i,j,k),(u * Kad_Fe2),SEDECO(ng)%Fe2(i,j,k),rhos_d(k))
 #  endif
     ENDDO
-    ! Fc_Tmp(Nsed+1) = Fc_Tmp(Nsed)
-    ! Fc_Sal(Nsed+1) = Fc_Sal(Nsed)
+    Fc_Tmp(Nsed+1) = Fc_Tmp(Nsed)
+    Fc_Sal(Nsed+1) = Fc_Sal(Nsed)
     Fc_O2(Nsed+1)   = Fc_O2(Nsed)
+    Fc_TA (Nsed+1)  = Fc_TA (Nsed)
     Fc_DIC(Nsed+1)  = Fc_DIC(Nsed)
     Fc_N2(Nsed+1)   = Fc_N2(Nsed)
 #  if defined ORGANIC_MATTER
@@ -1719,9 +1684,10 @@ CONTAINS
     AdvecVelo = -1.0d0 * sgd_flux ! [cm s-1]       advection velocity (advection downwards is positive)
     !! surface layer k = 1
     k = 1
-    ! Fa_Tmp(k)     = FCa(1.0d0,SEDECO(ng)%poro(i,j,k),AdvecVelo,O2amb,SEDECO(ng)%O2 (i,j,k))
-    ! Fa_Sal(k)     = FCa(1.0d0,SEDECO(ng)%poro(i,j,k),AdvecVelo,O2amb,SEDECO(ng)%O2 (i,j,k))
+    Fa_Tmp(k)     = FCa(1.0d0,SEDECO(ng)%poro(i,j,k),AdvecVelo,Tamb, SEDECO(ng)%Tmp(i,j,k))
+    Fa_Sal(k)     = FCa(1.0d0,SEDECO(ng)%poro(i,j,k),AdvecVelo,Samb, SEDECO(ng)%Sal(i,j,k))
     Fa_O2(k)      = FCa(1.0d0,SEDECO(ng)%poro(i,j,k),AdvecVelo,O2amb,SEDECO(ng)%O2 (i,j,k))
+    Fa_TA (k)     = FCa(1.0d0,SEDECO(ng)%poro(i,j,k),AdvecVelo,TAamb,SEDECO(ng)%TA (i,j,k))
     Fa_DIC(k)     = FCa(1.0d0,SEDECO(ng)%poro(i,j,k),AdvecVelo,DICamb,SEDECO(ng)%DIC(i,j,k))
     Fa_N2(k)      = FCa(1.0d0,SEDECO(ng)%poro(i,j,k),AdvecVelo,N2amb,SEDECO(ng)%N2 (i,j,k))
 #  if defined ORGANIC_MATTER
@@ -1763,9 +1729,10 @@ CONTAINS
 
   !! sediment layers k = 1:Nsed
   DO k = 2,Nsed
-        ! Fa_Tmp(k)     = FCa(SEDECO(ng)%poro(i,j,k-1),SEDECO(ng)%poro(i,j,k),AdvecVelo,SEDECO(ng)%O2 (i,j,k-1),SEDECO(ng)%O2 (i,j,k))
-        ! Fa_Sal(k)     = FCa(SEDECO(ng)%poro(i,j,k-1),SEDECO(ng)%poro(i,j,k),AdvecVelo,SEDECO(ng)%O2 (i,j,k-1),SEDECO(ng)%O2 (i,j,k))
+        Fa_Tmp(k) = FCa(SEDECO(ng)%poro(i,j,k-1),SEDECO(ng)%poro(i,j,k),AdvecVelo,SEDECO(ng)%Tmp(i,j,k-1),SEDECO(ng)%Tmp(i,j,k))
+        Fa_Sal(k) = FCa(SEDECO(ng)%poro(i,j,k-1),SEDECO(ng)%poro(i,j,k),AdvecVelo,SEDECO(ng)%Sal(i,j,k-1),SEDECO(ng)%Sal(i,j,k))
         Fa_O2(k)  = FCa(SEDECO(ng)%poro(i,j,k-1),SEDECO(ng)%poro(i,j,k),AdvecVelo,SEDECO(ng)%O2 (i,j,k-1),SEDECO(ng)%O2 (i,j,k))
+        Fa_TA (k) = FCa(SEDECO(ng)%poro(i,j,k-1),SEDECO(ng)%poro(i,j,k),AdvecVelo,SEDECO(ng)%TA (i,j,k-1),SEDECO(ng)%TA (i,j,k))
         Fa_DIC(k) = FCa(SEDECO(ng)%poro(i,j,k-1),SEDECO(ng)%poro(i,j,k),AdvecVelo,SEDECO(ng)%DIC(i,j,k-1),SEDECO(ng)%DIC(i,j,k))
         Fa_N2(k)  = FCa(SEDECO(ng)%poro(i,j,k-1),SEDECO(ng)%poro(i,j,k),AdvecVelo,SEDECO(ng)%N2 (i,j,k-1),SEDECO(ng)%N2 (i,j,k))
 #  if defined ORGANIC_MATTER
@@ -1808,9 +1775,10 @@ CONTAINS
 
     !! bottom layer k = Nsed+1
     k = Nsed+1
-    ! Fa_Tmp(k)     = FCa(SEDECO(ng)%poro(i,j,k),1.0d0,AdvecVelo,SEDECO(ng)%O2 (i,j,k),sgd_DOx_in)
-    ! Fa_Sal(k)     = FCa(SEDECO(ng)%poro(i,j,k),1.0d0,AdvecVelo,SEDECO(ng)%O2 (i,j,k),sgd_DOx_in)
+    Fa_Tmp(k)     = FCa(SEDECO(ng)%poro(i,j,k),1.0d0,AdvecVelo,SEDECO(ng)%Tmp(i,j,k),sgd_Tmp_in)
+    Fa_Sal(k)     = FCa(SEDECO(ng)%poro(i,j,k),1.0d0,AdvecVelo,SEDECO(ng)%Sal(i,j,k),sgd_Sal_in)
     Fa_O2(k)      = FCa(SEDECO(ng)%poro(i,j,k),1.0d0,AdvecVelo,SEDECO(ng)%O2 (i,j,k),sgd_DOx_in)
+    Fa_TA (k)     = FCa(SEDECO(ng)%poro(i,j,k),1.0d0,AdvecVelo,SEDECO(ng)%TA (i,j,k),sgd_TA_in)
     Fa_DIC(k)     = FCa(SEDECO(ng)%poro(i,j,k),1.0d0,AdvecVelo,SEDECO(ng)%DIC(i,j,k),sgd_DIC_in)
     Fa_N2(k)      = FCa(SEDECO(ng)%poro(i,j,k),1.0d0,AdvecVelo,SEDECO(ng)%N2 (i,j,k),8.0d0) ! constant influx of 8.0 [umol.N2 L-1]
 #  if defined ORGANIC_MATTER
@@ -1940,59 +1908,6 @@ CONTAINS
             !! ギブスエネルギーで反応が変化するようにするべきだ
 # else
 
-        ! if (SEDECO(ng)%O2(i,j,k)  < O2lim .and. &                           ! yt_debug if O2 < O2lim   &&   NO3 > NO3lim
-        !     SEDECO(ng)%NO3(i,j,k) > NO3lim) then
-        !     v1(k) = vOC(k) * (SEDECO(ng)%O2(i,j,k) / O2lim)
-        !     v2(k) = vOC(k) * (1d0 - SEDECO(ng)%O2(i,j,k) / O2lim)
-        !     ! redoxlevel(k) = 2d0 !!for debug
-        ! endif
-        ! !! -- Manganese reduction (MnO2) (nmol g-1)--!!
-        ! if (SEDECO(ng)%O2(i,j,k)  < O2lim .and. &                           ! yt_debug if O2 < O2lim   &&   NO3 < NO3lim   &&   Mn02 > MnO2lim
-        !     SEDECO(ng)%NO3(i,j,k) < NO3lim .and. &
-        !     SEDECO(ng)%MnO2(i,j,k) > MnO2lim)  then
-        !     v1(k) = vOC(k) * (SEDECO(ng)%O2(i,j,k) / O2lim)
-        !     v2(k) = vOC(k) * (1d0 - SEDECO(ng)%O2(i,j,k) / O2lim) &
-        !                      * (SEDECO(ng)%NO3(i,j,k) / NO3lim)
-        !     v3(k) = vOC(k) * (1d0 - SEDECO(ng)%O2(i,j,k) / O2lim) &
-        !                      * (1d0 - SEDECO(ng)%NO3(i,j,k) / NO3lim)
-        !     ! redoxlevel(k) = 3d0 !!for debug
-        ! endif
-        ! !! -- Iron reduction (FeOOH) (nmol g-1)--!!
-        ! if (SEDECO(ng)%O2(i,j,k)  < O2lim .and. &                           ! yt_debug if O2 < O2lim   &&   NO3 < NO3lim   &&   Mn02 < MnO2lim   &&   FeOOH > FeOOHlim
-        !     SEDECO(ng)%NO3(i,j,k) < NO3lim .and. &
-        !     SEDECO(ng)%MnO2(i,j,k) < MnO2lim .and. &
-        !     SEDECO(ng)%FeOOH(i,j,k) > FeOOHlim)  then
-        !     v1(k) = vOC(k) * (SEDECO(ng)%O2(i,j,k) / O2lim)
-        !     v2(k) = vOC(k) * (1d0 - SEDECO(ng)%O2(i,j,k) / O2lim) &
-        !                    * (SEDECO(ng)%NO3(i,j,k) / NO3lim)
-        !     v3(k) = vOC(k) * (1d0 - SEDECO(ng)%O2(i,j,k) / O2lim) &
-        !                    * (1d0 - SEDECO(ng)%NO3(i,j,k) / NO3lim) &
-        !                    * (SEDECO(ng)%MnO2(i,j,k) / MnO2lim)
-        !     v4(k) = vOC(k) * (1d0 - SEDECO(ng)%O2(i,j,k) / O2lim) &
-        !                    * (1d0 - SEDECO(ng)%NO3(i,j,k) / NO3lim) &
-        !                    * (1d0 - SEDECO(ng)%MnO2(i,j,k) / MnO2lim)
-        !     ! redoxlevel(k) = 4d0 !!for debug
-        ! endif
-        ! !! -- Sulfate reduction (SO4) (µmol L-1)--!!
-        ! if (SEDECO(ng)%O2(i,j,k)  < O2lim .and. &                           ! yt_debug if O2 < O2lim   &&   NO3 < NO3lim   &&   Mn02 < MnO2lim   &&   FeOOH < FeOOHlim
-        !     SEDECO(ng)%NO3(i,j,k) < NO3lim .and. &
-        !     SEDECO(ng)%MnO2(i,j,k) < MnO2lim .and. &
-        !     SEDECO(ng)%FeOOH(i,j,k) < FeOOHlim )  then
-        !     v1(k) = vOC(k) * (SEDECO(ng)%O2(i,j,k) / O2lim)
-        !     v2(k) = vOC(k) * (1d0 - SEDECO(ng)%O2(i,j,k) / O2lim) &
-        !                    * (SEDECO(ng)%NO3(i,j,k) / NO3lim)
-        !     v3(k) = vOC(k) * (1d0 - SEDECO(ng)%O2(i,j,k) / O2lim) &
-        !                    * (1d0 - SEDECO(ng)%NO3(i,j,k) / NO3lim) &
-        !                    * (SEDECO(ng)%MnO2(i,j,k) / MnO2lim)
-        !     v4(k) = vOC(k) * (1d0 - SEDECO(ng)%O2(i,j,k) / O2lim) &
-        !                    * (1d0 - SEDECO(ng)%NO3(i,j,k) / NO3lim) &
-        !                    * (1d0 - SEDECO(ng)%MnO2(i,j,k) / MnO2lim) &
-        !                    * (SEDECO(ng)%FeOOH(i,j,k) / FeOOHlim)
-        !     v5(k) = vOC(k) - v1(k) -v2(k) -v3(k) - v4(k)
-        !     ! redoxlevel(k) = 5d0 !!for debug
-        ! endif
-
-
         !! Redox concentration limit in organic matter degradation (Berg et al.2003)
         if (SEDECO(ng)%O2(i,j,k) > O2lim) then            !! -- Redox of CH2O       (CH2O)  (µmol L-1) -- !!   if O2 > O2lim
             v1(k) = vOC(k)
@@ -2056,9 +1971,12 @@ CONTAINS
 # endif
     ENDDO
 
+    R_Tmp(:) = 0.0d0
+    R_Sal(:) = 0.0d0
 
     !! Net Production and Consumption from Reactions
     R_O2 (:) = -v1(:) -2d0*v6(:) -v9(:) -v11(:) -2d0*v16(:) -2d0*v17(:) -7d0*v18(:)
+    R_TA (:) = 0.0d0 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     R_DIC(:) = v1(:) + v2(:) +v3(:) +v4(:) + v5(:)
     R_N2(:)  = 0.2d0*v2(:)
 # if defined ORGANIC_MATTER
@@ -2112,9 +2030,12 @@ CONTAINS
 ! ***************************** !
     !! Total Flux : (nmol cm-2 s-1)
     !! DBL Flux (k = 0) (Only surface diffusion is considered. Deposition added in POM.)
-    FT_O2(1)    = Fd_O2(1)
-    FT_DIC(1)   = Fd_DIC(1)
-    FT_N2(1)    = Fd_N2(1)
+    FT_Tmp(1) = Fd_Tmp(1)
+    FT_Sal(1) = Fd_Sal(1)
+    FT_O2(1)  = Fd_O2(1)
+    FT_TA(1)  = Fd_TA(1)
+    FT_DIC(1) = Fd_DIC(1)
+    FT_N2(1)  = Fd_N2(1)
 # if defined ORGANIC_MATTER
     FT_DOC(1,1) = 0.0d0 ! no flux with water column
     FT_DOC(1,2) = 0.0d0 ! no flux with water column
@@ -2156,7 +2077,10 @@ CONTAINS
     !! sediment column Flux (k = 1:Nsed)
     !! -- Diffusion and biodiffusion -- !!
     DO k = 2,Nsed
+        FT_Tmp(k)   = Fd_Tmp(k)   + Fb_Tmp(k)
+        FT_Sal(k)   = Fd_Sal(k)   + Fb_Sal(k)
         FT_O2(k)    = Fd_O2(k)    + Fb_O2(k)
+        FT_TA (k)   = Fd_TA (k)   + Fb_TA (k)
         FT_DIC(k)   = Fd_DIC(k)   + Fb_DIC(k)
         FT_N2(k)    = Fd_N2(k)    + Fb_N2(k)
 # if defined ORGANIC_MATTER
@@ -2339,7 +2263,10 @@ CONTAINS
 ! ***************************** !
 !!!   Miscellaneous other sources
 ! ***************************** !
+    miscTmp(:) = 0;
+    miscSal(:) = 0;
     miscO2 (:) = 0;
+    miscTA (:) = 0;
     miscDIC(:) = 0;
     miscN2 (:) = 0;
 # if defined ORGANIC_MATTER
@@ -2375,6 +2302,7 @@ CONTAINS
 #  if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE
     ! [umol/L s] = [umol/L s]
     miscO2 (:) = miscO2 (:) + sum(SEDECO(ng)%sg_dO2_dt (:,i,j,:),DIM=1) ! (umol L-1 s-1) change in DO  due to flux from seagrass (positive means seagrass to sediment)
+    miscTA (:) = miscTA (:) + 0.0d0 !sum(SEDECO(ng)%sg_dTA_dt(:,i,j,:),DIM=1) ! (umol L-1 s-1) change in TA due to flux from seagrass (positive means seagrass to sediment)
     miscDIC(:) = miscDIC(:) + sum(SEDECO(ng)%sg_dDIC_dt(:,i,j,:),DIM=1) ! (umol L-1 s-1) change in DIC due to flux from seagrass (positive means seagrass to sediment)
 #  endif
 #  if defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
@@ -2406,220 +2334,54 @@ CONTAINS
 
     !! Mass Balance cal (Concentration at each layer in sed column)
     DO k = 1,Nsed
-        ! -- O2 -- !
+        ! -- Temp -- !
+        SEDECO(ng)%Tmp(i,j,k)  = massbalance_sed_d(SEDECO(ng)%Tmp(i,j,k),FT_Tmp(k),FT_Tmp(k+1),R_Tmp(k), &
+                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,miscTmp(k))
+         ! -- Salt -- !
+        SEDECO(ng)%Sal(i,j,k)  = massbalance_sed_d(SEDECO(ng)%Sal(i,j,k),FT_Sal(k),FT_Sal(k+1),R_Sal(k), &
+                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,miscSal(k))
+         ! -- O2 -- !
         SEDECO(ng)%O2(i,j,k)  = massbalance_sed_d(SEDECO(ng)%O2(i,j,k),FT_O2(k),FT_O2(k+1),R_O2(k), &
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,miscO2(k))
-        ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ! ! if (isnan(SEDECO(ng)%O2(i,j,k)) .or. abs(SEDECO(ng)%O2(i,j,k)) > huge(SEDECO(ng)%O2(i,j,k))) then
-        ! if (isnan(SEDECO(ng)%O2(i,j,k)) .or. SEDECO(ng)%O2(i,j,k) > 1.0d8 .or. SEDECO(ng)%O2(i,j,k) < 0.0d0) then
-        !   write(*,*) 'yt_debug: sedecosys SEDECO(ng)%O2(i,j,k)      i =', i, '   j =', j, '   k =', k
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%O2(i,j,k) =', SEDECO(ng)%O2(i,j,k)
-        !   write(*,*) 'yt_debug:     FT_O2(k) =', FT_O2(k)
-        !   write(*,*) 'yt_debug:     FT_O2(k+1) =', FT_O2(k+1)
-        !   write(*,*) 'yt_debug:     R_O2(k) =', R_O2(k)
-        !   write(*,*) 'yt_debug:     dz(k) =', dz(k)
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%poro(i,j,k) =', SEDECO(ng)%poro(i,j,k)
-        !   write(*,*) 'yt_debug:     dt =', dt
-        ! endif
-        ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
+        ! -- TA -- !
+        SEDECO(ng)%TA(i,j,k) = massbalance_sed_d(SEDECO(ng)%TA(i,j,k),FT_TA(k),FT_TA(k+1),R_TA(k), &
+                                                  dz(k),SEDECO(ng)%poro(i,j,k),dt,miscTA(k))
         ! -- DIC -- !
         SEDECO(ng)%DIC(i,j,k) = massbalance_sed_d(SEDECO(ng)%DIC(i,j,k),FT_DIC(k),FT_DIC(k+1),R_DIC(k), &
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,miscDIC(k))
-        ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ! ! if (isnan(SEDECO(ng)%DIC(i,j,k)) .or. abs(SEDECO(ng)%DIC(i,j,k)) > huge(SEDECO(ng)%DIC(i,j,k))) then
-        ! if (isnan(SEDECO(ng)%DIC(i,j,k)) .or. SEDECO(ng)%DIC(i,j,k) > 1.0d8 .or. SEDECO(ng)%DIC(i,j,k) < 0.0d0) then
-        !   write(*,*) 'yt_debug: sedecosys SEDECO(ng)%DIC(i,j,k)      i =', i, '   j =', j, '   k =', k
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%DIC(i,j,k) =', SEDECO(ng)%DIC(i,j,k)
-        !   write(*,*) 'yt_debug:     FT_DIC(k) =', FT_DIC(k)
-        !   write(*,*) 'yt_debug:     FT_DIC(k+1) =', FT_DIC(k+1)
-        !   write(*,*) 'yt_debug:     R_DIC(k) =', R_DIC(k)
-        !   write(*,*) 'yt_debug:     dz(k) =', dz(k)
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%poro(i,j,k) =', SEDECO(ng)%poro(i,j,k)
-        !   write(*,*) 'yt_debug:     dt =', dt
-        ! endif
-        ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-        
         ! -- N2 -- !
         SEDECO(ng)%N2(i,j,k)  = massbalance_sed_d(SEDECO(ng)%N2(i,j,k),FT_N2(k),FT_N2(k+1),R_N2(k), & 
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,miscN2(k))
-        ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ! ! if (isnan(SEDECO(ng)%N2(i,j,k)) .or. abs(SEDECO(ng)%N2(i,j,k)) > huge(SEDECO(ng)%N2(i,j,k))) then
-        ! if (isnan(SEDECO(ng)%N2(i,j,k)) .or. SEDECO(ng)%N2(i,j,k) > 1.0d8 .or. SEDECO(ng)%N2(i,j,k) < 0.0d0) then
-        !   write(*,*) 'yt_debug: sedecosys SEDECO(ng)%N2(i,j,k)      i =', i, '   j =', j, '   k =', k
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%N2(i,j,k) =', SEDECO(ng)%N2(i,j,k)
-        !   write(*,*) 'yt_debug:     FT_N2(k) =', FT_N2(k)
-        !   write(*,*) 'yt_debug:     FT_N2(k+1) =', FT_N2(k+1)
-        !   write(*,*) 'yt_debug:     R_N2(k) =', R_N2(k)
-        !   write(*,*) 'yt_debug:     dz(k) =', dz(k)
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%poro(i,j,k) =', SEDECO(ng)%poro(i,j,k)
-        !   write(*,*) 'yt_debug:     dt =', dt
-        ! endif
-        ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         
 # if defined ORGANIC_MATTER
         ! -- DOC -- !
         SEDECO(ng)%DOCf(i,j,k) = massbalance_sed_d(SEDECO(ng)%DOCf(i,j,k),FT_DOC(k,1),FT_DOC(k+1,1),R_DOC(k,1), &
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,miscDOC(k,1))  ! DOCf
-        ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ! ! if (isnan(SEDECO(ng)%DOCf(i,j,k)) .or. abs(SEDECO(ng)%DOCf(i,j,k)) > huge(SEDECO(ng)%DOCf(i,j,k))) then
-        ! if (isnan(SEDECO(ng)%DOCf(i,j,k)) .or. SEDECO(ng)%DOCf(i,j,k) > 1.0d8 .or. SEDECO(ng)%DOCf(i,j,k) < 0.0d0) then
-        !   write(*,*) 'yt_debug: sedecosys SEDECO(ng)%DOCf(i,j,k)      i =', i, '   j =', j, '   k =', k
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%DOCf(i,j,k) =', SEDECO(ng)%DOCf(i,j,k)
-        !   write(*,*) 'yt_debug:     FT_DOC(k,1) =', FT_DOC(k,1)
-        !   write(*,*) 'yt_debug:     FT_DOC(k+1,1) =', FT_DOC(k+1,1)
-        !   write(*,*) 'yt_debug:     R_DOC(k,1) =', R_DOC(k,1)
-        !   write(*,*) 'yt_debug:     dz(k) =', dz(k)
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%poro(i,j,k) =', SEDECO(ng)%poro(i,j,k)
-        !   write(*,*) 'yt_debug:     dt =', dt
-        ! endif
-        ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-        
         SEDECO(ng)%DOCs(i,j,k) = massbalance_sed_d(SEDECO(ng)%DOCs(i,j,k),FT_DOC(k,2),FT_DOC(k+1,2),R_DOC(k,2), &
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,miscDOC(k,2))  ! DOCs
-        ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ! ! if (isnan(SEDECO(ng)%DOCs(i,j,k)) .or. abs(SEDECO(ng)%DOCs(i,j,k)) > huge(SEDECO(ng)%DOCs(i,j,k))) then
-        ! if (isnan(SEDECO(ng)%DOCs(i,j,k)) .or. SEDECO(ng)%DOCs(i,j,k) > 1.0d8 .or. SEDECO(ng)%DOCs(i,j,k) < 0.0d0) then
-        !   write(*,*) 'yt_debug: sedecosys SEDECO(ng)%DOCs(i,j,k)      i =', i, '   j =', j, '   k =', k
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%DOCs(i,j,k) =', SEDECO(ng)%DOCs(i,j,k)
-        !   write(*,*) 'yt_debug:     FT_DOC(k,2) =', FT_DOC(k,2)
-        !   write(*,*) 'yt_debug:     FT_DOC(k+1,2) =', FT_DOC(k+1,2)
-        !   write(*,*) 'yt_debug:     R_DOC(k,2) =', R_DOC(k,2)
-        !   write(*,*) 'yt_debug:     dz(k) =', dz(k)
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%poro(i,j,k) =', SEDECO(ng)%poro(i,j,k)
-        !   write(*,*) 'yt_debug:     dt =', dt
-        ! endif
-        ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-        
         ! -- POC -- !
         SEDECO(ng)%POCf(i,j,k) = massbalance_sed_p(SEDECO(ng)%POCf(i,j,k),FT_POC(k,1),FT_POC(k+1,1),R_POC(k,1), &
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k),miscPOC(k,1))  ! POCf
-        ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ! ! if (isnan(SEDECO(ng)%POCf(i,j,k)) .or. abs(SEDECO(ng)%POCf(i,j,k)) > huge(SEDECO(ng)%POCf(i,j,k))) then
-        ! if (isnan(SEDECO(ng)%POCf(i,j,k)) .or. SEDECO(ng)%POCf(i,j,k) > 1.0d8 .or. SEDECO(ng)%POCf(i,j,k) < 0.0d0) then
-        !   write(*,*) 'yt_debug: sedecosys SEDECO(ng)%POCf(i,j,k)      i =', i, '   j =', j, '   k =', k
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%POCf(i,j,k) =', SEDECO(ng)%POCf(i,j,k)
-        !   write(*,*) 'yt_debug:     FT_POC(k,1) =', FT_POC(k,1)
-        !   write(*,*) 'yt_debug:     FT_POC(k+1,1) =', FT_POC(k+1,1)
-        !   write(*,*) 'yt_debug:     R_POC(k,1) =', R_POC(k,1)
-        !   write(*,*) 'yt_debug:     dz(k) =', dz(k)
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%poro(i,j,k) =', SEDECO(ng)%poro(i,j,k)
-        !   write(*,*) 'yt_debug:     dt =', dt
-        !   write(*,*) 'yt_debug:     rhos_d(k) =', rhos_d(k)
-        ! endif
-        ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-        
         SEDECO(ng)%POCs(i,j,k) = massbalance_sed_p(SEDECO(ng)%POCs(i,j,k),FT_POC(k,2),FT_POC(k+1,2),R_POC(k,2), &
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k),miscPOC(k,2))  ! POCs
-        ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ! ! if (isnan(SEDECO(ng)%POCs(i,j,k)) .or. abs(SEDECO(ng)%POCs(i,j,k)) > huge(SEDECO(ng)%POCs(i,j,k))) then
-        ! if (isnan(SEDECO(ng)%POCs(i,j,k)) .or. SEDECO(ng)%POCs(i,j,k) > 1.0d8 .or. SEDECO(ng)%POCs(i,j,k) < 0.0d0) then
-        !   write(*,*) 'yt_debug: sedecosys SEDECO(ng)%POCs(i,j,k)      i =', i, '   j =', j, '   k =', k
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%POCs(i,j,k) =', SEDECO(ng)%POCs(i,j,k)
-        !   write(*,*) 'yt_debug:     FT_POC(k,2) =', FT_POC(k,2)
-        !   write(*,*) 'yt_debug:     FT_POC(k+1,2) =', FT_POC(k+1,2)
-        !   write(*,*) 'yt_debug:     R_POC(k,2) =', R_POC(k,2)
-        !   write(*,*) 'yt_debug:     dz(k) =', dz(k)
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%poro(i,j,k) =', SEDECO(ng)%poro(i,j,k)
-        !   write(*,*) 'yt_debug:     dt =', dt
-        !   write(*,*) 'yt_debug:     rhos_d(k) =', rhos_d(k)
-        ! endif
-        ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-        
         SEDECO(ng)%POCn(i,j,k) = massbalance_sed_p(SEDECO(ng)%POCn(i,j,k),FT_POC(k,3),FT_POC(k+1,3),0d0, &
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k),miscPOC(k,3))  ! POCn
-        ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ! ! if (isnan(SEDECO(ng)%POCn(i,j,k)) .or. abs(SEDECO(ng)%POCn(i,j,k)) > huge(SEDECO(ng)%POCn(i,j,k))) then
-        ! if (isnan(SEDECO(ng)%POCn(i,j,k)) .or. SEDECO(ng)%POCn(i,j,k) > 1.0d8 .or. SEDECO(ng)%POCn(i,j,k) < 0.0d0) then
-        !   write(*,*) 'yt_debug: sedecosys SEDECO(ng)%POCn(i,j,k)      i =', i, '   j =', j, '   k =', k
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%POCn(i,j,k) =', SEDECO(ng)%POCn(i,j,k)
-        !   write(*,*) 'yt_debug:     FT_POC(k,3) =', FT_POC(k,3)
-        !   write(*,*) 'yt_debug:     FT_POC(k+1,3) =', FT_POC(k+1,3)
-        !   write(*,*) 'yt_debug:     dz(k) =', dz(k)
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%poro(i,j,k) =', SEDECO(ng)%poro(i,j,k)
-        !   write(*,*) 'yt_debug:     dt =', dt
-        !   write(*,*) 'yt_debug:     rhos_d(k) =', rhos_d(k)
-        ! endif
-        ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-        
 # endif
 # if defined NUTRIENTS
 #  if defined adsorption
         ! -- NO3 -- !
         SEDECO(ng)%NO3(i,j,k) = massbalance_sed_d(SEDECO(ng)%NO3(i,j,k),FT_NO3(k),FT_NO3(k+1),R_NO3(k), &
                                             dz(k),(SEDECO(ng)%poro(i,j,k)+rhos_d(k)*(1d0 - SEDECO(ng)%poro(i,j,k))*Kad_NO3),dt,miscNO3(k)) 
-        ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ! ! if (isnan(SEDECO(ng)%NO3(i,j,k)) .or. abs(SEDECO(ng)%NO3(i,j,k)) > huge(SEDECO(ng)%NO3(i,j,k))) then
-        ! if (isnan(SEDECO(ng)%NO3(i,j,k)) .or. SEDECO(ng)%NO3(i,j,k) > 1.0d8 .or. SEDECO(ng)%NO3(i,j,k) < 0.0d0) then
-        !   write(*,*) 'yt_debug: sedecosys SEDECO(ng)%NO3(i,j,k)      i =', i, '   j =', j, '   k =', k
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%NO3(i,j,k) =', SEDECO(ng)%NO3(i,j,k)
-        !   write(*,*) 'yt_debug:     FT_NO3(k) =', FT_NO3(k)
-        !   write(*,*) 'yt_debug:     FT_NO3(k+1) =', FT_NO3(k+1)
-        !   write(*,*) 'yt_debug:     R_NO3(k) =', R_NO3(k)
-        !   write(*,*) 'yt_debug:     dz(k) =', dz(k)
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%poro(i,j,k) =', SEDECO(ng)%poro(i,j,k)
-        !   write(*,*) 'yt_debug:     rhos_d(k) =', rhos_d(k)
-        !   write(*,*) 'yt_debug:     Kad_NO3 =', Kad_NO3
-        !   write(*,*) 'yt_debug:     dt =', dt
-        ! endif
-        ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
         ! -- NH4 -- !
         SEDECO(ng)%NH4(i,j,k) = massbalance_sed_d(SEDECO(ng)%NH4(i,j,k),FT_NH4(k),FT_NH4(k+1),R_NH4(k), &
                                             dz(k),(SEDECO(ng)%poro(i,j,k)+rhos_d(k)*(1d0 - SEDECO(ng)%poro(i,j,k))*Kad_NH4),dt,miscNH4(k)) 
-        ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ! ! if (isnan(SEDECO(ng)%NH4(i,j,k)) .or. abs(SEDECO(ng)%NH4(i,j,k)) > huge(SEDECO(ng)%NH4(i,j,k))) then
-        ! if (isnan(SEDECO(ng)%NH4(i,j,k)) .or. SEDECO(ng)%NH4(i,j,k) > 1.0d8 .or. SEDECO(ng)%NH4(i,j,k) < 0.0d0) then
-        !   write(*,*) 'yt_debug: sedecosys SEDECO(ng)%NH4(i,j,k)      i =', i, '   j =', j, '   k =', k
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%NH4(i,j,k) =', SEDECO(ng)%NH4(i,j,k)
-        !   write(*,*) 'yt_debug:     FT_NH4(k) =', FT_NH4(k)
-        !   write(*,*) 'yt_debug:     FT_NH4(k+1) =', FT_NH4(k+1)
-        !   write(*,*) 'yt_debug:     R_NH4(k) =', R_NH4(k)
-        !   write(*,*) 'yt_debug:     dz(k) =', dz(k)
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%poro(i,j,k) =', SEDECO(ng)%poro(i,j,k)
-        !   write(*,*) 'yt_debug:     rhos_d(k) =', rhos_d(k)
-        !   write(*,*) 'yt_debug:     Kad_NH4 =', Kad_NH4
-        !   write(*,*) 'yt_debug:     dt =', dt
-        ! endif
-        ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
         ! -- PO4 -- !
         SEDECO(ng)%PO4(i,j,k) = massbalance_sed_d(SEDECO(ng)%PO4(i,j,k),FT_PO4(k),FT_PO4(k+1),R_PO4(k), &
                                             dz(k),(SEDECO(ng)%poro(i,j,k)+rhos_d(k)*(1d0 - SEDECO(ng)%poro(i,j,k))*Kad_PO4),dt,miscPO4(k))
-        ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ! ! if (isnan(SEDECO(ng)%PO4(i,j,k)) .or. abs(SEDECO(ng)%PO4(i,j,k)) > huge(SEDECO(ng)%PO4(i,j,k))) then
-        ! if (isnan(SEDECO(ng)%PO4(i,j,k)) .or. SEDECO(ng)%PO4(i,j,k) > 1.0d8 .or. SEDECO(ng)%PO4(i,j,k) < 0.0d0) then
-        !   write(*,*) 'yt_debug: sedecosys SEDECO(ng)%PO4(i,j,k)      i =', i, '   j =', j, '   k =', k
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%PO4(i,j,k) =', SEDECO(ng)%PO4(i,j,k)
-        !   write(*,*) 'yt_debug:     FT_PO4(k) =', FT_PO4(k)
-        !   write(*,*) 'yt_debug:     FT_PO4(k+1) =', FT_PO4(k+1)
-        !   write(*,*) 'yt_debug:     R_PO4(k) =', R_PO4(k)
-        !   write(*,*) 'yt_debug:     dz(k) =', dz(k)
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%poro(i,j,k) =', SEDECO(ng)%poro(i,j,k)
-        !   write(*,*) 'yt_debug:     rhos_d(k) =', rhos_d(k)
-        !   write(*,*) 'yt_debug:     Kad_PO4 =', Kad_PO4
-        !   write(*,*) 'yt_debug:     dt =', dt
-        ! endif
-        ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-                                    
 #  else
-            ! -- NO3 -- !
+        ! -- NO3 -- !
         SEDECO(ng)%NO3(i,j,k) = massbalance_sed_d(SEDECO(ng)%NO3(i,j,k),FT_NO3(k),FT_NO3(k+1),R_NO3(k), &
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,miscNO3(k)) 
-        ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ! ! if (isnan(SEDECO(ng)%NO3(i,j,k)) .or. abs(SEDECO(ng)%NO3(i,j,k)) > huge(SEDECO(ng)%NO3(i,j,k))) then
-        ! if (isnan(SEDECO(ng)%NO3(i,j,k)) .or. SEDECO(ng)%NO3(i,j,k) > 1.0d8 .or. SEDECO(ng)%NO3(i,j,k) < 0.0d0) then
-        !   write(*,*) 'yt_debug: sedecosys SEDECO(ng)%NO3(i,j,k)      i =', i, '   j =', j, '   k =', k
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%NO3(i,j,k) =', SEDECO(ng)%NO3(i,j,k)
-        !   write(*,*) 'yt_debug:     FT_NO3(k) =', FT_NO3(k)
-        !   write(*,*) 'yt_debug:     FT_NO3(k+1) =', FT_NO3(k+1)
-        !   write(*,*) 'yt_debug:     R_NO3(k) =', R_NO3(k)
-        !   write(*,*) 'yt_debug:     dz(k) =', dz(k)
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%poro(i,j,k) =', SEDECO(ng)%poro(i,j,k)
-        !   write(*,*) 'yt_debug:     dt =', dt
-        ! endif
-        ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
         ! -- NH4 -- !
         SEDECO(ng)%NH4(i,j,k) = massbalance_sed_d(SEDECO(ng)%NH4(i,j,k),FT_NH4(k),FT_NH4(k+1),R_NH4(k), &
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,miscNH4(k)) 
@@ -2642,190 +2404,33 @@ CONTAINS
         ! -- PO4 -- !
         SEDECO(ng)%PO4(i,j,k) = massbalance_sed_d(SEDECO(ng)%PO4(i,j,k),FT_PO4(k),FT_PO4(k+1),R_PO4(k), &
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,miscPO4(k))
-        ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ! ! if (isnan(SEDECO(ng)%PO4(i,j,k)) .or. abs(SEDECO(ng)%PO4(i,j,k)) > huge(SEDECO(ng)%PO4(i,j,k))) then
-        ! if (isnan(SEDECO(ng)%PO4(i,j,k)) .or. SEDECO(ng)%PO4(i,j,k) > 1.0d8 .or. SEDECO(ng)%PO4(i,j,k) < 0.0d0) then
-        !   write(*,*) 'yt_debug: sedecosys SEDECO(ng)%PO4(i,j,k)      i =', i, '   j =', j, '   k =', k
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%PO4(i,j,k) =', SEDECO(ng)%PO4(i,j,k)
-        !   write(*,*) 'yt_debug:     FT_PO4(k) =', FT_PO4(k)
-        !   write(*,*) 'yt_debug:     FT_PO4(k+1) =', FT_PO4(k+1)
-        !   write(*,*) 'yt_debug:     R_PO4(k) =', R_PO4(k)
-        !   write(*,*) 'yt_debug:     dz(k) =', dz(k)
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%poro(i,j,k) =', SEDECO(ng)%poro(i,j,k)
-        !   write(*,*) 'yt_debug:     dt =', dt
-        ! endif
-        ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
              
 #  endif
 #  if defined ORGANIC_MATTER
-
         ! -- DON -- !
         SEDECO(ng)%DONf(i,j,k) = massbalance_sed_d(SEDECO(ng)%DONf(i,j,k),FT_DON(k,1),FT_DON(k+1,1),R_DON(k,1), &
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,miscDON(k,1))  ! DONf
-        ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ! ! if (isnan(SEDECO(ng)%DONf(i,j,k)) .or. abs(SEDECO(ng)%DONf(i,j,k)) > huge(SEDECO(ng)%DONf(i,j,k))) then
-        ! if (isnan(SEDECO(ng)%DONf(i,j,k)) .or. SEDECO(ng)%DONf(i,j,k) > 1.0d8 .or. SEDECO(ng)%DONf(i,j,k) < 0.0d0) then
-        !   write(*,*) 'yt_debug: sedecosys SEDECO(ng)%DONf(i,j,k)      i =', i, '   j =', j, '   k =', k
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%DONf(i,j,k) =', SEDECO(ng)%DONf(i,j,k)
-        !   write(*,*) 'yt_debug:     FT_DON(k,1) =', FT_DON(k,1)
-        !   write(*,*) 'yt_debug:     FT_DON(k+1,1) =', FT_DON(k+1,1)
-        !   write(*,*) 'yt_debug:     R_DON(k,1) =', R_DON(k,1)
-        !   write(*,*) 'yt_debug:     dz(k) =', dz(k)
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%poro(i,j,k) =', SEDECO(ng)%poro(i,j,k)
-        !   write(*,*) 'yt_debug:     dt =', dt
-        ! endif
-        ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
         SEDECO(ng)%DONs(i,j,k) = massbalance_sed_d(SEDECO(ng)%DONs(i,j,k),FT_DON(k,2),FT_DON(k+1,2),R_DON(k,2), &
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,miscDON(k,2))  ! DONs
-        ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ! ! if (isnan(SEDECO(ng)%DONs(i,j,k)) .or. abs(SEDECO(ng)%DONs(i,j,k)) > huge(SEDECO(ng)%DONs(i,j,k))) then
-        ! if (isnan(SEDECO(ng)%DONs(i,j,k)) .or. SEDECO(ng)%DONs(i,j,k) > 1.0d8 .or. SEDECO(ng)%DONs(i,j,k) < 0.0d0) then
-        !   write(*,*) 'yt_debug: sedecosys SEDECO(ng)%DONs(i,j,k)      i =', i, '   j =', j, '   k =', k
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%DONs(i,j,k) =', SEDECO(ng)%DONs(i,j,k)
-        !   write(*,*) 'yt_debug:     FT_DON(k,2) =', FT_DON(k,2)
-        !   write(*,*) 'yt_debug:     FT_DON(k+1,2) =', FT_DON(k+1,2)
-        !   write(*,*) 'yt_debug:     R_DON(k,2) =', R_DON(k,2)
-        !   write(*,*) 'yt_debug:     dz(k) =', dz(k)
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%poro(i,j,k) =', SEDECO(ng)%poro(i,j,k)
-        !   write(*,*) 'yt_debug:     dt =', dt
-        ! endif
-        ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
         ! -- PON -- !
         SEDECO(ng)%PONf(i,j,k) = massbalance_sed_p(SEDECO(ng)%PONf(i,j,k),FT_PON(k,1),FT_PON(k+1,1),R_PON(k,1), &
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k),miscPON(k,1))  ! PONf
-        ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ! ! if (isnan(SEDECO(ng)%PONf(i,j,k)) .or. abs(SEDECO(ng)%PONf(i,j,k)) > huge(SEDECO(ng)%PONf(i,j,k))) then
-        ! if (isnan(SEDECO(ng)%PONf(i,j,k)) .or. SEDECO(ng)%PONf(i,j,k) > 1.0d8 .or. SEDECO(ng)%PONf(i,j,k) < 0.0d0) then
-        !   write(*,*) 'yt_debug: sedecosys SEDECO(ng)%PONf(i,j,k)      i =', i, '   j =', j, '   k =', k
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%PONf(i,j,k) =', SEDECO(ng)%PONf(i,j,k)
-        !   write(*,*) 'yt_debug:     FT_PON(k,1) =', FT_PON(k,1)
-        !   write(*,*) 'yt_debug:     FT_PON(k+1,1) =', FT_PON(k+1,1)
-        !   write(*,*) 'yt_debug:     R_PON(k,1) =', R_PON(k,1)
-        !   write(*,*) 'yt_debug:     dz(k) =', dz(k)
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%poro(i,j,k) =', SEDECO(ng)%poro(i,j,k)
-        !   write(*,*) 'yt_debug:     dt =', dt
-        !   write(*,*) 'yt_debug:     rhos_d(k) =', rhos_d(k)
-        ! endif
-        ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
         SEDECO(ng)%PONs(i,j,k) = massbalance_sed_p(SEDECO(ng)%PONs(i,j,k),FT_PON(k,2),FT_PON(k+1,2),R_PON(k,2), &
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k),miscPON(k,2))  ! PONs
-        ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ! ! if (isnan(SEDECO(ng)%PONs(i,j,k)) .or. abs(SEDECO(ng)%PONs(i,j,k)) > huge(SEDECO(ng)%PONs(i,j,k))) then
-        ! if (isnan(SEDECO(ng)%PONs(i,j,k)) .or. SEDECO(ng)%PONs(i,j,k) > 1.0d8 .or. SEDECO(ng)%PONs(i,j,k) < 0.0d0) then
-        !   write(*,*) 'yt_debug: sedecosys SEDECO(ng)%PONs(i,j,k)      i =', i, '   j =', j, '   k =', k
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%PONs(i,j,k) =', SEDECO(ng)%PONs(i,j,k)
-        !   write(*,*) 'yt_debug:     FT_PON(k,2) =', FT_PON(k,2)
-        !   write(*,*) 'yt_debug:     FT_PON(k+1,2) =', FT_PON(k+1,2)
-        !   write(*,*) 'yt_debug:     R_PON(k,2) =', R_PON(k,2)
-        !   write(*,*) 'yt_debug:     dz(k) =', dz(k)
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%poro(i,j,k) =', SEDECO(ng)%poro(i,j,k)
-        !   write(*,*) 'yt_debug:     dt =', dt
-        !   write(*,*) 'yt_debug:     rhos_d(k) =', rhos_d(k)
-        ! endif
-        ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
         SEDECO(ng)%PONn(i,j,k) = massbalance_sed_p(SEDECO(ng)%PONn(i,j,k),FT_PON(k,3),FT_PON(k+1,3),0d0, &
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k),miscPON(k,3))  ! PONn
-        ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ! ! if (isnan(SEDECO(ng)%PONn(i,j,k)) .or. abs(SEDECO(ng)%PONn(i,j,k)) > huge(SEDECO(ng)%PONn(i,j,k))) then
-        ! if (isnan(SEDECO(ng)%PONn(i,j,k)) .or. SEDECO(ng)%PONn(i,j,k) > 1.0d8 .or. SEDECO(ng)%PONn(i,j,k) < 0.0d0) then
-        !   write(*,*) 'yt_debug: sedecosys SEDECO(ng)%PONn(i,j,k)      i =', i, '   j =', j, '   k =', k
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%PONn(i,j,k) =', SEDECO(ng)%PONn(i,j,k)
-        !   write(*,*) 'yt_debug:     FT_PON(k,3) =', FT_PON(k,3)
-        !   write(*,*) 'yt_debug:     FT_PON(k+1,3) =', FT_PON(k+1,3)
-        !   write(*,*) 'yt_debug:     dz(k) =', dz(k)
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%poro(i,j,k) =', SEDECO(ng)%poro(i,j,k)
-        !   write(*,*) 'yt_debug:     dt =', dt
-        !   write(*,*) 'yt_debug:     rhos_d(k) =', rhos_d(k)
-        ! endif
-        ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
         ! -- DOP -- !
         SEDECO(ng)%DOPf(i,j,k) = massbalance_sed_d(SEDECO(ng)%DOPf(i,j,k),FT_DOP(k,1),FT_DOP(k+1,1),R_DOP(k,1), &
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,miscDOP(k,1))  ! DOPf
-        ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ! ! if (isnan(SEDECO(ng)%DOPf(i,j,k)) .or. abs(SEDECO(ng)%DOPf(i,j,k)) > huge(SEDECO(ng)%DOPf(i,j,k))) then
-        ! if (isnan(SEDECO(ng)%DOPf(i,j,k)) .or. SEDECO(ng)%DOPf(i,j,k) > 1.0d8 .or. SEDECO(ng)%DOPf(i,j,k) < 0.0d0) then
-        !   write(*,*) 'yt_debug: sedecosys SEDECO(ng)%DOPf(i,j,k)      i =', i, '   j =', j, '   k =', k
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%DOPf(i,j,k) =', SEDECO(ng)%DOPf(i,j,k)
-        !   write(*,*) 'yt_debug:     FT_DOP(k,1) =', FT_DOP(k,1)
-        !   write(*,*) 'yt_debug:     FT_DOP(k+1,1) =', FT_DOP(k+1,1)
-        !   write(*,*) 'yt_debug:     R_DOP(k,1) =', R_DOP(k,1)
-        !   write(*,*) 'yt_debug:     dz(k) =', dz(k)
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%poro(i,j,k) =', SEDECO(ng)%poro(i,j,k)
-        !   write(*,*) 'yt_debug:     dt =', dt
-        ! endif
-        ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
         SEDECO(ng)%DOPs(i,j,k) = massbalance_sed_d(SEDECO(ng)%DOPs(i,j,k),FT_DOP(k,2),FT_DOP(k+1,2),R_DOP(k,2), &
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,miscDOP(k,2))  ! DOPs
-        ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ! ! if (isnan(SEDECO(ng)%DOPs(i,j,k)) .or. abs(SEDECO(ng)%DOPs(i,j,k)) > huge(SEDECO(ng)%DOPs(i,j,k))) then
-        ! if (isnan(SEDECO(ng)%DOPs(i,j,k)) .or. SEDECO(ng)%DOPs(i,j,k) > 1.0d8 .or. SEDECO(ng)%DOPs(i,j,k) < 0.0d0) then
-        !   write(*,*) 'yt_debug: sedecosys SEDECO(ng)%DOPs(i,j,k)      i =', i, '   j =', j, '   k =', k
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%DOPs(i,j,k) =', SEDECO(ng)%DOPs(i,j,k)
-        !   write(*,*) 'yt_debug:     FT_DOP(k,2) =', FT_DOP(k,2)
-        !   write(*,*) 'yt_debug:     FT_DOP(k+1,2) =', FT_DOP(k+1,2)
-        !   write(*,*) 'yt_debug:     R_DOP(k,2) =', R_DOP(k,2)
-        !   write(*,*) 'yt_debug:     dz(k) =', dz(k)
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%poro(i,j,k) =', SEDECO(ng)%poro(i,j,k)
-        !   write(*,*) 'yt_debug:     dt =', dt
-        ! endif
-        ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
         ! -- POP -- !
         SEDECO(ng)%POPf(i,j,k) = massbalance_sed_p(SEDECO(ng)%POPf(i,j,k),FT_POP(k,1),FT_POP(k+1,1),R_POP(k,1), &
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k),miscPOP(k,1))  ! POPf
-        ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ! ! if (isnan(SEDECO(ng)%POPf(i,j,k)) .or. abs(SEDECO(ng)%POPf(i,j,k)) > huge(SEDECO(ng)%POPf(i,j,k))) then
-        ! if (isnan(SEDECO(ng)%POPf(i,j,k)) .or. SEDECO(ng)%POPf(i,j,k) > 1.0d8 .or. SEDECO(ng)%POPf(i,j,k) < 0.0d0) then
-        !   write(*,*) 'yt_debug: sedecosys SEDECO(ng)%POPf(i,j,k)      i =', i, '   j =', j, '   k =', k
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%POPf(i,j,k) =', SEDECO(ng)%POPf(i,j,k)
-        !   write(*,*) 'yt_debug:     FT_POP(k,1) =', FT_POP(k,1)
-        !   write(*,*) 'yt_debug:     FT_POP(k+1,1) =', FT_POP(k+1,1)
-        !   write(*,*) 'yt_debug:     R_POP(k,1) =', R_POP(k,1)
-        !   write(*,*) 'yt_debug:     dz(k) =', dz(k)
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%poro(i,j,k) =', SEDECO(ng)%poro(i,j,k)
-        !   write(*,*) 'yt_debug:     dt =', dt
-        !   write(*,*) 'yt_debug:     rhos_d(k) =', rhos_d(k)
-        ! endif
-        ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
         SEDECO(ng)%POPs(i,j,k) = massbalance_sed_p(SEDECO(ng)%POPs(i,j,k),FT_POP(k,2),FT_POP(k+1,2),R_POP(k,2), &
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k),miscPOP(k,2))  ! POPs
-        ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ! ! if (isnan(SEDECO(ng)%POPs(i,j,k)) .or. abs(SEDECO(ng)%POPs(i,j,k)) > huge(SEDECO(ng)%POPs(i,j,k))) then
-        ! if (isnan(SEDECO(ng)%POPs(i,j,k)) .or. SEDECO(ng)%POPs(i,j,k) > 1.0d8 .or. SEDECO(ng)%POPs(i,j,k) < 0.0d0) then
-        !   write(*,*) 'yt_debug: sedecosys SEDECO(ng)%POPs(i,j,k)      i =', i, '   j =', j, '   k =', k
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%POPs(i,j,k) =', SEDECO(ng)%POPs(i,j,k)
-        !   write(*,*) 'yt_debug:     FT_POP(k,2) =', FT_POP(k,2)
-        !   write(*,*) 'yt_debug:     FT_POP(k+1,2) =', FT_POP(k+1,2)
-        !   write(*,*) 'yt_debug:     R_POP(k,2) =', R_POP(k,2)
-        !   write(*,*) 'yt_debug:     dz(k) =', dz(k)
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%poro(i,j,k) =', SEDECO(ng)%poro(i,j,k)
-        !   write(*,*) 'yt_debug:     dt =', dt
-        !   write(*,*) 'yt_debug:     rhos_d(k) =', rhos_d(k)
-        ! endif
-        ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
         SEDECO(ng)%POPn(i,j,k) = massbalance_sed_p(SEDECO(ng)%POPn(i,j,k),FT_POP(k,3),FT_POP(k+1,3),0d0, &
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k),miscPOP(k,3))  ! POPn
-        ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ! ! if (isnan(SEDECO(ng)%POPn(i,j,k)) .or. abs(SEDECO(ng)%POPn(i,j,k)) > huge(SEDECO(ng)%POPn(i,j,k))) then
-        ! if (isnan(SEDECO(ng)%POPn(i,j,k)) .or. SEDECO(ng)%POPn(i,j,k) > 1.0d8 .or. SEDECO(ng)%POPn(i,j,k) < 0.0d0) then
-        !   write(*,*) 'yt_debug: sedecosys SEDECO(ng)%POPn(i,j,k)      i =', i, '   j =', j, '   k =', k
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%POPn(i,j,k) =', SEDECO(ng)%POPn(i,j,k)
-        !   write(*,*) 'yt_debug:     FT_POP(k,3) =', FT_POP(k,3)
-        !   write(*,*) 'yt_debug:     FT_POP(k+1,3) =', FT_POP(k+1,3)
-        !   write(*,*) 'yt_debug:     dz(k) =', dz(k)
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%poro(i,j,k) =', SEDECO(ng)%poro(i,j,k)
-        !   write(*,*) 'yt_debug:     dt =', dt
-        !   write(*,*) 'yt_debug:     rhos_d(k) =', rhos_d(k)
-        ! endif
-        ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 #  endif
 # endif
 # if defined SULFATE
@@ -2833,223 +2438,42 @@ CONTAINS
         ! -- Mn2 -- !
         SEDECO(ng)%Mn2(i,j,k) = massbalance_sed_d(SEDECO(ng)%Mn2(i,j,k),FT_Mn2(k),FT_Mn2(k+1),R_Mn2(k), &
                                             dz(k),(SEDECO(ng)%poro(i,j,k)+rhos_d(k)*(1d0 - SEDECO(ng)%poro(i,j,k))*Kad_Mn2),dt,miscMn2(k)) 
-        ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ! ! if (isnan(SEDECO(ng)%Mn2(i,j,k)) .or. abs(SEDECO(ng)%Mn2(i,j,k)) > huge(SEDECO(ng)%Mn2(i,j,k))) then
-        ! if (isnan(SEDECO(ng)%Mn2(i,j,k)) .or. SEDECO(ng)%Mn2(i,j,k) > 1.0d8 .or. SEDECO(ng)%Mn2(i,j,k) < 0.0d0) then
-        !   write(*,*) 'yt_debug: sedecosys SEDECO(ng)%Mn2(i,j,k)      i =', i, '   j =', j, '   k =', k
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%Mn2(i,j,k) =', SEDECO(ng)%Mn2(i,j,k)
-        !   write(*,*) 'yt_debug:     FT_Mn2(k) =', FT_Mn2(k)
-        !   write(*,*) 'yt_debug:     FT_Mn2(k+1) =', FT_Mn2(k+1)
-        !   write(*,*) 'yt_debug:     R_Mn2(k) =', R_Mn2(k)
-        !   write(*,*) 'yt_debug:     dz(k) =', dz(k)
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%poro(i,j,k) =', SEDECO(ng)%poro(i,j,k)
-        !   write(*,*) 'yt_debug:     rhos_d(k) =', rhos_d(k)
-        !   write(*,*) 'yt_debug:     Kad_Mn2 =', Kad_Mn2
-        !   write(*,*) 'yt_debug:     dt =', dt
-        ! endif
-        ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
         ! -- Fe2 -- !
         SEDECO(ng)%Fe2(i,j,k) = massbalance_sed_d(SEDECO(ng)%Fe2(i,j,k),FT_Fe2(k),FT_Fe2(k+1),R_Fe2(k), &
                                             dz(k),(SEDECO(ng)%poro(i,j,k)+rhos_d(k)*(1d0 - SEDECO(ng)%poro(i,j,k))*Kad_Fe2),dt,miscFe2(k)) 
-        ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ! ! if (isnan(SEDECO(ng)%Fe2(i,j,k)) .or. abs(SEDECO(ng)%Fe2(i,j,k)) > huge(SEDECO(ng)%Fe2(i,j,k))) then
-        ! if (isnan(SEDECO(ng)%Fe2(i,j,k)) .or. SEDECO(ng)%Fe2(i,j,k) > 1.0d8 .or. SEDECO(ng)%Fe2(i,j,k) < 0.0d0) then
-        !   write(*,*) 'yt_debug: sedecosys SEDECO(ng)%Fe2(i,j,k)      i =', i, '   j =', j, '   k =', k
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%Fe2(i,j,k) =', SEDECO(ng)%Fe2(i,j,k)
-        !   write(*,*) 'yt_debug:     FT_Fe2(k) =', FT_Fe2(k)
-        !   write(*,*) 'yt_debug:     FT_Fe2(k+1) =', FT_Fe2(k+1)
-        !   write(*,*) 'yt_debug:     R_Fe2(k) =', R_Fe2(k)
-        !   write(*,*) 'yt_debug:     dz(k) =', dz(k)
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%poro(i,j,k) =', SEDECO(ng)%poro(i,j,k)
-        !   write(*,*) 'yt_debug:     rhos_d(k) =', rhos_d(k)
-        !   write(*,*) 'yt_debug:     Kad_Fe2 =', Kad_Fe2
-        !   write(*,*) 'yt_debug:     dt =', dt
-        ! endif
-        ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
                                             
 #  else
         ! -- Mn2 -- !
         SEDECO(ng)%Mn2(i,j,k) = massbalance_sed_d(SEDECO(ng)%Mn2(i,j,k),FT_Mn2(k),FT_Mn2(k+1),R_Mn2(k), &
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,miscMn2(k)) 
-        ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ! ! if (isnan(SEDECO(ng)%Mn2(i,j,k)) .or. abs(SEDECO(ng)%Mn2(i,j,k)) > huge(SEDECO(ng)%Mn2(i,j,k))) then
-        ! if (isnan(SEDECO(ng)%Mn2(i,j,k)) .or. SEDECO(ng)%Mn2(i,j,k) > 1.0d8 .or. SEDECO(ng)%Mn2(i,j,k) < 0.0d0) then
-        !   write(*,*) 'yt_debug: sedecosys SEDECO(ng)%Mn2(i,j,k)      i =', i, '   j =', j, '   k =', k
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%Mn2(i,j,k) =', SEDECO(ng)%Mn2(i,j,k)
-        !   write(*,*) 'yt_debug:     FT_Mn2(k) =', FT_Mn2(k)
-        !   write(*,*) 'yt_debug:     FT_Mn2(k+1) =', FT_Mn2(k+1)
-        !   write(*,*) 'yt_debug:     R_Mn2(k) =', R_Mn2(k)
-        !   write(*,*) 'yt_debug:     dz(k) =', dz(k)
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%poro(i,j,k) =', SEDECO(ng)%poro(i,j,k)
-        !   write(*,*) 'yt_debug:     dt =', dt
-        ! endif
-        ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-        
         ! -- Fe2 -- !
         SEDECO(ng)%Fe2(i,j,k) = massbalance_sed_d(SEDECO(ng)%Fe2(i,j,k),FT_Fe2(k),FT_Fe2(k+1),R_Fe2(k), &
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,miscFe2(k)) 
-        ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ! ! if (isnan(SEDECO(ng)%Fe2(i,j,k)) .or. abs(SEDECO(ng)%Fe2(i,j,k)) > huge(SEDECO(ng)%Fe2(i,j,k))) then
-        ! if (isnan(SEDECO(ng)%Fe2(i,j,k)) .or. SEDECO(ng)%Fe2(i,j,k) > 1.0d8 .or. SEDECO(ng)%Fe2(i,j,k) < 0.0d0) then
-        !   write(*,*) 'yt_debug: sedecosys SEDECO(ng)%Fe2(i,j,k)      i =', i, '   j =', j, '   k =', k
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%Fe2(i,j,k) =', SEDECO(ng)%Fe2(i,j,k)
-        !   write(*,*) 'yt_debug:     FT_Fe2(k) =', FT_Fe2(k)
-        !   write(*,*) 'yt_debug:     FT_Fe2(k+1) =', FT_Fe2(k+1)
-        !   write(*,*) 'yt_debug:     R_Fe2(k) =', R_Fe2(k)
-        !   write(*,*) 'yt_debug:     dz(k) =', dz(k)
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%poro(i,j,k) =', SEDECO(ng)%poro(i,j,k)
-        !   write(*,*) 'yt_debug:     dt =', dt
-        ! endif
-        ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
 #  endif
         ! -- MnO2 -- !
         SEDECO(ng)%MnO2(i,j,k) = massbalance_sed_p(SEDECO(ng)%MnO2(i,j,k),FT_MnO2(k),FT_MnO2(k+1),R_MnO2(k), &
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k),miscMnO2(k)) 
-        ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ! ! if (isnan(SEDECO(ng)%MnO2(i,j,k)) .or. abs(SEDECO(ng)%MnO2(i,j,k)) > huge(SEDECO(ng)%MnO2(i,j,k))) then
-        ! if (isnan(SEDECO(ng)%MnO2(i,j,k)) .or. SEDECO(ng)%MnO2(i,j,k) > 1.0d8 .or. SEDECO(ng)%MnO2(i,j,k) < 0.0d0) then
-        !   write(*,*) 'yt_debug: sedecosys SEDECO(ng)%MnO2(i,j,k)      i =', i, '   j =', j, '   k =', k
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%MnO2(i,j,k) =', SEDECO(ng)%MnO2(i,j,k)
-        !   write(*,*) 'yt_debug:     FT_MnO2(k) =', FT_MnO2(k)
-        !   write(*,*) 'yt_debug:     FT_MnO2(k+1) =', FT_MnO2(k+1)
-        !   write(*,*) 'yt_debug:     R_MnO2(k) =', R_MnO2(k)
-        !   write(*,*) 'yt_debug:     dz(k) =', dz(k)
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%poro(i,j,k) =', SEDECO(ng)%poro(i,j,k)
-        !   write(*,*) 'yt_debug:     dt =', dt
-        !   write(*,*) 'yt_debug:     rhos_d(k) =', rhos_d(k)
-        ! endif
-        ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-        
         ! -- FeS -- !
         SEDECO(ng)%FeS(i,j,k) = massbalance_sed_p(SEDECO(ng)%FeS(i,j,k),FT_FeS(k),FT_FeS(k+1),R_FeS(k),  &
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k),miscFeS(k)) 
-        ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ! ! if (isnan(SEDECO(ng)%FeS(i,j,k)) .or. abs(SEDECO(ng)%FeS(i,j,k)) > huge(SEDECO(ng)%FeS(i,j,k))) then
-        ! if (isnan(SEDECO(ng)%FeS(i,j,k)) .or. SEDECO(ng)%FeS(i,j,k) > 1.0d8 .or. SEDECO(ng)%FeS(i,j,k) < 0.0d0) then
-        !   write(*,*) 'yt_debug: sedecosys SEDECO(ng)%FeS(i,j,k)      i =', i, '   j =', j, '   k =', k
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%FeS(i,j,k) =', SEDECO(ng)%FeS(i,j,k)
-        !   write(*,*) 'yt_debug:     FT_FeS(k) =', FT_FeS(k)
-        !   write(*,*) 'yt_debug:     FT_FeS(k+1) =', FT_FeS(k+1)
-        !   write(*,*) 'yt_debug:     R_FeS(k) =', R_FeS(k)
-        !   write(*,*) 'yt_debug:     dz(k) =', dz(k)
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%poro(i,j,k) =', SEDECO(ng)%poro(i,j,k)
-        !   write(*,*) 'yt_debug:     dt =', dt
-        !   write(*,*) 'yt_debug:     rhos_d(k) =', rhos_d(k)
-        ! endif
-        ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
         ! -- FeS2 -- !
         SEDECO(ng)%FeS2(i,j,k) = massbalance_sed_p(SEDECO(ng)%FeS2(i,j,k),FT_FeS2(k),FT_FeS2(k+1),R_FeS2(k), &
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k),miscFeS2(k)) 
-        ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ! ! if (isnan(SEDECO(ng)%FeS2(i,j,k)) .or. abs(SEDECO(ng)%FeS2(i,j,k)) > huge(SEDECO(ng)%FeS2(i,j,k))) then
-        ! if (isnan(SEDECO(ng)%FeS2(i,j,k)) .or. SEDECO(ng)%FeS2(i,j,k) > 1.0d8 .or. SEDECO(ng)%FeS2(i,j,k) < 0.0d0) then
-        !   write(*,*) 'yt_debug: sedecosys SEDECO(ng)%FeS2(i,j,k)      i =', i, '   j =', j, '   k =', k
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%FeS2(i,j,k) =', SEDECO(ng)%FeS2(i,j,k)
-        !   write(*,*) 'yt_debug:     FT_FeS2(k) =', FT_FeS2(k)
-        !   write(*,*) 'yt_debug:     FT_FeS2(k+1) =', FT_FeS2(k+1)
-        !   write(*,*) 'yt_debug:     R_FeS2(k) =', R_FeS2(k)
-        !   write(*,*) 'yt_debug:     dz(k) =', dz(k)
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%poro(i,j,k) =', SEDECO(ng)%poro(i,j,k)
-        !   write(*,*) 'yt_debug:     dt =', dt
-        !   write(*,*) 'yt_debug:     rhos_d(k) =', rhos_d(k)
-        ! endif
-        ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
         ! -- FeOOH -- !
         SEDECO(ng)%FeOOH(i,j,k) = massbalance_sed_p(SEDECO(ng)%FeOOH(i,j,k),FT_FeOOH(k),FT_FeOOH(k+1),R_FeOOH(k), &
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k),miscFeOOH(k)) 
-        ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ! ! if (isnan(SEDECO(ng)%FeOOH(i,j,k)) .or. abs(SEDECO(ng)%FeOOH(i,j,k)) > huge(SEDECO(ng)%FeOOH(i,j,k))) then
-        ! if (isnan(SEDECO(ng)%FeOOH(i,j,k)) .or. SEDECO(ng)%FeOOH(i,j,k) > 1.0d8 .or. SEDECO(ng)%FeOOH(i,j,k) < 0.0d0) then
-        !   write(*,*) 'yt_debug: sedecosys SEDECO(ng)%FeOOH(i,j,k)      i =', i, '   j =', j, '   k =', k
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%FeOOH(i,j,k) =', SEDECO(ng)%FeOOH(i,j,k)
-        !   write(*,*) 'yt_debug:     FT_FeOOH(k) =', FT_FeOOH(k)
-        !   write(*,*) 'yt_debug:     FT_FeOOH(k+1) =', FT_FeOOH(k+1)
-        !   write(*,*) 'yt_debug:     R_FeOOH(k) =', R_FeOOH(k)
-        !   write(*,*) 'yt_debug:     dz(k) =', dz(k)
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%poro(i,j,k) =', SEDECO(ng)%poro(i,j,k)
-        !   write(*,*) 'yt_debug:     dt =', dt
-        !   write(*,*) 'yt_debug:     rhos_d(k) =', rhos_d(k)
-        ! endif
-        ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
         ! -- FeOOH=PO4 -- !
         SEDECO(ng)%FeOOH_PO4(i,j,k) = massbalance_sed_p(SEDECO(ng)%FeOOH_PO4(i,j,k),FT_FeOOH_PO4(k),FT_FeOOH_PO4(k+1), & 
                                                   R_FeOOH_PO4(k),dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k),miscFeOOH_PO4(k)) 
-        ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ! ! if (isnan(SEDECO(ng)%FeOOH_PO4(i,j,k)) .or. abs(SEDECO(ng)%FeOOH_PO4(i,j,k)) > huge(SEDECO(ng)%FeOOH_PO4(i,j,k))) then
-        ! if (isnan(SEDECO(ng)%FeOOH_PO4(i,j,k)) .or. SEDECO(ng)%FeOOH_PO4(i,j,k) > 1.0d8 &
-        !   .or. SEDECO(ng)%FeOOH_PO4(i,j,k) < 0.0d0) then
-        !   write(*,*) 'yt_debug: sedecosys SEDECO(ng)%FeOOH_PO4(i,j,k)      i =', i, '   j =', j, '   k =', k
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%FeOOH_PO4(i,j,k) =', SEDECO(ng)%FeOOH_PO4(i,j,k)
-        !   write(*,*) 'yt_debug:     FT_FeOOH_PO4(k) =', FT_FeOOH_PO4(k)
-        !   write(*,*) 'yt_debug:     FT_FeOOH_PO4(k+1) =', FT_FeOOH_PO4(k+1)
-        !   write(*,*) 'yt_debug:     R_FeOOH_PO4(k) =', R_FeOOH_PO4(k)
-        !   write(*,*) 'yt_debug:     dz(k) =', dz(k)
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%poro(i,j,k) =', SEDECO(ng)%poro(i,j,k)
-        !   write(*,*) 'yt_debug:     dt =', dt
-        !   write(*,*) 'yt_debug:     rhos_d(k) =', rhos_d(k)
-        ! endif
-        ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
         ! -- H2S -- !
         SEDECO(ng)%H2S(i,j,k) = massbalance_sed_d(SEDECO(ng)%H2S(i,j,k),FT_H2S(k),FT_H2S(k+1),R_H2S(k), &
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,miscH2S(k)) 
-        ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ! ! if (isnan(SEDECO(ng)%H2S(i,j,k)) .or. abs(SEDECO(ng)%H2S(i,j,k)) > huge(SEDECO(ng)%H2S(i,j,k))) then
-        ! if (isnan(SEDECO(ng)%H2S(i,j,k)) .or. SEDECO(ng)%H2S(i,j,k) > 1.0d8 .or. SEDECO(ng)%H2S(i,j,k) < 0.0d0) then
-        !   write(*,*) 'yt_debug: sedecosys SEDECO(ng)%H2S(i,j,k)      i =', i, '   j =', j, '   k =', k
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%H2S(i,j,k) =', SEDECO(ng)%H2S(i,j,k)
-        !   write(*,*) 'yt_debug:     FT_H2S(k) =', FT_H2S(k)
-        !   write(*,*) 'yt_debug:     FT_H2S(k+1) =', FT_H2S(k+1)
-        !   write(*,*) 'yt_debug:     R_H2S(k) =', R_H2S(k)
-        !   write(*,*) 'yt_debug:     dz(k) =', dz(k)
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%poro(i,j,k) =', SEDECO(ng)%poro(i,j,k)
-        !   write(*,*) 'yt_debug:     dt =', dt
-        !   write(*,*) 'yt_debug:     rhos_d(k) =', rhos_d(k)
-        ! endif
-        ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
         ! -- S0 -- !
         SEDECO(ng)%S0(i,j,k) = massbalance_sed_p(SEDECO(ng)%S0(i,j,k),FT_S0(k),FT_S0(k+1),R_S0(k), &
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,rhos_d(k),miscS0(k)) 
-        ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ! ! if (isnan(SEDECO(ng)%S0(i,j,k)) .or. abs(SEDECO(ng)%S0(i,j,k)) > huge(SEDECO(ng)%S0(i,j,k))) then
-        ! if (isnan(SEDECO(ng)%S0(i,j,k)) .or. SEDECO(ng)%S0(i,j,k) > 1.0d8 .or. SEDECO(ng)%S0(i,j,k) < 0.0d0) then
-        !   write(*,*) 'yt_debug: sedecosys SEDECO(ng)%S0(i,j,k)      i =', i, '   j =', j, '   k =', k
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%S0(i,j,k) =', SEDECO(ng)%S0(i,j,k)
-        !   write(*,*) 'yt_debug:     FT_S0(k) =', FT_S0(k)
-        !   write(*,*) 'yt_debug:     FT_S0(k+1) =', FT_S0(k+1)
-        !   write(*,*) 'yt_debug:     R_S0(k) =', R_S0(k)
-        !   write(*,*) 'yt_debug:     dz(k) =', dz(k)
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%poro(i,j,k) =', SEDECO(ng)%poro(i,j,k)
-        !   write(*,*) 'yt_debug:     dt =', dt
-        !   write(*,*) 'yt_debug:     rhos_d(k) =', rhos_d(k)
-        ! endif
-        ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
         ! -- SO4 -- !
         SEDECO(ng)%SO4(i,j,k) = massbalance_sed_d(SEDECO(ng)%SO4(i,j,k),FT_SO4(k),FT_SO4(k+1),R_SO4(k), &
                                                   dz(k),SEDECO(ng)%poro(i,j,k),dt,miscSO4(k))
-        ! !!! yt_debug >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ! ! if (isnan(SEDECO(ng)%SO4(i,j,k)) .or. abs(SEDECO(ng)%SO4(i,j,k)) > huge(SEDECO(ng)%SO4(i,j,k))) then
-        ! if (SEDECO(ng)%SO4(i,j,k) > 1.0d8) then
-        !   SEDECO(ng)%SO4(i,j,k) = 1.0d8 ! Cap SO4 concetration (effectively infinite)
-        ! endif
-        ! if (isnan(SEDECO(ng)%SO4(i,j,k)) .or. SEDECO(ng)%SO4(i,j,k) > 1.0d8 .or. SEDECO(ng)%SO4(i,j,k) < 0.0d0) then
-        !   write(*,*) 'yt_debug: sedecosys SEDECO(ng)%SO4(i,j,k)      i =', i, '   j =', j, '   k =', k
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%SO4(i,j,k) =', SEDECO(ng)%SO4(i,j,k)
-        !   write(*,*) 'yt_debug:     FT_SO4(k) =', FT_SO4(k)
-        !   write(*,*) 'yt_debug:     FT_SO4(k+1) =', FT_SO4(k+1)
-        !   write(*,*) 'yt_debug:     R_SO4(k) =', R_SO4(k)
-        !   write(*,*) 'yt_debug:     dz(k) =', dz(k)
-        !   write(*,*) 'yt_debug:     SEDECO(ng)%poro(i,j,k) =', SEDECO(ng)%poro(i,j,k)
-        !   write(*,*) 'yt_debug:     dt =', dt
-        ! endif
-        ! !!! yt_debug <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 # endif
     ENDDO
@@ -3060,13 +2484,12 @@ CONTAINS
 ! ***************************** !
 # if defined SEDECO_ADVECTION
 !! Return total flux of water --> DBL
-  ! [oC]    = [oC]
-    Tmp_out = sgd_Tmp_in
-  ! [PSU/cm2s] = [PSU/L]    * [cm/s]   * [L/1000cm3]
-    Flux_Sal   = sgd_Sal_in * sgd_flux / 1000d0         ! yt_edit is this correct???   right now, groundwater salt is passed directly to reef_ecosys. still need to add propper diffusion
+    Flux_Tmp = FT_Tmp(1)
+    Flux_Sal = FT_Sal(1) 
 # endif
     Flux_DO  = FT_O2(1) 
-    Flux_DICsed = FT_DIC(1)
+    Flux_TA  = FT_TA(1)
+    Flux_DIC = FT_DIC(1)
     Flux_N2  = FT_N2(1)
 # if defined ORGANIC_MATTER
     Flux_POC(:) = FT_POC(1,:)

@@ -494,6 +494,14 @@
                 iDbio3(iWarg)=varid
               CASE ('iDbio3(iWcal)')
                 iDbio3(iWcal)=varid
+
+!!! mons light model >>>>>s>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>KM:Add
+# if defined LIGHT_MODEL
+              CASE ('iDbio3(iLight)')
+                iDbio3(iLight)=varid
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<KM:Add
+
 # ifdef CARBON_ISOTOPE
               CASE ('iDbio3(id13C)')
                 iDbio3(id13C)=varid

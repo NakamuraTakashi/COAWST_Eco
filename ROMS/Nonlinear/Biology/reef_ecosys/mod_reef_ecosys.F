@@ -257,9 +257,13 @@ END SUBROUTINE allocate_reef_ecosys
 #  endif
 # endif
 #endif
+#if defined SEDIMENT && defined SUSPLOAD
+    , ero_flux          &   ! Sediment erosion rate (cm s-1)
+    , dep_flux          &   ! Sediment deposition rate (cm s-1)
+#endif
 !   output parameters
-    , dTemp_dt       &   ! Tmp(N): Temperature (oC)
-    , dSalt_dt       &   ! Sal(N): Salinity (PSU)
+    , dTemp_dt       &   ! dTemp_dt(N): Temperature (oC s-1)
+    , dSalt_dt       &   ! dSalt_dt(N): Salinity (PSU s-1)
     , dDIC_dt        &   ! dDIC_dt(N): dDIC/dt (umol kg-1 s-1)
     , dTA_dt         &   ! dTA_dt (N): dTA/dt (umol kg-1 s-1)
     , dDOx_dt        &   ! dDOx_dt(N): dDO/dt (umol L-1 s-1)
@@ -317,6 +321,11 @@ END SUBROUTINE allocate_reef_ecosys
     , ssCO2flux      &   ! sea surface CO2 flux (mmol m-2 s-1)
     , ssO2flux       &   ! sea surface O2 flux (mmol m-2 s-1)
     , PFDbott        &   ! Bottom photon flux density (umol m-2 s-1)
+!!! mons light model >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>KM:Add
+#if defined LIGHT_MODEL
+    , PFDk           &   ! Column PFD (umol m-2 s-1)
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<KM:Add
     )                    
 !
 !-----------------------------------------------------------------------
@@ -375,6 +384,7 @@ END SUBROUTINE allocate_reef_ecosys
     real(8), intent(in) :: tau        
     real(8), intent(in) :: pCO2air    
     real(8), intent(in) :: U10        
+
 #ifdef CORAL_POLYP
     real(8), intent(in) :: p_coral(Ncl)
 #endif
@@ -459,6 +469,11 @@ END SUBROUTINE allocate_reef_ecosys
 #  endif
 # endif
 #endif
+#if defined SEDIMENT && defined SUSPLOAD
+    real(8), intent(in) :: ero_flux           ! Sediment erosion rate (cm s-1)
+    real(8), intent(in) :: dep_flux           ! Sediment deposition rate (cm s-1)
+#endif
+
 ! input with negatives corrected to zero
     real(8) :: Tmp(N)        
     real(8) :: Sal(N)        
@@ -570,7 +585,11 @@ END SUBROUTINE allocate_reef_ecosys
     real(8), intent(out) :: ssCO2flux 
     real(8), intent(out) :: ssO2flux  
     real(8), intent(out) :: PFDbott   
-
+!!! mons light model >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>KM:Add
+#if defined LIGHT_MODEL
+    real(8), intent(out) :: PFDk(N)  
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<KM:Add
     real(8), parameter :: AttSW  = 0.12d0     ! Light attenuation due to seawater [1/m], {0.04d0}.
     real(8), parameter :: AttChl = 0.02486d0  ! Light attenuation by chlorophyll [1/(mg_Chl m2)], {0.02486d0}.
 #ifdef CORAL_POLYP
@@ -591,8 +610,12 @@ END SUBROUTINE allocate_reef_ecosys
     real(8) :: cCO2aq, cHCO3, cCO3, R13C
     real(8) :: PFD, Att, AttFac, ExpAtt, Itop
     real(8) :: cff, cff1, cff2, cff3, cff4, cff5
+!!! mons light model >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>KM:Add
+    real(8) :: sza, tPOC, TSS
+    real(8) :: Aw490, Aop440, Aop490, Aip440, Aip490, Ag440, Ag490, Bbw490, Bbp490, Bbp560, At490, Bbt490, Kd490, Kdpar
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<KM:Add
 
-    real(8) :: SGD_Temp, Flux_Sal
+    real(8) :: Flux_Tmp, Flux_Sal
     real(8) :: Flux_DIC, Flux_TA,  Flux_DO, Flux_CO2sed, Flux_N2  ! yuta_edits_for_masa
 #if defined ORGANIC_MATTER
     real(8) :: Flux_DOC(Ndom), Flux_POC(Npom)
@@ -1012,7 +1035,10 @@ END SUBROUTINE allocate_reef_ecosys
 
     DO k=N,1,-1
     
-!!
+#if defined LIGHT_MODEL
+      PFDk(k) = PFD
+#endif
+
 !!  Compute average light attenuation for each grid cell. To include
 !!  other attenuation contributions like suspended sediment or CDOM
 !!  modify AttFac.
@@ -1031,11 +1057,11 @@ END SUBROUTINE allocate_reef_ecosys
 !        Chl2C=MIN(Bio(i,k,iChlo)/(Bio(i,k,iPhyt)*cff+eps),      &
 !     &            Chl2C_m(ng))
 !
-      Att= AttSW*dz(k) 
-      ExpAtt=EXP(-Att)
-      Itop=PFD
-      PFD=Itop*(1.0d0-ExpAtt)/Att    ! average at cell center
 
+!      Att= AttSW*dz(k)
+!      ExpAtt=EXP(-Att)
+!      Itop=PFD
+!      PFD=Itop*(1.0d0-ExpAtt)/Att    ! average at cell center
 
 #if defined FOODWEB
 !-----------------------------------------------------------------------
@@ -1184,7 +1210,48 @@ END SUBROUTINE allocate_reef_ecosys
 !  Light attenuation at the bottom of the grid cell. It is the starting
 !  PFD value for the next (deeper) vertical grid cell.
 !
-      PFD=Itop*ExpAtt
+!      PFD=Itop*ExpAtt
+
+!!! mons light model >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>KM:Add
+#if defined LIGHT_MODEL
+
+! constants that should be computed
+      sza = 1.5d1 !typical PH SZA                   ! 
+      tPOC = POC(k,1) + POC(k,2)
+
+! actual calculations
+      Aw490 = 1.5d-2
+      Aop440 = 1.48776909221838d-2*MAX(tPOC,0.0d0)**5.75341428428829d-1
+      Aop490 = MAX((5.83174d-1+7.66d-12*LOG(MAX(Aop440,1.0d-30)))*Aop440,0.0d0)
+      Aip440 = 4.05699607236094d-3*MAX(tPOC,0.0d0)**9.99999435689510d-1
+      Aip490 = MAX(Aip440*EXP(-5.6303965d-1),0.0d0)
+      Ag440 = -4.27996832826524d-2*MAX(Sal(k),0.0d0)+1.61458559175428d0 
+      Ag490 = MAX(Ag440*EXP(-4.2204005d-1),0.0d0) 
+      Bbw490 = 1.622d-3
+      Bbp560 = 4.28633036350060d-3*MAX(tPOC,0.0d0)**9.99862455045082d-1
+      Bbp490 = MAX(Bbp560*1.138105699d0,0.0d0)
+      At490 = Aw490+Aip490+Aop490+Ag490
+      Bbt490 = Bbw490+Bbp490
+      Kd490 = (1.0d0+5.0d-3*sza)*At490+4.18d0*(1.0d0-5.2d-1*EXP(-1.08d1*At490))*Bbt490
+
+      IF (Kd490.GT.1.15d-1) THEN
+          Kdpar = 8.1d-1*Kd490**8.256d-1
+      ELSE
+          Kdpar = 4.6051d0*Kd490/(6.07d0*Kd490+3.2d0)
+      END IF
+
+      Att= Kdpar*dz(k)            
+      ExpAtt=EXP(-Att)
+      Itop=PFD
+      PFD = Itop*ExpAtt
+#else
+!original script
+      Att= AttSW*dz(k)
+      ExpAtt=EXP(-Att)
+      Itop=PFD
+      PFD = Itop*ExpAtt    
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<KM:Add
 
     END DO
 
@@ -1256,7 +1323,7 @@ END SUBROUTINE allocate_reef_ecosys
 !!!---------------------------------------------------------------------
 !!!  Benthic interactions.
 !!!---------------------------------------------------------------------
-    SGD_Temp = 0.0d0
+    Flux_Tmp = 0.0d0
     Flux_Sal = 0.0d0
     Flux_DIC = 0.0d0
     Flux_TA  = 0.0d0
@@ -1663,7 +1730,7 @@ END SUBROUTINE allocate_reef_ecosys
 #   endif
 #  endif
 #  if defined SEDECO_ADVECTION && defined SGD_ON
-          , sgd_flux/p_sand   &   ! sumbarine groundwater discharge rate of sediment (cm s-1)  This flux is assumed to be the same throughout the sediment ecosystem layers (no compression/expansion) So volume flux doesn't change but concentrations of tracers do
+          , sgd_flux          &   ! sumbarine groundwater discharge rate of sediment (cm s-1)  This flux is assumed to be the same throughout the sediment ecosystem layers (no compression/expansion) So volume flux doesn't change but concentrations of tracers do
           , sgd_Tmp_in        &   ! SGD concentration coming in through bottom: Tmp: Temperature (oC)
           , sgd_Sal_in        &   ! SGD concentration coming in through bottom: Sal: Salinity (PSU)
           , sgd_DIC_in*rho_sw(1) &   ! SGD concentration coming in through bottom: DIC: Total dissolved inorganic carbon (DIC: umol kg-1)
@@ -1683,7 +1750,7 @@ END SUBROUTINE allocate_reef_ecosys
 #   endif
 #  endif
 !         output parameters
-          , SGD_Temp       &   ! Temperature flux (K cm-2 s-1)  * direction of water column to sediment is positive
+          , Flux_Tmp       &   ! Temperature flux (K cm-2 s-1)  * direction of water column to sediment is positive
           , Flux_Sal       &   ! Salinity  flux PSU (cm-2 s-1)  * direction of water column to sediment is positive
           , Flux_TA        &   ! Total Alkalinity flux (??? cm-2 s-1)  * direction of water column to sediment is positive
           , Flux_DO        &   ! DO  flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
@@ -1716,31 +1783,11 @@ END SUBROUTINE allocate_reef_ecosys
         )
       END DO
 
-#  if defined SEDECO_ADVECTION && defined SGD_ON
-      ! [oC s]    =              
-      ! ocean_temp = Tmp(1)
-      ! sgd_temp = sgd_temp
-      ! ocean_vol = dz(1)*gridarea
-      ! sgd_vol = sgd_flux*0.01*dt*gridarea  [cm/s][0.01m/cm][s][m2]
-      ! avg_temp = ( ocean_temp * ocean_vol + sgd_temp * sgd_vol) / (ocean_vol + sgd_vol)
-      ! dTemp_dt = ( avg_temp - ocean_temp ) / dt
-      
-      dTemp_dt(1) = ( ((Tmp(1)*dz(1) + sgd_temp*sgd_flux*0.01d0*dt)/(dz(1) + sgd_flux*0.01d0*dt)) - Tmp(1) ) / dt
-      ! dTemp_dt(1) = 0.001d0 ! yt_debug
-#  endif
-
-    ! 1 nmol cm-2 s-1 = 0.01 mmol m-2 s-1, 1 mmol m-3 = 1 umol L-1 = 1/1.024 umol kg-1
-    ! x[nmol/cm2 s] (umol/1000nmol) (10000cm2/m2) (1/dz)[1/m] (m3/1000L)= x/dz 0.01(umol L-1 s-1)
-    ! cff: convaert [nmol cm-2 s-1] to [umol L-1 s-1]
-      ! cff=0.01d0 /dz(1) * p_sand ! yt_edit  implement coverage scheme later
       cff=0.01d0 /dz(1) * p_sand
-    ! (umol L-1 s-1) / rho(kg L-1) = (1/rho) (umol kg-1 s-1)
-
-      ! [PSU/L s] =               [PSU/cm2 s] * [1/m]   (10000cm2/m2) (m3/1000L)
-      dSalt_dt(1) = dSalt_dt(1) + Flux_Sal    / dz(1) * p_sand * 10d0      ! Sal(N): Salinity (PSU)
-
-      ! dTA_dt (1) = dTA_dt (1) - Flux_TA  * cff ! yt_edit what are the units? do we need to divide by rho?
+      dTemp_dt(1) = dTemp_dt(1) - Flux_Tmp  * cff
+      dSalt_dt(1) = dSalt_dt(1) - Flux_Sal  * cff
       dDOx_dt(1) = dDOx_dt(1) - Flux_DO  * cff
+      dTA_dt (1) = dTA_dt (1) - Flux_TA  * cff/rho_sw(1)
       dDIC_dt(1) = dDIC_dt(1) - Flux_DIC * cff/rho_sw(1)
 
 #  if defined ORGANIC_MATTER
