@@ -860,13 +860,13 @@
           DO itrc=1,Npom
             t(i,j,k,1,iPOC(itrc)) = POC_0(itrc,ng)     ! umolC L-1
           END DO
-          t(i,j,k,1,iPhyt(1)) = PHY1_Profile2( z_r(i,j,k) )
-          t(i,j,k,1,iPhyt(2)) = PHY2_Profile2( z_r(i,j,k) )
-          t(i,j,k,1,iPhyt(3)) = PHY3_Profile2( z_r(i,j,k) )
-!          DO itrc=1,Nzoo
+          DO itrc=1,Nphy
+            t(i,j,k,1,iPhyt(itrc)) = PHY_Profile2( itrc, z_r(i,j,k) )
+          END DO
+          DO itrc=1,Nzoo
 !            t(i,j,k,1,iZoop(itrc))=Zoop_0(itrc,ng)     ! umolC L-1
-!          END DO
-          t(i,j,k,1,iZoop(1)) = ZOO_Profile2( z_r(i,j,k) )    ! umolC L-1
+            t(i,j,k,1,iZoop(itrc)) = ZOO_Profile2( itrc, z_r(i,j,k) )    ! umolC L-1
+          END DO
           DO itrc=1,Npim
             t(i,j,k,1,iPIC(itrc)) = PIC_0(itrc,ng)     ! umolC L-1
           END DO

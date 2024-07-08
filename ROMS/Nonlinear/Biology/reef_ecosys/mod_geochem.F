@@ -1880,51 +1880,46 @@ contains
 
   end function PHY2_Profile
 
-!--- Phytoplankton_01 -------------------------------------
-!     developed by Shinya AMANO
+!--- Phytoplankton -------------------------------------
+!     developed by Shinya AMANO, Takashi NAKAMURA
 
-  real(8) function PHY1_Profile2(d)
+  real(8) function PHY_Profile2(iphy, d)
     implicit none
-    real(8), intent(in) :: d   ! elevation (m) = -depth
-
-    IF (d.gt.-155.0d0) THEN
-      PHY1_Profile2=(-0.00095d0*(d+50.0d0)**2 + 10.5d0)/24.0d0 *0.2d0    ! umol L-1
-    ELSE IF (d.le.-155.0d0) THEN
-      PHY1_Profile2=0.0d0     ! umol L-1
-    END IF
-
-  end function PHY1_Profile2
-
-!--- Phytoplankton_02 -------------------------------------
-!     developed by Shinya AMANO
-
-  real(8) function PHY2_Profile2(d)
-    implicit none
-    real(8), intent(in) :: d   ! elevation (m) = -depth  
+    integer, intent(in) :: iphy ! Phytoplankton functional group num 
+    real(8), intent(in) :: d    ! elevation (m) = -depth  
  
-    IF (d.gt.-155.0d0) THEN
-      PHY2_Profile2=(-0.00095d0*(d+50.0d0)**2 + 10.5d0)/24.0d0     ! umol L-1
-    ELSE IF (d.le.-155d0) THEN
-      PHY2_Profile2=0.0d0     ! umol L-1
-    END IF
+    SELECT CASE(iphy)
+    !--- Phytoplankton_01 ---
+    CASE(1)
+      IF (d.gt.-155.0d0) THEN
+        PHY_Profile2=(-0.00095d0*(d+50.0d0)**2 + 10.5d0)/24.0d0 * 0.2d0    ! umol L-1
+      ELSE IF (d.le.-155d0) THEN
+        PHY_Profile2=0.0d0     ! umol L-1
+      END IF
+    !--- Phytoplankton_02 ---
+    CASE(2)
+      IF (d.gt.-155.0d0) THEN
+        PHY_Profile2=(-0.00095d0*(d+50.0d0)**2 + 10.5d0)/24.0d0 * 1.0d0    ! umol L-1
+      ELSE IF (d.le.-155d0) THEN
+        PHY_Profile2=0.0d0     ! umol L-1
+      END IF
+    !--- Phytoplankton_03 ---
+    CASE(3)
+      IF (d.gt.-155.0d0) THEN
+        PHY_Profile2=(-0.00095d0*(d+50.0d0)**2 + 10.5d0)/24.0d0 * 0.02d0    ! umol L-1
+      ELSE IF (d.le.-155d0) THEN
+        PHY_Profile2=0.0d0     ! umol L-1
+      END IF
+    !--- Phytoplankton_04 ---
+    CASE(4)
+      IF (d.gt.-155.0d0) THEN
+        PHY_Profile2=(-0.00095d0*(d+50.0d0)**2 + 10.5d0)/24.0d0 * 0.4d0    ! umol L-1
+      ELSE IF (d.le.-155d0) THEN
+        PHY_Profile2=0.0d0     ! umol L-1
+      END IF
+    END SELECT
 
-  end function PHY2_Profile2
-
-!--- Phytoplankton_03 -------------------------------------
-!     developed by Shinya AMANO
-
-  real(8) function PHY3_Profile2(d)
-    implicit none
-    real(8), intent(in) :: d   ! elevation (m) = -depth  
- 
-    IF (d.gt.-155.0d0) THEN
-      PHY3_Profile2=(-0.00095d0*(d+50.0d0)**2 + 10.5d0)/24.0d0 * 0.8d0    ! umol L-1
-    ELSE IF (d.le.-155d0) THEN
-      PHY3_Profile2=0.0d0     ! umol L-1
-    END IF
-
-  end function PHY3_Profile2
-
+  end function PHY_Profile2
 
 !--- Zooplankton -------------------------------------
 !     developed by Faisal AMRI
@@ -1944,11 +1939,16 @@ contains
 !--- Zooplankton -------------------------------------
 !     TN test
 
-  real(8) function ZOO_Profile2(d)
+  real(8) function ZOO_Profile2(izoo, d)
     implicit none
-    real(8), intent(in) :: d   ! elevation (m) = -depth
+    integer, intent(in) :: izoo ! Zooplankton functional group num 
+    real(8), intent(in) :: d    ! elevation (m) = -depth
 
-    ZOO_Profile2 = max( 0.25d0+(d/2000.0d0), 0.0d0 )    ! umolC L-1
+    SELECT CASE(izoo)
+    !--- Zooplankton_01 ---
+    CASE(1)
+      ZOO_Profile2 = max( 0.25d0+(d/2000.0d0), 0.0d0 )    ! umolC L-1
+    END SELECT
 
   end function ZOO_Profile2
 

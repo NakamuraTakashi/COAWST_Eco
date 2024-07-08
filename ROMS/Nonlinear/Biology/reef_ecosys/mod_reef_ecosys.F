@@ -258,8 +258,8 @@ END SUBROUTINE allocate_reef_ecosys
 # endif
 #endif
 #if defined SEDIMENT && defined SUSPLOAD
-    , ero_flux          &   ! Sediment erosion rate (cm s-1)
-    , dep_flux          &   ! Sediment deposition rate (cm s-1)
+!    , ero_flux          &   ! Sediment erosion rate (cm s-1)
+!    , dep_flux          &   ! Sediment deposition rate (cm s-1)
 #endif
 !   output parameters
     , dTemp_dt       &   ! dTemp_dt(N): Temperature (oC s-1)
@@ -470,8 +470,8 @@ END SUBROUTINE allocate_reef_ecosys
 # endif
 #endif
 #if defined SEDIMENT && defined SUSPLOAD
-    real(8), intent(in) :: ero_flux           ! Sediment erosion rate (cm s-1)
-    real(8), intent(in) :: dep_flux           ! Sediment deposition rate (cm s-1)
+!    real(8), intent(in) :: ero_flux           ! Sediment erosion rate (cm s-1)
+!    real(8), intent(in) :: dep_flux           ! Sediment deposition rate (cm s-1)
 #endif
 
 ! input with negatives corrected to zero

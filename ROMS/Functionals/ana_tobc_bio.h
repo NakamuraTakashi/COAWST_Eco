@@ -747,11 +747,13 @@
               BOUNDARY(ng)%t_east(j,k,iPOC(itrc)) = POC_0(itrc,ng)     ! umolC L-1
             END DO
         ! Phytoplankton        
-            BOUNDARY(ng)%t_east(j,k,iPhyt(1)) = PHY1_Profile2( z_r(Iend+1,j,k) )
-            BOUNDARY(ng)%t_east(j,k,iPhyt(2)) = PHY2_Profile2( z_r(Iend+1,j,k) )
-            BOUNDARY(ng)%t_east(j,k,iPhyt(3)) = PHY3_Profile2( z_r(Iend+1,j,k) )
+            DO itrc=1,Nphy
+              BOUNDARY(ng)%t_east(j,k,iPhyt(itrc)) = PHY_Profile2( itrc, z_r(Iend+1,j,k) )
+            END DO
         ! Zooplankton
-            BOUNDARY(ng)%t_east(j,k,iZoop(1)) = ZOO_Profile2 ( z_r(Iend+1,j,k) )
+            DO itrc=1,Nzoo
+              BOUNDARY(ng)%t_east(j,k,iZoop(itrc)) = ZOO_Profile2( itrc, z_r(Iend+1,j,k) )
+            END DO
         ! POC
             DO itrc=1,Npim
               BOUNDARY(ng)%t_east(j,k,iPIC(itrc)) = PIC_0(itrc,ng)     ! umolC L-1
@@ -916,11 +918,13 @@
               BOUNDARY(ng)%t_west(j,k,iPOC(itrc)) = POC_0(itrc,ng)     ! umolC L-1
             END DO
         ! Phytoplankton        
-            BOUNDARY(ng)%t_west(j,k,iPhyt(1)) = PHY1_Profile2( z_r(Istr-1,j,k) )
-            BOUNDARY(ng)%t_west(j,k,iPhyt(2)) = PHY2_Profile2( z_r(Istr-1,j,k) )
-            BOUNDARY(ng)%t_west(j,k,iPhyt(3)) = PHY3_Profile2( z_r(Istr-1,j,k) )
+            DO itrc=1,Nphy
+              BOUNDARY(ng)%t_west(j,k,iPhyt(itrc)) = PHY_Profile2( itrc, z_r(Istr-1,j,k) )
+            END DO
         ! Zooplankton
-            BOUNDARY(ng)%t_west(j,k,iZoop(1)) = ZOO_Profile2 ( z_r(Istr-1,j,k) )
+            DO itrc=1,Nzoo
+              BOUNDARY(ng)%t_west(j,k,iZoop(itrc)) = ZOO_Profile2( itrc, z_r(Istr-1,j,k) )
+            END DO
         ! PIC
             DO itrc=1,Npim
               BOUNDARY(ng)%t_west(j,k,iPIC(itrc)) = PIC_0(itrc,ng)     ! umolC L-1
@@ -1085,11 +1089,13 @@
               BOUNDARY(ng)%t_south(i,k,iPOC(itrc)) = POC_0(itrc,ng)     ! umolC L-1
             END DO
         ! Phytoplankton        
-            BOUNDARY(ng)%t_south(i,k,iPhyt(1)) = PHY1_Profile2( z_r(i,Jstr-1,k) )
-            BOUNDARY(ng)%t_south(i,k,iPhyt(2)) = PHY2_Profile2( z_r(i,Jstr-1,k) )
-            BOUNDARY(ng)%t_south(i,k,iPhyt(3)) = PHY3_Profile2( z_r(i,Jstr-1,k) )
+            DO itrc=1,Nphy
+              BOUNDARY(ng)%t_south(i,k,iPhyt(itrc)) = PHY_Profile2( itrc, z_r(i,Jstr-1,k) )
+            END DO
         ! Zooplankton
-            BOUNDARY(ng)%t_south(i,k,iZoop(1)) = ZOO_Profile2 ( z_r(i,Jstr-1,k) )
+            DO itrc=1,Nzoo
+              BOUNDARY(ng)%t_south(i,k,iZoop(itrc)) = ZOO_Profile2( itrc, z_r(i,Jstr-1,k) )
+            END DO
         ! PIC
             DO itrc=1,Npim
               BOUNDARY(ng)%t_south(i,k,iPIC(itrc)) = PIC_0(itrc,ng)     ! umolC L-1
@@ -1254,11 +1260,13 @@
               BOUNDARY(ng)%t_north(i,k,iPOC(itrc)) = POC_0(itrc,ng)     ! umolC L-1
             END DO
         ! Phytoplankton        
-            BOUNDARY(ng)%t_north(i,k,iPhyt(1)) = PHY1_Profile2( z_r(i,Jend+1,k) )
-            BOUNDARY(ng)%t_north(i,k,iPhyt(2)) = PHY2_Profile2( z_r(i,Jend+1,k) )
-            BOUNDARY(ng)%t_north(i,k,iPhyt(3)) = PHY3_Profile2( z_r(i,Jend+1,k) )
+            DO itrc=1,Nphy
+              BOUNDARY(ng)%t_north(i,k,iPhyt(itrc)) = PHY_Profile2( itrc, z_r(i,Jend+1,k) )
+            END DO
         ! Zooplankton
-            BOUNDARY(ng)%t_north(i,k,iZoop(1)) = ZOO_Profile2 ( z_r(i,Jend+1,k) )
+            DO itrc=1,Nzoo
+              BOUNDARY(ng)%t_north(i,k,iZoop(itrc)) = ZOO_Profile2( itrc, z_r(i,Jend+1,k) )
+            END DO
         ! PIC
             DO itrc=1,Npim
               BOUNDARY(ng)%t_north(i,k,iPIC(itrc)) = PIC_0(itrc,ng)     ! umolC L-1
@@ -1388,8 +1396,6 @@
      &    DOMAIN(ng)%Eastern_Edge(tile)) THEN
         DO k=1,N(ng)
           DO j=JstrT,JendT
-            BOUNDARY(ng)%t_east(j,k,itemp)=T0(ng)
-            BOUNDARY(ng)%t_east(j,k,isalt)=S0(ng)
 # if defined SEDIMENT && defined ANA_TOBC_SED
             DO ised=1,NST
               BOUNDARY(ng)%t_east(j,k,idsed(ised))=0.0_r8
@@ -1527,8 +1533,6 @@
      &    DOMAIN(ng)%Western_Edge(tile)) THEN
         DO k=1,N(ng)
           DO j=JstrT,JendT
-            BOUNDARY(ng)%t_west(j,k,itemp)=T0(ng)
-            BOUNDARY(ng)%t_west(j,k,isalt)=S0(ng)
 # if defined SEDIMENT && defined ANA_TOBC_SED
             DO ised=1,NST
               BOUNDARY(ng)%t_west(j,k,idsed(ised))=0.0_r8
@@ -1665,8 +1669,6 @@
      &    DOMAIN(ng)%Southern_Edge(tile)) THEN
         DO k=1,N(ng)
           DO i=IstrT,IendT
-            BOUNDARY(ng)%t_south(i,k,itemp)=T0(ng)
-            BOUNDARY(ng)%t_south(i,k,isalt)=S0(ng)
 # if defined SEDIMENT && defined ANA_TOBC_SED
             DO ised=1,NST
               BOUNDARY(ng)%t_south(i,k,idsed(ised))=0.0_r8
@@ -1803,8 +1805,6 @@
      &    DOMAIN(ng)%Northern_Edge(tile)) THEN
         DO k=1,N(ng)
           DO i=IstrT,IendT
-            BOUNDARY(ng)%t_north(i,k,itemp)=T0(ng)
-            BOUNDARY(ng)%t_north(i,k,isalt)=S0(ng)
 # if defined SEDIMENT && defined ANA_TOBC_SED
             DO ised=1,NST
               BOUNDARY(ng)%t_north(i,k,idsed(ised))=0.0_r8

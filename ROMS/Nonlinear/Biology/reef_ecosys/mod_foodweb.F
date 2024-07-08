@@ -1,6 +1,6 @@
 
 !!!=== Copyright (c) 2012-2024 Takashi NAKAMURA  =====
-!!!      modified by Shinya AMANO, Faisal AMRI
+!!!      modified by Shinya AMANO, Faisal AMRI, Jorge SUAREZ
 
 #include "cppdefs.h"
 
@@ -20,10 +20,11 @@ MODULE mod_foodweb
   integer, parameter :: iDtr  = 1    !  1: Detritus
   integer, parameter :: iCPOM = 2    !  2: Coarse POM (leaf litter, etc.)
 
-  integer, parameter :: Nphy  = 3    ! Number of Phytoplankton types
+  integer, parameter :: Nphy  = 4    ! Number of Phytoplankton types
   integer, parameter :: iDnfl = 1    !  1: Dinoflagellate
   integer, parameter :: iDtm  = 2    !  2: Diatom
   integer, parameter :: iCcl  = 3    !  3: Coccolithophorids
+  integer, parameter :: iCya  = 4    !  4: Cyanobacteria
    
   integer, parameter :: Nzoo = 1     ! Number of Zooplankton types
   integer, parameter :: iGzoo = 1    !  1: General Zooplankton
@@ -249,41 +250,41 @@ CONTAINS
 
 !------- Phytoplankton parameters ------------------------
 !  Maximum photosynthetic rate at 0 oC ( s-1) (0.4d0 d-1; Kishi et al., 2007)0.3
-    real(8), parameter :: k_Pp(Nphy) = [ 3.5d-6,   1.0d-5,   3.5d-6   ]  ! (s-1)
+    real(8), parameter :: k_Pp(Nphy) = [ 3.5d-6,   1.0d-5,   3.5d-6,   1.0d-6]  ! (s-1)   JS_edit check reference values for all parameters
 !  Temperature coefficient for PHY photosynthesis (0.063; Kawamiya et al., 1995)          
-    real(8), parameter :: b_Pp(Nphy) = [ 0.0693d0, 0.0693d0, 0.0693d0 ]  ! (degC-1) 
+    real(8), parameter :: b_Pp(Nphy) = [ 0.0693d0, 0.0693d0, 0.0693d0, 0.0693d0 ]  ! (degC-1) 
 !  Optimum light intensity (48.83d0 J m2 s-1; Kawamiya et al., 1995)     
-    real(8), parameter :: Ip(Nphy)   = [ 90.0d0,   90.0d0,   90.0d0   ] ! (umol m-2 s-1) 
+    real(8), parameter :: Ip(Nphy)   = [ 90.0d0,   90.0d0,   90.0d0,   90.0d0   ] ! (umol m-2 s-1) JS_edit check reference values
 !  Respiration rate at 0 oC (Kawamiya et al., 1995)
-    real(8), parameter :: k_Rp(Nphy) = [ 3.5d-7,   3.5d-7,   3.5d-7   ]    ! (s-1)
+    real(8), parameter :: k_Rp(Nphy) = [ 3.5d-7,   3.5d-7,   3.5d-7,   3.5d-7   ]    ! (s-1)
 !  Temperature coefficient for PHY respiration rate (0.03d0 d-1; Kawamiya et al., 1995)
-    real(8), parameter :: b_Rp(Nphy) = [ 0.0519d0, 0.0519d0, 0.0519d0 ] ! (degC-1)
+    real(8), parameter :: b_Rp(Nphy) = [ 0.0519d0, 0.0519d0, 0.0519d0, 0.0519d0 ] ! (degC-1)
 !  Mortality rate at 0 oC (0.00562d0 umol-1 d-1; 0.0585L/umolN/day? 0.0088; Kishi et al., 2001)0.0066     
-    real(8), parameter :: k_Mp(Nphy) = [ 6.5d-7,   3.3d-7,   6.5d-7   ] ! (L umol-1 s-1)
+    real(8), parameter :: k_Mp(Nphy) = [ 3.3d-7,   3.3d-7,   6.5d-7,   6.5d-7   ] ! (L umol-1 s-1)
 !  Temperature coefficient for PHY mortality (Kawamiya et al., 1995)
-    real(8), parameter :: b_Mp(Nphy) = [ 0.069d0,  0.069d0,  0.069d0  ] ! (degC-1)   
+    real(8), parameter :: b_Mp(Nphy) = [ 0.069d0,  0.069d0,  0.069d0,  0.069d0  ] ! (degC-1)   
 !  PHY ratio of extracellular excretion to production 0.135(Kawamiya et al., 1995)    
-    real(8), parameter :: k_Ep(Nphy) = [ 0.135d0,  0.135d0,  0.135d0  ] ! (no dim.) 
+    real(8), parameter :: k_Ep(Nphy) = [ 0.135d0,  0.135d0,  0.135d0,  0.135d0  ] ! (no dim.) 
     real(8), parameter :: rLDOMphy = 0.99d0  ! (Labile DOM)/(Total DOM) of phytoplankton excreted DOM (no dim.) 
 #if defined NUTRIENTS
 !  PHY Nutrient Assimilation Parameter         
-    real(8), parameter :: Kp_NH4(Nphy) = [ 1.5d0,  0.5d0,  1.5d0  ] ! (umol L-1)1.5         
-    real(8), parameter :: Kp_NO3(Nphy) = [ 0.1d0,  1.0d0,  0.1d0  ] ! (umol L-1)0.1         
-    real(8), parameter :: Kp_PO4(Nphy) = [ 0.01d0, 0.03d0, 0.01d0 ] ! (umol L-1)0.01 
+real(8), parameter :: Kp_NH4(Nphy) = [3.0d-1, 5.0d-2, 1.0d-2, 2.0d-1]      ! (µmol L-1)       JS_edit   
+real(8), parameter :: Kp_NO3(Nphy) = [2.0d-1, 5.0d-1, 2.0d-1, 5.0d0]       ! (µmol L-1)       JS_edit 
+real(8), parameter :: Kp_PO4(Nphy) = [5.0d-1, 5.0d-2, 6.0d-3, 1.5d-1]      ! (µmol L-1)       JS_edit 
     ! (1.5L umolN-1; Kishi et al., 2007)  0.01  0.226  0.5
-    real(8), parameter :: psi(Nphy) =    [ 0.5d0,  0.5d0,  0.5d0  ] !(L umolC-1)   
+    real(8), parameter :: psi(Nphy) =    [ 0.5d0,  0.5d0,  0.5d0,  0.5d0  ] !(L umolC-1)   
 #endif
 !------- Zooplankton parameters ------------------------
-    real(8), parameter :: k_Gp2z(Nphy,Nzoo) = reshape( [ 3.0d-6,    2.0d-6,    3.0d-7    ], [Nphy,Nzoo] ) ! (s-1)          Maximum grazing rate of PHY1 by ZOO at 0 oC (0.3d0 d-1; Kawamiya et al., 1995)0.16
-    real(8), parameter :: b_Gp2z(Nphy,Nzoo) = reshape( [ 0.0693d0,  0.0693d0,  0.0693d0  ], [Nphy,Nzoo] ) ! (degC-1)       Temperature coefficient for ZOO grazing (0.063d0degC-1;Kawamiya et al., 1995)
-    real(8), parameter :: e_Gp2z(Nphy,Nzoo) = reshape( [ 0.250d0,   0.250d0,   0.250d0   ], [Nphy,Nzoo] ) ! (no dim.)      Assimilation efficiency of ZOO (0.7:Kawamiya et al., 1995)
+    real(8), parameter :: k_Gp2z(Nphy,Nzoo) = reshape( [ 3.0d-6,    2.0d-6,    3.0d-7 ,    3.0d-7    ], [Nphy,Nzoo] ) ! (s-1)          Maximum grazing rate of PHY1 by ZOO at 0 oC (0.3d0 d-1; Kawamiya et al., 1995)0.16
+    real(8), parameter :: b_Gp2z(Nphy,Nzoo) = reshape( [ 0.0693d0,  0.0693d0,  0.0693d0,   0.0693d0  ], [Nphy,Nzoo] ) ! (degC-1)       Temperature coefficient for ZOO grazing (0.063d0degC-1;Kawamiya et al., 1995)
+    real(8), parameter :: e_Gp2z(Nphy,Nzoo) = reshape( [ 0.250d0,   0.250d0,   0.250d0,    0.250d0   ], [Nphy,Nzoo] ) ! (no dim.)      Assimilation efficiency of ZOO (0.7:Kawamiya et al., 1995)
 
-    real(8), parameter :: k_Rz(Nzoo) = [ 6.0d-8    ]  ! (s-1)            ZOO respiration rate at 0  oC  																					!!!(Tuning)
+    real(8), parameter :: k_Rz(Nzoo) = [ 6.0d-8    ]  ! (s-1)            ZOO respiration rate at 0  oC  																					!!!(Tuning) Check
     real(8), parameter :: b_Rz(Nzoo) = [ 0.0693d0  ]  ! (degC-1)         Temperature coefficient for ZOO respiration rate (Kawamiya et al., 1995)
     real(8), parameter :: k_Mz(Nzoo) = [ 1.0d-8    ]  ! (L umol-1 s-1)   ZOO mortality rate at 0 oC 3.0d0/86400.0d0(0.0088d0 umol-1 d-1; Kawamiya et al., 1995)
     real(8), parameter :: b_Mz(Nzoo) = [ 0.0693d0  ]  ! (degC-1)         Temperature coefficient for ZOO mortality (Kawamiya et al., 1995)
     real(8), parameter :: lam(Nzoo)  = [ 0.211d0   ]  ! ((umol C L-1)-1) zooplankton Ivlev constant for PHY1 (1.4L/umolN.0.211; Kishi et al., 2007)
-    real(8), parameter :: t_Gp2z(Nphy,Nzoo) = reshape( [ 0.265d0,   0.265d0,   0.265d0   ], [Nphy,Nzoo] ) ! (umol C L-1)       PHY1 threshold value for grazing by ZOO (0.04umolN/L0.265; Kishi et al., 2007)
+    real(8), parameter :: t_Gp2z(Nphy,Nzoo) = reshape( [ 0.265d0,   0.265d0,   0.265d0,   0.265d0   ], [Nphy,Nzoo] ) ! (umol C L-1)       PHY1 threshold value for grazing by ZOO (0.04umolN/L0.265; Kishi et al., 2007)
 !------- Microbial loop parameters  -------
     real(8), parameter :: k_Gdoc2z(Ndom,Nzoo) = reshape( [ 1.0d-8,    0.0d0    ], [Ndom,Nzoo] ) ! (s-1)          Maximum grazing rate of DOC by ZOO at 0 oC (0.3d0 d-1; Kawamiya et al., 1995)
     real(8), parameter :: b_Gdoc2z(Ndom,Nzoo) = reshape( [ 0.0693d0,  0.0693d0 ], [Ndom,Nzoo] ) ! (degC-1)       Temperature coefficient of DOC grazing by ZOO (Kawamiya et al., 1995)
@@ -345,13 +346,13 @@ CONTAINS
 ! Martiny et al  (2014) C:N:P -> C:N=7.4  C:P=163    N:P=22
 ! GLODAP Data           C:N:P -> C:N=9.2  C:P=131.9  N:P=14.4
 
-    real(8), parameter :: rCNp(Nphy) = [ 9.2d0,   9.2d0,   9.2d0   ]    ! (no dim.) PHY1 C:N ratio
-    real(8), parameter :: rCPp(Nphy) = [ 131.9d0, 131.9d0, 131.9d0 ]    ! (no dim.) PHY1 C:P ratio
+    real(8), parameter :: rCNp(Nphy) = [ 6.6d0,   6.6d0,   6.6d0,   6.6d0   ]    ! (no dim.) PHY1 C:N ratio    JS_edit Set to Redfield Ratio
+    real(8), parameter :: rCPp(Nphy) = [ 106d0, 106d0, 106d0, 106d0 ]    ! (no dim.) PHY1 C:P ratio
     real(8), parameter :: rCNz(Nzoo) = [ 9.2d0   ]    ! (no dim.) ZOO  C:N ratio
     real(8), parameter :: rCPz(Nzoo) = [ 131.9d0 ]    ! (no dim.) ZOO  C:P ratio
-    real(8), parameter :: rNH4(Nphy) = 0.3d0            ! (no dim.)  PHY NH4:Nitrogen ratio 
+    real(8), parameter :: rNH4(Nphy) = 0.3d0            ! (no dim.)  PHY NH4:Nitrogen ratio JS_edit make array to use 4 categories
 #endif                                
-    real(8), parameter :: rCCp(Nphy) = [ 0.0d0, 0.0d0, 0.5d0 ]  ! ***** (no dim.) CaCO3:OrgC ratio !!! Need Ref!!!!!!!!!!
+    real(8), parameter :: rCCp(Nphy) = [ 0.0d0, 0.0d0, 0.5d0, 0.0d0 ]  ! ***** (no dim.) CaCO3:OrgC ratio !!! Need Ref!!!!!!!!!!
 #if defined CARBON_ISOTOPE
 !----- for carbon isotope ------------------------
 # if defined CARBON_TRACE
@@ -504,7 +505,7 @@ CONTAINS
       ENDIF
       Pp(k) = MAX( Pp(k), 0.0d0 )  !!! Error handling
 
-!----- Assimilation rate (umolC L-1 s-1) -----------------
+!----- Assimilation rate (umolC L-1 s-1) ----------------- JS_edit find more references about switching NH4 to NO3, etc (nutrient assimilation)
 
 #if defined NUTRIENTS
         cf1 = MAX(NH4, 0.0d0)  !!! Error handling
@@ -512,10 +513,14 @@ CONTAINS
         cf3 = MAX(PO4, 0.0d0)  !!! Error handling
 
       IF(k == iDnfl) THEN
-        Vp_NH4(k) = cf1/(cf1+Kp_NH4(k)) * rNH4(k)
-        Vp_NO3(k) = cf2/(cf2+Kp_NO3(k)) * exp(-psi(k) * cf1) * (1.0d0 - rNH4(k))   
-        Vp_PO4(k) = cf3/(cf3+Kp_PO4(k))
+        Vp_NH4(k) = cf1*cf1/(cf1*cf1+Kp_NH4(k)*Kp_NH4(k)) * rNH4(k)
+        Vp_NO3(k) = cf2*cf2/(cf2*cf2+Kp_NO3(k)*Kp_NO3(k)) * exp(-psi(k) * cf1) * (1.0d0 - rNH4(k))    
+        Vp_PO4(k) = cf3*cf3/(cf3*cf3+Kp_PO4(k)*Kp_PO4(k))
       ELSE IF(k == iDtm) THEN   
+        Vp_NH4(k) = cf1*cf1/(cf1*cf1+Kp_NH4(k)*Kp_NH4(k)) * rNH4(k)
+        Vp_NO3(k) = cf2*cf2/(cf2*cf2+Kp_NO3(k)*Kp_NO3(k)) * exp(-psi(k) * cf1) * (1.0d0 - rNH4(k))    
+        Vp_PO4(k) = cf3*cf3/(cf3*cf3+Kp_PO4(k)*Kp_PO4(k))
+      ELSE IF(k == iCya) THEN   
         Vp_NH4(k) = cf1*cf1/(cf1*cf1+Kp_NH4(k)*Kp_NH4(k)) * rNH4(k)
         Vp_NO3(k) = cf2*cf2/(cf2*cf2+Kp_NO3(k)*Kp_NO3(k)) * exp(-psi(k) * cf1) * (1.0d0 - rNH4(k))    
         Vp_PO4(k) = cf3*cf3/(cf3*cf3+Kp_PO4(k)*Kp_PO4(k))
@@ -544,7 +549,7 @@ CONTAINS
       Ap(k) = MIN( Ap(k), 0.1d0*PO4*rCPp(k)/dt ) !!! yt_edit Error handling  assimilation should not exceed 10% PO4 concentration in a timestep
 #endif
 
-!     === Mass barance ===
+!     === Mass balance ===
 
       dPHY_dt(k) = dPHY_dt(k) + Ap(k)
       dTA_dt = dTA_dt - Ap(k)*rCCp(k)*2.0d0  ! calcification
@@ -576,7 +581,7 @@ CONTAINS
       Ep(k) = MIN( Ep(k), 0.1d0*DIC/dt ) !!! yt_edit Error handling  excretion should not exceed 10% DIC concentration in a timestep
 
 
-!     === Mass barance ===
+!     === Mass balance ===
 
       dDIC_dt = dDIC_dt - Ep(k)
       dDOx_dt = dDOx_dt + Ep(k)  !!!!!!**************
@@ -607,7 +612,7 @@ CONTAINS
       Rp(k) = MIN( Rp(k), 0.1d0*PHY(k)/dt ) !!! yt_edit Error handling  respiration should not exceed 10% PHY concentration in a timestep
       Rp(k) = MIN( Rp(k), 0.1d0*DOx/dt )    !!! yt_edit Error handling  respiration should not consume over 10% DO concentration in a time step
 
-!     === Mass barance ===
+!     === Mass balance ===
 
       dPHY_dt(k) = dPHY_dt(k) - Rp(k)
       dDIC_dt = dDIC_dt + Rp(k)
@@ -629,7 +634,7 @@ CONTAINS
       Mp(k) = MAX( Mp(k), 0.0d0 )  !!! Error handling
       Mp(k) = MIN( Mp(k), 0.1d0*PHY(k)/dt ) !!! yt_edit Error handling  mortality should not exceed 10% PHY concentration in a timestep
 
-!     === Mass barance ===
+!     === Mass balance ===
 
       dPHY_dt(k) = dPHY_dt(k) - Mp(k)
       dPOC_dt(iDtr) = dPOC_dt(iDtr) + Mp(k)
@@ -652,7 +657,7 @@ CONTAINS
 
     DO k=1, Nzoo
 
-!----- Grazing rate of PHY by ZOO (umolC L-1 s-1) -----------------
+!----- Grazing rate of PHY by ZOO (umolC L-1 s-1) ----------------- JS_edit Difficult part: Mixotrophy from Dinoflagellates
 
       DO m=1, Nphy
         Gp2z(m,k) = k_Gp2z(m,k) * exp(b_Gp2z(m,k)*Tmp)    &
@@ -663,7 +668,7 @@ CONTAINS
         Gp2z(m,k) = MAX( Gp2z(m,k), 0.0d0 )  !!! Error handling
         Gp2z(m,k) = MIN( Gp2z(m,k), 0.1d0*PHY(m)/dt ) !!! yt_edit Error handling  grazing should not exceed 10% PHY concentration in a timestep
 
-!     === Mass barance ===
+!     === Mass balance ===
 
         dPHY_dt(m) = dPHY_dt(m) - Gp2z(m,k)
         dZOO_dt(k) = dZOO_dt(k) + Gp2z(m,k)*e_Gp2z(m,k)
@@ -679,7 +684,7 @@ CONTAINS
 #endif
       END DO
 
-!!!------- Microbial loop (inplicitly assumed) ---------------
+!!!------- Microbial loop (implicitly assumed) ---------------
 
 !----- Grazing rate of DOC(iLbl) by ZOO (umolC L-1 s-1) -----------------
 
@@ -692,7 +697,7 @@ CONTAINS
         Gdoc2z(m,k) = MAX( Gdoc2z(m,k), 0.0d0 )  !!! Error handling
         Gdoc2z(m,k) = MIN( Gdoc2z(m,k), 0.1d0*cf1/dt ) !!! yt_edit Error handling  grazing should not exceed 10% total of limiting factor concentration in a timestep
 
-!     === Mass barance ===
+!     === Mass balance ===
         dZOO_dt(k) = dZOO_dt(k) + Gdoc2z(m,k)*e_Gdoc2z(m,k)
         dDOC_dt(m) = dDOC_dt(m) - Gdoc2z(m,k)
         dDOC_dt(iLbl) = dDOC_dt(iLbl) + Gdoc2z(m,k)*(1.0d0-e_Gdoc2z(m,k))
@@ -720,7 +725,7 @@ CONTAINS
         Gpoc2z(m,k) = MAX( Gpoc2z(m,k), 0.0d0 )  !!! Error handling
         Gpoc2z(m,k) = MIN( Gpoc2z(m,k), 0.1d0*cf1/dt ) !!! yt_edit Error handling  grazing should not exceed 10% total of limiting factor concentration in a timestep
 
-!     === Mass barance ===
+!     === Mass balance ===
         dZOO_dt(k) = dZOO_dt(k) + Gpoc2z(m,k)*e_Gpoc2z(m,k)
         dPOC_dt(m) = dPOC_dt(m) - Gpoc2z(m,k)
         dPOC_dt(iDtr) = dPOC_dt(iDtr) + Gpoc2z(m,k)*(1.0d0-e_Gpoc2z(m,k))
@@ -747,7 +752,7 @@ CONTAINS
       Rz(k) = MIN( Rz(k), 0.1d0*ZOO(k)/dt )  !!! yt_edit Error handling  respiration should not exceed 10% ZOO in a timestep
       Rz(k) = MIN( Rz(k), 0.1d0*DOx/dt )     !!! yt_edit Error handling  respiration should not consume over 10% DO concentration in a time step
 
-!     === Mass barance ===
+!     === Mass balance ===
 
       dZOO_dt(k) = dZOO_dt(k) - Rz(k)
       dDIC_dt = dDIC_dt + Rz(k)
@@ -768,7 +773,7 @@ CONTAINS
       Mz(k) = MAX( Mz(k), 0.0d0 )  !!! Error handling
       Mz(k) = MIN( Mz(k), 0.1d0*ZOO(k)/dt )  !!! yt_edit Error handling mortality should not exceed 10% ZOO in a timestep
 
-!     === Mass barance ===
+!     === Mass balance ===
 
       dZOO_dt(k) = dZOO_dt(k) - Mz(k)
       dPOC_dt(iDtr) = dPOC_dt(iDtr) + Mz(k)
@@ -796,7 +801,7 @@ CONTAINS
       Ddoc(k) = MIN( Ddoc(k), 0.1d0*DOx/dt )     !!! yt_edit Error handling decomposition should not consume over 10% DO concentration in a time step
 
 
-!     === Mass barance ===
+!     === Mass balance ===
 
       dDOC_dt(k) = dDOC_dt(k) - Ddoc(k)
       dDIC_dt = dDIC_dt + Ddoc(k)
@@ -820,7 +825,7 @@ CONTAINS
       Ddop(k) = MAX( Ddop(k), 0.0d0 )  !!! Error handling
       Ddop(k) = MIN( Ddop(k), 0.1d0*DOP(k)/dt )  !!! yt_edit Error handling decomposition should not exceed 10% DOP concentration in a timestep
 
-!     === Mass barance ===
+!     === Mass balance ===
 
       dDON_dt(k) = dDON_dt(k) - Ddon(k)
       dDOP_dt(k) = dDOP_dt(k) - Ddop(k)
@@ -841,7 +846,7 @@ CONTAINS
       Dpoc(k) = MIN( Dpoc(k), 0.1d0*POC(k)/dt )  !!! yt_edit Error handling decomposition should not exceed 10% POC concentration in a timestep
       Dpoc(k) = MIN( Dpoc(k), 0.1d0*DOx/dt )     !!! yt_edit Error handling decomposition should not consume over 10% DO concentration in a time step
 
-!     === Mass barance ===
+!     === Mass balance ===
 
       dPOC_dt(k) = dPOC_dt(k) - Dpoc(k)
       dDIC_dt = dDIC_dt + Dpoc(k)
@@ -866,7 +871,7 @@ CONTAINS
       Dpop(k) = MAX( Dpop(k), 0.0d0 )  !!! Error handling
       Dpop(k) = MIN( Dpop(k), 0.1d0*POP(k)/dt )  !!! yt_edit Error handling decomposition should not exceed 10% POP concentration in a timestep
 
-!     === Mass barance ===
+!     === Mass balance ===
 
       dPON_dt(k) = dPON_dt(k) - Dpon(k)
       dPOP_dt(k) = dPOP_dt(k) - Dpop(k)
@@ -887,7 +892,7 @@ CONTAINS
         Dp2doc(m,k) = MAX( Dp2doc(m,k), 0.0d0 )  !!! Error handling
         Dp2doc(m,k) = MIN( Dp2doc(m,k), 0.1d0*POC(m)/dt )  !!! yt_edit Error handling decomposition should not exceed 10% POC concentration in a timestep
 
-!     === Mass barance ===
+!     === Mass balance ===
 
         dDOC_dt(k) = dDOC_dt(k) + Dp2doc(m,k)
         dPOC_dt(m) = dPOC_dt(m) - Dp2doc(m,k)
@@ -910,7 +915,7 @@ CONTAINS
         Dp2dop(m,k) = MAX( Dp2dop(m,k), 0.0d0 )  !!! Error handling
         Dp2dop(m,k) = MIN( Dp2dop(m,k), 0.1d0*POP(m)/dt )  !!! yt_edit Error handling decomposition should not exceed 10% POP concentration in a timestep
 
-!     === Mass barance ===
+!     === Mass balance ===
 
         dDON_dt(k) = dDON_dt(k) + Dp2don(m,k)
         dPON_dt(m) = dPON_dt(m) - Dp2don(m,k)
@@ -927,7 +932,7 @@ CONTAINS
     Dcpoc2dtr = MAX( Dcpoc2dtr, 0.0d0 )  !!! Error handling
     Dcpoc2dtr = MIN( Dcpoc2dtr, 0.1d0*POC(iCPOM)/dt )  !!! yt_edit Error handling decomposition should not exceed 10% POC(iCPOM) concentration in a timestep
 
-  !     === Mass barance ===
+  !     === Mass balance ===
   
     dPOC_dt(iCPOM) = dPOC_dt(iCPOM) - Dcpoc2dtr
     dPOC_dt(iDtr ) = dPOC_dt(iDtr ) + Dcpoc2dtr
@@ -944,7 +949,7 @@ CONTAINS
     Dcpop2dtr = MAX( Dcpop2dtr, 0.0d0 )  !!! Error handling
     Dcpop2dtr = MIN( Dcpop2dtr, 0.1d0*POP(iCPOM)/dt )  !!! yt_edit Error handling decomposition should not exceed 10% POP(iCPOM) concentration in a timestep
   
-  !     === Mass barance ===
+  !     === Mass balance ===
   
     ! dPON_dt(iCPOM) = dPON_dt(iCPOM) - Dcpon2dtr
     ! dPOP_dt(iDtr ) = dPOP_dt(iDtr ) + Dcpop2dtr
@@ -957,7 +962,7 @@ CONTAINS
 #endif
 
   
-!===== Nitrification ====================================================
+!===== Nitrification ==================================================== JS_edit find reference
 
 #if defined NUTRIENTS
     Nit = k_Nit * exp(b_Nit*Tmp) * MAX( NH4, 0.0d0 )**2
@@ -969,7 +974,7 @@ CONTAINS
     Nit = MIN( Nit, 0.1d0*DOx/dt/2.0d0 )  !!! yt_edit Error handling nitrification should not exceed 10% DOx concentration in a timestep
 
 
-!     === Mass barance ===
+!     === Mass balance ===
 
     dNO3_dt = dNO3_dt + Nit
     dNH4_dt = dNH4_dt - Nit
@@ -984,7 +989,7 @@ CONTAINS
     CO3   = cCO3_fromCTpH( DIC, pH, Tmp+273.15d0, Sal )  ! CO32- concentration
     Wcal   = Wcal_fromcCO3( CO3, Tmp+273.15d0, Sal )  ! Calcite saturation state
     Warg   = Warg_fromcCO3( CO3, Tmp+273.15d0, Sal )  ! Calcite saturation state
-    IF ( Wcal < 1.0d0 ) THEN
+    IF ( Wcal < 1.0d0 ) THEN !!! CHECK: Keir 1979 !!!!!!
       Dissol = 1.3d7*(1.d0-Wcal)**2.8d0 * PIC(iCaCO3)  !! [umol L-1 s-1] Low-Mg Calcite dissolution rate (Walter and Morse, 1985)
     ELSE
       Dissol = 0.0d0
@@ -993,7 +998,7 @@ CONTAINS
     Dissol = MIN( Dissol, 0.1d0*PIC(iCaCO3)/dt )  !!! yt_edit Error handling  carbonate dissolution should not exceed 10% PIC(iCaCO3) in a timestep
 
 
-!     === Mass barance ===
+!     === Mass balance ===
 
     dPIC_dt(iCaCO3) = dPIC_dt(iCaCO3) - Dissol
     dTA_dt = dTA_dt + Dissol*2.0d0

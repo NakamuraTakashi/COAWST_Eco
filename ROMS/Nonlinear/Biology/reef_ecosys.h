@@ -497,8 +497,8 @@
 # endif
 #endif
 #if defined SEDIMENT && defined SUSPLOAD
-     &            ,ero_flux          &
-     &            ,settling_flux     &
+!     &            ,ero_flux          &
+!     &            ,settling_flux     &
 #endif
 !          output parameters
      &            ,dtrc_dt(:,iTemp)        &   ! dTemp_dt(N): Temperature (oC s-1)

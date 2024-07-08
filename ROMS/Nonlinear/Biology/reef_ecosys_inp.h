@@ -514,6 +514,7 @@
               END DO
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+#if defined SEDIMENT_ECOSYS
             CASE ('Hout(iHbiosed3)')
               Npts=load_l(Nval, Cval, NHbiosed3d*Ngrids, LHbiosed3)
               DO ng=1,Ngrids
@@ -528,6 +529,7 @@
                   Hout(i,ng)=LHbiosed3(itrc,ng)
                 END DO
               END DO
+#endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
             CASE ('Qout(idTvar)')
               Npts=load_l(Nval, Cval, NBT*Ngrids, Ltrc)
@@ -588,6 +590,7 @@
                   Qout(i,ng)=LHbio3(itrc,ng)
                 END DO
               END DO
+#if defined SEDIMENT_ECOSYS
             CASE ('Qout(iHbiosed3)')
               Npts=load_l(Nval, Cval, NHbiosed3d*Ngrids, LHbiosed3)
               DO ng=1,Ngrids
@@ -602,6 +605,7 @@
                   Qout(i,ng)=LHbiosed3(itrc,ng)
                 END DO
               END DO
+#endif
 #if defined DIAGNOSTICS_BIO && defined REEF_ECOSYS /*!!!<<< TN:add REEF_ECOSYS*/
             CASE ('Dout(iDbio2)')
               Npts=load_l(Nval, Cval, NDbio2d*Ngrids, LDbio2)
@@ -1047,12 +1051,14 @@
             END DO
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+#if defined SEDIMENT_ECOSYS
             DO itrc=1,NHbiosed3d
               i=iHbiosed3(itrc)
               IF (Hout(i,ng)) WRITE (out,130)                           &
      &            Hout(i,ng), 'Hout(iHbiosed3)',                        &
      &            'Write out', TRIM(Vname(1,i))
             END DO
+#endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
             DO itrc=1,NBT
@@ -1081,12 +1087,14 @@
      &            Qout(i,ng), 'Qout(iHbio3)',                           &
      &            'Write out', TRIM(Vname(1,i))
             END DO
+#if defined SEDIMENT_ECOSYS
             DO itrc=1,NHbiosed3d
               i=iHbiosed3(itrc)
               IF (Qout(i,ng)) WRITE (out,130)                           &
      &            Qout(i,ng), 'Qout(iHbiosed3)',                        &
      &            'Write out', TRIM(Vname(1,i))
             END DO
+#endif
 #if defined DIAGNOSTICS_BIO && defined REEF_ECOSYS /*!!!<<< TN:add REEF_ECOSYS*/
             IF (NDbio2d.gt.0) THEN
               DO itrc=1,NDbio2d
