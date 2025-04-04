@@ -1405,7 +1405,7 @@ MODULE mod_seagrass
       NH4_uptake_possible(k) = Rt_NH4_flux_max   * root_mass_profile(k) &
         * (Rt_NH4_ratio_slope*(sedNH4/sedN-0.5d0)+1.0d0) * RtDryBm      &
         * ( (sedNH4-smin_rt_NH4) / (k_rt_NH4 + sedNH4-smin_rt_NH4) )
-      PO4_uptake_possible(k) = Rt_PO4_flux_max   * root_mass_profile(:) * RtDryBm   &
+      PO4_uptake_possible(k) = Rt_PO4_flux_max   * root_mass_profile(k) * RtDryBm   &
         * ( (sedPO4-smin_rt_PO4) / (k_rt_PO4 + sedPO4-smin_rt_PO4) )
       NO3_uptake_possible(k) = max( NO3_uptake_possible(k), 0.0d0) ! prevet negative uptake rates
       NH4_uptake_possible(k) = max( NH4_uptake_possible(k), 0.0d0) ! prevet negative uptake rates
