@@ -353,13 +353,38 @@ MODULE mod_seagrass
     SGRASS(ng)%k_proj                               = [ 0.8d0    ]                                    ! [m2.sg.hab m-2.leaf]        Species specific leaf projection coefficient                                                                  ! 0.8 is a guess
     ! SGRASS(ng)%k_proj                             = [ 1.0d0    ]                                    ! [m2.sg.hab m-2.leaf]        Species specific leaf projection coefficient                                                                
 # if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE || defined SEAGRASS_ROOT_POM
-    ! yt_edit TODO
     ! SeagrassRootProf(ng, species, k)                  Profile of seagrass root biomass: fraction in each biological sediment layer 
-    SGRASS(ng)%root_mass_profile(1,:)               = &!SeagrassRootProf(ng, :, :)                      ! Mass ratio of roots in each layer (total must sum to 1.0)
-     [0.0125d0, 0.0125d0, 0.0125d0, 0.0125d0, 0.0125d0, 0.0125d0, 0.0125d0, 0.0125d0, 0.0125d0, 0.0125d0, &
-      0.0625d0, 0.0625d0, 0.125d0 , 0.125d0 , 0.125d0 , 0.125d0 , 0.125d0 , 0.125d0 , 0.0d0   , 0.0d0   , 0.0d0  ]   ! Nsed = 21; even vertical distribution (straight roots) until 8 cm depth
+    ! SGRASS(ng)%root_mass_profile(1,:)               = &!SeagrassRootProf(ng, :, :)                      ! Mass ratio of roots in each layer (total must sum to 1.0)
+    !  [0.0125d0, 0.0125d0, 0.0125d0, 0.0125d0, 0.0125d0, 0.0125d0, 0.0125d0, 0.0125d0, 0.0125d0, 0.0125d0, &
+    !   0.0625d0, 0.0625d0, 0.125d0 , 0.125d0 , 0.125d0 , 0.125d0 , 0.125d0 , 0.125d0 , 0.0d0   , 0.0d0   , 0.0d0  ]   ! Nsed = 21; even vertical distribution (straight roots) until 8 cm depth
     ! write(*,*) 'yt_debug: mod_seagrass.F initialize_seagrass() after root_mass_profile assigment'
     ! write(*,*) 'yt_debug: mod_seagrass.F initialize_seagrass() root_mass_profile = ', SGRASS(ng)%root_mass_profile
+
+
+    ! Calculate root mass profile based on empirical equation below and sediment layers from sedecosys
+
+    ! y = a*(z-atan(k*(x-b).^2))
+    ! where y is total root width (proportional to mass) and x is depth (cm)
+    ! a = 0.5785
+    ! k = 0.08588
+    ! z = 1.422
+    ! b = 2.224
+    ! x_min = 0
+    ! x_max = (tan(z)/k)^0.5+b = 11.0375
+
+    ! dzr(:)           layer thickness (cm)
+    ! zr(:)            sediment depth  (cm)
+
+    do k=1,Nsed
+      if(zr(k) > 11.0375d0) then
+        SGRASS(ng)%root_mass_profile(k) = 0d0;
+      else
+        SGRASS(ng)%root_mass_profile(k) = 0.5785d0*(1.422d0-ATAN(0.08588d0*(zr(k)-2.224d0)**2d0)) * dzr(k);
+      endif
+    enddo
+    SGRASS(ng)%root_mass_profile(:) = SGRASS(ng)%root_mass_profile(:) / sum(SGRASS(ng)%root_mass_profile(:)); ! Mass ratio of roots in each layer (total must sum to 1.0)
+
+    
 # endif
 
     ! photoynthesis: light-limit
