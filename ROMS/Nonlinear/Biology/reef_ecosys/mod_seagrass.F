@@ -379,7 +379,7 @@ MODULE mod_seagrass
       if(zr(k) > 11.0375d0) then
         SGRASS(ng)%root_mass_profile(k) = 0d0;
       else
-        SGRASS(ng)%root_mass_profile(k) = 0.5785d0*(1.422d0-ATAN(0.08588d0*(zr(k)-2.224d0)**2d0)) * dzr(k);
+        SGRASS(ng)%root_mass_profile(k) = 0.5785d0*(1.422d0-ATAN(0.08588d0*(SEDECO(ng)%zr(k)-2.224d0)**2d0)) * SEDECO(ng)%dzr(:);
       endif
     enddo
     SGRASS(ng)%root_mass_profile(:) = SGRASS(ng)%root_mass_profile(:) / sum(SGRASS(ng)%root_mass_profile(:)); ! Mass ratio of roots in each layer (total must sum to 1.0)
