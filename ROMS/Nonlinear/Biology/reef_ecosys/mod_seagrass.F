@@ -324,6 +324,9 @@ MODULE mod_seagrass
 ! Module dependencies
 ! ====================================================================================================
     USE mod_reef_ecosys_param
+# if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE || defined SEAGRASS_ROOT_POM
+    USE mod_sedecosys,    ONLY : SEDECO
+# endif
 
 ! ====================================================================================================
 ! Variable declarations
@@ -339,6 +342,7 @@ MODULE mod_seagrass
 
 ! indexing variables
     integer species,i,j
+    integer k                                             ! Vertical layer counter
 
 ! ====================================================================================================
 ! Variable initializations
@@ -363,6 +367,7 @@ MODULE mod_seagrass
 
     ! Calculate root mass profile based on empirical equation below and sediment layers from sedecosys
 
+    ! Thalassia hemprichii (seagrass group 1)
     ! y = a*(z-atan(k*(x-b).^2))
     ! where y is total root width (proportional to mass) and x is depth (cm)
     ! a = 0.5785
@@ -376,14 +381,15 @@ MODULE mod_seagrass
     ! zr(:)            sediment depth  (cm)
 
     do k=1,Nsed
-      if(zr(k) > 11.0375d0) then
-        SGRASS(ng)%root_mass_profile(k) = 0d0;
+      if(SEDECO(ng)%zr(k) > 11.0375d0) then
+        SGRASS(ng)%root_mass_profile(1, k) = 0d0;
       else
-        SGRASS(ng)%root_mass_profile(k) = 0.5785d0*(1.422d0-ATAN(0.08588d0*(SEDECO(ng)%zr(k)-2.224d0)**2d0)) * SEDECO(ng)%dzr(:);
+        SGRASS(ng)%root_mass_profile(1, k) = 0.5785d0*(1.422d0-ATAN(0.08588d0*(SEDECO(ng)%zr(k)-2.224d0)**2d0)) * SEDECO(ng)%dzr(k);
       endif
     enddo
-    SGRASS(ng)%root_mass_profile(:) = SGRASS(ng)%root_mass_profile(:) / sum(SGRASS(ng)%root_mass_profile(:)); ! Mass ratio of roots in each layer (total must sum to 1.0)
-
+    SGRASS(ng)%root_mass_profile(1, :) = SGRASS(ng)%root_mass_profile(1, :) / sum(SGRASS(ng)%root_mass_profile(1, :)); ! Mass ratio of roots in each layer (total must sum to 1.0)
+    SGRASS(ng)%root_mass_profile(1, 1) = 1.0d0 - sum(SGRASS(ng)%root_mass_profile(1, 2:Nsed));                         ! make up for numerical inaccuracy to force to sum to 1.0
+    write(*,*) 'yt_debug: mod_seagrass.F initialize_seagrass() after root_mass_profile assigment'
     
 # endif
 
@@ -652,6 +658,12 @@ MODULE mod_seagrass
 
       ! write(*,*) 'yt_debug: mod_seagrass.F initialize_seagrass() after analytical start mass assigments'
     endif
+
+    ! write(*,*) 'yt_debug: mod_seagrass.F initialize_seagrass() root_mass_profile'
+    ! do k=1,Nsed
+    !   write(*,*) 'yt_debug: k=', k, 'root_mass_profile =', SGRASS(ng)%root_mass_profile(1, k)
+    ! enddo
+    ! write(*,*) 'yt_debug: k=sum of all  root_mass_profile =', sum(SGRASS(ng)%root_mass_profile(1, :))
 
     RETURN
     
