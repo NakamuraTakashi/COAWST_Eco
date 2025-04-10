@@ -2069,13 +2069,13 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
 
     ! DICstock                    [umol.DIC m-2.sg.hab]       Seagrass internal DIC stock per unit ground area (in seagrass habitat area)
     ! delta_DICstock              [umol.DIC m-2.sg.hab s-1]   Rate of change in DICstock
-    ! [umol.DIC/m2.hab] = [umol.DIC/m2.hab s] [s]
-    DICstock(:)         = delta_DICstock(:)   * dt
-    DOstock             = delta_DOstock       * dt
+    ! [umol.DIC/m2.hab] = [umol.DIC/m2.hab] + [umol.DIC/m2.hab s] [s]
+    DICstock(:)         = DICstock(:)       + delta_DICstock(:)   * dt
+    DOstock             = DOstock           + delta_DOstock       * dt
 # if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
-    NO3stock(:)         = delta_NO3stock(:)   * dt
-    NH4stock(:)         = delta_NH4stock(:)   * dt
-    PO4stock(:)         = delta_PO4stock(:)   * dt
+    NO3stock(:)         = NO3stock(:)       + delta_NO3stock(:)   * dt
+    NH4stock(:)         = NH4stock(:)       + delta_NH4stock(:)   * dt
+    PO4stock(:)         = PO4stock(:)       + delta_PO4stock(:)   * dt
 # endif
 
 ! If stocks exceed limit, leak to environment -------------------------------------------------------------------------
