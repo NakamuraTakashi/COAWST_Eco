@@ -1767,9 +1767,11 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
     delta_DICstock(:)   = delta_DICstock(:) - Growth_rate              * rDICstock(:)
     delta_DOstock       = delta_DOstock     + Growth_rate ! for every mol of CO2  consumed in growth: 1 mol of O2 is produced
 #  if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
-    delta_NO3stock(:)   = delta_NO3stock(:) - Growth_rate    * SgNperC * rNO3stock(:)*(NO3stock(iNt)/(NO3stock(iNt)+NH4stock(iNt))) ! portion from nitrate proportional to stock
-    delta_DOstock       = delta_DOstock     + 2*Growth_rate  * SgNperC *              (NO3stock(iNt)/(NO3stock(iNt)+NH4stock(iNt))) ! for every mol of NO3- consumed in growth: 2 mol of O2 is produced
-    delta_NH4stock(:)   = delta_NH4stock(:) - Growth_rate    * SgNperC * rNH4stock(:)*(NH4stock(iNt)/(NO3stock(iNt)+NH4stock(iNt))) ! portion from ammonium proportional to stock
+    if ((NO3stock(iNt)+NH4stock(iNt)) .gt. 0d0) then
+      delta_NO3stock(:)   = delta_NO3stock(:) - Growth_rate * SgNperC * rNO3stock(:)*(NO3stock(iNt)/(NO3stock(iNt)+NH4stock(iNt))) ! portion from nitrate proportional to stock
+      delta_DOstock       = delta_DOstock     + 2*Growth_rate* SgNperC *              (NO3stock(iNt)/(NO3stock(iNt)+NH4stock(iNt))) ! for every mol of NO3- consumed in growth: 2 mol of O2 is produced
+      delta_NH4stock(:)   = delta_NH4stock(:) - Growth_rate  * SgNperC * rNH4stock(:)*(NH4stock(iNt)/(NO3stock(iNt)+NH4stock(iNt))) ! portion from ammonium proportional to stock
+    endif
     delta_PO4stock(:)   = delta_PO4stock(:) - Growth_rate    * SgPperC * rPO4stock(:)
 #  endif
 
@@ -2071,8 +2073,9 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
 # endif
     endif
 
+    ! yt_debug
     if (SgCBmF(iCt)*0.0d0 /= 0.0d0) then
-      write(*,*) 'SEAGRASS error: SgCBmF is NAN'
+      write(*,*) 'SEAGRASS error 2: SgCBmF is NAN', SgCBmF(iCt), delta_SgCBmF(iCt)
       error stop
     endif
 
@@ -2161,7 +2164,6 @@ if (NO3stock(iNt) .gt. SgNBmF(iNt)) then
   NO3stock(:)         = SgNBmF(iNt)     * rNO3stock(:)
 endif
 # endif
-
 # if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
 if (NH4stock(iNt) .gt. SgNBmF(iNt)) then
   ! Excess NH4 = (NH4 stock - seagrass biomass) = (NH4stock(:)-SgNBmF(iNt)*rNH4stock(:))
