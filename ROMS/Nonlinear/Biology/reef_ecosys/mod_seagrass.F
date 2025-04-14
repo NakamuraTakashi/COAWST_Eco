@@ -1991,6 +1991,20 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
     ! [umol.C/m2.grid s] = [umol.C/m2.hab s] [m2.hab/m2.grid]
     GridDieoff           = dieoff_rate       * p_sgrass(species)
 
+    ! PhotLim                     []                          Seagrass photosynthesis limiting factor: 1 = light; 2 = Carbon uptake; 3 = Nitrogen uptake; 4 = Phosphorus uptake
+    ! Growth_limit_light          [umol.C m-2.sg.hab s-1]     Photosynthesis/growth rate possible as limited by light
+    ! Growth_limit_DIC            [umol.C m-2.sg.hab s-1]     Photosynthesis/growth rate possible as limited by DIC uptake
+    ! Growth_limit_NO3            [umol.C m-2.sg.hab s-1]     Photosynthesis/growth rate possible as limited by NO3 uptake
+    ! Growth_limit_NH4            [umol.C m-2.sg.hab s-1]     Photosynthesis/growth rate possible as limited by NH4 uptake
+    ! Growth_limit_PO4            [umol.C m-2.sg.hab s-1]     Photosynthesis/growth rate possible as limited by PO4 uptake
+# if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
+    PhotLim = minloc((/Growth_limit_light, Growth_limit_DIC, (Growth_limit_NO3+Growth_limit_NH4) &
+            , Growth_limit_PO4/), DIM=1)
+# else
+    PhotLim = minloc((/Growth_limit_light, Growth_limit_DIC/), DIM=1)
+# endif
+
+
 
 ! ====================================================================================================
 ! ----------------------------------------------------------------------------------------------------
