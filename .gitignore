@@ -13,3 +13,7 @@ Lib/SCRIP_COAWST/netcdf.inc
 
 test*.txt
 test*.F
+
+*/Darwin-gfortran.mk
+*/Darwin-gfortran_original.mk
+
