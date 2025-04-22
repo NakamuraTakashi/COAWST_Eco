@@ -65,6 +65,8 @@
         real(r8), pointer :: ru_loc_veg_root(:,:,:,:)  ! For mangrove roots
         real(r8), pointer :: rv_loc_veg_root(:,:,:,:)  ! For mangrove roots
 # endif
+        real(r8), pointer :: ru_loc_veg_tke(:,:,:,:)   ! For turbulence calculation
+        real(r8), pointer :: rv_loc_veg_tke(:,:,:,:)   ! For turbulence calculation
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
         real(r8), pointer :: step2d_uveg(:,:)
         real(r8), pointer :: step2d_vveg(:,:)
@@ -137,6 +139,8 @@
       allocate ( VEG(ng) % ru_loc_veg_root(LBi:UBi,LBj:UBj,N(ng),NVEG) )
       allocate ( VEG(ng) % rv_loc_veg_root(LBi:UBi,LBj:UBj,N(ng),NVEG) )
 # endif
+      allocate ( VEG(ng) % ru_loc_veg_tke(LBi:UBi,LBj:UBj,N(ng),NVEG) )
+      allocate ( VEG(ng) % rv_loc_veg_tke(LBi:UBi,LBj:UBj,N(ng),NVEG) )
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
       allocate ( VEG(ng) % step2d_uveg(LBi:UBi,LBj:UBj) )
       allocate ( VEG(ng) % step2d_vveg(LBi:UBi,LBj:UBj) )
@@ -279,6 +283,8 @@
                 VEG(ng) % ru_loc_veg_root(i,j,k,iveg) = IniVal
                 VEG(ng) % rv_loc_veg_root(i,j,k,iveg) = IniVal
 # endif
+                VEG(ng) % ru_loc_veg_tke(i,j,k,iveg) = IniVal
+                VEG(ng) % rv_loc_veg_tke(i,j,k,iveg) = IniVal
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
               END DO
             END DO

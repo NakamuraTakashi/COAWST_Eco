@@ -49,6 +49,7 @@
       USE mod_stepping
       USE mod_grid
       USE mod_ocean
+      USE mod_param
       USE mod_mixing
       USE mod_vegarr
       USE vegetation_drag_mod
@@ -78,6 +79,9 @@
      &                        VEG(ng) % ru_loc_veg_root,                &
      &                        VEG(ng) % rv_loc_veg_root,                &
 # endif
+     &                        VEG(ng) % ru_loc_veg_tke,                 &
+     &                        VEG(ng) % rv_loc_veg_tke,                 &
+     &                        VEG(ng) % Lveg,                           &
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
      &                        VEG(ng) % plant,                          &
 # ifdef VEG_FLEX
@@ -107,6 +111,8 @@
 # if defined MANGROVE_DRAG
      &                              ru_loc_veg_root, rv_loc_veg_root,   &
 # endif
+     &                              ru_loc_veg_tke, rv_loc_veg_tke,     &
+     &                              Lveg,                               &
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
      &                              plant,                              &
 # ifdef VEG_FLEX
@@ -148,6 +154,9 @@
       real(r8), intent(in) :: ru_loc_veg_root(LBi:,LBj:,:,:)
       real(r8), intent(in) :: rv_loc_veg_root(LBi:,LBj:,:,:)
 #  endif
+      real(r8), intent(in) :: ru_loc_veg_tke(LBi:,LBj:,:,:)
+      real(r8), intent(in) :: rv_loc_veg_tke(LBi:,LBj:,:,:)
+      real(r8), intent(in) :: Lveg(LBi:,LBj:,:)
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
       real(r8), intent(in) :: plant(LBi:,LBj:,:,:)
 # ifdef VEG_FLEX
@@ -170,6 +179,9 @@
       real(r8), intent(in) :: ru_loc_veg_root(LBi:UBi,LBj:UBj,N(ng),NVEG)
       real(r8), intent(in) :: rv_loc_veg_root(LBi:UBi,LBj:UBj,N(ng),NVEG)
 #  endif
+      real(r8), intent(in) :: ru_loc_veg_tke(LBi:UBi,LBj:UBj,N(ng),NVEG)
+      real(r8), intent(in) :: rv_loc_veg_tke(LBi:UBi,LBj:UBj,N(ng),NVEG)
+      real(r8), intent(in) :: Lveg(LBi:UBi,LBj:UBj,N(ng))
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
       real(r8), intent(in) :: plant(LBi:UBi,LBj:UBj,NVEG,NVEGP)
 # ifdef VEG_FLEX
@@ -200,9 +212,9 @@
 !      real(r8), parameter :: cl_veg=1.0_r8, ck=2.828427_r8      ! gamma = 0.5
 !      real(r8), parameter :: cl_veg=1.0_r8, ck=2.151657_r8      ! gamma = 0.6
 !      real(r8), parameter :: cl_veg=1.0_r8, ck=1.707469_r8      ! gamma = 0.7
-      real(r8), parameter :: cl_veg=1.0_r8, ck=1.397542_r8      ! gamma = 0.8
+!      real(r8), parameter :: cl_veg=1.0_r8, ck=1.397542_r8      ! gamma = 0.8
 !      real(r8), parameter :: cl_veg=1.0_r8, ck=1.171214_r8      ! gamma = 0.9
-!      real(r8), parameter :: cl_veg=1.0_r8, ck=1.0_r8           ! gamma = 1.0
+      real(r8), parameter :: cl_veg=1.0_r8, ck=1.0_r8           ! gamma = 1.0
 !      real(r8), parameter :: cl_veg=1.0_r8, ck=0.866784_r8      ! gamma = 1.1
 !      real(r8), parameter :: cl_veg=1.0_r8, ck=0.760726_r8      ! gamma = 1.2
 !      real(r8), parameter :: cl_veg=1.0_r8, ck=0.67466_r8       ! gamma = 1.3
@@ -226,7 +238,8 @@
 # endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
       real(r8), parameter :: max_L=10.0e10_r8
-      real(r8), parameter :: eps=1.0e-12_r8
+      real(r8), parameter :: min_eps=1.0e-12_r8 
+      real(r8), parameter :: max_eps=1.0e14_r8 
       real(r8) :: wrku1, wrku2, wrku3, wrku4, wrku
       real(r8) :: wrkv1, wrkv2, wrkv3, wrkv4, wrkv
       real(r8) :: wrk, cff1, cff2, cff3, dissip, inverse_dissip
@@ -242,11 +255,11 @@
       real(r8) :: taueff_root       ! For mangrove roots
       real(r8) :: tke_loc_veg_root  ! For mangrove roots
       real(r8) :: gls_loc_veg_root  ! For mangrove roots
-
       real(r8), dimension(IminS:ImaxS,JminS:JmaxS,0:N(ng)) :: dab
 !      real(r8), dimension(IminS:ImaxS,JminS:JmaxS) :: dens_out
       real(r8) :: HRmax  ! Maximum root height
 # endif
+      real(r8) :: tke_loc_veg2      ! For attempts of bug-fix
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 
 # include "set_bounds.h"
@@ -306,8 +319,22 @@
               wrkv4=rv_loc_veg_root(i,j+1,k+1,iveg)*v(i,j+1,k+1,nstp)
               wrkv=0.25_r8*(wrkv1+wrkv2+wrkv3+wrkv4)
               tke_loc_veg_root=sqrt(wrku*wrku+wrkv*wrkv)
-!
 # endif
+!
+! Attempt of a correction of the code
+!
+              wrku1=ru_loc_veg_tke(i,j,k,iveg)*u(i,j,k,nstp)
+              wrku2=ru_loc_veg_tke(i,j,k+1,iveg)*u(i,j,k+1,nstp)
+              wrku3=ru_loc_veg_tke(i+1,j,k,iveg)*u(i+1,j,k,nstp)
+              wrku4=ru_loc_veg_tke(i+1,j,k+1,iveg)*u(i+1,j,k+1,nstp)
+              wrku=0.25_r8*(wrku1+wrku2+wrku3+wrku4)
+              wrkv1=rv_loc_veg_tke(i,j,k,iveg)*v(i,j,k,nstp)
+              wrkv2=rv_loc_veg_tke(i,j,k+1,iveg)*v(i,j,k+1,nstp)
+              wrkv3=rv_loc_veg_tke(i,j+1,k,iveg)*v(i,j+1,k,nstp)
+              wrkv4=rv_loc_veg_tke(i,j+1,k+1,iveg)*v(i,j+1,k+1,nstp)
+              wrkv=0.25_r8*(wrkv1+wrkv2+wrkv3+wrkv4)
+              tke_loc_veg2=sqrt(wrku*wrku+wrkv*wrkv)
+!
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 !
 !-----------------------------------------------------------------------
@@ -318,7 +345,8 @@
               wrk=MAX(tke(i,j,k,nstp),gls_Kmin(ng))
               dissip=(gls_cmu0(ng)**cff1)*(wrk**cff2)*                  &
      &                 (gls(i,j,k,nstp)**cff3)
-              inverse_dissip=1.0_r8/MAX(dissip,eps)
+!              inverse_dissip=1.0_r8/MAX(dissip,min_eps)
+              inverse_dissip=MAX( (1.0_r8/dissip), max_eps)
 !
 ! Dissipation time-scale for free turbulence
 !
@@ -343,7 +371,7 @@
 ! Eddies typical size constrained by distance in between the plants
 !
               L=cl_veg*((1.0_r8-MIN(solid,1.0_r8))/                     &
-     &                 (plant(i,j,iveg,pdens)+eps))**one_half  !!!<<<<<<<<< TN: mod ( plant(i,j,iveg,pdens) -> (plant(i,j,iveg,pdens)+eps))
+     &                 (plant(i,j,iveg,pdens)+min_eps))**one_half  !!!<<<<<<<<< TN: mod ( plant(i,j,iveg,pdens) -> (plant(i,j,iveg,pdens)+eps))
               L=MIN(L,max_L)
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
 # if defined MANGROVE_DRAG
@@ -403,26 +431,29 @@
               ELSE
                 L_root = cl_veg*plant(i,j,iveg,pdiam)  ! Dummy input
               END IF
-#  if defined TURB_LENGTH_STEM
-              L_root = cl_veg*plant(i,j,iveg,pdiam)
-#  elif defined TURB_LENGTH_ROOT
-              IF (SPE_MANGR(iveg,ng)==1) THEN
-                L = cl_veg*FAI_ROOT
-              END IF
-#  endif
 !
 # endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 !
 ! Dissipation time-scale of eddies in between the plants
 !
-              tauveg=(L**2.0_r8/((ck**2.0_r8*tke_loc_veg)+eps))**one_third !!!<<< TN: mod ( ck**2.0_r8*tke_loc_veg -> (ck**2.0_r8*tke_loc_veg)+eps) )
+              cff2=MIN( (1.0_r8/(ck**2.0_r8*tke_loc_veg)), max_eps )
+              tauveg=(L**2.0_r8*cff2)**one_third
+!              tauveg=(L**2.0_r8/(ck**2.0_r8*tke_loc_veg))**one_third
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+!
+! Attampts of a bug-fix
+!
+              cff2=MIN( (1.0_r8/(ck**2.0_r8*tke_loc_veg2)), max_eps )
+              tauveg=(L**2.0_r8*cff2)**one_third
+!
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
 # if defined MANGROVE_DRAG
 !
 ! Limit maximum of dissipation time-scale to avoid infinity-value
 !
-              tauveg=MIN(tauveg,10.0e8_r8)
+!              tauveg=MIN(tauveg,10.0e8_r8)
 !
 ! Dissipation time-scale of eddies generated by mangrove roots
 !
@@ -468,8 +499,38 @@
                 tke_loc_veg_root = 0.0_r8
                 gls_loc_veg_root = 0.0_r8
               END IF
-!
 # endif
+!
+! Remove vegetation effects when there is no vegetation
+!
+              IF (plant(i,j,iveg,pdens)<1.0e-6_r8 ) THEN
+                  tke_loc_veg = 0.0_r8
+                  gls_loc_veg = 0.0_r8
+# if defined MANGROVE_DRAG
+                  tke_loc_veg_root = 0.0_r8
+                  gls_loc_veg_root = 0.0_r8
+# endif
+              ELSEIF (Lveg(i,j,k)<1.0e-3_r8) THEN
+!              ELSEIF (Lveg(i,j,k+1)<1.0_r8 ) THEN
+!              ELSEIF (tke_loc_veg2<1.0e-9_r8 ) THEN
+              ELSEIF (k<N(ng)-1) THEN
+!                 IF (Lveg(i,j,k+1)<1.0_r8 ) THEN
+!
+!                  tke_loc_veg = 0.0_r8
+!                  gls_loc_veg = 0.0_r8
+!                  tke_loc_veg_root = 0.0_r8
+!                  gls_loc_veg_root = 0.0_r8
+!                 END IF
+              END IF
+!
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+! FOR DEBUG PURPOSE
+!              if (i == 20 .and. j == 20) THEN
+!                write (*,*) 'L', L
+!                write (*,*) 'tauveg, taueff', tauveg, taueff
+!                write (*,*) 'gls_loc_veg', gls_loc_veg
+!              end if
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 !
 !-----------------------------------------------------------------------

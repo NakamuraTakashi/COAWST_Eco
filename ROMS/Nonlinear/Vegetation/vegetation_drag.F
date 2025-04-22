@@ -84,6 +84,8 @@
      &                        VEG(ng) % ru_loc_veg_root,                &
      &                        VEG(ng) % rv_loc_veg_root,                &
 # endif
+     &                        VEG(ng) % ru_loc_veg_tke,                 &
+     &                        VEG(ng) % rv_loc_veg_tke,                 &
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
      &                        VEG(ng) % ru_veg,                         &
      &                        VEG(ng) % rv_veg,                         &
@@ -110,7 +112,6 @@
      &                              vmask_wet,                          &
 # endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
      &                              u, v,                               &
      &                              plant,                              &
 # ifdef VEG_FLEX
@@ -121,6 +122,7 @@
 # if defined MANGROVE_DRAG
      &                              ru_loc_veg_root, rv_loc_veg_root,   &
 # endif
+     &                              ru_loc_veg_tke, rv_loc_veg_tke,     &
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
      &                              ru_veg, rv_veg,                     &
      &                              step2d_uveg, step2d_vveg,           &
@@ -131,6 +133,13 @@
       USE mod_scalars
       USE mod_vegetation
       USE mod_vegarr
+      USE bc_3d_mod, ONLY: bc_r3d_tile
+      USE exchange_2d_mod
+      USE exchange_3d_mod
+# ifdef DISTRIBUTE
+      USE mp_exchange_mod, ONLY : mp_exchange2d,                       &
+     &                            mp_exchange3d, mp_exchange4d
+# endif
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
 # if defined MANGROVE_DRAG
       USE mod_mangr_root
@@ -171,6 +180,8 @@
       real(r8), intent(inout) :: ru_loc_veg_root(LBi:,LBj:,:,:)
       real(r8), intent(inout) :: rv_loc_veg_root(LBi:,LBj:,:,:)
 #  endif
+      real(r8), intent(inout) :: ru_loc_veg_tke(LBi:,LBj:,:,:)
+      real(r8), intent(inout) :: rv_loc_veg_tke(LBi:,LBj:,:,:)
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
       real(r8), intent(inout) :: ru_veg(LBi:,LBj:,:)
       real(r8), intent(inout) :: rv_veg(LBi:,LBj:,:)
@@ -201,6 +212,9 @@
     &               ru_loc_veg_root(LBi:UBi,LBj:UBj,N(ng),NVEG),        &
     &               rv_loc_veg_root(LBi:UBi,LBj:UBj,N(ng),NVEG)
 #  endif
+      real(r8), intent(inout) ::                                        &
+    &               ru_loc_veg_tke(LBi:UBi,LBj:UBj,N(ng),NVEG),         &
+    &               rv_loc_veg_tke(LBi:UBi,LBj:UBj,N(ng),NVEG)
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
       real(r8), intent(inout) :: ru_veg(LBi:UBi,LBj:UBj,N(ng))
       real(r8), intent(inout) :: rv_veg(LBi:UBi,LBj:UBj,N(ng))
@@ -229,6 +243,7 @@
       real(r8), dimension(IminS:ImaxS,JminS:JmaxS) :: wrk_root           ! For mangrove roots
       real(r8), dimension(IminS:ImaxS,JminS:JmaxS,1:N(ng)) :: farea_out  ! Root projected area in a layer (m2 root/m2 ground)
 # endif
+      real(r8), dimension(IminS:ImaxS,JminS:JmaxS) :: wrk2               ! For turbulence calculation
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 !
 # include "set_bounds.h"
@@ -350,16 +365,13 @@
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
 # if defined MANGROVE_DRAG
-
-              farea_out(i,j,k)=0.0_r8
 !
 ! If this is Rhizophora, compute the vertically integrated root
 ! projected area in a layer
 !
               IF (SPE_MANGR(iveg,ng)==1 .and.                           &
      &            dab(i,j,k-1)<mangr_layer_thck*                        &
-     &            dble(mangr_n_layer) .and.                             &
-     &            plant(i,j,iveg,pdens)>1.e-06_r8) THEN
+     &            dble(mangr_n_layer)) THEN
                 CALL mangr_get_farea ( &
                                                      ! *** Input ***
                 plant(i,j,iveg,pdiam)           , &  ! DBH given in a grid-cell (m)
@@ -370,6 +382,14 @@
                                                      ! *** Output ***
                 farea_out(i,j,k)                  &  ! Vertically integrated root projected area in a layer (m2 root/m2 ground)
                 )
+                ! if (plant(i,j,iveg,pdens)>1.e-06 .and. dab(i,j,k-1)<1.0d0) then
+                !   if (i== 25 .and. j==120) then
+                !     write(*,*) 'i, j, k', i, j, k
+                !     write(*,*) 'a, dab_down, dab_up', farea_out(i,j,k)/Hz(i,j,k), dab(i,j,k-1), dab(i,j,k)
+                !   end if
+                ! end if
+              ELSE
+                farea_out(i,j,k)=0.0_r8
               END IF
 
 #  ifdef MANGR_XIE
@@ -414,6 +434,19 @@
               ! wrk(i,j)=wrk(i,j)+0.5_r8*cd_veg(iveg,ng)*farea_out(i,j,k)
 # endif
 !
+! For turbulence calculation (at rho points)
+!
+!              IF (Lveg_loc>0.5_r8) THEN
+!                wrk2(i,j)=0.5_r8*cd_veg(iveg,ng)*plant(i,j,iveg,pdiam)* &
+!     &                    plant(i,j,iveg,pdens)*Lveg_loc
+!                wrk2(i,j)=0.5_r8*cd_veg(iveg,ng)*plant(i,j,iveg,pdiam)* &
+!     &                    plant(i,j,iveg,pdens)
+!              ELSE
+!                wrk2(i,j)=0.0_r8
+!              END IF
+              wrk2(i,j)=0.5_r8*cd_veg(iveg,ng)*plant(i,j,iveg,pdiam)*   &
+     &                    plant(i,j,iveg,pdens)*Lveg_loc
+!
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 !
 ! Store Lveg_loc for all vegetation types
@@ -421,6 +454,45 @@
               Lveg(i,j,k)=Lveg_loc+Lveg(i,j,k)
             END DO
           END DO
+!
+! Exchange boundary data 
+!
+          IF (EWperiodic(ng).or.NSperiodic(ng)) THEN
+            CALL exchange_r2d_tile (ng, tile,                               &
+         &                          LBi, UBi, LBj, UBj,                     &
+         &                          wrk)
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+# if defined MANGROVE_DRAG
+            CALL exchange_r2d_tile (ng, tile,                               &
+         &                          LBi, UBi, LBj, UBj,                     &
+         &                          wrk_root)
+# endif
+            CALL exchange_r2d_tile (ng, tile,                               &
+         &                          LBi, UBi, LBj, UBj,                     &
+         &                          wrk2)
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
+          ENDIF
+    
+    !
+            CALL mp_exchange2d (ng, tile, iNLM, 1,                          &
+         &                    LBi, UBi, LBj, UBj,                           &
+         &                    NghostPoints,                                 &
+         &                    EWperiodic(ng), NSperiodic(ng),               &
+         &                    wrk(:,:)) 
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+# if defined MANGROVE_DRAG
+            CALL mp_exchange2d (ng, tile, iNLM, 1,                          &
+         &                    LBi, UBi, LBj, UBj,                           &
+         &                    NghostPoints,                                 &
+         &                    EWperiodic(ng), NSperiodic(ng),               &
+         &                    wrk_root(:,:)) 
+# endif
+            CALL mp_exchange2d (ng, tile, iNLM, 1,                          &
+         &                    LBi, UBi, LBj, UBj,                           &
+         &                    NghostPoints,                                 &
+         &                    EWperiodic(ng), NSperiodic(ng),               &
+         &                    wrk2(:,:)) 
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 !
 ! Compute friction force (at cell faces)
 !
@@ -442,6 +514,12 @@
      &                                            wrk_root(i,j))*cff3
 !
 # endif
+!
+! For turbulence calculation
+!
+              ru_loc_veg_tke(i,j,k,iveg)=0.5_r8*(wrk2(i-1,j)+           &
+     &                                           wrk2(i,j))*cff3
+!
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 !
 !  Add the ru_iveg from this veg type to another veg type
@@ -486,10 +564,15 @@
 !
 ! For mangrove roots
 !
-              rv_loc_veg_root(i,j,k,iveg)=0.5_r8*(wrk_root(i-1,j)+      &
+              rv_loc_veg_root(i,j,k,iveg)=0.5_r8*(wrk_root(i,j-1)+      &
      &                                            wrk_root(i,j))*cff3
-!
 # endif
+!
+! For turbulence calculation
+!
+              rv_loc_veg_tke(i,j,k,iveg)=0.5_r8*(wrk2(i,j-1)+           &
+     &                                           wrk2(i,j))*cff3
+!
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 !
 !   Add the rv_iveg from this veg type to another veg type
@@ -520,6 +603,74 @@
           END DO
         END DO K_LOOP
       END DO VEG_LOOP
+!
+! Exchange boundary data 
+!
+      IF (EWperiodic(ng).or.NSperiodic(ng)) THEN
+        DO iveg=1,NVEG
+          CALL exchange_u3d_tile (ng, tile,                             &
+     &                          LBi, UBi, LBj, UBj, 1, N(ng),           &
+     &                          ru_loc_veg(:,:,:,iveg))
+          CALL exchange_v3d_tile (ng, tile,                             &
+     &                          LBi, UBi, LBj, UBj, 1, N(ng),           &
+     &                          rv_loc_veg(:,:,:,iveg))
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+# if defined MANGROVE_DRAG
+          CALL exchange_u3d_tile (ng, tile,                             &
+     &                          LBi, UBi, LBj, UBj, 1, N(ng),           &
+     &                          ru_loc_veg_root(:,:,:,iveg))
+          CALL exchange_v3d_tile (ng, tile,                             &
+     &                          LBi, UBi, LBj, UBj, 1, N(ng),           &
+     &                          rv_loc_veg_root(:,:,:,iveg))
+# endif
+          CALL exchange_u3d_tile (ng, tile,                             &
+     &                          LBi, UBi, LBj, UBj, 1, N(ng),           &
+     &                          ru_loc_veg_tke(:,:,:,iveg))
+          CALL exchange_v3d_tile (ng, tile,                             &
+     &                          LBi, UBi, LBj, UBj, 1, N(ng),           &
+     &                          rv_loc_veg_tke(:,:,:,iveg))
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
+        END DO 
+        CALL exchange_u3d_tile (ng, tile,                               &
+     &                          LBi, UBi, LBj, UBj, 1, N(ng),           &
+     &                          ru_veg(:,:,:))
+        CALL exchange_v3d_tile (ng, tile,                               &
+     &                          LBi, UBi, LBj, UBj, 1, N(ng),           &
+     &                          rv_veg(:,:,:))
+      END IF
+!
+# ifdef DISTRIBUTE
+!
+      CALL mp_exchange4d (ng, tile, iNLM, 2,                            &
+     &                    LBi, UBi, LBj, UBj, 1, N(ng), 1, NVEG,        &
+     &                    NghostPoints,                                 &
+     &                    EWperiodic(ng), NSperiodic(ng),               &
+     &                    ru_loc_veg(:,:,:,:),                          &
+     &                    rv_loc_veg(:,:,:,:))
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
+# if defined MANGROVE_DRAG
+      CALL mp_exchange4d (ng, tile, iNLM, 2,                            &
+     &                    LBi, UBi, LBj, UBj, 1, N(ng), 1, NVEG,        &
+     &                    NghostPoints,                                 &
+     &                    EWperiodic(ng), NSperiodic(ng),               &
+     &                    ru_loc_veg_root(:,:,:,:),                     &
+     &                    rv_loc_veg_root(:,:,:,:))
+# endif
+      CALL mp_exchange4d (ng, tile, iNLM, 2,                            &
+     &                    LBi, UBi, LBj, UBj, 1, N(ng), 1, NVEG,        &
+     &                    NghostPoints,                                 &
+     &                    EWperiodic(ng), NSperiodic(ng),               &
+     &                    ru_loc_veg_tke(:,:,:,:),                      &
+     &                    rv_loc_veg_tke(:,:,:,:))
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
+!
+      CALL mp_exchange3d (ng, tile, iNLM, 2,                            &
+     &                    LBi, UBi, LBj, UBj, 1, N(ng),                 &
+     &                    NghostPoints,                                 &
+     &                    EWperiodic(ng), NSperiodic(ng),               &
+     &                    ru_veg, rv_veg)
+! 
+# endif
 !
 !-----------------------------------------------------------------------
 !  Add in resistance imposed on the flow by the vegetation (3D->2D).
