@@ -360,8 +360,8 @@
 !
       USE mod_param
 !!! yuta_edits >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
-#ifdef REEF_ECOSYS
-      USE mod_reef_ecosys_param
+#if defined CORAL_POLYP || defined SEAGRASS || defined MACROALGAE
+      USE mod_reef_ecosys_param, ONLY : Ncl, Nsg, Nag
 #endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add

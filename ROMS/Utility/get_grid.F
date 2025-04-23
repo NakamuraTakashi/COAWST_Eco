@@ -1939,7 +1939,7 @@
             END DO
 #  endif
 # endif
-# ifdef SEAGRASS
+# if defined SEAGRASS || defined SEAGRASS_DRAG
 !
 !  Read in seagrass coverage.
 !
