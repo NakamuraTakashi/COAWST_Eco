@@ -345,8 +345,8 @@
               wrk=MAX(tke(i,j,k,nstp),gls_Kmin(ng))
               dissip=(gls_cmu0(ng)**cff1)*(wrk**cff2)*                  &
      &                 (gls(i,j,k,nstp)**cff3)
-!              inverse_dissip=1.0_r8/MAX(dissip,min_eps)
-              inverse_dissip=MAX( (1.0_r8/dissip), max_eps)
+              inverse_dissip=1.0_r8/MAX(dissip,min_eps)  !!!TN <<<<<<<<<<< Activated
+!              inverse_dissip=MAX( (1.0_r8/dissip), max_eps)  !!!TN <<<<<<<<<<< Deactivated
 !
 ! Dissipation time-scale for free turbulence
 !
@@ -485,7 +485,7 @@
 !
 # endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
-              gls_loc_veg=gls_c2(ng)*tke_loc_veg/taueff
+              gls_loc_veg=gls_c2(ng)*tke_loc_veg/MAX(taueff,min_eps)  !!!<<<<<<<<< TN: mod taueff -> MAX(taueff,min_eps)
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
 # if defined MANGROVE_DRAG
 !
