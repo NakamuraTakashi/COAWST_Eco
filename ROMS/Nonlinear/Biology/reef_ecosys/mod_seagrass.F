@@ -614,16 +614,17 @@ MODULE mod_seagrass
             SGRASS(ng)%SgCBmF(iD47,species,i,j) = Ci_from_Ct_delta( SGRASS(ng)%SgCBmF(iCt,species,i,j), -20.0d0, R13C_VPDB ) !!???????
 #  endif
 # endif
+# if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
             SGRASS(ng)%SgNBmF(  :,species,i,j) = 0.0d0
             ! [umol.N.tot/m2.hab]              
             SGRASS(ng)%SgNBmF(iNt,species,i,j) = SGRASS(ng)%SgCBmF(iCt,species,i,j) * SGRASS(ng)%SgNperC(species)
-# if defined NITROGEN_ISOTOPE
+#  if defined NITROGEN_ISOTOPE
             SGRASS(ng)%SgNBmF(iN15,species,i,j) = Ci_from_Ct_delta( SGRASS(ng)%SgNBmF(iNt,species,i,j), -20.0d0, R13C_VPDB )
-# endif
+#  endif
             SGRASS(ng)%SgPBmF(  :,species,i,j) = 0.0d0
             ! [umol.P.tot/m2.hab]              
             SGRASS(ng)%SgPBmF(iPt,species,i,j) = SGRASS(ng)%SgCBmF(iCt,species,i,j) * SGRASS(ng)%SgPperC(species)
-
+# endif
             ! [umol.C.rt/m2.hab]          = [umol.C.tot/m2.hab]                [mol.C.rt/mol.C.tot]
             SGRASS(ng)%RtCBm(species,i,j) = SGRASS(ng)%SgCBmF(iCt,species,i,j) * (1.0d0 - SGRASS(ng)%f_above(species))
 
@@ -1727,10 +1728,11 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
 
     ! [umol.C/m2.hab s] = [mol.C/mol.CHM] [umol.CHM/m2.hab] [1/s]
     Growth_limit_DIC    =                   DICstock(iCt)   / dt
+# if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
     Growth_limit_NO3    = 1d0 / SgNperC   * NO3stock(iNt)   / dt
     Growth_limit_NH4    = 1d0 / SgNperC   * NH4stock(iNt)   / dt
     Growth_limit_PO4    = 1d0 / SgPperC   * PO4stock(iPt)   / dt
-
+# endif
 ! Gross Photosythesis/Growth rate ---------------------------------------------------------------------
 
     ! Growth_rate                 [umol.C m-2.sg.hab s-1]     Gross photosynthesis/growth rate
@@ -1751,9 +1753,11 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
       write(*,*) "yt_debug:     Growth_rate        = ", Growth_rate
       write(*,*) "yt_debug:     Growth_limit_light = ", Growth_limit_light
       write(*,*) "yt_debug:     Growth_limit_DIC   = ", Growth_limit_DIC
+# if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
       write(*,*) "yt_debug:     Growth_limit_NO3   = ", Growth_limit_NO3
       write(*,*) "yt_debug:     Growth_limit_NH4   = ", Growth_limit_NH4
       write(*,*) "yt_debug:     Growth_limit_PO4   = ", Growth_limit_PO4
+# endif
       Growth_rate = 0.0d0
     endif
 
@@ -2524,8 +2528,10 @@ endif
       else !=== if TotSgCBm <=0 ========================================================
         
         SgCBmF(:) = 0.0d0
+# if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
         SgNBmF(:) = 0.0d0
         SgPBmF(:) = 0.0d0
+# endif
         TotSgCBm  = 0.0d0
         TotLfCBm  = 0.0d0
         TotRtCBm  = 0.0d0
@@ -2925,10 +2931,12 @@ endif
     
     ! SgCBmF                      [umol.C m-2.sg.hab]         Seagrass leaf+root carbon-biomass per unit ground area (in seagrass habitat area) updates on fine time interval
     SGRASS(ng)%SgCBmF(:,species,i,j) = 0.0d0
+# if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
     ! SgNBmF                      [umol.C m-2.sg.hab]         Seagrass leaf+root nitrogen-biomass per unit ground area (in seagrass habitat area) updates on fine time interval
     SGRASS(ng)%SgNBmF(:,species,i,j) = 0.0d0
     ! SgPBmF                      [umol.C m-2.sg.hab]         Seagrass leaf+root phosphorus-biomass per unit ground area (in seagrass habitat area) updates on fine time interval
     SGRASS(ng)%SgPBmF(:,species,i,j) = 0.0d0
+# endif
     ! TotSgCBmF                   [mol.C]                     Total seagrass carbon-biomass in grid cell. updates on fine time interval
     SGRASS(ng)%TotSgCBmF(species,i,j) = 0.0d0
 
