@@ -1782,8 +1782,10 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
     ! [umol.C/m2.hab s] = [umol.C/m2.hab s] + [umol.C/m2.hab s] (stoicheometry) (isotope ratios) (N-species proportion)
     delta_SgCBmF(:)     = delta_SgCBmF(:)   + Growth_rate           * rDICstock(:)
 #  if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
-    delta_SgNBmF(:)     = delta_SgNBmF(:)   + Growth_rate * SgNperC * rNO3stock(:)*(NO3stock(iNt)/(NO3stock(iNt)+NH4stock(iNt))) ! portion from nitrate proportional to stock
-    delta_SgNBmF(:)     = delta_SgNBmF(:)   + Growth_rate * SgNperC * rNH4stock(:)*(NH4stock(iNt)/(NO3stock(iNt)+NH4stock(iNt))) ! portion from ammonium proportional to stock
+    if ((NO3stock(iNt)+NH4stock(iNt)) .gt. 0d0) then
+      delta_SgNBmF(:)     = delta_SgNBmF(:)   + Growth_rate * SgNperC * rNO3stock(:)*(NO3stock(iNt)/(NO3stock(iNt)+NH4stock(iNt))) ! portion from nitrate proportional to stock
+      delta_SgNBmF(:)     = delta_SgNBmF(:)   + Growth_rate * SgNperC * rNH4stock(:)*(NH4stock(iNt)/(NO3stock(iNt)+NH4stock(iNt))) ! portion from ammonium proportional to stock
+    endif
     delta_SgPBmF(:)     = delta_SgPBmF(:)   + Growth_rate * SgPperC * rPO4stock(:)
 #  endif
 
@@ -2073,11 +2075,21 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
 # endif
     endif
 
-    ! yt_debug
-    if (SgCBmF(iCt)*0.0d0 /= 0.0d0) then
-      write(*,*) 'SEAGRASS error 2: SgCBmF is NAN', SgCBmF(iCt), delta_SgCBmF(iCt)
-      error stop
-    endif
+    ! ! yt_debug
+    ! if (SgCBmF(iCt)*0.0d0 /= 0.0d0) then
+    !   write(*,*) 'SEAGRASS error 2: SgCBmF is NAN', SgCBmF(iCt), delta_SgCBmF(iCt)
+    !   error stop
+    ! endif
+    ! ! yt_debug
+    ! if (SgNBmF(iNt)*0.0d0 /= 0.0d0) then
+    !   write(*,*) 'SEAGRASS error 2: SgNBmF is NAN', SgNBmF(iNt), delta_SgNBmF(iNt)
+    !   error stop
+    ! endif
+    ! ! yt_debug
+    ! if (SgPBmF(iPt)*0.0d0 /= 0.0d0) then
+    !   write(*,*) 'SEAGRASS error 2: SgPBmF is NAN', SgPBmF(iPt), delta_SgPBmF(iPt)
+    !   error stop
+    ! endif
 
     ! [mol.C] = [umol.C/m2.hab] [m2.hab]  (mol/1000000umol)
     TotSgCBmF = SgCBmF(iCt)    * HabArea * 0.000001d0
@@ -2512,6 +2524,8 @@ endif
       else !=== if TotSgCBm <=0 ========================================================
         
         SgCBmF(:) = 0.0d0
+        SgNBmF(:) = 0.0d0
+        SgPBmF(:) = 0.0d0
         TotSgCBm  = 0.0d0
         TotLfCBm  = 0.0d0
         TotRtCBm  = 0.0d0
@@ -2911,6 +2925,10 @@ endif
     
     ! SgCBmF                      [umol.C m-2.sg.hab]         Seagrass leaf+root carbon-biomass per unit ground area (in seagrass habitat area) updates on fine time interval
     SGRASS(ng)%SgCBmF(:,species,i,j) = 0.0d0
+    ! SgNBmF                      [umol.C m-2.sg.hab]         Seagrass leaf+root nitrogen-biomass per unit ground area (in seagrass habitat area) updates on fine time interval
+    SGRASS(ng)%SgNBmF(:,species,i,j) = 0.0d0
+    ! SgPBmF                      [umol.C m-2.sg.hab]         Seagrass leaf+root phosphorus-biomass per unit ground area (in seagrass habitat area) updates on fine time interval
+    SGRASS(ng)%SgPBmF(:,species,i,j) = 0.0d0
     ! TotSgCBmF                   [mol.C]                     Total seagrass carbon-biomass in grid cell. updates on fine time interval
     SGRASS(ng)%TotSgCBmF(species,i,j) = 0.0d0
 
