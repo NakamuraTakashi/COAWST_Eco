@@ -96,7 +96,9 @@
       integer  :: iSgTotLA(Nsg)        ! Total one-sided green leaf area in grid [m2.lf]
       integer  :: iSgGridELAP(Nsg)     ! Effective leaf area projection on ground (whole grid) [m2.lf.proj m-2.grid]
       integer  :: iSgGridPhot(Nsg)     ! Seagrass gross photosynthesis rate per unit ground area (whole grid) [umol.C m-2.grid s-1]
-      integer  :: iSgPhotLim(Nsg)      ! Seagrass photosynthesis limiting factor: 1 = light; 2 = Carbon uptake; 3 = Nitrogen uptake; 4 = Phosphorus uptake
+      integer  :: iSgGridGrow(Nsg)     ! Seagrass growth rate per unit ground area (whole grid) [umol.C m-2.grid s-1]
+      integer  :: iSgPhotLim(Nsg)      ! Seagrass photosynthesis limiting factor: 1 = light; 2 = Carbon stock
+      integer  :: iSgGrowLim(Nsg)      ! Seagrass growth limiting factor: 1 = Sugar stock; 2 = Nitrogen stock; 3 = Phosphorus stock
       integer  :: iSgGridResp(Nsg)     ! Seagrass respiration rate per unit ground area (whole grid) [umol.C m-2.grid s-1]
       integer  :: iSgGridNetPhot(Nsg)  ! Seagrass net photosynthesis rate per unit ground area (whole grid) [umol.C m-2.grid s-1]
       integer  :: iSgGridDieoff(Nsg)   ! Seagrass dieoff rate carbon biomass per unit ground area (whole grid) [umol.C m-2.grid s-1]    
@@ -570,7 +572,15 @@
       END DO
       DO m=1,Nsg
         ic=ic+1
+        iSgGridGrow(m)=ic
+      END DO
+      DO m=1,Nsg
+        ic=ic+1
         iSgPhotLim(m)=ic
+      END DO
+      DO m=1,Nsg
+        ic=ic+1
+        iSgGrowLim(m)=ic
       END DO
       DO m=1,Nsg
         ic=ic+1
@@ -1142,6 +1152,7 @@
             SGRASS(ng)%TotLA      (m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgTotLA      (m) )
             SGRASS(ng)%GridELAP   (m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgGridELAP   (m) )
             SGRASS(ng)%GridPhot   (m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgGridPhot   (m) )
+            SGRASS(ng)%GridGrow   (m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgGridGrow   (m) )
             SGRASS(ng)%PhotLim    (m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgPhotLim    (m) )
             SGRASS(ng)%GridResp   (m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgGridResp   (m) )
             SGRASS(ng)%GridNetPhot(m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgGridNetPhot(m) )
@@ -1276,7 +1287,9 @@
             OCEAN(ng)%HisBio2d(i,j, iSgTotLA      (m) ) = SGRASS(ng)%TotLA      (m,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgGridELAP   (m) ) = SGRASS(ng)%GridELAP   (m,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgGridPhot   (m) ) = SGRASS(ng)%GridPhot   (m,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgGridGrow   (m) ) = SGRASS(ng)%GridGrow   (m,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgPhotLim    (m) ) = SGRASS(ng)%PhotLim    (m,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgGrowLim    (m) ) = SGRASS(ng)%GrowLim    (m,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgGridResp   (m) ) = SGRASS(ng)%GridResp   (m,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgGridNetPhot(m) ) = SGRASS(ng)%GridNetPhot(m,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgGridDieoff (m) ) = SGRASS(ng)%GridDieoff (m,i,j)

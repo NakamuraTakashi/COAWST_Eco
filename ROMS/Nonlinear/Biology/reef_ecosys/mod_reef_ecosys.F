@@ -984,6 +984,7 @@ END SUBROUTINE allocate_reef_ecosys
           , Flux_NH4(:)         &   ! NH4 uptake rate (mmol m-2 s-1)  * direction of ocean to seagrass is positive
           , Flux_PO4(:)         &   ! PO4 uptake rate (mmol m-2 s-1)  * direction of ocean to seagrass is positive
 #  endif
+          , Flux_DOC(:,iLDOM)   &   ! DOC uptake rate (mmol m-2 s-1)  * direction of water column to algae is positive
 #  if defined SEAGRASS_LEAF_POM
           , Flux_POC(:,iCPOM)   &   ! POC uptake rate (mmol m-2 s-1)  * direction of ocean to seagrass is positive
 #   if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE

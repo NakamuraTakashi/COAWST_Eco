@@ -98,6 +98,7 @@ MODULE mod_sedecosys
 # if defined SEAGRASS
 #  if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE
     real(8), pointer :: sg_dDIC_dt(:,:,:,:,:) ! (umol L-1 s-1) change in DIC due to flux from seagrass (positive means seagrass to sediment)
+    real(8), pointer :: sg_dDOC_dt(:,:,:,:,:) ! (umol L-1 s-1) change in DOC due to flux from seagrass (positive means seagrass to sediment)
     real(8), pointer :: sg_dO2_dt (:,:,:,:) ! (umol L-1 s-1) change in DO due to flux from seagrass (positive means seagrass to sediment)
 #  endif
 #  if defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
@@ -175,6 +176,7 @@ CONTAINS
 # if defined SEAGRASS
 #  if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE
     allocate( SEDECO(ng)%sg_dDIC_dt(N_Csp,Nsed,Nsg,LBi:UBi,LBj:UBj) ) ! (umol L-1 s-1) change in DIC due to flux from seagrass (positive means seagrass to sediment)
+    allocate( SEDECO(ng)%sg_dDOC_dt(N_Csp,Nsed,Nsg,LBi:UBi,LBj:UBj) ) ! (umol L-1 s-1) change in DOC due to flux from seagrass (positive means seagrass to sediment)
     allocate( SEDECO(ng)%sg_dO2_dt       (Nsed,Nsg,LBi:UBi,LBj:UBj) ) ! (nmol g-1 s-1) change in DO due to flux from seagrass (positive means seagrass to sediment)
 #  endif
 #  if defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
@@ -1307,6 +1309,7 @@ CONTAINS
       R_O2 (k) = R_O2 (k) + sum(SEDECO(ng)%sg_dO2_dt (k,:,i,j)) ! (umol L-1 s-1) change in DO  due to flux from seagrass (positive means seagrass to sediment)
       DO isp=1,N_Csp
         R_DIC(isp,k) = R_DIC(isp,k) + sum(SEDECO(ng)%sg_dDIC_dt(isp,k,:,i,j)) ! (umol L-1 s-1) change in DIC due to flux from seagrass (positive means seagrass to sediment)
+        R_DOC(isp,iLDOM,k) = R_DOC(isp,iLDOM,k) + sum(SEDECO(ng)%sg_dDOC_dt(isp,k,:,i,j)) ! (umol L-1 s-1) change in DOC due to flux from seagrass (positive means seagrass to sediment)
       ENDDO
 #  endif
 #  if defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
