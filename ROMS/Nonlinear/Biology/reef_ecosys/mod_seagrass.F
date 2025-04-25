@@ -98,6 +98,15 @@ MODULE mod_seagrass
     real(8), pointer :: Turnover_rate                           (:    )   ! [umol.C umol-1.C day-1]     Base mass turnover rate (dieoff) in fraction of mass per day
     ! dieoff when respiration is insufficient
     real(8), pointer :: max_anoxic_dieoff_rate                  (:    )   ! [mol.C mol-1.C day-1]       maximum dieoff due to anoxia in fraction of mass per day, represents atypical modes of survival such as anaerobic respiration and cellular canibalism which limits extreme death rates
+    ! stockpile maximum cap
+    real(8), pointer :: DICstockCap                             (:    )   ! Factor to multiply carbon biomsass to get maximum DIC stock (stock limit = DICstockCap*SgCBmF) 
+    real(8), pointer :: CH2OstockCap                            (:    )   ! Factor to multiply carbon biomsass to get maximum sugar stock (stock limit = CH2OstockCap*SgCBmF) 
+    real(8), pointer :: DOstockCap                              (:    )   ! Factor to multiply carbon biomsass to get maximum DO stock (stock limit = DOstockCap*SgCBmF) 
+# if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
+    real(8), pointer :: NO3stockCap                             (:    )   ! Factor to multiply nitrogen biomsass to get maximum NO3 stock (stock limit = NO3stockCap*SgNBmF) 
+    real(8), pointer :: NH4stockCap                             (:    )   ! Factor to multiply nitrogen biomsass to get maximum NH4 stock (stock limit = NH4stockCap*SgNBmF) 
+    real(8), pointer :: PO4stockCap                             (:    )   ! Factor to multiply phosphorus biomsass to get maximum PO4 stock (stock limit = PO4stockCap*SgPBmF) 
+# endif
     ! Update at end of growth interval
     ! allocate growth
     ! update bed-density/habitat area
@@ -265,6 +274,15 @@ MODULE mod_seagrass
     allocate( SGRASS(ng)%Turnover_rate                              (Nsg)                  ) ! [umol.C umol-1.C day-1]     Base mass turnover rate (dieoff) in fraction of mass per day
     ! dieoff when respiration is insufficient
     allocate( SGRASS(ng)%max_anoxic_dieoff_rate                     (Nsg)                  ) ! [mol.C mol-1.C day-1]       maximum dieoff due to anoxia in fraction of mass per day, represents atypical modes of survival such as anaerobic respiration and cellular canibalism which limits extreme death rates
+    ! stockpile maximum cap
+    allocate( SGRASS(ng)%DICstockCap                                (Nsg)                  ) ! Factor to multiply carbon biomsass to get maximum DIC stock (stock limit = DICstockCap*SgCBmF) 
+    allocate( SGRASS(ng)%CH2OstockCap                               (Nsg)                  ) ! Factor to multiply carbon biomsass to get maximum sugar stock (stock limit = CH2OstockCap*SgCBmF) 
+    allocate( SGRASS(ng)%DOstockCap                                 (Nsg)                  ) ! Factor to multiply carbon biomsass to get maximum DO stock (stock limit = DOstockCap*SgCBmF) 
+# if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
+    allocate( SGRASS(ng)%NO3stockCap                                (Nsg)                  ) ! Factor to multiply nitrogen biomsass to get maximum NO3 stock (stock limit = NO3stockCap*SgNBmF) 
+    allocate( SGRASS(ng)%NH4stockCap                                (Nsg)                  ) ! Factor to multiply nitrogen biomsass to get maximum NH4 stock (stock limit = NH4stockCap*SgNBmF) 
+    allocate( SGRASS(ng)%PO4stockCap                                (Nsg)                  ) ! Factor to multiply phosphorus biomsass to get maximum PO4 stock (stock limit = PO4stockCap*SgPBmF) 
+# endif
     ! Growth interval
     allocate( SGRASS(ng)%trans_rate                                 (Nsg)                  ) ! [mol.C mol-1.C day-1]       Maximum translocation rate as fraction of mass translocatable per day
     allocate( SGRASS(ng)%opt_sg_bed_density                         (Nsg)                  ) ! [g.drywt m-2.hab]           Ideal seagrass bed density (represents guerilla vs phallanx strategy)
@@ -428,10 +446,10 @@ MODULE mod_seagrass
     ! SGRASS(ng)%k_lf_DIC                             = [ 4500d0   ]                                    ! [umol.DIC L-1]              Half saturation consentration of DIC in water column for growth                                             ! 4500 µmol L-1 from Bjo ̈rk et al. (1997) (master's thesis section 6.3.2b)
     SGRASS(ng)%k_lf_DIC                             = [ 3000.0d0 ]                                    ! [umol.DIC L-1]              Half saturation consentration of DIC in water column for growth                                               ! yt_edit Tuning
 # if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE
-    SGRASS(ng)%Rt_DIC_flux_max                      = [ 73.8d0/0.069d0 ]                              ! [umol.DIC g-1.rt.drywt s-1] Maximum uptake rate of DIC in the roots                                                                       ! yt_edit Tuning
+    ! SGRASS(ng)%Rt_DIC_flux_max                      = [ 73.8d0/0.069d0 ]                              ! [umol.DIC g-1.rt.drywt s-1] Maximum uptake rate of DIC in the roots                                                                       ! yt_edit Tuning
+    SGRASS(ng)%Rt_DIC_flux_max                      = [ 0.0d0 ]                                                                                              ! yt_edit Tuning
     SGRASS(ng)%k_rt_DIC                             = [ 3000.0d0*10d0 ]                               ! [umol.DIC L-1]              Half saturation consentration of DIC in soil pore water for growth                                            ! yt_edit Tuning
 # endif
-
     ! photoynthesis: nutrient-limit
 # if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE
     ! SGRASS(ng)%Lf_NO3_uptake_max                    = [ 200.0d0/35.0d0  ]                             ! [umol.NO3 m-2.lf s-1]       Maximum uptake rate of NO3 in the leaves                                                                      ! yt_edit tuning  set equal to max photosynthesis
@@ -478,7 +496,6 @@ MODULE mod_seagrass
     SGRASS(ng)%k_rt_PO4                             = [ 1.45d0   ]                                    ! [umol.PO4 L-1]              Half saturation consentration of PO4 in soil pore water for growth                                            ! Yuta seagrass experiment - Thalassia hemprichii
     SGRASS(ng)%smin_rt_PO4                          = [ 0.0d0    ]                                    ! [umol.PO4 L-1]              Minimum consentration of PO4 in soil pore water for uptake                                                    ! Yuta seagrass experiment - Thalassia hemprichii
 # endif
-    
     ! respiration: DO-limit
     ! SGRASS(ng)%Lf_DO_uptake_max                     = [ 2.075d0  ]                                  ! [umol.DO m-2.lf s-1]        Maximum uptake rate of DO in the leaves                                                                       ! 2.075 umol.C/m2.leaf/s calculated from Rasmusson et al. (2020) (refer to master's thesis 6.3.3a)
     ! SGRASS(ng)%Lf_DO_uptake_max                     = [ 40d0     ]                                    ! [umol.DO m-2.lf s-1]        Maximum uptake rate of DO in the leaves                                                                       ! tuning
@@ -496,7 +513,15 @@ MODULE mod_seagrass
     SGRASS(ng)%Turnover_rate                        = [0.01      ]                                    ! [umol.C umol-1.C day-1]     Base mass turnover rate (dieoff) in fraction of mass per day
     ! dieoff when respiration is insufficient
     SGRASS(ng)%max_anoxic_dieoff_rate               = [ 0.5d0    ]                                    ! [mol.C mol-1.C day-1]       maximum dieoff due to anoxia in fraction of mass per day, represents atypical modes of survival such as anaerobic respiration and cellular canibalism which limits extreme death rates ! tuning
-
+    ! stockpile maximum cap
+    SGRASS(ng)%DICstockCap                          = [1.0d0]                                         ! Factor to multiply carbon biomsass to get maximum DIC stock (stock limit = DICstockCap*SgCBmF) 
+    SGRASS(ng)%CH2OstockCap                         = [1.0d0]                                         ! Factor to multiply carbon biomsass to get maximum sugar stock (stock limit = CH2OstockCap*SgCBmF) 
+    SGRASS(ng)%DOstockCap                           = [1.0d0]                                         ! Factor to multiply carbon biomsass to get maximum DO stock (stock limit = DOstockCap*SgCBmF) 
+# if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
+    SGRASS(ng)%NO3stockCap                          = [1.0d0]                                         ! Factor to multiply nitrogen biomsass to get maximum NO3 stock (stock limit = NO3stockCap*SgNBmF) 
+    SGRASS(ng)%NH4stockCap                          = [1.0d0]                                         ! Factor to multiply nitrogen biomsass to get maximum NH4 stock (stock limit = NH4stockCap*SgNBmF) 
+    SGRASS(ng)%PO4stockCap                          = [1.0d0]                                         ! Factor to multiply phosphorus biomsass to get maximum PO4 stock (stock limit = PO4stockCap*SgPBmF) 
+# endif
     ! Growth interval
     SGRASS(ng)%trans_rate                           = [ 0.05d0   ]                                    ! [mol.C mol-1.C day-1]       Maximum translocation rate as fraction of mass translocatable per day                                         ! yt_edit tuning: translocation 10% per day
     SGRASS(ng)%opt_sg_bed_density                   = [ 500.0d0  ]                                    ! [g.drywt m-2.hab]           Ideal seagrass bed density (represents guerilla vs phallanx strategy)                                         ! yt_edit tuning
@@ -882,6 +907,15 @@ MODULE mod_seagrass
     real(8), pointer      :: Turnover_rate              ! [umol.C umol-1.C day-1]     Base mass turnover rate (dieoff) in fraction of mass per day
     ! dieoff when respiration is insufficient
     real(8), pointer      :: max_anoxic_dieoff_rate     ! [mol.C mol-1.C day-1]       maximum dieoff due to anoxia in fraction of mass per day, represents atypical modes of survival such as anaerobic respiration and cellular canibalism which limits extreme death rates
+    ! stockpile maximum cap
+    real(8), pointer      :: DICstockCap                ! []                          Factor to multiply carbon biomsass to get maximum DIC stock (stock limit = DICstockCap*SgCBmF) 
+    real(8), pointer      :: CH2OstockCap               ! []                          Factor to multiply carbon biomsass to get maximum sugar stock (stock limit = CH2OstockCap*SgCBmF) 
+    real(8), pointer      :: DOstockCap                 ! []                          Factor to multiply carbon biomsass to get maximum DO stock (stock limit = DOstockCap*SgCBmF) 
+# if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
+    real(8), pointer      :: NO3stockCap                ! []                          Factor to multiply nitrogen biomsass to get maximum NO3 stock (stock limit = NO3stockCap*SgNBmF) 
+    real(8), pointer      :: NH4stockCap                ! []                          Factor to multiply nitrogen biomsass to get maximum NH4 stock (stock limit = NH4stockCap*SgNBmF) 
+    real(8), pointer      :: PO4stockCap                ! []                          Factor to multiply phosphorus biomsass to get maximum PO4 stock (stock limit = PO4stockCap*SgPBmF) 
+# endif
     ! Update at end of growth interval
     ! allocate growth
     ! update bed-density/habitat area
@@ -1196,6 +1230,15 @@ MODULE mod_seagrass
     Turnover_rate       =>  SGRASS(ng)%Turnover_rate          (species)     ! [umol.C umol-1.C day-1]     Base mass turnover rate (dieoff) in fraction of mass per day
     ! dieoff when respiration is insufficient
     max_anoxic_dieoff_rate =>  SGRASS(ng)%max_anoxic_dieoff_rate(species)   ! [mol.C mol-1.C day-1]       maximum dieoff due to anoxia in fraction of mass per day, represents atypical modes of survival such as anaerobic respiration and cellular canibalism which limits extreme death rates
+    ! stockpile maximum cap
+    DICstockCap         =>  SGRASS(ng)%DICstockCap            (species)     ! []                          Factor to multiply carbon biomsass to get maximum DIC stock (stock limit = DICstockCap*SgCBmF) 
+    CH2OstockCap        =>  SGRASS(ng)%CH2OstockCap           (species)     ! []                          Factor to multiply carbon biomsass to get maximum sugar stock (stock limit = CH2OstockCap*SgCBmF) 
+    DOstockCap          =>  SGRASS(ng)%DOstockCap             (species)     ! []                          Factor to multiply carbon biomsass to get maximum DO stock (stock limit = DOstockCap*SgCBmF) 
+# if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
+    NO3stockCap         =>  SGRASS(ng)%NO3stockCap            (species)     ! []                          Factor to multiply nitrogen biomsass to get maximum NO3 stock (stock limit = NO3stockCap*SgNBmF) 
+    NH4stockCap         =>  SGRASS(ng)%NH4stockCap            (species)     ! []                          Factor to multiply nitrogen biomsass to get maximum NH4 stock (stock limit = NH4stockCap*SgNBmF) 
+    PO4stockCap         =>  SGRASS(ng)%PO4stockCap            (species)     ! []                          Factor to multiply phosphorus biomsass to get maximum PO4 stock (stock limit = PO4stockCap*SgPBmF) 
+# endif
     ! Update at end of growth interval
     ! allocate growth
     ! update bed-density/habitat area
@@ -1465,15 +1508,16 @@ MODULE mod_seagrass
 
     ! DIC_uptake_possible(:)      [umol.DIC m-2.sg.hab s-1]   DIC uptake rate possible in each layer; 0 = water column, 1-Nsed = sediment layers
     ! sumCUpPos                   [umol.DIC m-2.sg.hab s-1]   sum of all potential DIC uptake (used for scaling/normalizing uptake proportions)
+    ! DICstockCap                 []                          Factor to multiply carbon biomsass to get maximum DIC stock (stock limit = DICstockCap*SgCBmF) 
     sumCUpPos = sum(DIC_uptake_possible(:))
 
-    ! limit uptake so that DIC stock is limited to 100 percent of biomass C
-    if (DICstock(iCt) .ge. SgCBmF(iCt)) then
+    ! limit uptake so that DIC stock is limited to stockpile cap
+    if (DICstock(iCt) .ge. DICstockCap*SgCBmF(iCt)) then
       DIC_uptake_possible(:) = 0d0
       sumCUpPos = 0d0
-    elseif (DICstock(iCt) + sumCUpPos .gt. SgCBmF(iCt)) then
-      DIC_uptake_possible(:) = DIC_uptake_possible(:) * (SgCBmF(iCt)-DICstock(iCt))/sumCUpPos
-      sumCUpPos = SgCBmF(iCt)-DICstock(iCt)
+    elseif (DICstock(iCt) + sumCUpPos .gt. DICstockCap*SgCBmF(iCt)) then
+      DIC_uptake_possible(:) = DIC_uptake_possible(:) * (DICstockCap*SgCBmF(iCt)-DICstock(iCt))/sumCUpPos
+      sumCUpPos = DICstockCap*SgCBmF(iCt)-DICstock(iCt)
     endif
 
 ! DO uptake rate --------------------------------------------------------------------------
@@ -1505,15 +1549,16 @@ MODULE mod_seagrass
 
     ! DO_uptake_possible(:)       [umol.DO m-2.sg.hab s-1]    DO uptake rate possible in each layer; 0 = water column, 1-Nsed = sediment layers
     ! sumOUpPos                   [umol.DO m-2.sg.hab s-1]    sum of all potential DO uptake (used for scaling/normalizing uptake proportions)
+    ! DOstockCap                  []                          Factor to multiply carbon biomsass to get maximum DO stock (stock limit = DOstockCap*SgCBmF) 
     sumOUpPos = sum(DO_uptake_possible(:))
 
     ! limit uptake so that DO stock is limited to 100 percent of biomass C
-    if (DOstock .ge. SgCBmF(iCt)) then
+    if (DOstock .ge. DOstockCap*SgCBmF(iCt)) then
       DO_uptake_possible(:) = 0d0
       sumOUpPos = 0d0
-    elseif (DOstock + sumOUpPos .gt. SgCBmF(iCt)) then
-      DO_uptake_possible(:) = DO_uptake_possible(:) * (SgCBmF(iCt)-DOstock)/sumOUpPos
-      sumOUpPos = SgCBmF(iCt)-DOstock
+    elseif (DOstock + sumOUpPos .gt. DOstockCap*SgCBmF(iCt)) then
+      DO_uptake_possible(:) = DO_uptake_possible(:) * (DOstockCap*SgCBmF(iCt)-DOstock)/sumOUpPos
+      sumOUpPos = DOstockCap*SgCBmF(iCt)-DOstock
     endif
 
 ! Nutrient uptake rate --------------------------------------------------------------------------
@@ -1589,31 +1634,34 @@ MODULE mod_seagrass
     sumNH4UpPos = sum(NH4_uptake_possible(:))
     sumPUpPos = sum(PO4_uptake_possible(:))
 
+    ! NO3stockCap                 []                          Factor to multiply nitrogen biomsass to get maximum NO3 stock (stock limit = NO3stockCap*SgNBmF) 
     ! limit uptake so that NO3 stock is limited to 100 percent of biomass N
-    if (NO3stock(iNt) .ge. SgNBmF(iNt)) then
+    if (NO3stock(iNt) .ge. NO3stockCap*SgNBmF(iNt)) then
       NO3_uptake_possible(:) = 0d0
       sumNO3UpPos = 0d0
-    elseif (NO3stock(iNt) + sumNO3UpPos .gt. SgNBmF(iNt)) then
-      NO3_uptake_possible(:) = NO3_uptake_possible(:) * (SgNBmF(iNt)-NO3stock(iNt))/sumNO3UpPos
-      sumNO3UpPos = SgNBmF(iNt)-NO3stock(iNt)
+    elseif (NO3stock(iNt) + sumNO3UpPos .gt. NO3stockCap*SgNBmF(iNt)) then
+      NO3_uptake_possible(:) = NO3_uptake_possible(:) * (NO3stockCap*SgNBmF(iNt)-NO3stock(iNt))/sumNO3UpPos
+      sumNO3UpPos = NO3stockCap*SgNBmF(iNt)-NO3stock(iNt)
     endif
 
+    ! NH4stockCap                 []                          Factor to multiply nitrogen biomsass to get maximum NH4 stock (stock limit = NH4stockCap*SgNBmF) 
     ! limit uptake so that NH4 stock is limited to 100 percent of biomass N
-    if (NH4stock(iNt) .ge. SgNBmF(iNt)) then
+    if (NH4stock(iNt) .ge. NH4stockCap*SgNBmF(iNt)) then
       NH4_uptake_possible(:) = 0d0
       sumNH4UpPos = 0d0
-    elseif (NH4stock(iNt) + sumNH4UpPos .gt. SgNBmF(iNt)) then
-      NH4_uptake_possible(:) = NH4_uptake_possible(:) * (SgNBmF(iNt)-NH4stock(iNt))/sumNH4UpPos
-      sumNH4UpPos = SgNBmF(iNt)-NH4stock(iNt)
+    elseif (NH4stock(iNt) + sumNH4UpPos .gt. NH4stockCap*SgNBmF(iNt)) then
+      NH4_uptake_possible(:) = NH4_uptake_possible(:) * (NH4stockCap*SgNBmF(iNt)-NH4stock(iNt))/sumNH4UpPos
+      sumNH4UpPos = NH4stockCap*SgNBmF(iNt)-NH4stock(iNt)
     endif
 
+    ! PO4stockCap                 []                          Factor to multiply phosphorus biomsass to get maximum PO4 stock (stock limit = PO4stockCap*SgPBmF) 
     ! limit uptake so that PO4 stock is limited to 100 percent of biomass P
-    if (PO4stock(iPt) .ge. SgPBmF(iPt)) then
+    if (PO4stock(iPt) .ge. PO4stockCap*SgPBmF(iPt)) then
       PO4_uptake_possible(:) = 0d0
       sumPUpPos = 0d0
-    elseif (PO4stock(iPt) + sumPUpPos .gt. SgPBmF(iPt)) then
-      PO4_uptake_possible(:) = PO4_uptake_possible(:) * (SgPBmF(iPt)-PO4stock(iPt))/sumPUpPos
-      sumPUpPos = SgPBmF(iPt)-PO4stock(iPt)
+    elseif (PO4stock(iPt) + sumPUpPos .gt. PO4stockCap*SgPBmF(iPt)) then
+      PO4_uptake_possible(:) = PO4_uptake_possible(:) * (PO4stockCap*SgPBmF(iPt)-PO4stock(iPt))/sumPUpPos
+      sumPUpPos = PO4stockCap*SgPBmF(iPt)-PO4stock(iPt)
     endif
 
     sumNUpPos = sumNO3UpPos + sumNH4UpPos
@@ -2177,7 +2225,7 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
 
 ! If stocks exceed limit, leak to environment -------------------------------------------------------------------------
 
-    ! stock is limited to 100 percent of biomass so leak any excess
+    ! stock is limited to stock cap so leak any excess
     ! DICstock                    [umol.DIC m-2.sg.hab]       Seagrass internal DIC stock per unit ground area (in seagrass habitat area)
     ! SgCBmF                      [umol.C m-2.sg.hab]         Seagrass leaf+root carbon-biomass per unit ground area (in seagrass habitat area)
     ! delta_DICstock              [umol.DIC m-2.sg.hab s-1]   Rate of change in DICstock
@@ -2185,128 +2233,134 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
     ! SEDECO(ng)%sg_dDIC_dt()     [umol.DIC L-1 s-1]          Rate of change in DIC due to flux from roots to sediment (positive means seagrass to sediment)
     ! f_above                     [g.lf.drywt g-1.tot.drywt]  also [mol.C.lf mol-1.C.tot] Ideal above ground biomass to total biomass fraction
     ! root_comp_dist_factor(Nsed) [g.rt.comp g-1.tot m2.sg.hab m-2.sedmnt mm-1]    root compartemtent distribution factor equal to f_blw_cur * root_mass_profile(:) * sgrass_per_sedmnt / sed_layer_thickness(:) 
+    ! DICstockCap                 []                          Factor to multiply carbon biomsass to get maximum DIC stock (stock limit = DICstockCap*SgCBmF) 
 
-if (DICstock(iCt) .gt. SgCBmF(iCt)) then
+if (DICstock(iCt) .gt. DICstockCap*SgCBmF(iCt)) then
     ! Excess DIC = (DIC stock - seagrass biomass) = (DICstock(:)-SgCBmF(iCt)*rDICstock(:))
     ! Distribute this to ocean and sediment
     ! [mmol.CHEM/m2.hab s]        = [mmol.CHEM/m2.hab s]          - [umol.DIC/m2.hab]                      [1/s] []        (mmol/1000umol)
     DIC_uptake_rate_from_ocean(:) = DIC_uptake_rate_from_ocean(:) &
-            - (DICstock(:)-SgCBmF(iCt)*rDICstock(:)) / dt  * f_above * 0.001d0
+            - (DICstock(:)-DICstockCap*SgCBmF(iCt)*rDICstock(:)) / dt  * f_above * 0.001d0
 # if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE
     do k=1,Nsed
       ! [umol.CHEM/L s]                      = [umol.CHEM/L s]                        + [umol.DIC/m2.hab]                      [1/s] {[][g.rt.comp/g.tot][m2.hab/m2.sedmnt][1/mm](m2.sedmnt*mm/L)}
       SEDECO(ng)%sg_dDIC_dt(:,k,species,i,j) = SEDECO(ng)%sg_dDIC_dt(:,k,species,i,j) &
-              + (DICstock(:)-SgCBmF(iCt)*rDICstock(:)) / dt  * root_comp_dist_factor(k)
+              + (DICstock(:)-DICstockCap*SgCBmF(iCt)*rDICstock(:)) / dt  * root_comp_dist_factor(k)
     end do
 # endif
     ! Set stock equal to seagrass biomass
     ! [umol.DIC/m2.hab] = [umol.C/m2.hab] (isotope ratio)
-    DICstock(:)         = SgCBmF(iCt)     * rDICstock(:)
+    DICstock(:)         = DICstockCap*SgCBmF(iCt)     * rDICstock(:)
 endif
 
-if (CH2Ostock(iCt) .gt. SgCBmF(iCt)) then
+  ! CH2OstockCap                []                          Factor to multiply carbon biomsass to get maximum sugar stock (stock limit = CH2OstockCap*SgCBmF) 
+if (CH2Ostock(iCt) .gt. CH2OstockCap*SgCBmF(iCt)) then
   ! Excess DOC = (CH2O stock - seagrass biomass) = (CH2Ostock(:)-SgCBmF(iCt)*rCH2Ostock(:))
   ! Distribute this to ocean and sediment
   ! [mmol.CHEM/m2.hab s]        = [mmol.CHEM/m2.hab s]          - [umol.CH2O/m2.hab]                      [1/s] []        (mmol/1000umol)
   DOC_uptake_rate_from_ocean(:) = DOC_uptake_rate_from_ocean(:) &
-          - (CH2Ostock(:)-SgCBmF(iCt)*rCH2Ostock(:)) / dt  * f_above * 0.001d0
+          - (CH2Ostock(:)-CH2OstockCap*SgCBmF(iCt)*rCH2Ostock(:)) / dt  * f_above * 0.001d0
 # if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE
   do k=1,Nsed
     ! [umol.CHEM/L s]                      = [umol.CHEM/L s]                        + [umol.DIC/m2.hab]                      [1/s] {[][g.rt.comp/g.tot][m2.hab/m2.sedmnt][1/mm](m2.sedmnt*mm/L)}
     SEDECO(ng)%sg_dDOC_dt(:,k,species,i,j) = SEDECO(ng)%sg_dDOC_dt(:,k,species,i,j) &
-            + (CH2Ostock(:)-SgCBmF(iCt)*rCH2Ostock(:)) / dt  * root_comp_dist_factor(k)
+            + (CH2Ostock(:)-CH2OstockCap*SgCBmF(iCt)*rCH2Ostock(:)) / dt  * root_comp_dist_factor(k)
   end do
 # endif
   ! Set stock equal to seagrass biomass
   ! [umol.DIC/m2.hab] = [umol.C/m2.hab] (isotope ratio)
-  CH2Ostock(:)         = SgCBmF(iCt)     * rCH2Ostock(:)
+  CH2Ostock(:)         = CH2OstockCap*SgCBmF(iCt)     * rCH2Ostock(:)
 endif
 
-if (DOstock .gt. SgCBmF(iCt)) then
+  ! DOstockCap                  []                          Factor to multiply carbon biomsass to get maximum DO stock (stock limit = DOstockCap*SgCBmF) 
+if (DOstock .gt. DOstockCap*SgCBmF(iCt)) then
   ! Excess DO = (DO stock - seagrass C-biomass) = (DOstock-SgCBmF(iCt))
   ! Distribute this to ocean and sediment
   ! [mmol.CHEM/m2.hab s]     = [mmol.CHEM/m2.hab s]          - [umol.DIC/m2.hab]     [1/s] []        (mmol/1000umol)
-  DO__uptake_rate_from_ocean = DO__uptake_rate_from_ocean    - (DOstock-SgCBmF(iCt)) / dt  * f_above * 0.001d0
+  DO__uptake_rate_from_ocean = DO__uptake_rate_from_ocean    - (DOstock-DOstockCap*SgCBmF(iCt)) / dt  * f_above * 0.001d0
 # if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE
   do k=1,Nsed
     ! [umol.CHEM/L s]                   = [umol.CHEM/L s]                     + [umol.DIC/m2.hab]     [1/s] {[][g.rt.comp/g.tot][m2.hab/m2.sedmnt][1/mm](m2.sedmnt*mm/L)}
     SEDECO(ng)%sg_dO2_dt(k,species,i,j) = SEDECO(ng)%sg_dO2_dt(k,species,i,j) &
-            + (DOstock-SgCBmF(iCt)) / dt * root_comp_dist_factor(k)
+            + (DOstock-DOstockCap*SgCBmF(iCt)) / dt * root_comp_dist_factor(k)
   end do
 # endif
   ! Set stock equal to seagrass biomass
   ! [umol.DIC/m2.hab] = [umol.C/m2.hab] (isotope ratio)
-  DOstock             = SgCBmF(iCt)
+  DOstock             = DOstockCap*SgCBmF(iCt)
 endif
 
+  ! NO3stockCap                 []                          Factor to multiply nitrogen biomsass to get maximum NO3 stock (stock limit = NO3stockCap*SgNBmF) 
 # if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
-if (NO3stock(iNt) .gt. SgNBmF(iNt)) then
+if (NO3stock(iNt) .gt. NO3stockCap*SgNBmF(iNt)) then
   ! Excess NO3 = (NO3 stock - seagrass biomass) = (NO3stock(:)-SgNBmF(iNt)*rNO3stock(:))
   ! Distribute this to ocean and sediment
 # endif
 # if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE
   ! [mmol.CHEM/m2.hab s]        = [mmol.CHEM/m2.hab s]          - [umol.NO3/m2.hab]                      [1/s] []        (mmol/1000umol)
   NO3_uptake_rate_from_ocean(:) = NO3_uptake_rate_from_ocean(:) &
-          - (NO3stock(:)-SgNBmF(iNt)*rNO3stock(:)) / dt  * f_above * 0.001d0
+          - (NO3stock(:)-NO3stockCap*SgNBmF(iNt)*rNO3stock(:)) / dt  * f_above * 0.001d0
 # endif
 # if defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
   do k=1,Nsed
     ! [umol.CHEM/L s]                      = [umol.CHEM/L s]                        + [umol.NO3/m2.hab]                      [1/s] {[][g.rt.comp/g.tot][m2.hab/m2.sedmnt][1/mm](m2.sedmnt*mm/L)}
     SEDECO(ng)%sg_dNO3_dt(:,k,species,i,j) = SEDECO(ng)%sg_dNO3_dt(:,k,species,i,j) &
-            + (NO3stock(:)-SgNBmF(iNt)*rNO3stock(:)) / dt  * root_comp_dist_factor(k)
+            + (NO3stock(:)-NO3stockCap*SgNBmF(iNt)*rNO3stock(:)) / dt  * root_comp_dist_factor(k)
   end do
 # endif
 # if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
   ! Set stock equal to seagrass biomass
   ! [umol.NO3/m2.hab] = [umol.N/m2.hab] (isotope ratio)
-  NO3stock(:)         = SgNBmF(iNt)     * rNO3stock(:)
+  NO3stock(:)         = NO3stockCap*SgNBmF(iNt)     * rNO3stock(:)
 endif
 # endif
+  ! NH4stockCap                 []                          Factor to multiply nitrogen biomsass to get maximum NH4 stock (stock limit = NH4stockCap*SgNBmF) 
 # if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
-if (NH4stock(iNt) .gt. SgNBmF(iNt)) then
+if (NH4stock(iNt) .gt. NH4stockCap*SgNBmF(iNt)) then
   ! Excess NH4 = (NH4 stock - seagrass biomass) = (NH4stock(:)-SgNBmF(iNt)*rNH4stock(:))
   ! Distribute this to ocean and sediment
 # endif
 # if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE
   ! [mmol.CHEM/m2.hab s]        = [mmol.CHEM/m2.hab s]          - [umol.NH4/m2.hab]                      [1/s] []        (mmol/1000umol)
   NH4_uptake_rate_from_ocean(:) = NH4_uptake_rate_from_ocean(:) &
-          - (NH4stock(:)-SgNBmF(iNt)*rNH4stock(:)) / dt  * f_above * 0.001d0
+          - (NH4stock(:)-NH4stockCap*SgNBmF(iNt)*rNH4stock(:)) / dt  * f_above * 0.001d0
 # endif
 # if defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
   do k=1,Nsed
     ! [umol.CHEM/L s]                      = [umol.CHEM/L s]                        + [umol.NH4/m2.hab]                      [1/s] {[][g.rt.comp/g.tot][m2.hab/m2.sedmnt][1/mm](m2.sedmnt*mm/L)}
     SEDECO(ng)%sg_dNH4_dt(:,k,species,i,j) = SEDECO(ng)%sg_dNH4_dt(:,k,species,i,j) &
-            + (NH4stock(:)-SgNBmF(iNt)*rNH4stock(:)) / dt  * root_comp_dist_factor(k)
+            + (NH4stock(:)-NH4stockCap*SgNBmF(iNt)*rNH4stock(:)) / dt  * root_comp_dist_factor(k)
   end do
 # endif
 # if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
   ! Set stock equal to seagrass biomass
   ! [umol.NH4/m2.hab] = [umol.N/m2.hab] (isotope ratio)
-  NH4stock(:)         = SgNBmF(iNt)     * rNH4stock(:)
+  NH4stock(:)         = NH4stockCap*SgNBmF(iNt)     * rNH4stock(:)
 endif
 # endif
 
+  ! PO4stockCap                 []                          Factor to multiply phosphorus biomsass to get maximum PO4 stock (stock limit = PO4stockCap*SgPBmF) 
 # if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
-if (PO4stock(iPt) .gt. SgPBmF(iPt)) then
+if (PO4stock(iPt) .gt. PO4stockCap*SgPBmF(iPt)) then
   ! Excess PO4 = (PO4 stock - seagrass biomass) = (PO4stock(:)-SgPBmF(iPt)*rPO4stock(:))
   ! Distribute this to ocean and sediment
 # endif
 # if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE
   ! [mmol.CHEM/m2.hab s]        = [mmol.CHEM/m2.hab s]          - [umol.PO4/m2.hab]                      [1/s] []        (mmol/1000umol)
   PO4_uptake_rate_from_ocean(:) = PO4_uptake_rate_from_ocean(:) &
-          - (PO4stock(:)-SgPBmF(iPt)*rPO4stock(:)) / dt  * f_above * 0.001d0
+          - (PO4stock(:)-PO4stockCap*SgPBmF(iPt)*rPO4stock(:)) / dt  * f_above * 0.001d0
 # endif
 # if defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
   do k=1,Nsed
     ! [umol.CHEM/L s]                      = [umol.CHEM/L s]                        + [umol.PO4/m2.hab]                      [1/s] {[][g.rt.comp/g.tot][m2.hab/m2.sedmnt][1/mm](m2.sedmnt*mm/L)}
     SEDECO(ng)%sg_dPO4_dt(:,k,species,i,j) = SEDECO(ng)%sg_dPO4_dt(:,k,species,i,j) &
-            + (PO4stock(:)-SgPBmF(iPt)*rPO4stock(:)) / dt  * root_comp_dist_factor(k)
+            + (PO4stock(:)-PO4stockCap*SgPBmF(iPt)*rPO4stock(:)) / dt  * root_comp_dist_factor(k)
   end do
 # endif
 # if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
   ! Set stock equal to seagrass biomass
   ! [umol.PO4/m2.hab] = [umol.P/m2.hab] (isotope ratio)
-  PO4stock(:)         = SgPBmF(iPt)     * rPO4stock(:)
+  PO4stock(:)         = PO4stockCap*SgPBmF(iPt)     * rPO4stock(:)
 endif
 # endif
 
