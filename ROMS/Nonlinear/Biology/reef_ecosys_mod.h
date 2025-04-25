@@ -48,7 +48,10 @@
       integer :: iZooN(N_Nsp,Nzoo)      ! Zooplankton density
       integer :: iPhyP(N_Psp,Nphy)      ! Phytoplankton1 density
       integer :: iZooP(N_Psp,Nzoo)      ! Zooplankton density
-      integer :: iPIC(N_Csp,Npim)        ! Particulate inorganic C-concentration
+      integer :: iPIC(N_Csp,Npim)       ! Particulate inorganic C-concentration
+#if defined BLUE_TIDE         
+      integer :: iH2S(N_Ssp)            ! H2S concentration
+#endif
 #if defined COT_STARFISH
       integer :: iCOTe                  ! Eggs of crown-of-thorns starfish
       integer :: iCOTl                  ! Larvae of crown-of-thorns starfish
@@ -214,6 +217,9 @@
       real(r8), allocatable :: PhyC_0(:,:)           ! umolC/L
       real(r8), allocatable :: ZooC_0(:,:)           ! umolC/L
       real(r8), allocatable :: PIC_0(:,:)            ! umolC/L
+#if defined BLUE_TIDE         
+      real(r8), allocatable :: H2S_0(:)              ! umol/L
+#endif
 #if defined CARBON_ISOTOPE
       real(r8), allocatable :: d13C_DIC_0(:)         ! permil (VPDB)
       real(r8), allocatable :: d13C_DOC_0(:,:)       ! permil (VPDB)
@@ -393,6 +399,12 @@
           iPIC(isp,m)=ic+i 
         END DO
       END DO 
+#if defined BLUE_TIDE 
+      DO isp=1,N_Ssp
+        i=i+1    
+        iH2S(isp)=ic+i       
+      END DO       
+#endif
 #if defined COT_STARFISH
       i=i+1
       iCOTe=ic+i
@@ -1462,4 +1474,184 @@
       END SUBROUTINE call_initialize_reef_ecosys_wrapper
 #endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+!***********************************************************************
+
+      SUBROUTINE set_reef_ecosys_vertical_profile(ng, z_r, t)
+!
+!=======================================================================
+!                                                                      !
+!  This routine sets vertical profiles of biological parameters used   !
+!  in reef_ecosys for analytically creating initial and boundary       !
+!  conditions.                                                         !
+!                                                                      !
+!=======================================================================
+!
+      USE mod_scalars
+      USE mod_geochem
+      USE mod_reef_ecosys_param
+
+!  Imported variable declarations.
+!
+      integer,  intent(in   ) :: ng
+      real(r8), intent(in   ) :: z_r
+      real(r8), intent(inout) :: t(NT(ng))
+!
+!  Local variable declarations.
+!
+      integer :: m
+!
+! Initialize all tracer values to be zero
+!
+      t(iDIC (1)  :iDIC (N_Csp)     ) = 0.0_r8
+      t(iNO3 (1)  :iNO3 (N_Nsp)     ) = 0.0_r8
+      t(iNH4 (1)  :iNH4 (N_Nsp)     ) = 0.0_r8
+      t(iPO4 (1)  :iPO4 (N_Psp)     ) = 0.0_r8
+      t(iDOC (1,1):iDOC (N_Csp,Ndom)) = 0.0_r8     ! umolC L-1
+      t(iPOC (1,1):iPOC (N_Csp,Npom)) = 0.0_r8     ! umolC L-1
+      t(iDON (1,1):iDON (N_Nsp,Ndom)) = 0.0_r8     ! umolN L-1
+      t(iPON (1,1):iPON (N_Nsp,Npom)) = 0.0_r8     ! umolN L-1
+      t(iDOP (1,1):iDOP (N_Psp,Ndom)) = 0.0_r8     ! umolP L-1
+      t(iPOP (1,1):iPOP (N_Psp,Npom)) = 0.0_r8     ! umolP L-1
+      t(iPhyC(1,1):iPhyC(N_Csp,Nphy)) = 0.0_r8     ! umolC L-1
+      t(iZooC(1,1):iZooC(N_Csp,Nzoo)) = 0.0_r8     ! umolC L-1
+      t(iPhyN(1,1):iPhyN(N_Nsp,Nphy)) = 0.0_r8     ! umolN L-1
+      t(iZooN(1,1):iZooN(N_Nsp,Nzoo)) = 0.0_r8     ! umolN L-1
+      t(iPhyP(1,1):iPhyP(N_Psp,Nphy)) = 0.0_r8     ! umolP L-1
+      t(iZooP(1,1):iZooP(N_Psp,Nzoo)) = 0.0_r8     ! umolP L-1
+      t(iPIC (1,1):iPIC (N_Csp,Npim)) = 0.0_r8     ! umolC L-1
+# if defined BLUE_TIDE 
+      t(iH2S (1)  :iH2S (N_Ssp)     ) = 0.0_r8
+# endif
+
+    ! TA  
+      t(iTA) = TA_Profile (t(iTemp), t(iSalt), z_r)
+    ! DIC  
+      t(iDIC(iCt)) = DIC_Profile(t(iTemp), t(iSalt), z_r)
+    ! DO  
+      t(iDO) = DO_Profile (t(iTemp), t(iSalt), z_r)
+    ! NO3  
+      t(iNO3(iNt)) = NO3_Profile(t(iTemp), t(iSalt), z_r)
+    ! NH4   
+      t(iNH4(iNt)) = NH4_0(ng)     ! umol L-1
+    ! PO4
+      t(iPO4(iPt)) = PO4_Profile(t(iTemp), t(iSalt), z_r)
+    ! DOC
+      DO m=1,Ndom
+        t(iDOC(iCt,m)) = DOC_Profile(t(iTemp), t(iSalt), z_r, m)
+      END DO
+    ! POC
+      DO m=1,Npom
+        t(iPOC(iCt,m)) = POC_Profile(t(iTemp), t(iSalt), z_r, m)
+      END DO
+    ! DON
+      DO m=1,Ndom
+        t(iDON(iNt,m)) = t(iDOC(iCt,m))*16.0_r8/106.0_r8
+      END DO
+    ! PON
+      DO m=1,Npom
+        t(iPON(iNt,m)) = t(iPOC(iCt,m))*16.0_r8/106.0_r8
+      END DO
+    ! DOP
+      DO m=1,Ndom
+        t(iDOP(iPt,m)) = t(iDOC(iCt,m))/106.0_r8
+      END DO
+    ! POP
+      DO m=1,Npom
+        t(iPOP(iPt,m)) = t(iPOC(iCt,m))/106.0_r8
+      END DO
+    ! PhyC        
+      DO m=1,Nphy
+        t(iPhyC(iCt,m))  = PhyC_Profile(t(iTemp), t(iSalt), z_r, m)
+      END DO
+    ! ZooC
+      DO m=1,Nzoo
+        t(iZooC(iCt,m)) = ZooC_Profile(t(iTemp), t(iSalt), z_r, m)
+      END DO
+      ! PhyN        
+      DO m=1,Nphy
+        t(iPhyN(iNt,m)) = t(iPhyC(iCt,m))*rNCp(m)
+      END DO
+    ! ZooN
+      DO m=1,Nzoo
+        t(iZooN(iNt,m)) = t(iZooC(iCt,m))*rNCz(m)
+      END DO
+    ! PhyP      
+      DO m=1,Nphy
+        t(iPhyP(iPt,m)) = t(iPhyC(iCt,m))*rPCp(m)
+      END DO
+    ! ZooP
+      DO m=1,Nzoo
+        t(iZooP(iPt,m)) = t(iZooC(iCt,m))*rPCz(m)
+      END DO
+    ! PIC
+      t(iPIC(iCt,iLive)) = t(iPhyC(iCt,iCcl))*rCaCp(iCcl) ! PIC_0(iLive,ng)     ! umolC L-1
+      DO m=2,Npim
+        t(iPIC(iCt,m)) = PIC_0(m,ng)     ! umolC L-1
+      END DO
+# if defined BLUE_TIDE 
+      t(iH2S(iSt)) = H2S_0(ng)
+# endif
+# if defined CARBON_ISOTOPE || defined CLUMPED_ISOTOPE
+      t(iDIC(iC13)) = Ci_from_Ct_delta(t(iDIC(iCt)),   d13C_DIC_0(ng), R13C_VPDB )                    &
+      DO m=1,Ndom
+        t(iDOC(iC13,m)) = Ci_from_Ct_delta(t(iDOC(iCt,m)), d13C_DOC_0(m,ng), R13C_VPDB )                    &
+      END DO
+      DO m=1,Npom
+        t(iPOC(iC13,m)) = Ci_from_Ct_delta(t(iPOC(iCt,m)), d13C_POC_0(m,ng), R13C_VPDB )                    &
+      END DO
+      DO m=1,Nphy
+        t(iPhyC(iC13,m)) = Ci_from_Ct_delta(t(iPhyC(iCt,m)), d13C_PhyC_0(m,ng), R13C_VPDB )                    &
+      END DO
+      DO m=1,Nzoo
+        t(iZooC(iC13,m)) = Ci_from_Ct_delta(t(iZooC(iCt,m)), d13C_ZooC_0(m,ng), R13C_VPDB )                    &
+      END DO
+      DO m=1,Npim
+        t(iPIC(iC13,m)) = Ci_from_Ct_delta(t(iPIC(iCt,m)), d13C_PIC_0(m,ng), R13C_VPDB )                    &
+      END DO
+#  if defined CLUMPED_ISOTOPE
+!**************** Under developpment *************************
+      t(iDIC(iD47)) = Ci_from_Ct_delta(t(iDIC(iCt)),   D47_DIC_0(ng), R47D_???? )                    &
+      DO m=1,Ndom
+        t(iDOC(iD47,m)) = Ci_from_Ct_delta(t(iDOC(iCt,m)), D47_DOC_0(m,ng), R47D_???? )                    &
+      END DO
+      DO m=1,Npom
+        t(iPOC(iD47,m)) = Ci_from_Ct_delta(t(iPOC(iCt,m)), D47_POC_0(m,ng), R47D_???? )                    &
+      END DO
+      DO m=1,Nphy
+        t(iPhyC(iD47,m)) = Ci_from_Ct_delta(t(iPhyC(iCt,m)), D47_PhyC_0(m,ng), R47D_???? )                    &
+      END DO
+      DO m=1,Nzoo
+        t(iZooC(iD47,m)) = Ci_from_Ct_delta(t(iZooC(iCt,m)), D47_ZooC_0(m,ng), R47D_???? )                    &
+      END DO
+      DO m=1,Npim
+        t(iPIC(iD47,m)) = Ci_from_Ct_delta(t(iPIC(iCt,m)), D47_PIC_0(m,ng), R47D_???? )                    &
+      END DO
+#  endif
+# endif
+# if defined NITROGEN_ISOTOPE
+      t(iNO3(iN15)) = Ci_from_Ct_delta(t(iNO3(iNt)),   d15N_NO3_0(ng), R15N_AIR )                    &
+      t(iNH4(iN15)) = Ci_from_Ct_delta(t(iNH4(iNt)),   d15N_NH4_0(ng), R15N_AIR )                    &
+      DO m=1,Ndom
+        t(iDON(iN15,m)) = Ci_from_Ct_delta(t(iDON(iNt,m)), d15N_DON_0(m,ng), R15N_AIR )                    &
+      END DO
+      DO m=1,Npom
+        t(iPON(iN15,m)) = Ci_from_Ct_delta(t(iPON(iNt,m)), d15N_PON_0(m,ng), R15N_AIR )                    &
+      END DO
+      DO m=1,Nphy
+        t(iPhyN(iN15,m)) = Ci_from_Ct_delta(t(iPhyN(iNt,m)), d15N_PhyN_0(m,ng), R15N_AIR )                    &
+      END DO
+      DO m=1,Nzoo
+        t(iZooN(iN15,m)) = Ci_from_Ct_delta(t(iZooN(iNt,m)), d15N_ZooN_0(m,ng), R15N_AIR )                    &
+      END DO
+# endif
+# if defined COT_STARFISH
+      t(iCOTe)=COTe0(ng)     ! umolC L-1
+      t(iCOTl)=COTl0(ng)     ! umolC L-1
+# endif
+
+
+!-----------------------------------------------------------------------
+      END SUBROUTINE set_reef_ecosys_vertical_profile
+
+!***********************************************************************
 
