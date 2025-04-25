@@ -9933,12 +9933,30 @@
   'r2dvar'
   1.0d0
 
+'seagrass_Grow'                                ! Input/Output
+  'Seagrass growth rate (umol.C m-2.grid s-1)'
+  'umol m-2 s-1'                                 ! [umol.C m-2.grid s-1]
+  'seagrass_Grow, scalar, series'
+  'ocean_time'
+  'iHbio2(iSgGridGrow(j))'
+  'r2dvar'
+  1.0d0
+
 'seagrass_Phot_Limiting'                                ! Input/Output
   'Seagrass photosynthesis limiting factor'
-  'limiting factor: 1 = light; 2 = Carbon uptake; 3 = Nitrogen uptake; 4 = Phosphorus uptake'                                 ! [limiting factor: 1 = light; 2 = Carbon uptake; 3 = Nitrogen uptake; 4 = Phosphorus uptake]
+  'limiting factor: 1 = light; 2 = Carbon stock'                                 ! [limiting factor: 1 = light; 2 = stock]
   'seagrass_Phot_Limiting, scalar, series'
   'ocean_time'
   'iHbio2(iSgPhotLim(j))'
+  'r2dvar'
+  1.0d0
+
+'seagrass_Grow_Limiting'                                ! Input/Output
+  'Seagrass growth limiting factor'
+  'limiting factor: 1 = Sugar stock; 3 = Nitrogen stock; 4 = Phosphorus stock'                                 ! [limiting factor: 1 = Sugar stock; 2 = Nitrogen uptake; 3 = Phosphorus uptake]
+  'seagrass_Grow_Limiting, scalar, series'
+  'ocean_time'
+  'iHbio2(iSgGrowLim(j))'
   'r2dvar'
   1.0d0
 
