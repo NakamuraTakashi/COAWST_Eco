@@ -9436,6 +9436,15 @@
   'r3dvar'
   1.0d0
 
+'H2S'                                              ! Input/Output
+  'H2S concentration'
+  'umolN L-1'                     ! [umol L-1]
+  'H2S, scalar, series'
+  'ocean_time'
+  'idTvar(iH2S(i))'
+  'r3dvar'
+  1.0d0
+
 'COTS_eggs'                                      ! Input/Output
   'crown-of-thornes starfish eggs concentration'
   'umolC L-1'                     ! [umolC L-1]
@@ -10703,6 +10712,42 @@
   'nulvar'
   1.0d0
 
+'H2S_east'                                         ! Input
+  'H2S eastern boundary condition'
+  'umolN L-1'                                       ! [umol L-1]
+  'H2S_east, scalar, series'
+  'H2S_time'
+  'idTbry(ieast,iH2S(i))'
+  'nulvar'
+  1.0d0
+
+'H2S_west'                                         ! Input
+  'H2S western boundary condition'
+  'umolN L-1'                                       ! [umol L-1]
+  'H2S_west, scalar, series'
+  'H2S_time'
+  'idTbry(iwest,iH2S(i))'
+  'nulvar'
+  1.0d0
+
+'H2S_south'                                        ! Input
+  'H2S southern boundary condition'
+  'umolN L-1'                                       ! [umol L-1]
+  'H2S_south, scalar, series'
+  'H2S_time'
+  'idTbry(isouth,iH2S(i))'
+  'nulvar'
+  1.0d0
+
+'H2S_north'                                        ! Input
+  'H2S northern boundary condition'
+  'umolN L-1'                                       ! [umol L-1]
+  'H2S_north, scalar, series'
+  'H2S_time'
+  'idTbry(inorth,iH2S(i))'
+  'nulvar'
+  1.0d0
+
 
 'COTe_east'                                        ! Input
   'crown-of-thornes starfish eggs eastern boundary condition'
@@ -10949,6 +10994,15 @@
   'river_PIC, scalar, series'
   'river_time'
   'idRtrc(iPIC(i,j))'
+  'nulvar'
+  1.0d0
+
+'river_H2S'                                        ! Input
+  'river runoff H2S'
+  'umol L-1'                     ! [umol L-1]
+  'river_H2S, scalar, series'
+  'river_time'
+  'idRtrc(iH2S(i))'
   'nulvar'
   1.0d0
 

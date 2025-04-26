@@ -343,6 +343,9 @@
       real(r8) :: PhyP(N_Psp,Nphy,N(ng))     ! phytoplankton P biomass (umol P L-1), dinoflagellate
       real(r8) :: ZooP(N_Psp,Nzoo,N(ng))     ! zooplankton P biomass (umol P L-1)
       real(r8) :: PIC (N_Csp,Npim,N(ng))     ! Particulate inorganic carbon (PIC: umol L-1), coccolith (CaCO3)
+#if defined BLUE_TIDE         
+      real(r8) :: H2S (N_Ssp,N(ng))          ! H2S (umol S L-1)
+#endif
 #if defined COT_STARFISH         
       real(r8) :: COTe(N(ng))         ! COT starfish egg (umol L-1)
       real(r8) :: COTl(N(ng))         ! COT starfish larvae (umol L-1)
@@ -369,6 +372,9 @@
       real(r8) :: dPhyP_dt(N_Psp,Nphy,N(ng)) ! dPhyP/dt  (umolP L-1 s-1)  
       real(r8) :: dZooP_dt(N_Psp,Nzoo,N(ng)) ! dZooP/dt  (umolP L-1 s-1)  
       real(r8) :: dPIC_dt (N_Csp,Npim,N(ng)) ! dPIC/dt  (umol L-1 s-1) 
+#if defined BLUE_TIDE         
+      real(r8) :: dH2S_dt (N_Ssp,N(ng))      ! dH2S/dt  (umol S L-1 s-1)
+#endif
 #if defined COT_STARFISH         
       real(r8) :: dCOTe_dt(N)    ! dCOTe/dt (umol L-1 s-1)
       real(r8) :: dCOTl_dt(N)    ! dCOTl/dt (umol L-1 s-1)
@@ -504,6 +510,11 @@
                  PIC (isp,m,:) = t(i,j,:,nstp,iPIC(isp,m)) 
               END DO
             END DO 
+#if defined BLUE_TIDE 
+            DO isp=1,N_Ssp     
+              H2S(isp,:) = t(i,j,:,nstp,iH2S(isp))       
+            END DO       
+#endif
 #if defined COT_STARFISH         
             COTe(:) = t(i,j,:,nstp,iCOTe)     &   ! COTe(N): COT starfish egg (umol L-1)
             COTl(:) = t(i,j,:,nstp,iCOTl)     &   ! COTl(N): COT starfish larvae (umol L-1)
@@ -609,6 +620,9 @@
      &            , PhyP               &   ! PhyP(N_Psp,Nphy,N): phytoplankton P biomass (umol P L-1)
      &            , ZooP               &   ! ZooP(N_Psp,Nzoo,N): zooplankton P biomass   (umol P L-1)
      &            , PIC                &   ! PIC (N_Csp,Npim,N): Particulate inorganic carbon (PIC: umolC L-1), coccolith (CaCO3)
+#if defined BLUE_TIDE         
+     &            , H2S                &   ! H2S (N_Ssp,N)     : (umol S L-1)
+#endif
 #if defined COT_STARFISH         
      &            , COTe               &   ! COTe(N): COT starfish egg (umol L-1)
      &            , COTl               &   ! COTl(N): COT starfish larvae (umol L-1)
@@ -652,6 +666,9 @@
      &            , dPhyP_dt           &   ! dPhyP_dt(N_Psp,Nphy,N): dPhyP/dt (umol P L-1 s-1)  
      &            , dZooP_dt           &   ! dZooP_dt(N_Psp,Nzoo,N): dZooP/dt (umol P L-1 s-1)  
      &            , dPIC_dt            &   ! dPIC_dt (N_Csp,Npim,N): dPIC/dt  (umol C L-1 s-1)
+#if defined BLUE_TIDE         
+     &            , dH2S_dt            &   ! dH2S_dt (N_Ssp,N)     : dH2S/dt  (umol S L-1 s-1)
+#endif
 #if defined COT_STARFISH         
      &            , dCOTe_dt           &   ! dCOTe/dt(N): (umol L-1 s-1)
      &            , dCOTl_dt           &   ! dCOTl/dt(N): (umol L-1 s-1)
@@ -752,6 +769,11 @@
                 dtrc_dt(:,iPIC(isp,m)) = dPIC_dt (isp,m,:)  
               END DO
             END DO 
+# if defined BLUE_TIDE         
+            DO isp=1,N_Ssp     
+              dtrc_dt(:,iH2S(isp)) = dH2S_dt(isp,:)        
+            END DO       
+# endif
 #if defined COT_STARFISH         
             dtrc_dt(:,iCOTe) = dCOTe_d(:)      &   ! COTe(N): COT starfish egg (umol L-1)
             dtrc_dt(:,iCOTl) = dCOTl_d(:)      &   ! COTl(N): COT starfish larvae (umol L-1)

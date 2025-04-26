@@ -184,6 +184,10 @@
                   PIC_0(itrc,ng)=Rpim(itrc,ng)
                 END DO
               END DO
+#if defined BLUE_TIDE 
+            CASE ('H2S_0')
+              Npts=load_r(Nval, Rval, Ngrids, H2S_0)
+#endif
 #if defined CARBON_ISOTOPE
             CASE ('d13C_DIC_0')
               Npts=load_r(Nval, Rval, Ngrids, d13C_DIC_0)
@@ -802,6 +806,10 @@
               WRITE (out,140) PIC_0(itrc,ng), 'PIC_0', itrc,             &
      &            'PIC (umolC/L).'
             END DO
+#if defined BLUE_TIDE 
+            WRITE (out,80) H2S_0(ng), 'H2S_0',                          &
+     &            'H2S (umol/L).'
+#endif
 #if defined CARBON_ISOTOPE
             WRITE (out,80) d13C_TIC0(ng), 'd13C_TIC0',                   &
      &            'd13C of DIC (permil VPDB).'
