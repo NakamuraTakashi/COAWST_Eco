@@ -1793,6 +1793,13 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
     ! [umol.C/m2.hab s] = [umol.C/m2.lf s] [m2.lf/m2.hab] [             ]
     Phot_limit_light  = P_max            * ELAP         * tanh(PFD/I_k)
 
+! DIC limit ---------------------------------------------------------------------
+
+    ! Phot_limit_DIC            [umol.C m-2.sg.hab s-1]     Photosynthesis/growth rate possible as limited by DIC uptake
+
+    ! [umol.C/m2.hab s] = [mol.C/mol.CHM] [umol.CHM/m2.hab] [1/s]
+    Phot_limit_DIC   =                    DICstock(iCt)  / dt
+
 ! Gross Photosythesis rate ---------------------------------------------------------------------
 
     ! Phot_rate                 [umol.C m-2.sg.hab s-1]     Gross photosynthesis rate
