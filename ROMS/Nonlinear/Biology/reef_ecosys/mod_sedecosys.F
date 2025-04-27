@@ -769,6 +769,7 @@ CONTAINS
     real(8) :: R_SO4(N_Ssp,Nsed)
 
     real(8) :: cff, cff2, cff3, cfdd, cfsd, cfss
+    real(8) :: pH, Wcal, Warg
 
 !!  Output ------------------------------------------------------------------
 # if defined SEDIMENT_TESTMODE
@@ -1294,6 +1295,10 @@ CONTAINS
         , R_H2S(:,k)        &   ! d[H2S]/dt (umol L-1 s-1)
         , R_S0(:,k)         &   ! d[S]/dt (nmol g(DW)-1 s-1) *solid
         , R_SO4(:,k)        &   ! d[SO42-]/dt (umol L-1 s-1)
+       ! output parameters
+        , pH                &   ! pH (total scale)
+        , Wcal              &   ! Calcite saturation state
+        , Warg              &   ! Aragonite saturation state
         )
 
     ENDDO
