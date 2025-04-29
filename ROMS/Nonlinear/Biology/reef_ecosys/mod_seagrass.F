@@ -637,7 +637,7 @@ MODULE mod_seagrass
 
             SGRASS(ng)%DICstock(:,species,i,j) = 0.0d0
             SGRASS(ng)%CH2Ostock(:,species,i,j) = 0.0d0
-            SGRASS(ng)%DOstock(species,i,j) = 0.01d0
+            SGRASS(ng)%DOstock(species,i,j) = SGRASS(ng)%DOstockCap(species)* SGRASS(ng)%SgCBmF(iCt,species,i,j)
 # if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
             SGRASS(ng)%NO3stock(:,species,i,j) = 0.0d0
             SGRASS(ng)%NH4stock(:,species,i,j) = 0.0d0
@@ -1512,8 +1512,9 @@ MODULE mod_seagrass
     sumCUpPos = sum(DIC_uptake_possible(:))
 
     ! if DIC uptake in a single time step exceeds the potential stockpile size, we need to increase the stock cap
-    if (sumCUpPos .gt. DICstockCap*SgCBmF) then
-      write(*,*) "yt_debug:     DICstockCap too low.     DIC_uptake_possible = ", sumCUpPos, "DICstockCap*SgCBmF = ", DICstockCap*SgCBmF
+    if (sumCUpPos .gt. DICstockCap*SgCBmF(iCt)) then
+      write(*,*) "yt_debug:     DICstockCap too low.     DIC_uptake_possible = ", sumCUpPos, &
+              "DICstockCap*SgCBmF = ", DICstockCap*SgCBmF(iCt)
       error stop
     endif
 
@@ -1559,8 +1560,8 @@ MODULE mod_seagrass
     sumOUpPos = sum(DO_uptake_possible(:))
 
     ! if DO uptake in a single time step exceeds the potential stockpile size, we need to increase the stock cap
-    if (sumOUpPos .gt. DOstockCap*SgCBmF) then
-      write(*,*) "yt_debug:     DOstockCap too low.     DO_uptake_possible = ", sumOUpPos, "DOstockCap*SgCBmF = ", DOstockCap*SgCBmF
+    if (sumOUpPos .gt. DOstockCap*SgCBmF(iCt)) then
+      write(*,*) "yt_debug:     DOstockCap too low.     DO_uptake_possible = ", sumOUpPos, "DOstockCap*SgCBmF = ", DOstockCap*SgCBmF(iCt)
       error stop
     endif
 
@@ -1647,16 +1648,19 @@ MODULE mod_seagrass
     sumPUpPos = sum(PO4_uptake_possible(:))
 
     ! if chem uptake in a single time step exceeds the potential stockpile size, we need to increase the stock cap
-    if (sumNO3UpPos .gt. NO3stockCap*SgNBmF) then
-      write(*,*) "yt_debug:     NO3stockCap too low.     NO3_uptake_possible = ", sumNO3UpPos, "NO3stockCap*SgNBmF = ", NO3stockCap*SgNBmF
+    if (sumNO3UpPos .gt. NO3stockCap*SgNBmF(iNt)) then
+      write(*,*) "yt_debug:     NO3stockCap too low.     NO3_uptake_possible = ", sumNO3UpPos, &
+              "NO3stockCap*SgNBmF = ", NO3stockCap*SgNBmF(iNt)
       error stop
     endif
-    if (sumNH4UpPos .gt. NH4stockCap*SgNBmF) then
-      write(*,*) "yt_debug:     NH4stockCap too low.     NH4_uptake_possible = ", sumNH4UpPos, "NH4stockCap*SgNBmF = ", NH4stockCap*SgNBmF
+    if (sumNH4UpPos .gt. NH4stockCap*SgNBmF(iNt)) then
+      write(*,*) "yt_debug:     NH4stockCap too low.     NH4_uptake_possible = ", sumNH4UpPos, &
+              "NH4stockCap*SgNBmF = ", NH4stockCap*SgNBmF(iNt)
       error stop
     endif
-    if (sumPUpPos .gt. PO4stockCap*SgPBmF) then
-      write(*,*) "yt_debug:     PO4stockCap too low.     PO4_uptake_possible = ", sumPUpPos, "PO4stockCap*SgPBmF = ", PO4stockCap*SgPBmF
+    if (sumPUpPos .gt. PO4stockCap*SgPBmF(iPt)) then
+      write(*,*) "yt_debug:     PO4stockCap too low.     PO4_uptake_possible = ", sumPUpPos, &
+              "PO4stockCap*SgPBmF = ", PO4stockCap*SgPBmF(iPt)
       error stop
     endif
 
