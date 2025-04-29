@@ -9953,7 +9953,7 @@
 
 'seagrass_Grow_Limiting'                                ! Input/Output
   'Seagrass growth limiting factor'
-  'limiting factor: 1 = Sugar stock; 3 = Nitrogen stock; 4 = Phosphorus stock'                                 ! [limiting factor: 1 = Sugar stock; 2 = Nitrogen uptake; 3 = Phosphorus uptake]
+  'limiting factor: 1 = Sugar stock; 2 = Nitrogen stock; 3 = Phosphorus stock'                                 ! [limiting factor: 1 = Sugar stock; 2 = Nitrogen uptake; 3 = Phosphorus uptake]
   'seagrass_Grow_Limiting, scalar, series'
   'ocean_time'
   'iHbio2(iSgGrowLim(j))'
