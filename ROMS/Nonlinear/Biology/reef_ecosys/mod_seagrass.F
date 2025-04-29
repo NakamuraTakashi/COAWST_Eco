@@ -1512,8 +1512,8 @@ MODULE mod_seagrass
     sumCUpPos = sum(DIC_uptake_possible(:))
 
     ! if DIC uptake in a single time step exceeds the potential stockpile size, we need to increase the stock cap
-    if (sumCUpPos .gt. DICstockCap*SgCBmF(iCt)) then
-      write(*,*) "yt_debug:     DICstockCap too low.     DIC_uptake_possible = ", sumCUpPos, &
+    if (sumCUpPos*dt .gt. DICstockCap*SgCBmF(iCt)) then
+      write(*,*) "yt_debug:     DICstockCap too low.     DIC_uptake_possible = ", sumCUpPos, "dt", dt, &
               "DICstockCap*SgCBmF = ", DICstockCap*SgCBmF(iCt)
       error stop
     endif
@@ -1522,9 +1522,9 @@ MODULE mod_seagrass
     if (DICstock(iCt) .ge. DICstockCap*SgCBmF(iCt)) then
       DIC_uptake_possible(:) = 0d0
       sumCUpPos = 0d0
-    elseif (DICstock(iCt) + sumCUpPos .gt. DICstockCap*SgCBmF(iCt)) then
-      DIC_uptake_possible(:) = DIC_uptake_possible(:) * (DICstockCap*SgCBmF(iCt)-DICstock(iCt))/sumCUpPos
-      sumCUpPos = DICstockCap*SgCBmF(iCt)-DICstock(iCt)
+    elseif (DICstock(iCt) + sumCUpPos*dt .gt. DICstockCap*SgCBmF(iCt)) then
+      DIC_uptake_possible(:) = DIC_uptake_possible(:) * (DICstockCap*SgCBmF(iCt)-DICstock(iCt))/(sumCUpPos*dt)
+      sumCUpPos = (DICstockCap*SgCBmF(iCt)-DICstock(iCt))/dt
     endif
 
 ! DO uptake rate --------------------------------------------------------------------------
@@ -1560,8 +1560,9 @@ MODULE mod_seagrass
     sumOUpPos = sum(DO_uptake_possible(:))
 
     ! if DO uptake in a single time step exceeds the potential stockpile size, we need to increase the stock cap
-    if (sumOUpPos .gt. DOstockCap*SgCBmF(iCt)) then
-      write(*,*) "yt_debug:     DOstockCap too low.     DO_uptake_possible = ", sumOUpPos, "DOstockCap*SgCBmF = ", DOstockCap*SgCBmF(iCt)
+    if (sumOUpPos*dt .gt. DOstockCap*SgCBmF(iCt)) then
+      write(*,*) "yt_debug:     DOstockCap too low.     DO_uptake_possible = ", sumOUpPos, "dt", dt, &
+              "DOstockCap*SgCBmF = ", DOstockCap*SgCBmF(iCt)
       error stop
     endif
 
@@ -1569,9 +1570,10 @@ MODULE mod_seagrass
     if (DOstock .ge. DOstockCap*SgCBmF(iCt)) then
       DO_uptake_possible(:) = 0d0
       sumOUpPos = 0d0
-    elseif (DOstock + sumOUpPos .gt. DOstockCap*SgCBmF(iCt)) then
-      DO_uptake_possible(:) = DO_uptake_possible(:) * (DOstockCap*SgCBmF(iCt)-DOstock)/sumOUpPos
-      sumOUpPos = DOstockCap*SgCBmF(iCt)-DOstock
+    elseif (DOstock + sumOUpPos*dt .gt. DOstockCap*SgCBmF(iCt)) then
+      ! new amount added/dt = old amount added/dt     amount that can be added        / old amount added
+      DO_uptake_possible(:) = DO_uptake_possible(:) * (DOstockCap*SgCBmF(iCt)-DOstock)/(sumOUpPos*dt)
+      sumOUpPos = (DOstockCap*SgCBmF(iCt)-DOstock) / dt
     endif
 
 ! Nutrient uptake rate --------------------------------------------------------------------------
@@ -1648,18 +1650,18 @@ MODULE mod_seagrass
     sumPUpPos = sum(PO4_uptake_possible(:))
 
     ! if chem uptake in a single time step exceeds the potential stockpile size, we need to increase the stock cap
-    if (sumNO3UpPos .gt. NO3stockCap*SgNBmF(iNt)) then
-      write(*,*) "yt_debug:     NO3stockCap too low.     NO3_uptake_possible = ", sumNO3UpPos, &
+    if (sumNO3UpPos*dt .gt. NO3stockCap*SgNBmF(iNt)) then
+      write(*,*) "yt_debug:     NO3stockCap too low.     NO3_uptake_possible = ", sumNO3UpPos, "dt", dt, &
               "NO3stockCap*SgNBmF = ", NO3stockCap*SgNBmF(iNt)
       error stop
     endif
-    if (sumNH4UpPos .gt. NH4stockCap*SgNBmF(iNt)) then
-      write(*,*) "yt_debug:     NH4stockCap too low.     NH4_uptake_possible = ", sumNH4UpPos, &
+    if (sumNH4UpPos*dt .gt. NH4stockCap*SgNBmF(iNt)) then
+      write(*,*) "yt_debug:     NH4stockCap too low.     NH4_uptake_possible = ", sumNH4UpPos, "dt", dt, &
               "NH4stockCap*SgNBmF = ", NH4stockCap*SgNBmF(iNt)
       error stop
     endif
-    if (sumPUpPos .gt. PO4stockCap*SgPBmF(iPt)) then
-      write(*,*) "yt_debug:     PO4stockCap too low.     PO4_uptake_possible = ", sumPUpPos, &
+    if (sumPUpPos*dt .gt. PO4stockCap*SgPBmF(iPt)) then
+      write(*,*) "yt_debug:     PO4stockCap too low.     PO4_uptake_possible = ", sumPUpPos, "dt", dt, &
               "PO4stockCap*SgPBmF = ", PO4stockCap*SgPBmF(iPt)
       error stop
     endif
@@ -1669,9 +1671,9 @@ MODULE mod_seagrass
     if (NO3stock(iNt) .ge. NO3stockCap*SgNBmF(iNt)) then
       NO3_uptake_possible(:) = 0d0
       sumNO3UpPos = 0d0
-    elseif (NO3stock(iNt) + sumNO3UpPos .gt. NO3stockCap*SgNBmF(iNt)) then
-      NO3_uptake_possible(:) = NO3_uptake_possible(:) * (NO3stockCap*SgNBmF(iNt)-NO3stock(iNt))/sumNO3UpPos
-      sumNO3UpPos = NO3stockCap*SgNBmF(iNt)-NO3stock(iNt)
+    elseif (NO3stock(iNt) + sumNO3UpPos*dt .gt. NO3stockCap*SgNBmF(iNt)) then
+      NO3_uptake_possible(:) = NO3_uptake_possible(:) * (NO3stockCap*SgNBmF(iNt)-NO3stock(iNt))/(sumNO3UpPos*dt)
+      sumNO3UpPos = (NO3stockCap*SgNBmF(iNt)-NO3stock(iNt))/dt
     endif
 
     ! NH4stockCap                 []                          Factor to multiply nitrogen biomsass to get maximum NH4 stock (stock limit = NH4stockCap*SgNBmF) 
@@ -1679,9 +1681,9 @@ MODULE mod_seagrass
     if (NH4stock(iNt) .ge. NH4stockCap*SgNBmF(iNt)) then
       NH4_uptake_possible(:) = 0d0
       sumNH4UpPos = 0d0
-    elseif (NH4stock(iNt) + sumNH4UpPos .gt. NH4stockCap*SgNBmF(iNt)) then
-      NH4_uptake_possible(:) = NH4_uptake_possible(:) * (NH4stockCap*SgNBmF(iNt)-NH4stock(iNt))/sumNH4UpPos
-      sumNH4UpPos = NH4stockCap*SgNBmF(iNt)-NH4stock(iNt)
+    elseif (NH4stock(iNt) + sumNH4UpPos*dt .gt. NH4stockCap*SgNBmF(iNt)) then
+      NH4_uptake_possible(:) = NH4_uptake_possible(:) * (NH4stockCap*SgNBmF(iNt)-NH4stock(iNt))/(sumNH4UpPos*dt)
+      sumNH4UpPos = (NH4stockCap*SgNBmF(iNt)-NH4stock(iNt))/dt
     endif
 
     ! PO4stockCap                 []                          Factor to multiply phosphorus biomsass to get maximum PO4 stock (stock limit = PO4stockCap*SgPBmF) 
@@ -1689,9 +1691,9 @@ MODULE mod_seagrass
     if (PO4stock(iPt) .ge. PO4stockCap*SgPBmF(iPt)) then
       PO4_uptake_possible(:) = 0d0
       sumPUpPos = 0d0
-    elseif (PO4stock(iPt) + sumPUpPos .gt. PO4stockCap*SgPBmF(iPt)) then
-      PO4_uptake_possible(:) = PO4_uptake_possible(:) * (PO4stockCap*SgPBmF(iPt)-PO4stock(iPt))/sumPUpPos
-      sumPUpPos = PO4stockCap*SgPBmF(iPt)-PO4stock(iPt)
+    elseif (PO4stock(iPt) + sumPUpPos*dt .gt. PO4stockCap*SgPBmF(iPt)) then
+      PO4_uptake_possible(:) = PO4_uptake_possible(:) * (PO4stockCap*SgPBmF(iPt)-PO4stock(iPt))/(sumPUpPos*dt)
+      sumPUpPos = (PO4stockCap*SgPBmF(iPt)-PO4stock(iPt))/dt
     endif
 
     sumNUpPos = sumNO3UpPos + sumNH4UpPos
