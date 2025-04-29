@@ -160,7 +160,7 @@
       USE mod_param
       USE mod_scalars
 # if defined OFFLINE_BIOLOGY
-      USE mod_biology
+      USE mod_biology, ONLY : idbio
 # endif
       USE mod_sources
 !
