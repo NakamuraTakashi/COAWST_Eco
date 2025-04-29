@@ -514,9 +514,9 @@ MODULE mod_seagrass
     ! dieoff when respiration is insufficient
     SGRASS(ng)%max_anoxic_dieoff_rate               = [ 0.5d0    ]                                    ! [mol.C mol-1.C day-1]       maximum dieoff due to anoxia in fraction of mass per day, represents atypical modes of survival such as anaerobic respiration and cellular canibalism which limits extreme death rates ! tuning
     ! stockpile maximum cap
-    SGRASS(ng)%DICstockCap                          = [1.0d0]                                         ! Factor to multiply carbon biomsass to get maximum DIC stock (stock limit = DICstockCap*SgCBmF) 
+    SGRASS(ng)%DICstockCap                          = [0.01d0]                                        ! Factor to multiply carbon biomsass to get maximum DIC stock (stock limit = DICstockCap*SgCBmF) 
     SGRASS(ng)%CH2OstockCap                         = [1.0d0]                                         ! Factor to multiply carbon biomsass to get maximum sugar stock (stock limit = CH2OstockCap*SgCBmF) 
-    SGRASS(ng)%DOstockCap                           = [1.0d0]                                         ! Factor to multiply carbon biomsass to get maximum DO stock (stock limit = DOstockCap*SgCBmF) 
+    SGRASS(ng)%DOstockCap                           = [0.01d0]                                        ! Factor to multiply carbon biomsass to get maximum DO stock (stock limit = DOstockCap*SgCBmF) 
 # if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
     SGRASS(ng)%NO3stockCap                          = [1.0d0]                                         ! Factor to multiply nitrogen biomsass to get maximum NO3 stock (stock limit = NO3stockCap*SgNBmF) 
     SGRASS(ng)%NH4stockCap                          = [1.0d0]                                         ! Factor to multiply nitrogen biomsass to get maximum NH4 stock (stock limit = NH4stockCap*SgNBmF) 
@@ -1511,6 +1511,12 @@ MODULE mod_seagrass
     ! DICstockCap                 []                          Factor to multiply carbon biomsass to get maximum DIC stock (stock limit = DICstockCap*SgCBmF) 
     sumCUpPos = sum(DIC_uptake_possible(:))
 
+    ! if DIC uptake in a single time step exceeds the potential stockpile size, we need to increase the stock cap
+    if (sumCUpPos .gt. DICstockCap*SgCBmF) then
+      write(*,*) "yt_debug:     DICstockCap too low.     DIC_uptake_possible = ", sumCUpPos, "DICstockCap*SgCBmF = ", DICstockCap*SgCBmF
+      error stop
+    endif
+
     ! limit uptake so that DIC stock is limited to stockpile cap
     if (DICstock(iCt) .ge. DICstockCap*SgCBmF(iCt)) then
       DIC_uptake_possible(:) = 0d0
@@ -1551,6 +1557,12 @@ MODULE mod_seagrass
     ! sumOUpPos                   [umol.DO m-2.sg.hab s-1]    sum of all potential DO uptake (used for scaling/normalizing uptake proportions)
     ! DOstockCap                  []                          Factor to multiply carbon biomsass to get maximum DO stock (stock limit = DOstockCap*SgCBmF) 
     sumOUpPos = sum(DO_uptake_possible(:))
+
+    ! if DO uptake in a single time step exceeds the potential stockpile size, we need to increase the stock cap
+    if (sumOUpPos .gt. DOstockCap*SgCBmF) then
+      write(*,*) "yt_debug:     DOstockCap too low.     DO_uptake_possible = ", sumOUpPos, "DOstockCap*SgCBmF = ", DOstockCap*SgCBmF
+      error stop
+    endif
 
     ! limit uptake so that DO stock is limited to 100 percent of biomass C
     if (DOstock .ge. DOstockCap*SgCBmF(iCt)) then
@@ -1633,6 +1645,20 @@ MODULE mod_seagrass
     sumNO3UpPos = sum(NO3_uptake_possible(:))
     sumNH4UpPos = sum(NH4_uptake_possible(:))
     sumPUpPos = sum(PO4_uptake_possible(:))
+
+    ! if chem uptake in a single time step exceeds the potential stockpile size, we need to increase the stock cap
+    if (sumNO3UpPos .gt. NO3stockCap*SgNBmF) then
+      write(*,*) "yt_debug:     NO3stockCap too low.     NO3_uptake_possible = ", sumNO3UpPos, "NO3stockCap*SgNBmF = ", NO3stockCap*SgNBmF
+      error stop
+    endif
+    if (sumNH4UpPos .gt. NH4stockCap*SgNBmF) then
+      write(*,*) "yt_debug:     NH4stockCap too low.     NH4_uptake_possible = ", sumNH4UpPos, "NH4stockCap*SgNBmF = ", NH4stockCap*SgNBmF
+      error stop
+    endif
+    if (sumPUpPos .gt. PO4stockCap*SgPBmF) then
+      write(*,*) "yt_debug:     PO4stockCap too low.     PO4_uptake_possible = ", sumPUpPos, "PO4stockCap*SgPBmF = ", PO4stockCap*SgPBmF
+      error stop
+    endif
 
     ! NO3stockCap                 []                          Factor to multiply nitrogen biomsass to get maximum NO3 stock (stock limit = NO3stockCap*SgNBmF) 
     ! limit uptake so that NO3 stock is limited to 100 percent of biomass N
@@ -1857,15 +1883,16 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
 # endif
 
     if (Growth_rate .lt. 0d0) then ! error handling
-      ! write(*,*) "yt_debug: negative value error in photosynthesis/growth. Time =", &
-      !   date, "Position =", i, j, "Growth_rate = ", Growth_rate
-      ! write(*,*) "yt_debug:     Growth_rate        = ", Growth_rate
-      ! write(*,*) "yt_debug:     Growth_limit_CH2O   = ", Growth_limit_CH2O
+      write(*,*) "yt_debug: negative value error in growth. Time =", &
+        date, "Position =", i, j, "Growth_rate = ", Growth_rate
+      write(*,*) "yt_debug:     Growth_rate        = ", Growth_rate
+      write(*,*) "yt_debug:     Growth_limit_CH2O   = ", Growth_limit_CH2O
 # if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
-      ! write(*,*) "yt_debug:     Growth_limit_NO3   = ", Growth_limit_NO3
-      ! write(*,*) "yt_debug:     Growth_limit_NH4   = ", Growth_limit_NH4
-      ! write(*,*) "yt_debug:     Growth_limit_PO4   = ", Growth_limit_PO4
+      write(*,*) "yt_debug:     Growth_limit_NO3   = ", Growth_limit_NO3
+      write(*,*) "yt_debug:     Growth_limit_NH4   = ", Growth_limit_NH4
+      write(*,*) "yt_debug:     Growth_limit_PO4   = ", Growth_limit_PO4
 # endif
+      error stop
       Growth_rate = 0.0d0
     endif
 
@@ -1942,6 +1969,15 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
 
     anoxic_dieoff = SgCBmF(iCt) - SgCBmF_toMaintain
 
+    if (SgCBmF_toMaintain .lt. 0d0) then ! error handling
+      write(*,*) "yt_debug: negative value error in respiration rate. Time =", &
+              date, "Position =", i, j
+      write(*,*) "yt_debug:     SgCBmF_toMaintain = ", SgCBmF_toMaintain
+      write(*,*) "yt_debug:     SgCBmF            = ", SgCBmF(iCt)
+      write(*,*) "yt_debug:     Resp_limit_DO     = ", Resp_limit_DO
+      error stop
+    endif
+
     ! error check for negative
     SgCBmF_toMaintain = max(SgCBmF_toMaintain, 0d0)
 
@@ -1950,9 +1986,6 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
 
     ! [umol.C/m2.hab s] = [umol.C/m2.hab] [1/s]
     Resp_rate           = CH2Orequired    / dt
-    if (Resp_rate .lt. 0d0) then ! error handling
-      Resp_rate = 0.0d0
-    endif
 
     if (CH2Ostock(iCt) .ge. CH2Orequired) then
       ! respired_mass = 0d0
@@ -2229,6 +2262,47 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
     NH4stock(:)         = NH4stock(:)       + delta_NH4stock(:)   * dt
     PO4stock(:)         = PO4stock(:)       + delta_PO4stock(:)   * dt
 # endif
+
+    ! error check for negative stock value
+    if (DICstock(iCt) .lt. 0.0d0) then
+      write(*,*) "yt_debug: negative value error in DICstock. Time =", &
+              date, "Position =", i, j
+      write(*,*) "yt_debug:     DICstock = ", DICstock(iCt)
+      error stop
+    endif
+    if (CH2Ostock(iCt) .lt. 0.0d0) then
+      write(*,*) "yt_debug: negative value error in CH2Ostock. Time =", &
+              date, "Position =", i, j
+      write(*,*) "yt_debug:     CH2Ostock = ", CH2Ostock(iCt)
+      error stop
+    endif
+    if (DOstock .lt. 0.0d0) then
+      write(*,*) "yt_debug: negative value error in DOstock. Time =", &
+              date, "Position =", i, j
+      write(*,*) "yt_debug:     DOstock = ", DOstock
+      error stop
+    endif
+# if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
+    if (NO3stock(iNt) .lt. 0.0d0) then
+      write(*,*) "yt_debug: negative value error in NO3stock. Time =", &
+              date, "Position =", i, j
+      write(*,*) "yt_debug:     NO3stock = ", NO3stock(iNt)
+      error stop
+    endif
+    if (NH4stock(iNt) .lt. 0.0d0) then
+      write(*,*) "yt_debug: negative value error in NH4stock. Time =", &
+              date, "Position =", i, j
+      write(*,*) "yt_debug:     NH4stock = ", NH4stock(iNt)
+      error stop
+    endif
+    if (PO4stock(iPt) .lt. 0.0d0) then
+      write(*,*) "yt_debug: negative value error in PO4stock. Time =", &
+              date, "Position =", i, j
+      write(*,*) "yt_debug:     PO4stock = ", PO4stock(iPt)
+      error stop
+    endif
+# endif
+
 
 ! If stocks exceed limit, leak to environment -------------------------------------------------------------------------
 
