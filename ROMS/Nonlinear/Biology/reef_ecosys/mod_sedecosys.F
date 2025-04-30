@@ -377,7 +377,7 @@ CONTAINS
           DO k=0,Nsed
             SEDECO(ng)%Tmp(k,i,j)  = 25.0d0     
             SEDECO(ng)%Sal(k,i,j)  = 34.0d0
-            SEDECO(ng)%O2 (k,i,j)  = 50.0d0        !DO  (umol L-1)
+            SEDECO(ng)%O2 (k,i,j)  =  0.0d0        !DO  (umol L-1)
             SEDECO(ng)%TA(k,i,j)  = 2232.0d0 ! TA (umol kg-1)
             cSO4 = 0.02824d0*34.0d0/35.0d0 *1.0d6  ! SO4 (umol L-1)
       

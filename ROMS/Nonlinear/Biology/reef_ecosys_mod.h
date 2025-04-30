@@ -1035,6 +1035,11 @@
       IF (.not.allocated(PIC_0)) THEN
         allocate ( PIC_0(Npim,Ngrids) )
       END IF
+#if defined BLUE_TIDE 
+      IF (.not.allocated(H2S_0)) THEN
+        allocate ( H2S_0(Ngrids) )
+      END IF
+#endif
 #if defined CARBON_ISOTOPE
       IF (.not.allocated(d13C_DIC_0)) THEN
         allocate ( d13C_DIC_0(Ngrids) )
