@@ -1951,7 +1951,7 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
     ! Resp_limit_DO               [umol.C m-2.sg.hab s-1]     Respiration/un-growth rate possible as limited by DO uptake
 
     ! [umol.C/m2.hab s] = [mol.C/mol.CHM] [umol.CHM/m2.hab] [1/s]
-    Resp_limit_DO       =                 DOstock           / dt
+    Resp_limit_DO       =                 (DOstock+delta_DOstock*dt) / dt
 
 ! Respiration/ungrowth -------------------------------------------------------------------------------
 
@@ -1984,8 +1984,8 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
       error stop
     endif
 
-    ! error check for negative
-    SgCBmF_toMaintain = max(SgCBmF_toMaintain, 0d0)
+    ! ! error check for negative
+    ! SgCBmF_toMaintain = max(SgCBmF_toMaintain, 0d0)
 
     ! [umol.C/m2.hab] = [umol.C/g s] [g/mol.C] [umol.C/m2.hab]     [s]  (mol/1000000umol)
     CH2Orequired      = R_basal      * SgMperC * SgCBmF_toMaintain * dt * 0.000001
@@ -1993,28 +1993,28 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
     ! [umol.C/m2.hab s] = [umol.C/m2.hab] [1/s]
     Resp_rate           = CH2Orequired    / dt
 
-    if (CH2Ostock(iCt) .ge. CH2Orequired) then
+    if (CH2Ostock(iCt)+delta_CH2Ostock(iCt)*dt .ge. CH2Orequired) then
       ! respired_mass = 0d0
       delta_CH2Ostock(:) = delta_CH2Ostock(:) - Resp_rate * rCH2Ostock(:)
       delta_DICstock(:)  = delta_DICstock(:)  + Resp_rate * rCH2Ostock(:)
       delta_DOstock      = delta_DOstock      - Resp_rate
 
-      ! if (CH2Ostock(iCt)+delta_CH2Ostock(iCt)*dt .lt. 0.0d0) then
-      !   write(*,*) "yt_debug:     CH2Ostock = ", CH2Ostock(iCt), &
-      !           "delta_CH2Ostock = ", delta_CH2Ostock(iCt), "CH2Orequired", CH2Orequired
-      !   error stop
-      ! endif
+      if (CH2Ostock(iCt)+delta_CH2Ostock(iCt)*dt .lt. 0.0d0) then
+        write(*,*) "yt_debug:     CH2Ostock = ", CH2Ostock(iCt), &
+                "delta_CH2Ostock = ", delta_CH2Ostock(iCt), "CH2Orequired", CH2Orequired
+        error stop
+      endif
       
     else ! if CH2Oavailable < CH2Orequired
-      delta_CH2Ostock(:) = delta_CH2Ostock(:) - CH2Ostock(:) / dt
-      delta_DICstock(:)  = delta_DICstock(:)  + CH2Ostock(:) / dt
-      delta_DOstock      = delta_DOstock      - CH2Ostock(iCt) / dt
+      delta_DICstock(:)  = delta_DICstock(:)  + (CH2Ostock(:)+delta_CH2Ostock(:)*dt) / dt
+      delta_DOstock      = delta_DOstock      - (CH2Ostock(iCt)+delta_CH2Ostock(iCt)*dt) / dt
+      delta_CH2Ostock(:) = delta_CH2Ostock(:) - (CH2Ostock(:)+delta_CH2Ostock(:)*dt) / dt
 
-      ! if (CH2Ostock(iCt)+delta_CH2Ostock(iCt)*dt .lt. 0.0d0) then
-      !   write(*,*) "yt_debug:     CH2Ostock = ", CH2Ostock(iCt), &
-      !           "delta_CH2Ostock = ", delta_CH2Ostock(iCt)
-      !   error stop
-      ! endif
+      if (CH2Ostock(iCt)+delta_CH2Ostock(iCt)*dt .lt. 0.0d0) then
+        write(*,*) "yt_debug:     CH2Ostock = ", CH2Ostock(iCt), &
+                "delta_CH2Ostock = ", delta_CH2Ostock(iCt)
+        error stop
+      endif
 
       ! massUnsupported  = SgCBmF(iCt) - CH2Ostock(iCt)
     
