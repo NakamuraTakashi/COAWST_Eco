@@ -428,7 +428,10 @@ END SUBROUTINE allocate_reef_ecosys
     real(8) :: Flux_DON(N_Nsp,Ndom), Flux_PON(N_Nsp,Npom)    
     real(8) :: Flux_DOP(N_Psp,Ndom), Flux_POP(N_Psp,Npom)    
 !!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
-    real(8) :: Mn2, Fe2, H2S(N_Ssp,N), SO4(N_Ssp)
+    real(8) :: Mn2, Fe2, SO4(N_Ssp)
+# if !defined BLUE_TIDE         
+    real(8) :: H2S (N_Ssp,N)        ! H2S (umol S L-1)
+# endif
     real(8) :: Fdep_MnO2, Fdep_FeOOH 
     real(8) :: Fdep_FeOOH_PO4(N_Psp)
     real(8) :: Fdep_FeS(N_Ssp), Fdep_FeS2(N_Ssp), Fdep_S0(N_Ssp)

@@ -147,7 +147,7 @@ CONTAINS
     real(8), intent(out) :: dZooP_dt(N_Psp,Nzoo) ! dZooP/dt  (umolP L-1 s-1)  
     real(8), intent(out) :: dPIC_dt (N_Csp,Npim) ! dPIC/dt  (umol L-1 s-1) 
 # if defined BLUE_TIDE         
-    real(8), intent(out) :: dH2Sdt(N_Ssp)        ! dH2S/dt  (umol S L-1 s-1)
+    real(8), intent(out) :: dH2S_dt(N_Ssp)        ! dH2S/dt  (umol S L-1 s-1)
 # endif
 # if defined COT_STARFISH
     real(8), intent(out) :: dCOTe_dt      ! dCOTe/dt (umol L-1 s-1)

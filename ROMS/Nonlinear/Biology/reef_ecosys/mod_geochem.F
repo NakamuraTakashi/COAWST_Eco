@@ -90,10 +90,14 @@ contains
 !!!*********************************************************************** 
 
 ! Density of seawater (g/cm^3) or (kg/l)
-  real(8) function densSW(temp, S)
-    real(8), intent(in) :: temp    ! Temperature (oC)
-    real(8), intent(in) :: S       ! Salinity (psu)
+  real(8) function densSW(temp0, S0)
+    real(8), intent(in) :: temp0    ! Temperature (oC)
+    real(8), intent(in) :: S0       ! Salinity (psu)
     real(8) :: dSMOW               ! Density of SMOW (kg/m^3)
+    real(8) :: temp, S
+
+    temp = max( temp0, 0.0d0 )  !!! Error handling
+    S    = max( S0   , 0.0d0 )  !!! Error handling
 
     dSMOW = 999.842594d0 + 6.793952d-2*temp                         &
       - 9.09529d-3*temp**2.0d0 + 1.001685d-4*temp**3.0d0            &
@@ -113,8 +117,11 @@ contains
 !-----------------------------------------------------------------------
 
 !  Density of water (g/cm^3) or (kg/l)
-  real(8) function densW(temp)
-    real(8), intent(in) :: temp    ! Temperature (oC)
+  real(8) function densW(temp0)
+    real(8), intent(in) :: temp0    ! Temperature (oC)
+    real(8) :: temp
+
+    temp = max( temp0, 0.0d0 )  !!! Error handling
 
     densW = 999.84847d0 + 6.337563d-2*temp - 8.523829d-3*temp**2.0d0 &
       + 6.943248d-5*temp**3.0d0 - 3.821216d-7*temp**4.0d0
@@ -552,10 +559,9 @@ contains
 
 ! - CO2 Exchange Parameters (Wanninkhof 1992) ------------------------
     
-    t_oC=T-273.15d0
-    IF(t_oC >= 30.0d0) THEN  !!! Error handling
-      t_oC = 30.0d0
-    ENDIF
+    t_oC = T-273.15d0
+    t_oC = min( t_oC, 30.0d0 )  !!! Error handling
+    t_oC = max( t_oC,  0.0d0 )  !!! Error handling
 
     rhoref =1023.0d0
 
@@ -600,9 +606,8 @@ contains
     real(8)  rhoref, t_oC
 
     t_oC=T-273.15d0
-    IF(t_oC >= 40.0d0) THEN  !!! Error handling
-      t_oC = 40.0d0
-    ENDIF
+    t_oC = min( t_oC, 40.0d0 )  !!! Error handling
+    t_oC = max( t_oC,  0.0d0 )  !!! Error handling
 
     Sc=Acoef - Bcoef*t_oC + Ccoef*t_oC**2.0d0 - Dcoef*t_oC**3.0d0   !Schmidt number for seawater for temperature ranging from 0 to 30 degrees celsius
     kvex=0.31d0*u10*u10*SQRT(660.0d0/Sc) !Gas transfer velocity for O2;Wanninkhof(1992)  (cm/hr)
@@ -616,12 +621,12 @@ contains
 !  O2 saturation concentration  (umol L-1)
 ! **********************************************************************
 
-  real(8) function O2satu(T, S) ! O2 saturation concentration  (umol L-1)
+  real(8) function O2satu(T, S0) ! O2 saturation concentration  (umol L-1)
 
     implicit none
 
     real(8), intent(in) :: T      ! Temperature (K)
-    real(8), intent(in) :: S      ! Salinity (psu)
+    real(8), intent(in) :: S0     ! Salinity (psu)
     
     real(8), parameter :: OA0 = 2.00907d0       ! Oxygen
     real(8), parameter :: OA1 = 3.22014d0       ! saturation
@@ -638,12 +643,14 @@ contains
     real(8), parameter :: rOxNH4= 6.625d0       ! 106/16
     real(8) :: l2mol = 1000.0d0/22.9316d0      ! liter to mol
 
-    real(8)  t_oC, TS, AA
+    real(8)  t_oC, TS, AA, S
 
 ! alculate O2 saturation concentration using Garcia and Gordon
 ! &O (1992) formula, (EXP(AA) is in ml/l).
 !
-    t_oC=T-273.15d0
+    t_oC = T-273.15d0
+    t_oC = max( t_oC,  0.0d0 )  !!! Error handling
+    S    = max( S0,    0.0d0 )  !!! Error handling
     
     TS=LOG((298.15d0-t_oC)/(273.15d0+t_oC))
     AA=OA0+TS*(OA1+TS*(OA2+TS*(OA3+TS*(OA4+TS*OA5))))+          &
@@ -662,10 +669,13 @@ contains
 ! **********************************************************************
 
 ! Weiss (1974) Mar. Chem. 2: 203-215
-  real(8)  function K0_Weiss1974(T, S)
+  real(8)  function K0_Weiss1974(T, S0)
     implicit none
     real(8), intent(in) :: T      ! Temperature (K)
-    real(8), intent(in) :: S      ! Salinity (psu)
+    real(8), intent(in) :: S0     ! Salinity (psu)
+    real(8) :: S
+
+    S = max( S0, 0.0d0 )  !!! Error handling
 
     K0_Weiss1974=exp(-60.2409+93.4517*(100./T)+23.3585*Log(T/100.) &
         +S*(0.023517-0.023656*(T/100.)+0.0047036*(T/100.)**2.))
@@ -674,10 +684,13 @@ contains
 !-----------------------------------------------------------------------
 ! Dissociation constant of carbonic acid by Lueker et al. (2000)
 ! Total hydrogen ion concentration scale
-  real(8)  function K1_Lueker2000(T, S)
+  real(8)  function K1_Lueker2000(T, S0)
     implicit none
     real(8), intent(in) :: T      ! Temperature (K)
-    real(8), intent(in) :: S      ! Salinity (psu)
+    real(8), intent(in) :: S0     ! Salinity (psu)
+    real(8) :: S
+    
+    S = max( S0, 0.0d0 )  !!! Error handling
 
     K1_Lueker2000=10.**(-(3633.86/T-61.2172+9.6777*Log(T) &
                         -0.011555*S+0.0001152*S**2.))
@@ -686,10 +699,13 @@ contains
 !-----------------------------------------------------------------------
 ! Dissociation constant of carbonic acid by Lueker et al. (2000)
 ! Total hydrogen ion concentration scale
-  real(8)  function K2_Lueker2000(T, S)
+  real(8)  function K2_Lueker2000(T, S0)
     implicit none
     real(8), intent(in) :: T      ! Temperature (K)
-    real(8), intent(in) :: S      ! Salinity (psu)
+    real(8), intent(in) :: S0     ! Salinity (psu)
+    real(8) :: S
+    
+    S = max( S0, 0.0d0 )  !!! Error handling
 
     K2_Lueker2000=10.**(-(471.78/T+25.929-3.16967*Log(T) &
                         -0.01781*S+0.0001122*S**2.))
@@ -697,19 +713,25 @@ contains
   end function K2_Lueker2000
 !-----------------------------------------------------------------------
 ! Uppstrom (1974) Deep-Sea Res. 21: 161-162
-  real(8)  function BT_Uppstrom1974(S)
+  real(8)  function BT_Uppstrom1974(S0)
     implicit none
-    real(8), intent(in) :: S      ! Salinity (psu)
+    real(8), intent(in) :: S0     ! Salinity (psu)
+    real(8) :: S
+    
+    S = max( S0, 0.0d0 )  !!! Error handling
 
     BT_Uppstrom1974=(0.000232/10.811)*(S/1.80655)
     return
   end function BT_Uppstrom1974
 !-----------------------------------------------------------------------
 ! Dickson (1990) Deep-Sea Res. 37: 755-766
-  real(8)  function KB_Dickson1990(T, S)
+  real(8)  function KB_Dickson1990(T, S0)
     implicit none
     real(8), intent(in) :: T      ! Temperature (K)
-    real(8), intent(in) :: S      ! Salinity (psu)
+    real(8), intent(in) :: S0     ! Salinity (psu)
+    real(8) :: S
+    
+    S = max( S0, 0.0d0 )  !!! Error handling
 
     KB_Dickson1990=exp((-8966.9-2890.53*S**0.5-77.942*S          &
                         +1.728*S**1.5-0.0996*S**2.)/T            &
@@ -720,10 +742,13 @@ contains
   end function KB_Dickson1990
 !-----------------------------------------------------------------------
 ! Millero (1995) Geochim.Cosmochim Acta 59: 661-677
-  real(8)  function Kw_Millero1995(T, S)
+  real(8)  function Kw_Millero1995(T, S0)
     implicit none
     real(8), intent(in) :: T      ! Temperature (K)
-    real(8), intent(in) :: S      ! Salinity (psu)
+    real(8), intent(in) :: S0     ! Salinity (psu)
+    real(8) :: S
+    
+    S = max( S0, 0.0d0 )  !!! Error handling
 
     Kw_Millero1995=exp(148.9652-13847.26/T-23.6521*Log(T)       &
                         +(-5.977+118.67/T+1.0495*Log(T))*S**0.5 &
@@ -732,9 +757,12 @@ contains
   end function Kw_Millero1995
 !-----------------------------------------------------------------------
 ! Morris & Riley (1966) Deep-Sea Res. 13: 699-705
-  real(8)  function ST_MorrisRiley1966(S)
+  real(8)  function ST_MorrisRiley1966(S0)
     implicit none
-    real(8), intent(in) :: S      ! Salinity (psu)
+    real(8), intent(in) :: S0     ! Salinity (psu)
+    real(8) :: S
+
+    S = max( S0, 0.0d0 )  !!! Error handling
 
     ST_MorrisRiley1966=(0.14/96.062)*(S/1.80655)
     return
@@ -742,13 +770,16 @@ contains
 !-----------------------------------------------------------------------
 ! Dickson (1990) J. Chem. Thermodynamics 22: 113-127
 !   -- free hydrogen ion scale
-  real(8)  function KS_Dickson1990(T, S)
+  real(8)  function KS_Dickson1990(T, S0)
     implicit none
     real(8), intent(in) :: T      ! Temperature (K)
-    real(8), intent(in) :: S      ! Salinity (psu)
-    real(8)  SI
+    real(8), intent(in) :: S0     ! Salinity (psu)
+    real(8) :: SI
+    real(8) :: S
 
-    SI=19.924*S/(1000.-1.005*S)
+    S = max( S0, 0.0d0 )  !!! Error handling
+
+    SI=19.924*S/(1000.0d0-1.005d0*S)
 
     KS_Dickson1990 = exp(-4276.1/T+141.328-23.093*Log(T)         &
                +(-13856/T+324.57-47.986*Log(T))*SI**0.5          &
@@ -758,9 +789,12 @@ contains
   end function KS_Dickson1990
 !-----------------------------------------------------------------------
 ! Weiss (1974) Mar. Chem. 2: 203-215
-  real(8)  function FT_Weiss1974(S)
+  real(8)  function FT_Weiss1974(S0)
     implicit none
-    real(8), intent(in) :: S      ! Salinity (psu)
+    real(8), intent(in) :: S0     ! Salinity (psu)
+    real(8) :: S
+
+    S = max( S0, 0.0d0 )  !!! Error handling
     
     FT_Weiss1974=(0.000067/18.998)*(S/1.80655)
     
@@ -769,11 +803,14 @@ contains
 !-----------------------------------------------------------------------
 ! Dickson & Riley (1979) Mar. Chem. 7: 89-99
 !   -- change pH scale to total
-  real(8)  function KF_DicksonRiley1979(T, S)
+  real(8)  function KF_DicksonRiley1979(T, S0)
     implicit none
     real(8), intent(in) :: T      ! Temperature (K)
-    real(8), intent(in) :: S      ! Salinity (psu)
+    real(8), intent(in) :: S0     ! Salinity (psu)
     real(8)  KF,SI,KS
+    real(8) :: S
+
+    S = max( S0, 0.0d0 )  !!! Error handling
 
     KS = KS_Dickson1990(T, S)
 
@@ -787,20 +824,26 @@ contains
   end function KF_DicksonRiley1979
 !-----------------------------------------------------------------------
 ! Perez & Fraga (1987) Mar. Chem. 21: 161-168
-  real(8)  function KF_PerezFraga1987(T, S)
+  real(8)  function KF_PerezFraga1987(T, S0)
     implicit none
     real(8), intent(in) :: T      ! Temperature (K)
-    real(8), intent(in) :: S      ! Salinity (psu)
+    real(8), intent(in) :: S0     ! Salinity (psu)
+    real(8) :: S
+
+    S = max( S0, 0.0d0 )  !!! Error handling
 
     KF_PerezFraga1987=exp(874./T-9.68+0.111*S**0.5)
     return
   end function KF_PerezFraga1987
 !-----------------------------------------------------------------------
 ! Mucci (1983) Amer. J. Sci. 282: 780
-  real(8)  function Kcal_Mucci1983(T, S)
+  real(8)  function Kcal_Mucci1983(T, S0)
     implicit none
     real(8), intent(in) :: T      ! Temperature (K)
-    real(8), intent(in) :: S      ! Salinity (psu)
+    real(8), intent(in) :: S0     ! Salinity (psu)
+    real(8) :: S
+
+    S = max( S0, 0.0d0 )  !!! Error handling
 
     Kcal_Mucci1983=10.**(-171.9065-0.077993*T+2839.319/T        &
    &                    +71.595*Log10(T)                        &
@@ -810,10 +853,13 @@ contains
   end function Kcal_Mucci1983
 !-----------------------------------------------------------------------
 ! Mucci (1983) Amer. J. Sci. 282: 780
-  real(8)  function Karg_Mucci1983(T, S)
+  real(8)  function Karg_Mucci1983(T, S0)
     implicit none
     real(8), intent(in) :: T      ! Temperature (K)
-    real(8), intent(in) :: S      ! Salinity (psu)
+    real(8), intent(in) :: S0     ! Salinity (psu)
+    real(8) :: S
+
+    S = max( S0, 0.0d0 )  !!! Error handling
 
     Karg_Mucci1983=10.**(-171.945-0.077993*T+2903.293/T          &
                         +71.595*Log10(T)                         &
@@ -1813,6 +1859,7 @@ contains
 #endif
 
   real(8) :: Tm20, Sm35, Dp1000
+  real(8) :: DOsat
   
   Tm20 = T-20.0d0
   Sm35 = S-35.0d0
@@ -1820,7 +1867,9 @@ contains
 
   DO_Profile = a(0) + a(1)*Tm20 + a(2)*Tm20*Tm20 + a(3)*Sm35 + a(4)*Sm35*Sm35  &
                     + a(5)*Dp1000 + a(6)*Dp1000*Dp1000 + a(7)*Tm20*Dp1000 
+  DOsat = O2satu(T+273.15d0, S)          
   DO_Profile = max( DO_Profile, 0.0d0 )
+  DO_Profile = min( DO_Profile, DOsat )
 
   end function DO_Profile
 
