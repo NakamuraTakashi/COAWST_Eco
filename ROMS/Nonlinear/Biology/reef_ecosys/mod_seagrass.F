@@ -1511,12 +1511,14 @@ MODULE mod_seagrass
     ! DICstockCap                 []                          Factor to multiply carbon biomsass to get maximum DIC stock (stock limit = DICstockCap*SgCBmF) 
     sumCUpPos = sum(DIC_uptake_possible(:))
 
+# if defined SEAGRASS_DEBUG_MODE
     ! if DIC uptake in a single time step exceeds the potential stockpile size, we need to increase the stock cap
     if (sumCUpPos*dt .gt. DICstockCap*SgCBmF(iCt)) then
       write(*,*) "yt_debug:     DICstockCap too low.     DIC_uptake_possible = ", sumCUpPos, "dt", dt, &
               "DICstockCap*SgCBmF = ", DICstockCap*SgCBmF(iCt)
       error stop
     endif
+# endif
 
     ! limit uptake so that DIC stock is limited to stockpile cap
     if (DICstock(iCt) .ge. DICstockCap*SgCBmF(iCt)) then
@@ -1559,12 +1561,14 @@ MODULE mod_seagrass
     ! DOstockCap                  []                          Factor to multiply carbon biomsass to get maximum DO stock (stock limit = DOstockCap*SgCBmF) 
     sumOUpPos = sum(DO_uptake_possible(:))
 
+# if defined SEAGRASS_DEBUG_MODE
     ! if DO uptake in a single time step exceeds the potential stockpile size, we need to increase the stock cap
     if (sumOUpPos*dt .gt. DOstockCap*SgCBmF(iCt)) then
       write(*,*) "yt_debug:     DOstockCap too low.     DO_uptake_possible = ", sumOUpPos, "dt", dt, &
               "DOstockCap*SgCBmF = ", DOstockCap*SgCBmF(iCt)
       error stop
     endif
+# endif
 
     ! limit uptake so that DO stock is limited to 100 percent of biomass C
     if (DOstock .ge. DOstockCap*SgCBmF(iCt)) then
@@ -1649,6 +1653,7 @@ MODULE mod_seagrass
     sumNH4UpPos = sum(NH4_uptake_possible(:))
     sumPUpPos = sum(PO4_uptake_possible(:))
 
+# if defined SEAGRASS_DEBUG_MODE
     ! if chem uptake in a single time step exceeds the potential stockpile size, we need to increase the stock cap
     if (sumNO3UpPos*dt .gt. NO3stockCap*SgNBmF(iNt)) then
       write(*,*) "yt_debug:     NO3stockCap too low.     NO3_uptake_possible = ", sumNO3UpPos, "dt", dt, &
@@ -1665,6 +1670,7 @@ MODULE mod_seagrass
               "PO4stockCap*SgPBmF = ", PO4stockCap*SgPBmF(iPt)
       error stop
     endif
+# endif
 
     ! NO3stockCap                 []                          Factor to multiply nitrogen biomsass to get maximum NO3 stock (stock limit = NO3stockCap*SgNBmF) 
     ! limit uptake so that NO3 stock is limited to 100 percent of biomass N
@@ -1715,32 +1721,32 @@ MODULE mod_seagrass
   ! rDIC_sed(N_Csp,Nsed)        [no dim.]                   Isotope ratio or tracer mass ratio
 
 if (sumCUpPos .gt. 0d0) then
-  ! [mmol.CHEM/m2.hab s]        = [mmol.CHEM/m2.hab s]          + [umol.CHEM/m2.hab s]   (mmol/1000umol) (fractionation)
-  DIC_uptake_rate_from_ocean(:) = DIC_uptake_rate_from_ocean(:) + DIC_uptake_possible(0) * 0.001d0       * aC_phot(1:N_Csp)*rDIC_ocn(:)
-  ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (fractionation)
-  delta_DICstock(:)      = delta_DICstock(:)    + DIC_uptake_possible(0) * aC_phot(1:N_Csp)*rDIC_ocn(:)
+  ! [mmol.CHEM/m2.hab s]        = [mmol.CHEM/m2.hab s]          + [umol.CHEM/m2.hab s]   (mmol/1000umol) (isotope ratio)
+  DIC_uptake_rate_from_ocean(:) = DIC_uptake_rate_from_ocean(:) + DIC_uptake_possible(0) * 0.001d0       * rDIC_ocn(:)
+  ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (isotope ratio)
+  delta_DICstock(:)      = delta_DICstock(:)    + DIC_uptake_possible(0) * rDIC_ocn(:)
 # if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE
   do k=1,Nsed
-    ! [umol.CHEM/L s]                      = [umol.CHEM/L s]                        - [umol.CHEM/m2.hab s]   [m2.hab/m2.sedmnt]  [1/mm] (1000mm/m)(m3/1000L) (fractionation)
+    ! [umol.CHEM/L s]                      = [umol.CHEM/L s]                        - [umol.CHEM/m2.hab s]   [m2.hab/m2.sedmnt]  [1/mm] (1000mm/m)(m3/1000L) (isotope ratio)
     SEDECO(ng)%sg_dDIC_dt(:,k,species,i,j) = SEDECO(ng)%sg_dDIC_dt(:,k,species,i,j) - DIC_uptake_possible(k) &
-            * sgrass_per_sedmnt / sed_layer_thickness(k)    * aC_phot(1:N_Csp)*rDIC_sed(:,k)
-    ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (fractionation)
-    delta_DICstock(:)      = delta_DICstock(:)    + DIC_uptake_possible(k) * aC_phot(1:N_Csp)*rDIC_sed(:,k)
+            * sgrass_per_sedmnt / sed_layer_thickness(k)    * rDIC_sed(:,k)
+    ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (isotope ratio)
+    delta_DICstock(:)      = delta_DICstock(:)    + DIC_uptake_possible(k) * rDIC_sed(:,k)
   end do
 # endif
 endif
 
 if (sumOUpPos .gt. 0d0) then
-  ! [mmol.CHEM/m2.hab s]        = [mmol.CHEM/m2.hab s]          + [umol.CHEM/m2.hab s]   (mmol/1000umol) (fractionation)
+  ! [mmol.CHEM/m2.hab s]        = [mmol.CHEM/m2.hab s]          + [umol.CHEM/m2.hab s]   (mmol/1000umol) (isotope ratio)
   DO__uptake_rate_from_ocean    = DO__uptake_rate_from_ocean    + DO_uptake_possible(0)  * 0.001d0
-  ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (fractionation)
+  ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (isotope ratio)
   delta_DOstock          = delta_DOstock        + DO_uptake_possible(0)
 # if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE
   do k=1,Nsed
-    ! [umol.CHEM/L s]                      = [umol.CHEM/L s]                        - [umol.CHEM/m2.hab s]   [m2.hab/m2.sedmnt]  [1/mm] (1000mm/m)(m3/1000L) (fractionation)
+    ! [umol.CHEM/L s]                      = [umol.CHEM/L s]                        - [umol.CHEM/m2.hab s]   [m2.hab/m2.sedmnt]  [1/mm] (1000mm/m)(m3/1000L) (isotope ratio)
     SEDECO(ng)%sg_dO2_dt(k,species,i,j)    = SEDECO(ng)%sg_dO2_dt(k,species,i,j)    - DO_uptake_possible(k)  &
             * sgrass_per_sedmnt / sed_layer_thickness(k)
-    ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (fractionation)
+    ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (isotope ratio)
     delta_DOstock          = delta_DOstock        + DO_uptake_possible(k)
   end do
 # endif
@@ -1748,51 +1754,51 @@ endif
 
 # if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE
 if (sumNO3UpPos .gt. 0d0) then
-  ! [mmol.CHEM/m2.hab s]        = [mmol.CHEM/m2.hab s]          + [umol.CHEM/m2.hab s]   (mmol/1000umol) (fractionation)
+  ! [mmol.CHEM/m2.hab s]        = [mmol.CHEM/m2.hab s]          + [umol.CHEM/m2.hab s]   (mmol/1000umol) (isotope ratio)
   NO3_uptake_rate_from_ocean(:) = NO3_uptake_rate_from_ocean(:) + NO3_uptake_possible(0) * 0.001d0       &
           * aNO3_phot(1:N_Nsp)*rNO3_ocn(:)
-  ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (fractionation)
+  ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (isotope ratio)
   delta_NO3stock(:)      = delta_NO3stock(:)    + NO3_uptake_possible(0) * aNO3_phot(1:N_Nsp)*rNO3_ocn(:)
 endif
 if (sumNH4UpPos .gt. 0d0) then
-  ! [mmol.CHEM/m2.hab s]        = [mmol.CHEM/m2.hab s]          + [umol.CHEM/m2.hab s]   (mmol/1000umol) (fractionation)
+  ! [mmol.CHEM/m2.hab s]        = [mmol.CHEM/m2.hab s]          + [umol.CHEM/m2.hab s]   (mmol/1000umol) (isotope ratio)
   NH4_uptake_rate_from_ocean(:) = NH4_uptake_rate_from_ocean(:) + NH4_uptake_possible(0) * 0.001d0       &
           * aNH4_phot(1:N_Nsp)*rNH4_ocn(:)
-  ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (fractionation)
+  ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (isotope ratio)
   delta_NH4stock(:)      = delta_NH4stock(:)    + NH4_uptake_possible(0) * aNH4_phot(1:N_Nsp)*rNH4_ocn(:)
 endif
 if (sumPUpPos .gt. 0d0) then
-  ! [mmol.CHEM/m2.hab s]        = [mmol.CHEM/m2.hab s]          + [umol.CHEM/m2.hab s]   (mmol/1000umol) (fractionation)
+  ! [mmol.CHEM/m2.hab s]        = [mmol.CHEM/m2.hab s]          + [umol.CHEM/m2.hab s]   (mmol/1000umol) (isotope ratio)
   PO4_uptake_rate_from_ocean(:) = PO4_uptake_rate_from_ocean(:) + PO4_uptake_possible(0) * 0.001d0       * rPO4_ocn(:)
-  ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (fractionation)
+  ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (isotope ratio)
   delta_PO4stock(:)      = delta_PO4stock(:)    + PO4_uptake_possible(0) * rPO4_ocn(:)
 endif
 # endif
 # if defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
 if (sumNO3UpPos .gt. 0d0) then
   do k=1,Nsed
-    ! [umol.CHEM/L s]                      = [umol.CHEM/L s]                        - [umol.CHEM/m2.hab s]   [m2.hab/m2.sedmnt]  [1/mm] (1000mm/m)(m3/1000L) (fractionation)
+    ! [umol.CHEM/L s]                      = [umol.CHEM/L s]                        - [umol.CHEM/m2.hab s]   [m2.hab/m2.sedmnt]  [1/mm] (1000mm/m)(m3/1000L) (isotope ratio)
     SEDECO(ng)%sg_dNO3_dt(:,k,species,i,j) = SEDECO(ng)%sg_dNO3_dt(:,k,species,i,j) - NO3_uptake_possible(k) &
             * sgrass_per_sedmnt / sed_layer_thickness(k)    * aNO3_phot(1:N_Nsp)*rNO3_sed(:,k)
-    ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (fractionation)
+    ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (isotope ratio)
     delta_NO3stock(:)      = delta_NO3stock(:)    + NO3_uptake_possible(k) * aNO3_phot(1:N_Nsp)*rNO3_sed(:,k)
   end do
 endif
 if (sumNH4UpPos .gt. 0d0) then
   do k=1,Nsed
-    ! [umol.CHEM/L s]                      = [umol.CHEM/L s]                        - [umol.CHEM/m2.hab s]   [m2.hab/m2.sedmnt]  [1/mm] (1000mm/m)(m3/1000L) (fractionation)
+    ! [umol.CHEM/L s]                      = [umol.CHEM/L s]                        - [umol.CHEM/m2.hab s]   [m2.hab/m2.sedmnt]  [1/mm] (1000mm/m)(m3/1000L) (isotope ratio)
     SEDECO(ng)%sg_dNH4_dt(:,k,species,i,j) = SEDECO(ng)%sg_dNH4_dt(:,k,species,i,j) - NH4_uptake_possible(k) &
             * sgrass_per_sedmnt / sed_layer_thickness(k)    * aNH4_phot(1:N_Nsp)*rNH4_sed(:,k)
-    ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (fractionation)
+    ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (isotope ratio)
     delta_NH4stock(:)      = delta_NH4stock(:)    + NH4_uptake_possible(k) * aNH4_phot(1:N_Nsp)*rNH4_sed(:,k)
   end do
 endif
 if (sumPUpPos .gt. 0d0) then
   do k=1,Nsed
-    ! [umol.CHEM/L s]                      = [umol.CHEM/L s]                        - [umol.CHEM/m2.hab s]   [m2.hab/m2.sedmnt]  [1/mm] (1000mm/m)(m3/1000L) (fractionation)
+    ! [umol.CHEM/L s]                      = [umol.CHEM/L s]                        - [umol.CHEM/m2.hab s]   [m2.hab/m2.sedmnt]  [1/mm] (1000mm/m)(m3/1000L) (isotope ratio)
     SEDECO(ng)%sg_dPO4_dt(:,k,species,i,j) = SEDECO(ng)%sg_dPO4_dt(:,k,species,i,j) - PO4_uptake_possible(k) &
             * sgrass_per_sedmnt / sed_layer_thickness(k)    * rPO4_sed(:,k)
-    ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (fractionation)
+    ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (isotope ratio)
     delta_PO4stock(:)      = delta_PO4stock(:)    + PO4_uptake_possible(k) * rPO4_sed(:,k)
   end do
 endif
@@ -1846,10 +1852,10 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
     ! delta_DICstock              [umol.DIC m-2.sg.hab s-1]   Rate of change in DICstock
     ! Phot_rate                   [umol.C m-2.sg.hab s-1]     Gross photosynthesis rate
 
-    ! [umol.C/m2.hab s] = [umol.C/m2.hab s]  - [umol.C/m2.hab s] (isotope ratios)
-    delta_DICstock(:)   = delta_DICstock(:)  - Phot_rate         * rDICstock(:)
+    ! [umol.C/m2.hab s] = [umol.C/m2.hab s]  - [umol.C/m2.hab s] (fractionation)  (isotope ratios)
+    delta_DICstock(:)   = delta_DICstock(:)  - Phot_rate         * aC_phot(1:N_Csp) * rDICstock(:)
     delta_DOstock       = delta_DOstock      + Phot_rate ! for every mol of CO2  consumed in growth: 1 mol of O2 is produced
-    delta_CH2Ostock(:)  = delta_CH2Ostock(:) + Phot_rate         * rDICstock(:)
+    delta_CH2Ostock(:)  = delta_CH2Ostock(:) + Phot_rate         * aC_phot(1:N_Csp) * rDICstock(:)
 
 ! ====================================================================================================
 !
@@ -1888,7 +1894,8 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
     Growth_rate = Growth_limit_CH2O
 # endif
 
-    if (Growth_rate .lt. 0d0) then ! error handling
+# if defined SEAGRASS_DEBUG_MODE
+    if (Growth_rate .lt. -1d-15) then ! error handling
       write(*,*) "yt_debug: negative value error in growth. Time =", &
         date, "Position =", i, j, "Growth_rate = ", Growth_rate
       write(*,*) "yt_debug:     Growth_rate        = ", Growth_rate
@@ -1899,8 +1906,9 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
       write(*,*) "yt_debug:     Growth_limit_PO4   = ", Growth_limit_PO4
 # endif
       error stop
-      Growth_rate = 0.0d0
     endif
+# endif
+      Growth_rate = max(Growth_rate, 0.0d0)
 
 ! Growth mass balance (remove from stock, add to biomass) ---------------------------------------------------------------------------------------
     
@@ -1975,7 +1983,8 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
 
     anoxic_dieoff = SgCBmF(iCt) - SgCBmF_toMaintain
 
-    if (SgCBmF_toMaintain .lt. 0d0) then ! error handling
+# if defined SEAGRASS_DEBUG_MODE
+    if (SgCBmF_toMaintain .lt. -1d-15) then ! error handling
       write(*,*) "yt_debug: negative value error in respiration rate. Time =", &
               date, "Position =", i, j
       write(*,*) "yt_debug:     SgCBmF_toMaintain = ", SgCBmF_toMaintain
@@ -1983,9 +1992,8 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
       write(*,*) "yt_debug:     Resp_limit_DO     = ", Resp_limit_DO
       error stop
     endif
-
-    ! ! error check for negative
-    ! SgCBmF_toMaintain = max(SgCBmF_toMaintain, 0d0)
+# endif
+    SgCBmF_toMaintain = max(SgCBmF_toMaintain, 0d0)
 
     ! [umol.C/m2.hab] = [umol.C/g s] [g/mol.C] [umol.C/m2.hab]     [s]  (mol/1000000umol)
     CH2Orequired      = R_basal      * SgMperC * SgCBmF_toMaintain * dt * 0.000001
@@ -1999,22 +2007,26 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
       delta_DICstock(:)  = delta_DICstock(:)  + Resp_rate * rCH2Ostock(:)
       delta_DOstock      = delta_DOstock      - Resp_rate
 
-      if (CH2Ostock(iCt)+delta_CH2Ostock(iCt)*dt .lt. 0.0d0) then
+# if defined SEAGRASS_DEBUG_MODE
+      if (CH2Ostock(iCt)+delta_CH2Ostock(iCt)*dt .lt. -1d-15) then
         write(*,*) "yt_debug:     CH2Ostock = ", CH2Ostock(iCt), &
                 "delta_CH2Ostock = ", delta_CH2Ostock(iCt), "CH2Orequired", CH2Orequired
         error stop
       endif
+# endif
       
     else ! if CH2Oavailable < CH2Orequired
       delta_DICstock(:)  = delta_DICstock(:)  + (CH2Ostock(:)+delta_CH2Ostock(:)*dt) / dt
       delta_DOstock      = delta_DOstock      - (CH2Ostock(iCt)+delta_CH2Ostock(iCt)*dt) / dt
       delta_CH2Ostock(:) = delta_CH2Ostock(:) - (CH2Ostock(:)+delta_CH2Ostock(:)*dt) / dt
 
-      if (CH2Ostock(iCt)+delta_CH2Ostock(iCt)*dt .lt. 0.0d0) then
+# if defined SEAGRASS_DEBUG_MODE
+      if (CH2Ostock(iCt)+delta_CH2Ostock(iCt)*dt .lt. -1d-15) then
         write(*,*) "yt_debug:     CH2Ostock = ", CH2Ostock(iCt), &
                 "delta_CH2Ostock = ", delta_CH2Ostock(iCt)
         error stop
       endif
+# endif
 
       ! massUnsupported  = SgCBmF(iCt) - CH2Ostock(iCt)
     
@@ -2282,46 +2294,68 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
     PO4stock(:)         = PO4stock(:)       + delta_PO4stock(:)   * dt
 # endif
 
+# if defined SEAGRASS_DEBUG_MODE
     ! error check for negative stock value
-    if (DICstock(iCt) .lt. 0.0d0) then
+    if (DICstock(iCt) .lt. -1d-15) then
       write(*,*) "yt_debug: negative value error in DICstock. Time =", &
               date, "Position =", i, j
       write(*,*) "yt_debug:     DICstock = ", DICstock(iCt)
       error stop
     endif
-    if (CH2Ostock(iCt) .lt. 0.0d0) then
+    if (CH2Ostock(iCt) .lt. -1d-15) then
       write(*,*) "yt_debug: negative value error in CH2Ostock. Time =", &
               date, "Position =", i, j
       write(*,*) "yt_debug:     CH2Ostock = ", CH2Ostock(iCt), "delta_CH2Ostock = ", delta_CH2Ostock(iCt)
       error stop
     endif
-    if (DOstock .lt. 0.0d0) then
+    if (DOstock .lt. -1d-15) then
       write(*,*) "yt_debug: negative value error in DOstock. Time =", &
               date, "Position =", i, j
       write(*,*) "yt_debug:     DOstock = ", DOstock
       error stop
     endif
 # if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
-    if (NO3stock(iNt) .lt. 0.0d0) then
+    if (NO3stock(iNt) .lt. -1d-15) then
       write(*,*) "yt_debug: negative value error in NO3stock. Time =", &
               date, "Position =", i, j
       write(*,*) "yt_debug:     NO3stock = ", NO3stock(iNt)
       error stop
     endif
-    if (NH4stock(iNt) .lt. 0.0d0) then
+    if (NH4stock(iNt) .lt. -1d-15) then
       write(*,*) "yt_debug: negative value error in NH4stock. Time =", &
               date, "Position =", i, j
       write(*,*) "yt_debug:     NH4stock = ", NH4stock(iNt)
       error stop
     endif
-    if (PO4stock(iPt) .lt. 0.0d0) then
+    if (PO4stock(iPt) .lt. -1d-15) then
       write(*,*) "yt_debug: negative value error in PO4stock. Time =", &
               date, "Position =", i, j
       write(*,*) "yt_debug:     PO4stock = ", PO4stock(iPt)
       error stop
     endif
 # endif
+# endif
 
+    if (DICstock(iCt) .lt. 0.0d0) then
+      DICstock(:) = 0.0d0
+    endif
+    if (CH2Ostock(iCt) .lt. 0.0d0) then
+      CH2Ostock(:) = 0.0d0
+    endif
+    if (DOstock .lt. 0.0d0) then
+      DOstock = 0.0d0
+    endif
+# if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
+    if (NO3stock(iNt) .lt. 0.0d0) then
+      NO3stock(:) = 0.0d0
+    endif
+    if (NH4stock(iNt) .lt. 0.0d0) then
+      NH4stock(:) = 0.0d0
+    endif
+    if (PO4stock(iPt) .lt. 0.0d0) then
+      PO4stock(:) = 0.0d0
+    endif
+# endif
 
 ! If stocks exceed limit, leak to environment -------------------------------------------------------------------------
 
