@@ -187,6 +187,8 @@
 #if defined BLUE_TIDE 
             CASE ('H2S_0')
               Npts=load_r(Nval, Rval, Ngrids, H2S_0)
+            CASE ('S0_0')
+              Npts=load_r(Nval, Rval, Ngrids, S0_0)
 #endif
 #if defined CARBON_ISOTOPE
             CASE ('d13C_DIC_0')
@@ -807,8 +809,10 @@
      &            'PIC (umolC/L).'
             END DO
 #if defined BLUE_TIDE 
-            WRITE (out,80) H2S_0(ng), 'H2S_0',                          &
+            WRITE (out,80) H2S_0(ng), 'H2S_0',                           &
      &            'H2S (umol/L).'
+     WRITE (out,80) S0_0(ng), 'S0_0',                                    &
+     &            'S0 (umol/L).'
 #endif
 #if defined CARBON_ISOTOPE
             WRITE (out,80) d13C_TIC0(ng), 'd13C_TIC0',                   &

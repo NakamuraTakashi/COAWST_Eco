@@ -47,6 +47,7 @@ CONTAINS
     , PIC            &   ! PIC (N_Csp,Npim): Particulate inorganic carbon (PIC: umolC L-1), coccolith (CaCO3)
 # if defined BLUE_TIDE         
     , H2S            &   ! H2S(N_Ssp): (umol S L-1)
+    , S0             &   ! S0(N_Ssp) : (umol S L-1)
 # endif
 # if defined COT_STARFISH         
     , COTe           &   ! COT starfish egg (umol L-1)
@@ -74,6 +75,7 @@ CONTAINS
     , dPIC_dt        &   ! dPIC_dt (N_Csp,Npim): dPIC/dt  (umol C L-1 s-1)
 #  if defined BLUE_TIDE         
     , dH2S_dt        &   ! dH2S_dt(N_Ssp)      : dH2S/dt  (umol S L-1 s-1)
+    , dS0_dt         &   ! dS0_dt(N_Ssp)       : dS0/dt   (umol S L-1 s-1)
 #  endif
 # if defined COT_STARFISH         
     , dCOTe_dt       &   ! dCOTe/dt (umol L-1 s-1)
@@ -121,6 +123,7 @@ CONTAINS
     real(8), intent(in) :: PIC (N_Csp,Npim)     ! Particulate inorganic carbon (PIC: umol L-1), coccolith (CaCO3)
 # if defined BLUE_TIDE         
     real(8), intent(in) :: H2S(N_Ssp)           ! H2S(N_Ssp): (umol S L-1)
+    real(8), intent(in) :: S0 (N_Ssp)           ! S0(N_Ssp) : (umol S L-1)
 # endif
 # if defined COT_STARFISH         
     real(8), intent(in) :: COTe           ! COT starfish egg (umol L-1)
@@ -147,7 +150,8 @@ CONTAINS
     real(8), intent(out) :: dZooP_dt(N_Psp,Nzoo) ! dZooP/dt  (umolP L-1 s-1)  
     real(8), intent(out) :: dPIC_dt (N_Csp,Npim) ! dPIC/dt  (umol L-1 s-1) 
 # if defined BLUE_TIDE         
-    real(8), intent(out) :: dH2S_dt(N_Ssp)        ! dH2S/dt  (umol S L-1 s-1)
+    real(8), intent(out) :: dH2S_dt(N_Ssp)       ! dH2S/dt  (umol S L-1 s-1)
+    real(8), intent(out) :: dS0_dt (N_Ssp)       ! dS0/dt   (umol S L-1 s-1)
 # endif
 # if defined COT_STARFISH
     real(8), intent(out) :: dCOTe_dt      ! dCOTe/dt (umol L-1 s-1)
@@ -282,6 +286,7 @@ CONTAINS
     real(8) :: rPIC (N_Csp,Npim) 
 # if defined BLUE_TIDE         
     real(8) :: rH2S(N_Ssp)
+    real(8) :: rS0 (N_Ssp)
 # endif
 
     real(8) :: rN2  (N_Nsp)      
@@ -293,28 +298,28 @@ CONTAINS
 
 ! Tne following variables are not used now.
     real(8) :: Mn2                  ! Mn2+ (umol L-1) 
-    real(8) :: MnO2                 ! MnO2 (nmol g-1 s-1) *solid
+    real(8) :: MnO2                 ! MnO2 (umol L-11) *solid
     real(8) :: Fe2                  ! Fe2+ (umol L-1) 
-    real(8) :: FeS(N_Ssp)           ! FeS (nmol g(DW)-1 s-1)) *solid
-    real(8) :: FeS2(N_Ssp)          ! FeS2 (nmol g(DW)-1 s-1)) *solid
-    real(8) :: FeOOH                ! FeOOH (nmol g(DW)-1 s-1)) *solid
-    real(8) :: FeOOH_PO4(N_Psp)     ! FeOOH=PO4 (nmol g(DW)-1 s-1)) *solid
+    real(8) :: FeS(N_Ssp)           ! FeS (umol L-1) *solid
+    real(8) :: FeS2(N_Ssp)          ! FeS2 (umol L-1) *solid
+    real(8) :: FeOOH                ! FeOOH (umol L-1) *solid
+    real(8) :: FeOOH_PO4(N_Psp)     ! FeOOH=PO4 (umol L-1) *solid
 # ifndef BLUE_TIDE  
     real(8) :: H2S(N_Ssp)           ! H2S (umol L-1) 
+    real(8) :: S0(N_Ssp)            ! S (umol L-1) *solid
 # endif
-    real(8) :: S0(N_Ssp)            ! S (nmol g(DW)-1 s-1)) *solid
     real(8) :: SO4(N_Ssp)           ! SO42- (umol L-1) 
     real(8) :: dMn2_dt              ! d[Mn2+]/dt (umol L-1 s-1)
-    real(8) :: dMnO2_dt             ! d[MnO2]/dt (nmol g(DW)-1 s-1) *solid
+    real(8) :: dMnO2_dt             ! d[MnO2]/dt (umol L-1 s-1) *solid
     real(8) :: dFe2_dt              ! d[Fe2+]/dt (umol L-1 s-1)
-    real(8) :: dFeS_dt(N_Ssp)       ! d[FeS]/dt (nmol g(DW)-1 s-1) *solid
-    real(8) :: dFeS2_dt(N_Ssp)      ! d[FeS2]/dt (nmol g(DW)-1 s-1) *solid
-    real(8) :: dFeOOH_dt            ! d[FeOOH]/dt (nmol g(DW)-1 s-1) *solid
-    real(8) :: dFeOOH_PO4_dt(N_Psp) ! d[FeOOH=O4]/dt (nmol g(DW)-1 s-1) *solid
+    real(8) :: dFeS_dt(N_Ssp)       ! d[FeS]/dt (umol L-1 s-1) *solid
+    real(8) :: dFeS2_dt(N_Ssp)      ! d[FeS2]/dt (umol L-1 s-1) *solid
+    real(8) :: dFeOOH_dt            ! d[FeOOH]/dt (umol L-1 s-1) *solid
+    real(8) :: dFeOOH_PO4_dt(N_Psp) ! d[FeOOH=O4]/dt (umol L-1 s-1) *solid
 # ifndef BLUE_TIDE  
     real(8) :: dH2S_dt(N_Ssp)       ! d[H2S]/dt (umol L-1 s-1)
+    real(8) :: dS0_dt(N_Ssp)        ! d[S]/dt (umol L-1 s-1) *solid
 # endif
-    real(8) :: dS0_dt(N_Ssp)        ! d[S]/dt (nmol g(DW)-1 s-1) *solid
     real(8) :: dSO4_dt(N_Ssp)       ! d[SO42-]/dt (umol L-1 s-1)
 
 # if defined FOODWEB_TESTMODE
@@ -419,6 +424,12 @@ CONTAINS
         rPIC(isp,m) = Iso_ratio( PIC(isp,m), PIC(iCt,m) ) 
       ENDDO
     ENDDO   
+# if defined BLUE_TIDE         
+    DO isp=1,N_Ssp
+      rH2S(isp) = Iso_ratio( H2S(isp), H2S(iSt) )
+      rS0 (isp) = Iso_ratio( S0 (isp), S0 (iSt) )
+    ENDDO
+# endif
 # if defined NITROGEN_ISOTOPE
     rN2(iN15)= 0.003663d0
     rN2(iNt) = 1.0d0
@@ -723,15 +734,16 @@ CONTAINS
     Mn2          = 0.0d0   ! Mn2+ (umol L-1) 
     MnO2         = 0.0d0   ! MnO2 (nmol g-1 s-1) *solid
     Fe2          = 0.0d0   ! Fe2+ (umol L-1) 
-    FeS(:)       = 0.0d0   ! FeS (nmol g(DW)-1 s-1)) *solid
-    FeS2(:)      = 0.0d0   ! FeS2 (nmol g(DW)-1 s-1)) *solid
-    FeOOH        = 0.0d0   ! FeOOH (nmol g(DW)-1 s-1)) *solid
-    FeOOH_PO4(:) = 0.0d0   ! FeOOH=PO4 (nmol g(DW)-1 s-1)) *solid
+    FeS(:)       = 0.0d0   ! FeS (umol L-1)) *solid
+    FeS2(:)      = 0.0d0   ! FeS2 (umol L-1)) *solid
+    FeOOH        = 0.0d0   ! FeOOH (umol L-1)) *solid
+    FeOOH_PO4(:) = 0.0d0   ! FeOOH=PO4 (umol L-1)) *solid
 # ifndef BLUE_TIDE  
     H2S(:)       = 0.0d0   ! H2S (umol L-1) 
+    S0(:)        = 0.0d0   ! S (umol L-1)) *solid
 # endif
-    S0(:)        = 0.0d0   ! S (nmol g(DW)-1 s-1)) *solid
     SO4(iSt)     = 0.02824d0*Sal/35.0d0*rho_sw *1.0d6   ! SO42- (umol L-1) 
+    SO4(iSt)     = MAX( SO4(iSt), 0.0d0 )  !!! Error handling
 !   SO4(iS34) = SO4(iSt)
 
     CALL decomposition  &
