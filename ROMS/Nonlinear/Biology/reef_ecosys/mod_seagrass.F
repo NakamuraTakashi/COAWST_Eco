@@ -1999,26 +1999,22 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
       delta_DICstock(:)  = delta_DICstock(:)  + Resp_rate * rCH2Ostock(:)
       delta_DOstock      = delta_DOstock      - Resp_rate
 
-      ! if (CH2Ostock(iCt)+delta_CH2Ostock(iCt)*dt .lt. 0.0d0) then
-      !   write(*,*) "yt_debug:     CH2Ostock = ", CH2Ostock(iCt), &
-      !           "delta_CH2Ostock = ", delta_CH2Ostock(iCt), "CH2Orequired", CH2Orequired
-      !   error stop
-      ! endif
+      if (CH2Ostock(iCt)+delta_CH2Ostock(iCt)*dt .lt. 0.0d0) then
+        write(*,*) "yt_debug:     CH2Ostock = ", CH2Ostock(iCt), &
+                "delta_CH2Ostock = ", delta_CH2Ostock(iCt), "CH2Orequired", CH2Orequired
+        error stop
+      endif
       
     else ! if CH2Oavailable < CH2Orequired
-      !ytedit
-      !    delta_CH2Ostock(:)  = delta_CH2Ostock(:) + Phot_rate * rDICstock(:)
-      !    delta_CH2Ostock(:)   = delta_CH2Ostock(:) - Growth_rate            * rCH2Ostock(:)
-      
       delta_DICstock(:)  = delta_DICstock(:)  + (CH2Ostock(:)+delta_CH2Ostock(:)*dt) / dt
       delta_DOstock      = delta_DOstock      - (CH2Ostock(iCt)+delta_CH2Ostock(iCt)*dt) / dt
       delta_CH2Ostock(:) = delta_CH2Ostock(:) - (CH2Ostock(:)+delta_CH2Ostock(:)*dt) / dt
 
-      ! if (CH2Ostock(iCt)+delta_CH2Ostock(iCt)*dt .lt. 0.0d0) then
-      !   write(*,*) "yt_debug:     CH2Ostock = ", CH2Ostock(iCt), &
-      !           "delta_CH2Ostock = ", delta_CH2Ostock(iCt)
-      !   error stop
-      ! endif
+      if (CH2Ostock(iCt)+delta_CH2Ostock(iCt)*dt .lt. 0.0d0) then
+        write(*,*) "yt_debug:     CH2Ostock = ", CH2Ostock(iCt), &
+                "delta_CH2Ostock = ", delta_CH2Ostock(iCt)
+        error stop
+      endif
 
       ! massUnsupported  = SgCBmF(iCt) - CH2Ostock(iCt)
     
