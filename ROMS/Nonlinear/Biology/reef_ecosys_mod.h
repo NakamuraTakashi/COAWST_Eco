@@ -51,6 +51,7 @@
       integer :: iPIC(N_Csp,Npim)       ! Particulate inorganic C-concentration
 #if defined BLUE_TIDE         
       integer :: iH2S(N_Ssp)            ! H2S concentration
+      integer :: iS0 (N_Ssp)            ! S0 concentration
 #endif
 #if defined COT_STARFISH
       integer :: iCOTe                  ! Eggs of crown-of-thorns starfish
@@ -221,6 +222,7 @@
       real(r8), allocatable :: PIC_0(:,:)            ! umolC/L
 #if defined BLUE_TIDE         
       real(r8), allocatable :: H2S_0(:)              ! umol/L
+      real(r8), allocatable :: S0_0 (:)              ! umol/L
 #endif
 #if defined CARBON_ISOTOPE
       real(r8), allocatable :: d13C_DIC_0(:)         ! permil (VPDB)
@@ -405,6 +407,10 @@
       DO isp=1,N_Ssp
         i=i+1    
         iH2S(isp)=ic+i       
+      END DO       
+      DO isp=1,N_Ssp
+        i=i+1    
+        iS0(isp)=ic+i       
       END DO       
 #endif
 #if defined COT_STARFISH
@@ -1039,6 +1045,9 @@
       IF (.not.allocated(H2S_0)) THEN
         allocate ( H2S_0(Ngrids) )
       END IF
+      IF (.not.allocated(S0_0)) THEN
+        allocate ( S0_0(Ngrids) )
+      END IF
 #endif
 #if defined CARBON_ISOTOPE
       IF (.not.allocated(d13C_DIC_0)) THEN
@@ -1539,6 +1548,7 @@
       t(iPIC (1,1):iPIC (N_Csp,Npim)) = 0.0_r8     ! umolC L-1
 # if defined BLUE_TIDE 
       t(iH2S (1)  :iH2S (N_Ssp)     ) = 0.0_r8
+      t(iS0  (1)  :iS0  (N_Ssp)     ) = 0.0_r8
 # endif
 
     ! TA  
@@ -1608,6 +1618,7 @@
       END DO
 # if defined BLUE_TIDE 
       t(iH2S(iSt)) = H2S_0(ng)
+      t(iS0 (iSt)) = S0_0 (ng)
 # endif
 # if defined CARBON_ISOTOPE || defined CLUMPED_ISOTOPE
       t(iDIC(iC13)) = Ci_from_Ct_delta(t(iDIC(iCt)),   d13C_DIC_0(ng), R13C_VPDB )                    &

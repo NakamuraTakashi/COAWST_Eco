@@ -166,6 +166,7 @@ END SUBROUTINE allocate_reef_ecosys
     , PIC            &   ! PIC (N_Csp,Npim,N): Particulate inorganic carbon (PIC: umolC L-1), coccolith (CaCO3)
 # if defined BLUE_TIDE         
     , H2S            &   ! H2S (N_Ssp,N)     : (umol S L-1)
+    , S0             &   ! S0  (N_Ssp,N)     : (umol S L-1)
 # endif
 # if defined COT_STARFISH         
     , COTe           &   ! COTe(N): COT starfish egg (umol L-1)
@@ -212,6 +213,7 @@ END SUBROUTINE allocate_reef_ecosys
     , dPIC_dt        &   ! dPIC_dt (N_Csp,Npim,N): dPIC/dt  (umol C L-1 s-1)
 # if defined BLUE_TIDE         
     , dH2S_dt        &   ! dH2S_dt (N_Ssp,N)     : dH2S/dt  (umol S L-1 s-1)
+    , dS0_dt         &   ! dS0_dt(N_Ssp,N)       : dS0/dt   (umol S L-1 s-1)
 # endif
 # if defined COT_STARFISH         
     , dCOTe_dt       &   ! dCOTe/dt(N): (umol L-1 s-1)
@@ -326,6 +328,7 @@ END SUBROUTINE allocate_reef_ecosys
     real(8), intent(in) :: PIC (N_Csp,Npim,N)   ! Particulate inorganic carbon (PIC: umol L-1), coccolith (CaCO3)
 # if defined BLUE_TIDE         
     real(8), intent(in) :: H2S (N_Ssp,N)        ! H2S (umol S L-1)
+    real(8), intent(in) :: S0  (N_Ssp,N)        ! S0  (umol S L-1)
 # endif
 # if defined COT_STARFISH         
     real(8), intent(in) :: COTe(N)         ! COT starfish egg (umol L-1)
@@ -373,6 +376,7 @@ END SUBROUTINE allocate_reef_ecosys
     real(8), intent(out) :: dPIC_dt (N_Csp,Npim,N) ! dPIC/dt  (umol L-1 s-1) 
 # if defined BLUE_TIDE         
     real(8), intent(out) :: dH2S_dt (N_Ssp,N)      ! dH2S/dt  (umol S L-1 s-1)
+    real(8), intent(out) :: dS0_dt  (N_Ssp,N)      ! dS0/dt   (umol S L-1 s-1)
 # endif
 # if defined COT_STARFISH         
     real(8), intent(out) :: dCOTe_dt(N)    ! dCOTe/dt (umol L-1 s-1)
@@ -430,7 +434,8 @@ END SUBROUTINE allocate_reef_ecosys
 !!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
     real(8) :: Mn2, Fe2, SO4(N_Ssp)
 # if !defined BLUE_TIDE         
-    real(8) :: H2S (N_Ssp,N)        ! H2S (umol S L-1)
+    real(8) :: H2S(N_Ssp,N)        ! H2S (umol S L-1)
+    real(8) :: S0 (N_Ssp,N)        ! S0  (umol S L-1)
 # endif
     real(8) :: Fdep_MnO2, Fdep_FeOOH 
     real(8) :: Fdep_FeOOH_PO4(N_Psp)
@@ -451,6 +456,7 @@ END SUBROUTINE allocate_reef_ecosys
     real(8) :: dDOP(N_Psp,Ndom,N), dPOP(N_Psp,Npom,N)
 # if defined BLUE_TIDE         
     real(8) :: dH2S(N_Ssp,N)
+    real(8) :: dS0 (N_Ssp,N)
 # endif
 # if defined COT_STARFISH         
     real(8) :: dCOTe(N), dCOTl(N)
@@ -503,6 +509,7 @@ END SUBROUTINE allocate_reef_ecosys
       dPIC_dt(:,:,k) = 0.0d0
 # if defined BLUE_TIDE         
       dH2S_dt(:,k)  = 0.0d0
+      dS0_dt (:,k)  = 0.0d0
 # endif
       pH(k)   = 8.0d0   ! sea surface pH
       Warg(k) = 4.0d0   ! aragonite saturation state
@@ -658,6 +665,7 @@ END SUBROUTINE allocate_reef_ecosys
         , PIC (:,:,k)  &   ! PIC (N_Csp,Npim): Particulate inorganic carbon (PIC: umolC L-1), coccolith (CaCO3)
 #  if defined BLUE_TIDE         
         , H2S(:,k)     &   ! H2S(N_Ssp): (umol S L-1)
+        , S0 (:,k)     &   ! S0(N_Ssp) : (umol S L-1)
 #  endif
 #  if defined COT_STARFISH         
         , COTe(k)      &   ! COT starfish egg (umol L-1)
@@ -685,6 +693,7 @@ END SUBROUTINE allocate_reef_ecosys
         , dPIC (:,:,k) &   ! dPIC_dt (N_Csp,Npim): dPIC/dt  (umol C L-1 s-1)
 #  if defined BLUE_TIDE         
         , dH2S(:,k)    &   ! dH2S_dt(N_Ssp)      : dH2S/dt  (umol S L-1 s-1)
+        , dS0 (:,k)    &   ! dS0_dt(N_Ssp)       : dS0/dt   (umol S L-1 s-1)
 #  endif
 #  if defined COT_STARFISH         
         , dCOTe(k)     &   ! dCOTe/dt (umol L-1 s-1)
@@ -718,6 +727,7 @@ END SUBROUTINE allocate_reef_ecosys
       dPIC_dt(:,:,k) = dPIC_dt(:,:,k) + dPIC(:,:,k)
 #  if defined BLUE_TIDE         
       dH2S_dt(:,k) = dH2S_dt(:,k) + dH2S(:,k)
+      dS0_dt (:,k) = dS0_dt (:,k) + dS0 (:,k)
 #  endif
 #  if defined COT_STARFISH
       dCOTe_dt(k) = dCOTe_dt(k) + dCOTe(k)
