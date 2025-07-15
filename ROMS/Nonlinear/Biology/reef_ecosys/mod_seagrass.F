@@ -116,9 +116,9 @@ MODULE mod_seagrass
 ! >>> Saved Values <<< !
     ! Update at end of main interval
     real(8), pointer :: SgCBmF                              (:,  :,:,:)   ! [umol.C m-2.sg.hab]         iSgSgCBm      Seagrass leaf+root carbon-biomass per unit ground area (in seagrass habitat area) updates on fine time interval
-    real(8), pointer :: DICstock                            (:,  :,:,:)   ! [umol.DIC m-2.sg.hab]                     Seagrass internal DIC stock per unit ground area (in seagrass habitat area)
-    real(8), pointer :: CH2Ostock                           (:,  :,:,:)   ! [umol.CH2O m-2.sg.hab]                    Seagrass internal sugar stock per unit ground area (in seagrass habitat area)
-    real(8), pointer :: DOstock                             (    :,:,:)   ! [umol.DO m-2.sg.hab]                      Seagrass internal DO stock per unit ground area (in seagrass habitat area)
+    real(8), pointer :: DICstock                            (:,  :,:,:)   ! [umol.DIC m-2.sg.hab]       iSgDICstock   Seagrass internal DIC stock per unit ground area (in seagrass habitat area)
+    real(8), pointer :: CH2Ostock                           (:,  :,:,:)   ! [umol.CH2O m-2.sg.hab]      iSgCH2Ostock  Seagrass internal sugar stock per unit ground area (in seagrass habitat area)
+    real(8), pointer :: DOstock                             (    :,:,:)   ! [umol.DO m-2.sg.hab]        iSgDOstock    Seagrass internal DO stock per unit ground area (in seagrass habitat area)
 #  if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
     real(8), pointer :: SgNBmF                              (:,  :,:,:)   ! [umol.N m-2.sg.hab]         iSgSgCBm      Seagrass leaf+root nitrogen-biomass per unit ground area (in seagrass habitat area) updates on fine time interval
     real(8), pointer :: SgPBmF                              (:,  :,:,:)   ! [umol.P m-2.sg.hab]         iSgSgCBm      Seagrass leaf+root phosphorus-biomass per unit ground area (in seagrass habitat area) updates on fine time interval
@@ -658,7 +658,6 @@ MODULE mod_seagrass
       do species=1,Nsg
         do i=LBi,UBi
           do j=LBj,UBj
-            ! when initializaing from start in a new run when only coverage is known, calculate biomass values assuming an ELAP of 90% in the coverage area and an ideal ratio of above to belowground biomass
 
             ! HabArea                     [m2.sg.hab]                 Seagrass habitat ground area in grid cell (such that seagrass coverage (p_sgrass) times the grid area equals the habitat area)
             ! GridArea                    [m2.grid]                   Total ground area in grid cell
@@ -868,6 +867,212 @@ MODULE mod_seagrass
 
 
       ! write(*,*) 'yt_debug: mod_seagrass.F initialize_seagrass() after analytical start mass assigments'
+    
+    
+    
+    ! start from save
+    else
+      do species=1,Nsg
+        do i=LBi,UBi
+          do j=LBj,UBj
+
+            ! HabArea                     [m2.sg.hab]                 Seagrass habitat ground area in grid cell (such that seagrass coverage (p_sgrass) times the grid area equals the habitat area)
+            ! GridArea                    [m2.grid]                   Total ground area in grid cell
+            ! p_sgrass                    [m2.sg.hab m-2.grid](0~1)   Seagrass coverage
+            ! LAI                         [m2.leaf m-2.sg.hab]        Leaf area index: one-sided green leaf area per unit ground surface area 
+            ! ELAP                        [m2.lf.proj m-2.sg.hab]     Effective leaf area projection on ground (only within seagrass habitat (covered area))
+            ! k_proj                      [m2.sg.hab m-2.leaf]        Species specific leaf projection coefficient
+            ! rho_lf                      [kg.drywt m-2.leaf]         Rho_leaf: Species specific leaf mass density
+            ! SgMperC                     [g.drywt mol-1.C]           Species specific biomass mass per unit carbon based on C-N-P ratio according to (CH2O)x(NH3)y(H3PO4)z as the chemical formula for biomass
+            ! SgCBmF                      [umol.C m-2.sg.hab]         Seagrass leaf+root carbon-biomass per unit ground area (in seagrass habitat area) updates on fine time interval
+            ! SgNBmF                      [umol.C m-2.sg.hab]         Seagrass leaf+root nitrogen-biomass per unit ground area (in seagrass habitat area) updates on fine time interval
+            ! SgPBmF                      [umol.C m-2.sg.hab]         Seagrass leaf+root phosphorus-biomass per unit ground area (in seagrass habitat area) updates on fine time interval
+            ! DICstock                    [umol.DIC m-2.sg.hab]       Seagrass internal DIC stock per unit ground area (in seagrass habitat area)
+            ! CH2Ostock                   [umol.CH2O m-2.sg.hab]      Seagrass internal sugar stock per unit ground area (in seagrass habitat area)
+            ! DOstock                     [umol.DO m-2.sg.hab]        Seagrass internal DO stock per unit ground area (in seagrass habitat area)
+            ! NO3stock                    [umol.NO3 m-2.sg.hab]       Seagrass internal NO3 stock per unit ground area (in seagrass habitat area)
+            ! NH4stock                    [umol.NH4 m-2.sg.hab]       Seagrass internal NH4 stock per unit ground area (in seagrass habitat area)
+            ! PO4stock                    [umol.PO4 m-2.sg.hab]       Seagrass internal PO4 stock per unit ground area (in seagrass habitat area)
+            ! TotSgCBmF                   [mol.C.tot]                 Total seagrass carbon-biomass in grid cell. updates on fine time interval
+            ! LfCBm                       [umol.lf.C m-2.sg.hab]      Seagrass leaf carbon-biomass per unit ground area (in seagrass habitat area)
+            ! RtCBm                       [umol.rt.C m-2.sg.hab]      Seagrass root carbon-biomass per unit ground area (in seagrass habitat area)
+            ! TotSgCBm                    [mol.C.tot]                 Total seagrass carbon-biomass in grid cell
+            ! TotLfCBm                    [mol.C.lf]                  Total seagrass leaf carbon-biomass in grid cell
+            ! TotRtCBm                    [mol.C.rt]                  Total seagrass root carbon-biomass in grid cell
+            ! f_above                     [g.lf.drywt g-1.tot.drywt]  also [mol.C.lf mol-1.C.tot] Ideal above ground biomass to total biomass fraction  
+            ! TotSgDryBm                  [g.drywt]                   Total seagrass dry weight biomass in grid cell
+            ! TotLfDryBm                  [g.lf.drywt]                Total seagrass leaf dry weight biomass in grid cell
+            ! TotRtDryBm                  [g.rt.drywt]                Total seagrass root dry weight biomass in grid cell
+            ! SgDryBm                     [g.drywt m-2.sg.hab]        Seagrass dry weight biomass per unit ground area (in seagrass habitat area)
+            ! LfDryBm                     [g.lf.drywt m-2.sg.hab]     Seagrass leaf dry weight biomass per unit ground area (in seagrass habitat area)
+            ! RtDryBm                     [g.rt.drywt m-2.sg.hab]     Seagrass root dry weight biomass per unit ground area (in seagrass habitat area)
+            
+            ! new based on chamber 2012 >>>>>>>>>>>>>>>>>>>
+            ! [g.drywt/m2.hab]              = g.drywt / m2.chamber
+            SGRASS(ng)%LfDryBm(species,i,j) = 46.8d0  / 0.45d0 ! from Watanabe chamber experiments 2012
+
+            ! [g.drywt/m2.hab]              = g.drywt / m2.chamber
+            SGRASS(ng)%RtDryBm(species,i,j) = 86.5d0  / 0.45d0 ! from Watanabe chamber experiments 2012
+
+            ! SGRASS(ng)%LfDryBm(species,i,j) = 0.0d0  ! no seagrass test
+            ! SGRASS(ng)%RtDryBm(species,i,j) = 0.0d0  ! no seagrass test
+
+            ! [g.drywt/m2.hab]
+            SGRASS(ng)%SgDryBm(species,i,j) = SGRASS(ng)%LfDryBm(species,i,j) + SGRASS(ng)%RtDryBm(species,i,j)
+
+            ! [umol.C/m2.hab]                 = [g.drywt/m2.hab]                / [g.drywt/mol.C]             * 1000000umol.C/mol.C
+            SGRASS(ng)%LfCBm(species,i,j) = SGRASS(ng)%LfDryBm(species,i,j) / SGRASS(ng)%SgMperC(species) * 1000000.0d0
+
+            ! [umol.C/m2.hab]                 = [g.drywt/m2.hab]                / [g.drywt/mol.C]             * 1000000umol.C/mol.C
+            SGRASS(ng)%RtCBm(species,i,j) = SGRASS(ng)%RtDryBm(species,i,j) / SGRASS(ng)%SgMperC(species) * 1000000.0d0
+
+            ! [umol.C/m2.hab]                  = [g.drywt/m2.hab]                / [g.drywt/mol.C]             * 1000000umol.C/mol.C
+            SGRASS(ng)%SgCBmF(iCt,species,i,j) = SGRASS(ng)%SgDryBm(species,i,j) / SGRASS(ng)%SgMperC(species) * 1000000.0d0
+
+            ! [m2.lf/m2.hab]            = [g.drywt/m2.hab]                / [kg.drywt/m2.lf]           * (kg.drywt/1000g.drywt)
+            SGRASS(ng)%LAI(species,i,j) = SGRASS(ng)%LfDryBm(species,i,j) / SGRASS(ng)%rho_lf(species) * 0.001d0
+            ! <<<<<<<<<<<<<<<<<<<
+
+        
+# if defined CARBON_ISOTOPE || defined CLUMPED_ISOTOPE
+            SGRASS(ng)%SgCBmF(iC13,species,i,j) = Ci_from_Ct_delta( SGRASS(ng)%SgCBmF(iCt,species,i,j), -20.0d0, R13C_VPDB )
+#  if defined CLUMPED_ISOTOPE
+            SGRASS(ng)%SgCBmF(iD47,species,i,j) = Ci_from_Ct_delta( SGRASS(ng)%SgCBmF(iCt,species,i,j), -20.0d0, R13C_VPDB ) !!???????
+#  endif
+# endif
+# if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
+            SGRASS(ng)%SgNBmF(  :,species,i,j) = 0.0d0
+            ! [umol.N.tot/m2.hab]              
+            SGRASS(ng)%SgNBmF(iNt,species,i,j) = SGRASS(ng)%SgCBmF(iCt,species,i,j) * SGRASS(ng)%SgNperC(species)
+#  if defined NITROGEN_ISOTOPE
+            SGRASS(ng)%SgNBmF(iN15,species,i,j) = Ci_from_Ct_delta( SGRASS(ng)%SgNBmF(iNt,species,i,j), -20.0d0, R13C_VPDB )
+#  endif
+            SGRASS(ng)%SgPBmF(  :,species,i,j) = 0.0d0
+            ! [umol.P.tot/m2.hab]              
+            SGRASS(ng)%SgPBmF(iPt,species,i,j) = SGRASS(ng)%SgCBmF(iCt,species,i,j) * SGRASS(ng)%SgPperC(species)
+# endif
+            ! ! [umol.C.rt/m2.hab]          = [umol.C.tot/m2.hab]                [mol.C.rt/mol.C.tot]
+            ! SGRASS(ng)%RtCBm(species,i,j) = SGRASS(ng)%SgCBmF(iCt,species,i,j) * (1.0d0 - SGRASS(ng)%f_above(species))
+
+            ! [mol.C]                        = [umol.C/m2.hab]                    [m2.hab]                          (mol/1000000umol)
+            SGRASS(ng)%TotSgCBm(species,i,j) = SGRASS(ng)%SgCBmF(iCt,species,i,j) * SGRASS(ng)%HabArea(species,i,j) * 0.000001d0
+
+            ! [mol.C]                        = [umol.C/m2.hab]               [m2.hab]                          (mol/1000000umol)
+            SGRASS(ng)%TotLfCBm(species,i,j) = SGRASS(ng)%LfCBm(species,i,j) * SGRASS(ng)%HabArea(species,i,j) * 0.000001d0
+
+            ! [mol.C]                        = [umol.C/m2.hab]               [m2.hab]                          (mol/1000000umol)
+            SGRASS(ng)%TotRtCBm(species,i,j) = SGRASS(ng)%RtCBm(species,i,j) * SGRASS(ng)%HabArea(species,i,j) * 0.000001d0
+            
+            ! [g.drywt]                        = [mol.C]                          [g.drywt/mol.C]
+            SGRASS(ng)%TotSgDryBm(species,i,j) = SGRASS(ng)%TotSgCBm(species,i,j) * SGRASS(ng)%SgMperC(species)
+
+            ! [g.drywt]                        = [mol.C]                          [g.drywt/mol.C]
+            SGRASS(ng)%TotLfDryBm(species,i,j) = SGRASS(ng)%TotLfCBm(species,i,j) * SGRASS(ng)%SgMperC(species)
+
+            ! [g.drywt]                        = [mol.C]                          [g.drywt/mol.C]
+            SGRASS(ng)%TotRtDryBm(species,i,j) = SGRASS(ng)%TotRtCBm(species,i,j) * SGRASS(ng)%SgMperC(species)
+
+            ! ! [g.drywt/m2.hab]              = [umol.C/m2.hab]                    [g.drywt/mol.C]               (mol.C/1000000umol.C)
+            ! SGRASS(ng)%SgDryBm(species,i,j) = SGRASS(ng)%SgCBmF(iCt,species,i,j) * SGRASS(ng)%SgMperC(species) * 0.000001d0
+
+            ! ! [g.drywt/m2.hab]              = [umol.C/m2.hab]               [g.drywt/mol.C]               (mol.C/1000000umol.C)
+            ! SGRASS(ng)%LfDryBm(species,i,j) = SGRASS(ng)%LfCBm(species,i,j) * SGRASS(ng)%SgMperC(species) * 0.000001d0
+
+            ! ! [g.drywt/m2.hab]              = [umol.C/m2.hab]               [g.drywt/mol.C]               (mol.C/1000000umol.C)
+            ! SGRASS(ng)%RtDryBm(species,i,j) = SGRASS(ng)%RtCBm(species,i,j) * SGRASS(ng)%SgMperC(species) * 0.000001d0
+
+            SGRASS(ng)%TotSgCBmF(species,i,j) = SGRASS(ng)%TotSgCBm(species,i,j)
+
+# if defined NET_ZERO_MASS_START
+            ! Calculate initial seagrass mass balance 
+            ! InitialC                    [mmol.C]                    Initial carbon remaining to destroy until net zero
+            ! InitialN                    [mmol.N]                    Initial nitrogen remaining to destroy until net zero
+            ! InitialP                    [mmol.P]                    Initial phosphorus remaining to destroy until net zero
+            ! TotSgCBm                    [mol.C.tot]                 Total seagrass carbon-biomass in grid cell
+            ! SgNperC                     [mol.N mol-1.C]             Species specific seagrass Nitrogen to Carbon ratio
+            ! SgPperC                     [mol.P mol-1.C]             Species specific seagrass Phosphorus to Carbon ratio
+            ! [mmol.X]                       = [mol.C]                          [mol.X/mol.C]                 [1000 mmol/mol]
+            SGRASS(ng)%InitialC(species,i,j) = SGRASS(ng)%TotSgCBm(species,i,j)                               * 1000.0d0 ! yt_edit to_do need to add this to save/restart parameters?
+#  if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
+            SGRASS(ng)%InitialN(species,i,j) = SGRASS(ng)%TotSgCBm(species,i,j) * SGRASS(ng)%SgNperC(species) * 1000.0d0
+            SGRASS(ng)%InitialP(species,i,j) = SGRASS(ng)%TotSgCBm(species,i,j) * SGRASS(ng)%SgPperC(species) * 1000.0d0
+#  endif
+# endif
+
+            SGRASS(ng)%DICstock(:,species,i,j) = 0.0d0
+            SGRASS(ng)%CH2Ostock(:,species,i,j) = 0.0d0
+            SGRASS(ng)%DOstock(species,i,j) = 0.0d0
+# if defined FULL_STOCK_START
+            SGRASS(ng)%DICstock(:,species,i,j) = SGRASS(ng)%DICstockCap(species)* SGRASS(ng)%SgCBmF(:,species,i,j)
+            ! SGRASS(ng)%CH2Ostock(:,species,i,j) = SGRASS(ng)%CH2OstockCap(species)* SGRASS(ng)%SgCBmF(:,species,i,j)
+            SGRASS(ng)%DOstock(species,i,j) = SGRASS(ng)%DOstockCap(species)* SGRASS(ng)%SgCBmF(iCt,species,i,j)
+# elif defined CHAMBER_EQUILIBRIUM_STOCK_START
+            ! SGRASS(ng)%DICstock(:,species,i,j)  &
+            !         = SGRASS(ng)%DICstockCap(species)* SGRASS(ng)%SgCBmF(:,species,i,j)  * 0.998913020616880d0
+            ! SGRASS(ng)%CH2Ostock(:,species,i,j) &
+            !         = SGRASS(ng)%CH2OstockCap(species)* SGRASS(ng)%SgCBmF(:,species,i,j) * 1.076256593956242d-05
+            ! SGRASS(ng)%DOstock(species,i,j)     &
+            !         = SGRASS(ng)%DOstockCap(species)* SGRASS(ng)%SgCBmF(iCt,species,i,j) * 1.0d0
+            ! SGRASS(ng)%DICstock(:,species,i,j)  &
+            !         = SGRASS(ng)%DICstockCap(species)* SGRASS(ng)%SgCBmF(:,species,i,j)  * 0.998947817125829d0
+            ! SGRASS(ng)%CH2Ostock(:,species,i,j) &
+            !         = SGRASS(ng)%CH2OstockCap(species)* SGRASS(ng)%SgCBmF(:,species,i,j) * 1.041802767639336d-05
+            SGRASS(ng)%DICstock(:,species,i,j)  &
+                    = SGRASS(ng)%DICstockCap(species)* SGRASS(ng)%SgCBmF(:,species,i,j)  * 1.0d0
+            SGRASS(ng)%CH2Ostock(:,species,i,j) &
+                    = SGRASS(ng)%CH2OstockCap(species)* SGRASS(ng)%SgCBmF(:,species,i,j) * 0.0d0
+            SGRASS(ng)%DOstock(species,i,j)     &
+                    = SGRASS(ng)%DOstockCap(species)* SGRASS(ng)%SgCBmF(iCt,species,i,j) * 1.0d0
+# endif
+# if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
+            SGRASS(ng)%NO3stock(:,species,i,j) = 0.0d0
+            SGRASS(ng)%NH4stock(:,species,i,j) = 0.0d0
+            SGRASS(ng)%PO4stock(:,species,i,j) = 0.0d0
+#  if defined FULL_STOCK_START
+            SGRASS(ng)%NO3stock(:,species,i,j) = SGRASS(ng)%NO3stockCap(species)* SGRASS(ng)%SgNBmF(:,species,i,j)
+            SGRASS(ng)%NH4stock(:,species,i,j) = SGRASS(ng)%NH4stockCap(species)* SGRASS(ng)%SgNBmF(:,species,i,j)
+            SGRASS(ng)%PO4stock(:,species,i,j) = SGRASS(ng)%PO4stockCap(species)* SGRASS(ng)%SgPBmF(:,species,i,j)
+#  elif defined CHAMBER_EQUILIBRIUM_STOCK_START
+            ! SGRASS(ng)%NO3stock(:,species,i,j) &
+            !         = SGRASS(ng)%NO3stockCap(species)* SGRASS(ng)%SgNBmF(:,species,i,j) * 3.666207853999131d-06
+            ! SGRASS(ng)%NH4stock(:,species,i,j) &
+            !         = SGRASS(ng)%NH4stockCap(species)* SGRASS(ng)%SgNBmF(:,species,i,j) * 0.285079904658520d0
+            ! SGRASS(ng)%PO4stock(:,species,i,j) &
+            !         = SGRASS(ng)%PO4stockCap(species)* SGRASS(ng)%SgPBmF(:,species,i,j) * 0.996486838205624d0
+            SGRASS(ng)%NO3stock(:,species,i,j) &
+                    = SGRASS(ng)%NO3stockCap(species)* SGRASS(ng)%SgNBmF(:,species,i,j) * 0.0d0
+            ! SGRASS(ng)%NH4stock(:,species,i,j) &
+            !         = SGRASS(ng)%NH4stockCap(species)* SGRASS(ng)%SgNBmF(:,species,i,j) * 0.256607049362339d0
+            ! SGRASS(ng)%PO4stock(:,species,i,j) &
+            !         = SGRASS(ng)%PO4stockCap(species)* SGRASS(ng)%SgPBmF(:,species,i,j) * 0.315942197801809d0
+            SGRASS(ng)%NH4stock(:,species,i,j) &
+                    = SGRASS(ng)%NH4stockCap(species)* SGRASS(ng)%SgNBmF(:,species,i,j) * 0.5d0
+            SGRASS(ng)%PO4stock(:,species,i,j) &
+                    = SGRASS(ng)%PO4stockCap(species)* SGRASS(ng)%SgPBmF(:,species,i,j) * 0.5d0
+#  endif
+# endif
+
+          enddo
+        enddo
+      enddo
+
+      ! >>> Saved Values Only for Output  <<< !
+      SGRASS(ng)%TotLA                    = 0d0 ! [m2.lf]                     Total one-sided green leaf area in grid
+      SGRASS(ng)%GridELAP                 = 0d0 ! [m2.lf.proj m-2.grid]       Effective leaf area projection on ground (whole grid)
+      SGRASS(ng)%GridPhot                 = 0d0 ! [umol.C m-2.grid s-1]       Seagrass gross photosynthesis rate per unit ground area (whole grid)
+      SGRASS(ng)%GridGrow                 = 0d0 ! [umol.C m-2.grid s-1]       Seagrass growth rate per unit ground area (whole grid)
+      SGRASS(ng)%PhotLim                  = 0   ! []                          Seagrass photosynthesis limiting factor: 1 = light; 2 = Carbon stock
+      SGRASS(ng)%GrowLim                  = 0   ! []                          Seagrass growth limiting factor: 1 = Sugar stock; 2 = Nitrogen stock; 3 = Phosphorus stock
+      SGRASS(ng)%GridResp                 = 0d0 ! [umol.C m-2.grid s-1]       Seagrass respiration rate per unit ground area (whole grid)
+      SGRASS(ng)%GridNetPhot              = 0d0 ! [umol.C m-2.grid s-1]       Seagrass net photosynthesis rate per unit ground area (whole grid)
+      SGRASS(ng)%GridDieoff               = 0d0 ! [umol.C m-2.grid s-1]       Seagrass dieoff rate carbon biomass per unit ground area (whole grid)
+
+
+
+
+
+
+
     endif
 
     ! write(*,*) 'yt_debug: mod_seagrass.F initialize_seagrass() root_mass_profile'
@@ -1803,11 +2008,14 @@ MODULE mod_seagrass
 
 # if defined SEAGRASS_DEBUG_MODE
     ! if chem uptake in a single time step exceeds the potential stockpile size, we need to increase the stock cap
+#  if defined SEAGRASS_IMMEDIATE_NO3_TO_NH4_CONVERSION
+#  else
     if (sumNO3UpPos*dt .gt. NO3stockCap*SgNBmF(iNt)) then
       write(*,*) "yt_debug:     NO3stockCap too low.     NO3_uptake_possible = ", sumNO3UpPos, "dt", dt, &
               "NO3stockCap*SgNBmF = ", NO3stockCap*SgNBmF(iNt)
       error stop
     endif
+#  endif
     if (sumNH4UpPos*dt .gt. NH4stockCap*SgNBmF(iNt)) then
       write(*,*) "yt_debug:     NH4stockCap too low.     NH4_uptake_possible = ", sumNH4UpPos, "dt", dt, &
               "NH4stockCap*SgNBmF = ", NH4stockCap*SgNBmF(iNt)
@@ -2078,7 +2286,7 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
 # endif
 
 # if defined SEAGRASS_DEBUG_MODE
-    if (Growth_rate .lt. -1d-15) then ! error handling
+    if (Growth_rate .lt. -1d-5) then ! error handling
       write(*,*) "yt_debug: negative value error in growth. Time =", &
         date, "Position =", i, j, "Growth_rate = ", Growth_rate
       write(*,*) "yt_debug:     Growth_rate        = ", Growth_rate
@@ -2167,7 +2375,7 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
     anoxic_dieoff = SgCBmF(iCt) - SgCBmF_toMaintain
 
 # if defined SEAGRASS_DEBUG_MODE
-    if (SgCBmF_toMaintain .lt. -1d-15) then ! error handling
+    if (SgCBmF_toMaintain .lt. -1d-5) then ! error handling
       write(*,*) "yt_debug: negative value error in respiration rate. Time =", &
               date, "Position =", i, j
       write(*,*) "yt_debug:     SgCBmF_toMaintain = ", SgCBmF_toMaintain
@@ -2191,7 +2399,7 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
       delta_DOstock      = delta_DOstock      - Resp_rate
 
 # if defined SEAGRASS_DEBUG_MODE
-      if (CH2Ostock(iCt)+delta_CH2Ostock(iCt)*dt .lt. -1d-15) then
+      if (CH2Ostock(iCt)+delta_CH2Ostock(iCt)*dt .lt. -1d-5) then
         write(*,*) "yt_debug:     CH2Ostock = ", CH2Ostock(iCt), &
                 "delta_CH2Ostock = ", delta_CH2Ostock(iCt), "CH2Orequired", CH2Orequired
         error stop
@@ -2204,7 +2412,7 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
       delta_CH2Ostock(:) = delta_CH2Ostock(:) - (CH2Ostock(:)+delta_CH2Ostock(:)*dt) / dt
 
 # if defined SEAGRASS_DEBUG_MODE
-      if (CH2Ostock(iCt)+delta_CH2Ostock(iCt)*dt .lt. -1d-15) then
+      if (CH2Ostock(iCt)+delta_CH2Ostock(iCt)*dt .lt. -1d-5) then
         write(*,*) "yt_debug:     CH2Ostock = ", CH2Ostock(iCt), &
                 "delta_CH2Ostock = ", delta_CH2Ostock(iCt)
         error stop
@@ -2479,38 +2687,38 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
 
 # if defined SEAGRASS_DEBUG_MODE
     ! error check for negative stock value
-    if (DICstock(iCt) .lt. -1d-15) then
+    if (DICstock(iCt) .lt. -1d-5) then
       write(*,*) "yt_debug: negative value error in DICstock. Time =", &
               date, "Position =", i, j
       write(*,*) "yt_debug:     DICstock = ", DICstock(iCt)
       error stop
     endif
-    if (CH2Ostock(iCt) .lt. -1d-15) then
+    if (CH2Ostock(iCt) .lt. -1d-5) then
       write(*,*) "yt_debug: negative value error in CH2Ostock. Time =", &
               date, "Position =", i, j
       write(*,*) "yt_debug:     CH2Ostock = ", CH2Ostock(iCt), "delta_CH2Ostock = ", delta_CH2Ostock(iCt)
       error stop
     endif
-    if (DOstock .lt. -1d-15) then
+    if (DOstock .lt. -1d-5) then
       write(*,*) "yt_debug: negative value error in DOstock. Time =", &
               date, "Position =", i, j
       write(*,*) "yt_debug:     DOstock = ", DOstock
       error stop
     endif
 # if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
-    if (NO3stock(iNt) .lt. -1d-15) then
+    if (NO3stock(iNt) .lt. -1d-5) then
       write(*,*) "yt_debug: negative value error in NO3stock. Time =", &
               date, "Position =", i, j
       write(*,*) "yt_debug:     NO3stock = ", NO3stock(iNt)
       error stop
     endif
-    if (NH4stock(iNt) .lt. -1d-15) then
+    if (NH4stock(iNt) .lt. -1d-5) then
       write(*,*) "yt_debug: negative value error in NH4stock. Time =", &
               date, "Position =", i, j
       write(*,*) "yt_debug:     NH4stock = ", NH4stock(iNt)
       error stop
     endif
-    if (PO4stock(iPt) .lt. -1d-15) then
+    if (PO4stock(iPt) .lt. -1d-5) then
       write(*,*) "yt_debug: negative value error in PO4stock. Time =", &
               date, "Position =", i, j
       write(*,*) "yt_debug:     PO4stock = ", PO4stock(iPt)

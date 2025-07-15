@@ -9852,6 +9852,24 @@
   'r2dvar'
   1.0d0
 
+'seagrass_DICstock'                                ! Input/Output
+  'Seagrass internal DIC stockpile (umol.C m-2.sg.hab)'
+  'umolC m-2'                                 ! [umol.C m-2.sg.hab]
+  'seagrass_DICstock, scalar, series'
+  'ocean_time'
+  'iHbio2(iSgDICstock(i,j))'
+  'r2dvar'
+  1.0d0
+
+'seagrass_CH2Ostock'                                ! Input/Output
+  'Seagrass internal sugar stockpile (umol.C m-2.sg.hab)'
+  'umolC m-2'                                 ! [umol.C m-2.sg.hab]
+  'seagrass_CH2Ostock, scalar, series'
+  'ocean_time'
+  'iHbio2(iSgCH2Ostock(i,j))'
+  'r2dvar'
+  1.0d0
+
 'seagrass_LfCBm'                                ! Input/Output
   'Seagrass leaf carbon-biomass (umol.lf.C m-2.sg.hab)'
   'umolC m-2'                                 ! [umol.lf.C m-2.sg.hab]

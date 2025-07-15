@@ -87,25 +87,28 @@
 # endif
 #endif
 #ifdef SEAGRASS
-      integer  :: iSgSgCBm(N_Csp,Nsg)  ! Seagrass leaf+root carbon-biomass per unit ground area (in seagrass habitat area) [umol.C m-2.sg.hab]
-      integer  :: iSgSgNBm(N_Nsp,Nsg)  ! Seagrass leaf+root carbon-biomass per unit ground area (in seagrass habitat area) [umol.C m-2.sg.hab]
-      integer  :: iSgSgPBm(N_Psp,Nsg)  ! Seagrass leaf+root carbon-biomass per unit ground area (in seagrass habitat area) [umol.C m-2.sg.hab]
-      integer  :: iSgLfCBm(Nsg)        ! Seagrass leaf carbon-biomass per unit ground area (in seagrass habitat area) [umol.lf.C m-2.sg.hab]
-      integer  :: iSgRtCBm(Nsg)        ! Seagrass root carbon-biomass per unit ground area (in seagrass habitat area) [umol.rt.C m-2.sg.hab]
-      integer  :: iSgTotSgCBmS(Nsg)    ! SgTotSgCBm of last growth interval (For internal use only, need to save to restart file, but use SgTotSgCBm for output)
-      integer  :: iSgTotSgCBm(Nsg)     ! Total seagrass carbon-biomass in grid [mol.C.tot]
-      integer  :: iSgTotLfCBm(Nsg)     ! Total seagrass above ground carbon-biomass in grid [mol.C.lf]
-      integer  :: iSgTotRtCBm(Nsg)     ! Total seagrass below ground carbon-biomass in grid [mol.C.rt]
-      integer  :: iSgLAI(Nsg)          ! Leaf area index: one-sided green leaf area per unit ground surface area [m2.lf m-2.sg.hab]
-      integer  :: iSgTotLA(Nsg)        ! Total one-sided green leaf area in grid [m2.lf]
-      integer  :: iSgGridELAP(Nsg)     ! Effective leaf area projection on ground (whole grid) [m2.lf.proj m-2.grid]
-      integer  :: iSgGridPhot(Nsg)     ! Seagrass gross photosynthesis rate per unit ground area (whole grid) [umol.C m-2.grid s-1]
-      integer  :: iSgGridGrow(Nsg)     ! Seagrass growth rate per unit ground area (whole grid) [umol.C m-2.grid s-1]
-      integer  :: iSgPhotLim(Nsg)      ! Seagrass photosynthesis limiting factor: 1 = light; 2 = Carbon stock
-      integer  :: iSgGrowLim(Nsg)      ! Seagrass growth limiting factor: 1 = Sugar stock; 2 = Nitrogen stock; 3 = Phosphorus stock
-      integer  :: iSgGridResp(Nsg)     ! Seagrass respiration rate per unit ground area (whole grid) [umol.C m-2.grid s-1]
-      integer  :: iSgGridNetPhot(Nsg)  ! Seagrass net photosynthesis rate per unit ground area (whole grid) [umol.C m-2.grid s-1]
-      integer  :: iSgGridDieoff(Nsg)   ! Seagrass dieoff rate carbon biomass per unit ground area (whole grid) [umol.C m-2.grid s-1]    
+      integer  :: iSgSgCBm(N_Csp,Nsg)     ! Seagrass leaf+root carbon-biomass per unit ground area (in seagrass habitat area) [umol.C m-2.sg.hab]
+      integer  :: iSgSgNBm(N_Nsp,Nsg)     ! Seagrass leaf+root carbon-biomass per unit ground area (in seagrass habitat area) [umol.C m-2.sg.hab]
+      integer  :: iSgSgPBm(N_Psp,Nsg)     ! Seagrass leaf+root carbon-biomass per unit ground area (in seagrass habitat area) [umol.C m-2.sg.hab]
+      integer  :: iSgDICstock(N_Csp,Nsg)  ! Seagrass internal DIC stock per unit ground area (in seagrass habitat area) [umol.C m-2.sg.hab]
+      integer  :: iSgCH2Ostock(N_Csp,Nsg) ! Seagrass internal sugar stock per unit ground area (in seagrass habitat area) [umol.C m-2.sg.hab]
+      integer  :: iSgDOstock(Nsg)         ! Seagrass internal DO stock per unit ground area (in seagrass habitat area) [umol.O m-2.sg.hab]
+      integer  :: iSgLfCBm(Nsg)           ! Seagrass leaf carbon-biomass per unit ground area (in seagrass habitat area) [umol.lf.C m-2.sg.hab]
+      integer  :: iSgRtCBm(Nsg)           ! Seagrass root carbon-biomass per unit ground area (in seagrass habitat area) [umol.rt.C m-2.sg.hab]
+      integer  :: iSgTotSgCBmS(Nsg)       ! SgTotSgCBm of last growth interval (For internal use only, need to save to restart file, but use SgTotSgCBm for output)
+      integer  :: iSgTotSgCBm(Nsg)        ! Total seagrass carbon-biomass in grid [mol.C.tot]
+      integer  :: iSgTotLfCBm(Nsg)        ! Total seagrass above ground carbon-biomass in grid [mol.C.lf]
+      integer  :: iSgTotRtCBm(Nsg)        ! Total seagrass below ground carbon-biomass in grid [mol.C.rt]
+      integer  :: iSgLAI(Nsg)             ! Leaf area index: one-sided green leaf area per unit ground surface area [m2.lf m-2.sg.hab]
+      integer  :: iSgTotLA(Nsg)           ! Total one-sided green leaf area in grid [m2.lf]
+      integer  :: iSgGridELAP(Nsg)        ! Effective leaf area projection on ground (whole grid) [m2.lf.proj m-2.grid]
+      integer  :: iSgGridPhot(Nsg)        ! Seagrass gross photosynthesis rate per unit ground area (whole grid) [umol.C m-2.grid s-1]
+      integer  :: iSgGridGrow(Nsg)        ! Seagrass growth rate per unit ground area (whole grid) [umol.C m-2.grid s-1]
+      integer  :: iSgPhotLim(Nsg)         ! Seagrass photosynthesis limiting factor: 1 = light; 2 = Carbon stock
+      integer  :: iSgGrowLim(Nsg)         ! Seagrass growth limiting factor: 1 = Sugar stock; 2 = Nitrogen stock; 3 = Phosphorus stock
+      integer  :: iSgGridResp(Nsg)        ! Seagrass respiration rate per unit ground area (whole grid) [umol.C m-2.grid s-1]
+      integer  :: iSgGridNetPhot(Nsg)     ! Seagrass net photosynthesis rate per unit ground area (whole grid) [umol.C m-2.grid s-1]
+      integer  :: iSgGridDieoff(Nsg)      ! Seagrass dieoff rate carbon biomass per unit ground area (whole grid) [umol.C m-2.grid s-1]    
 #endif
 #ifdef MACROALGAE
       integer  :: iAgQC(N_Csp,Nag)
@@ -547,6 +550,22 @@
           ic=ic+1
           iSgSgPBm(isp,m)=ic
         END DO
+      END DO
+      DO m=1,Nsg
+        DO isp=1,N_Csp     
+          ic=ic+1
+          iSgDICstock(isp,m)=ic
+        END DO
+      END DO
+      DO m=1,Nsg
+        DO isp=1,N_Csp     
+          ic=ic+1
+          iSgCH2Ostock(isp,m)=ic
+        END DO
+      END DO
+      DO m=1,Nsg
+        ic=ic+1
+        iSgDOstock(m)=ic
       END DO
       DO m=1,Nsg
         ic=ic+1
@@ -1168,6 +1187,9 @@
             SGRASS(ng)%SgCBmF   (:,m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgSgCBm(1,m):iSgSgCBm(N_Csp,m) )
             SGRASS(ng)%SgNBmF   (:,m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgSgNBm(1,m):iSgSgNBm(N_Nsp,m) )
             SGRASS(ng)%SgPBmF   (:,m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgSgPBm(1,m):iSgSgPBm(N_Psp,m) )
+            SGRASS(ng)%DICstock (:,m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgDICstock(1,m):iSgDICstock(N_Csp,m) )
+            SGRASS(ng)%CH2Ostock(:,m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgCH2Ostock(1,m):iSgCH2Ostock(N_Csp,m) )
+            SGRASS(ng)%DOstock    (m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgDOstock    (m) )
             SGRASS(ng)%LfCBm      (m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgLfCBm      (m) )
             SGRASS(ng)%RtCBm      (m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgRtCBm      (m) )
             SGRASS(ng)%TotSgCBm   (m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgTotSgCBmS  (m) )
@@ -1303,6 +1325,9 @@
             OCEAN(ng)%HisBio2d(i,j, iSgSgCBm(1,m):iSgSgCBm(N_Csp,m) ) = SGRASS(ng)%SgCBmF(:,m,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgSgNBm(1,m):iSgSgNBm(N_Nsp,m) ) = SGRASS(ng)%SgNBmF(:,m,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgSgPBm(1,m):iSgSgPBm(N_Psp,m) ) = SGRASS(ng)%SgPBmF(:,m,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgDICstock(1,m):iSgDICstock(N_Csp,m) ) = SGRASS(ng)%DICstock(:,m,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgCH2Ostock(1,m):iSgCH2Ostock(N_Csp,m) ) = SGRASS(ng)%iSgCH2Ostock(:,m,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgDOstock    (m) ) = SGRASS(ng)%iSgCH2Ostock(:,m,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgLfCBm      (m) ) = SGRASS(ng)%LfCBm      (m,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgRtCBm      (m) ) = SGRASS(ng)%RtCBm      (m,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgTotSgCBmS  (m) ) = SGRASS(ng)%TotSgCBm   (m,i,j)

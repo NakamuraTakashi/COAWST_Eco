@@ -1249,6 +1249,56 @@
                   END DO
                 END DO
                 varid=varid+1
+              CASE ('iHbio2(iSgDICstock(i,j))')
+                load=.FALSE.
+                varid=varid-1
+                DO j=1,Nsg
+                  DO i=1,N_Csp
+                    varid=varid+1
+                    iHbio2(iSgDICstock(i,j))=varid
+                    DO ng=1,Ngrids
+                      Fscale(varid,ng)=scale
+                      Iinfo(1,varid,ng)=gtype
+                    END DO
+                    WRITE (Vname(1,varid),'(a,i2.2,a,i2.2)')            &
+   &                      TRIM(ADJUSTL(Vinfo(1))), j,'_',i
+                    WRITE (Vname(2,varid),'(a,a,i2.2,a,i2.2)')          &
+   &                      TRIM(ADJUSTL(Vinfo(2)))                       &
+                          ,', functional group ', j, ', tracer ', i
+                    WRITE (Vname(3,varid),'(a)')                        &
+   &                      TRIM(ADJUSTL(Vinfo(3)))
+                    WRITE (Vname(4,varid),'(a,a)')                      &
+   &                      TRIM(Vname(1,varid)), ', scalar, series'
+                    WRITE (Vname(5,varid),'(a)')                        &
+   &                      TRIM(ADJUSTL(Vinfo(5)))
+                  END DO
+                END DO
+                varid=varid+1
+              CASE ('iHbio2(iSgCH2Ostock(i,j))')
+                load=.FALSE.
+                varid=varid-1
+                DO j=1,Nsg
+                  DO i=1,N_Csp
+                    varid=varid+1
+                    iHbio2(iSgCH2Ostock(i,j))=varid
+                    DO ng=1,Ngrids
+                      Fscale(varid,ng)=scale
+                      Iinfo(1,varid,ng)=gtype
+                    END DO
+                    WRITE (Vname(1,varid),'(a,i2.2,a,i2.2)')            &
+   &                      TRIM(ADJUSTL(Vinfo(1))), j,'_',i
+                    WRITE (Vname(2,varid),'(a,a,i2.2,a,i2.2)')          &
+   &                      TRIM(ADJUSTL(Vinfo(2)))                       &
+                          ,', functional group ', j, ', tracer ', i
+                    WRITE (Vname(3,varid),'(a)')                        &
+   &                      TRIM(ADJUSTL(Vinfo(3)))
+                    WRITE (Vname(4,varid),'(a,a)')                      &
+   &                      TRIM(Vname(1,varid)), ', scalar, series'
+                    WRITE (Vname(5,varid),'(a)')                        &
+   &                      TRIM(ADJUSTL(Vinfo(5)))
+                  END DO
+                END DO
+                varid=varid+1
               CASE ('iHbio2(iSgLfCBm(j))')
                 load=.FALSE.
                 varid=varid-1
