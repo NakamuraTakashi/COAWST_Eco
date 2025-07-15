@@ -120,11 +120,11 @@ MODULE mod_seagrass
     real(8), pointer :: CH2Ostock                           (:,  :,:,:)   ! [umol.CH2O m-2.sg.hab]      iSgCH2Ostock  Seagrass internal sugar stock per unit ground area (in seagrass habitat area)
     real(8), pointer :: DOstock                             (    :,:,:)   ! [umol.DO m-2.sg.hab]        iSgDOstock    Seagrass internal DO stock per unit ground area (in seagrass habitat area)
 #  if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
-    real(8), pointer :: SgNBmF                              (:,  :,:,:)   ! [umol.N m-2.sg.hab]         iSgSgCBm      Seagrass leaf+root nitrogen-biomass per unit ground area (in seagrass habitat area) updates on fine time interval
-    real(8), pointer :: SgPBmF                              (:,  :,:,:)   ! [umol.P m-2.sg.hab]         iSgSgCBm      Seagrass leaf+root phosphorus-biomass per unit ground area (in seagrass habitat area) updates on fine time interval
-    real(8), pointer :: NO3stock                            (:,  :,:,:)   ! [umol.NO3 m-2.sg.hab]                     Seagrass internal NO3 stock per unit ground area (in seagrass habitat area)
-    real(8), pointer :: NH4stock                            (:,  :,:,:)   ! [umol.NH4 m-2.sg.hab]                     Seagrass internal NH4 stock per unit ground area (in seagrass habitat area)
-    real(8), pointer :: PO4stock                            (:,  :,:,:)   ! [umol.PO4 m-2.sg.hab]                     Seagrass internal PO4 stock per unit ground area (in seagrass habitat area)
+    real(8), pointer :: SgNBmF                              (:,  :,:,:)   ! [umol.N m-2.sg.hab]         iSgSgNBm      Seagrass leaf+root nitrogen-biomass per unit ground area (in seagrass habitat area) updates on fine time interval
+    real(8), pointer :: SgPBmF                              (:,  :,:,:)   ! [umol.P m-2.sg.hab]         iSgSgPBm      Seagrass leaf+root phosphorus-biomass per unit ground area (in seagrass habitat area) updates on fine time interval
+    real(8), pointer :: NO3stock                            (:,  :,:,:)   ! [umol.NO3 m-2.sg.hab]       iSgNO3stock   Seagrass internal NO3 stock per unit ground area (in seagrass habitat area)
+    real(8), pointer :: NH4stock                            (:,  :,:,:)   ! [umol.NH4 m-2.sg.hab]       iSgNH4stock   Seagrass internal NH4 stock per unit ground area (in seagrass habitat area)
+    real(8), pointer :: PO4stock                            (:,  :,:,:)   ! [umol.PO4 m-2.sg.hab]       iSgPO4stock   Seagrass internal PO4 stock per unit ground area (in seagrass habitat area)
 #  endif
     real(8), pointer :: TotSgCBmF                               (:,:,:)   ! [mol.C.tot]                 iSgTotSgCBm   Total seagrass carbon-biomass in grid. updates on fine time interval
     ! Update at end of growth interval

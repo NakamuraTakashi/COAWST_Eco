@@ -93,6 +93,9 @@
       integer  :: iSgDICstock(N_Csp,Nsg)  ! Seagrass internal DIC stock per unit ground area (in seagrass habitat area) [umol.C m-2.sg.hab]
       integer  :: iSgCH2Ostock(N_Csp,Nsg) ! Seagrass internal sugar stock per unit ground area (in seagrass habitat area) [umol.C m-2.sg.hab]
       integer  :: iSgDOstock(Nsg)         ! Seagrass internal DO stock per unit ground area (in seagrass habitat area) [umol.O m-2.sg.hab]
+      integer  :: iSgNO3stock(N_Nsp,Nsg)  ! Seagrass internal NO3 stock per unit ground area (in seagrass habitat area) [umol.N m-2.sg.hab]
+      integer  :: iSgNH4stock(N_Nsp,Nsg)  ! Seagrass internal NH4 stock per unit ground area (in seagrass habitat area) [umol.N m-2.sg.hab]
+      integer  :: iSgPO4stock(N_Psp,Nsg)  ! Seagrass internal PO4 stock per unit ground area (in seagrass habitat area) [umol.P m-2.sg.hab]
       integer  :: iSgLfCBm(Nsg)           ! Seagrass leaf carbon-biomass per unit ground area (in seagrass habitat area) [umol.lf.C m-2.sg.hab]
       integer  :: iSgRtCBm(Nsg)           ! Seagrass root carbon-biomass per unit ground area (in seagrass habitat area) [umol.rt.C m-2.sg.hab]
       integer  :: iSgTotSgCBmS(Nsg)       ! SgTotSgCBm of last growth interval (For internal use only, need to save to restart file, but use SgTotSgCBm for output)
@@ -566,6 +569,24 @@
       DO m=1,Nsg
         ic=ic+1
         iSgDOstock(m)=ic
+      END DO
+      DO m=1,Nsg
+        DO isp=1,N_Nsp     
+          ic=ic+1
+          iSgNO3stock(isp,m)=ic
+        END DO
+      END DO
+      DO m=1,Nsg
+        DO isp=1,N_Nsp     
+          ic=ic+1
+          iSgNH4stock(isp,m)=ic
+        END DO
+      END DO
+      DO m=1,Nsg
+        DO isp=1,N_Psp     
+          ic=ic+1
+          iSgPO4stock(isp,m)=ic
+        END DO
       END DO
       DO m=1,Nsg
         ic=ic+1
@@ -1190,6 +1211,9 @@
             SGRASS(ng)%DICstock (:,m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgDICstock(1,m):iSgDICstock(N_Csp,m) )
             SGRASS(ng)%CH2Ostock(:,m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgCH2Ostock(1,m):iSgCH2Ostock(N_Csp,m) )
             SGRASS(ng)%DOstock    (m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgDOstock    (m) )
+            SGRASS(ng)%NO3stock (:,m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgNO3stock(1,m):iSgNO3stock(N_Nsp,m) )
+            SGRASS(ng)%NH4stock (:,m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgNH4stock(1,m):iSgNH4stock(N_Nsp,m) )
+            SGRASS(ng)%PO4stock (:,m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgPO4stock(1,m):iSgPO4stock(N_Psp,m) )
             SGRASS(ng)%LfCBm      (m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgLfCBm      (m) )
             SGRASS(ng)%RtCBm      (m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgRtCBm      (m) )
             SGRASS(ng)%TotSgCBm   (m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgTotSgCBmS  (m) )
@@ -1326,8 +1350,11 @@
             OCEAN(ng)%HisBio2d(i,j, iSgSgNBm(1,m):iSgSgNBm(N_Nsp,m) ) = SGRASS(ng)%SgNBmF(:,m,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgSgPBm(1,m):iSgSgPBm(N_Psp,m) ) = SGRASS(ng)%SgPBmF(:,m,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgDICstock(1,m):iSgDICstock(N_Csp,m) ) = SGRASS(ng)%DICstock(:,m,i,j)
-            OCEAN(ng)%HisBio2d(i,j, iSgCH2Ostock(1,m):iSgCH2Ostock(N_Csp,m) ) = SGRASS(ng)%iSgCH2Ostock(:,m,i,j)
-            OCEAN(ng)%HisBio2d(i,j, iSgDOstock    (m) ) = SGRASS(ng)%iSgCH2Ostock(:,m,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgCH2Ostock(1,m):iSgCH2Ostock(N_Csp,m) ) = SGRASS(ng)%CH2Ostock(:,m,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgDOstock    (m) ) = SGRASS(ng)%iSgDOstock (m,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgNO3stock(1,m):iSgNO3stock(N_Nsp,m) ) = SGRASS(ng)%NO3stock(:,m,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgNH4stock(1,m):iSgNH4stock(N_Nsp,m) ) = SGRASS(ng)%NH4stock(:,m,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgPO4stock(1,m):iSgPO4stock(N_Psp,m) ) = SGRASS(ng)%PO4stock(:,m,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgLfCBm      (m) ) = SGRASS(ng)%LfCBm      (m,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgRtCBm      (m) ) = SGRASS(ng)%RtCBm      (m,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgTotSgCBmS  (m) ) = SGRASS(ng)%TotSgCBm   (m,i,j)

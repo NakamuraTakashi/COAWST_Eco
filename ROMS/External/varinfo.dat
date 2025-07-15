@@ -9870,6 +9870,42 @@
   'r2dvar'
   1.0d0
 
+'seagrass_DOstock'                                ! Input/Output
+  'Seagrass internal DO stockpile (umol.O m-2.sg.hab)'
+  'umolO m-2'                                 ! [umol.O m-2.sg.hab]
+  'seagrass_DOstock, scalar, series'
+  'ocean_time'
+  'iHbio2(iSgDOstock(i,j))'
+  'r2dvar'
+  1.0d0
+
+'seagrass_NO3stock'                                ! Input/Output
+  'Seagrass internal NO3 stockpile (umol.N m-2.sg.hab)'
+  'umolN m-2'                                 ! [umol.N m-2.sg.hab]
+  'seagrass_NO3stock, scalar, series'
+  'ocean_time'
+  'iHbio2(iSgNO3stock(i,j))'
+  'r2dvar'
+  1.0d0
+
+'seagrass_NH4stock'                                ! Input/Output
+  'Seagrass internal NH4 stockpile (umol.N m-2.sg.hab)'
+  'umolN m-2'                                 ! [umol.N m-2.sg.hab]
+  'seagrass_NH4stock, scalar, series'
+  'ocean_time'
+  'iHbio2(iSgNH4stock(i,j))'
+  'r2dvar'
+  1.0d0
+
+'seagrass_PO4stock'                                ! Input/Output
+  'Seagrass internal PO4 stockpile (umol.P m-2.sg.hab)'
+  'umolP m-2'                                 ! [umol.N m-2.sg.hab]
+  'seagrass_PO4stock, scalar, series'
+  'ocean_time'
+  'iHbio2(iSgPO4stock(i,j))'
+  'r2dvar'
+  1.0d0
+
 'seagrass_LfCBm'                                ! Input/Output
   'Seagrass leaf carbon-biomass (umol.lf.C m-2.sg.hab)'
   'umolC m-2'                                 ! [umol.lf.C m-2.sg.hab]
