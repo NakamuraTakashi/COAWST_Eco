@@ -1304,7 +1304,7 @@
                 varid=varid-1
                 DO j=1,Nsg
                   varid=varid+1
-                  iHbio2(iSgLfCBm(j))=varid
+                  iHbio2(iSgDOstock(j))=varid
                   DO ng=1,Ngrids
                     Fscale(varid,ng)=scale
                     Iinfo(1,varid,ng)=gtype

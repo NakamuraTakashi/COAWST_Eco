@@ -1351,7 +1351,7 @@
             OCEAN(ng)%HisBio2d(i,j, iSgSgPBm(1,m):iSgSgPBm(N_Psp,m) ) = SGRASS(ng)%SgPBmF(:,m,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgDICstock(1,m):iSgDICstock(N_Csp,m) ) = SGRASS(ng)%DICstock(:,m,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgCH2Ostock(1,m):iSgCH2Ostock(N_Csp,m) ) = SGRASS(ng)%CH2Ostock(:,m,i,j)
-            OCEAN(ng)%HisBio2d(i,j, iSgDOstock    (m) ) = SGRASS(ng)%iSgDOstock (m,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgDOstock    (m) ) = SGRASS(ng)%DOstock (m,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgNO3stock(1,m):iSgNO3stock(N_Nsp,m) ) = SGRASS(ng)%NO3stock(:,m,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgNH4stock(1,m):iSgNH4stock(N_Nsp,m) ) = SGRASS(ng)%NH4stock(:,m,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgPO4stock(1,m):iSgPO4stock(N_Psp,m) ) = SGRASS(ng)%PO4stock(:,m,i,j)

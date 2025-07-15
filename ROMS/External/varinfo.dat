@@ -9875,7 +9875,7 @@
   'umolO m-2'                                 ! [umol.O m-2.sg.hab]
   'seagrass_DOstock, scalar, series'
   'ocean_time'
-  'iHbio2(iSgDOstock(i,j))'
+  'iHbio2(iSgDOstock(j))'
   'r2dvar'
   1.0d0
 
