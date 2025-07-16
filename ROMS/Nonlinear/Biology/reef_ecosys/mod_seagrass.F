@@ -1934,7 +1934,7 @@ if (sumNO3UpPos .gt. 0d0) then
 #  if defined SEAGRASS_IMMEDIATE_NO3_TO_NH4_CONVERSION
   ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] +     [umol.CHEM/m2.hab s]   (isotope ratio)
   delta_NH4stock(:)      = delta_NH4stock(:)    +     NO3_uptake_possible(0) * aNO3_phot(1:N_Nsp)*rNO3_ocn(:)
-  delta_DOstock          = delta_DOstock        - 2 * NO3_uptake_possible(0)
+  delta_DOstock          = delta_DOstock        + 2 * NO3_uptake_possible(0) ! for every mol of NO3 converted to NH4, 2 mol of DO is produced   NO3- + H+ + 2*H2O -> NH4+ + 2*O2 + OH-
 #  else
   ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (isotope ratio)
   delta_NO3stock(:)      = delta_NO3stock(:)    + NO3_uptake_possible(0) * aNO3_phot(1:N_Nsp)*rNO3_ocn(:)
@@ -1963,7 +1963,7 @@ if (sumNO3UpPos .gt. 0d0) then
 #  if defined SEAGRASS_IMMEDIATE_NO3_TO_NH4_CONVERSION
     ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] +    [umol.CHEM/m2.hab s]   (isotope ratio)
     delta_NH4stock(:)      = delta_NH4stock(:)    +     NO3_uptake_possible(k) * aNO3_phot(1:N_Nsp)*rNO3_sed(:,k)
-    delta_DOstock          = delta_DOstock        - 2 * NO3_uptake_possible(k)
+    delta_DOstock          = delta_DOstock        + 2 * NO3_uptake_possible(k) ! for every mol of NO3 converted to NH4, 2 mol of DO is produced   NO3- + H+ + 2*H2O -> NH4+ + 2*O2 + OH-
 #  else
     ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (isotope ratio)
     delta_NO3stock(:)      = delta_NO3stock(:)    + NO3_uptake_possible(k) * aNO3_phot(1:N_Nsp)*rNO3_sed(:,k)
@@ -2107,7 +2107,7 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
 #  if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
     if ((NO3stock(iNt)+NH4stock(iNt)) .gt. 0d0) then
       delta_NO3stock(:)   = delta_NO3stock(:) - Growth_rate  * SgNperC * rNO3stock(:)*(NO3stock(iNt)/(NO3stock(iNt)+NH4stock(iNt))) ! portion from nitrate proportional to stock
-      delta_DOstock       = delta_DOstock     + 2*Growth_rate* SgNperC *              (NO3stock(iNt)/(NO3stock(iNt)+NH4stock(iNt))) ! for every mol of NO3- consumed in growth: 2 mol of O2 is produced
+      delta_DOstock       = delta_DOstock     + 2*Growth_rate* SgNperC *              (NO3stock(iNt)/(NO3stock(iNt)+NH4stock(iNt))) ! for every mol of NO3- consumed in growth: 2 mol of O2 is produced   NO3- + H+ + 2*H2O -> NH4+ + 2*O2 + OH-
       delta_NH4stock(:)   = delta_NH4stock(:) - Growth_rate  * SgNperC * rNH4stock(:)*(NH4stock(iNt)/(NO3stock(iNt)+NH4stock(iNt))) ! portion from ammonium proportional to stock
     endif
     delta_PO4stock(:)   = delta_PO4stock(:) - Growth_rate    * SgPperC * rPO4stock(:)
