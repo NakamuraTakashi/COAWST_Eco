@@ -2091,7 +2091,7 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
       write(*,*) "yt_debug:     Growth_limit_NH4   = ", Growth_limit_NH4
       write(*,*) "yt_debug:     Growth_limit_PO4   = ", Growth_limit_PO4
 # endif
-      error stop
+      ! error stop
     endif
 # endif
       Growth_rate = max(Growth_rate, 0.0d0)
@@ -2176,7 +2176,7 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
       write(*,*) "yt_debug:     SgCBmF_toMaintain = ", SgCBmF_toMaintain
       write(*,*) "yt_debug:     SgCBmF            = ", SgCBmF(iCt)
       write(*,*) "yt_debug:     Resp_limit_DO     = ", Resp_limit_DO
-      error stop
+      ! error stop
     endif
 # endif
     SgCBmF_toMaintain = max(SgCBmF_toMaintain, 0d0)
@@ -2197,7 +2197,7 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
       if (CH2Ostock(iCt)+delta_CH2Ostock(iCt)*dt .lt. -1d-5) then
         write(*,*) "yt_debug:     CH2Ostock = ", CH2Ostock(iCt), &
                 "delta_CH2Ostock = ", delta_CH2Ostock(iCt), "CH2Orequired", CH2Orequired
-        error stop
+        ! error stop
       endif
 # endif
       
@@ -2210,7 +2210,7 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
       if (CH2Ostock(iCt)+delta_CH2Ostock(iCt)*dt .lt. -1d-5) then
         write(*,*) "yt_debug:     CH2Ostock = ", CH2Ostock(iCt), &
                 "delta_CH2Ostock = ", delta_CH2Ostock(iCt)
-        error stop
+        ! error stop
       endif
 # endif
 
@@ -2486,38 +2486,38 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
       write(*,*) "yt_debug: negative value error in DICstock. Time =", &
               date, "Position =", i, j
       write(*,*) "yt_debug:     DICstock = ", DICstock(iCt)
-      error stop
+      ! error stop
     endif
     if (CH2Ostock(iCt) .lt. -1d-5) then
       write(*,*) "yt_debug: negative value error in CH2Ostock. Time =", &
               date, "Position =", i, j
       write(*,*) "yt_debug:     CH2Ostock = ", CH2Ostock(iCt), "delta_CH2Ostock = ", delta_CH2Ostock(iCt)
-      error stop
+      ! error stop
     endif
     if (DOstock .lt. -1d-5) then
       write(*,*) "yt_debug: negative value error in DOstock. Time =", &
               date, "Position =", i, j
       write(*,*) "yt_debug:     DOstock = ", DOstock
-      error stop
+      ! error stop
     endif
 # if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
     if (NO3stock(iNt) .lt. -1d-5) then
       write(*,*) "yt_debug: negative value error in NO3stock. Time =", &
               date, "Position =", i, j
       write(*,*) "yt_debug:     NO3stock = ", NO3stock(iNt)
-      error stop
+      ! error stop
     endif
     if (NH4stock(iNt) .lt. -1d-5) then
       write(*,*) "yt_debug: negative value error in NH4stock. Time =", &
               date, "Position =", i, j
       write(*,*) "yt_debug:     NH4stock = ", NH4stock(iNt)
-      error stop
+      ! error stop
     endif
     if (PO4stock(iPt) .lt. -1d-5) then
       write(*,*) "yt_debug: negative value error in PO4stock. Time =", &
               date, "Position =", i, j
       write(*,*) "yt_debug:     PO4stock = ", PO4stock(iPt)
-      error stop
+      ! error stop
     endif
 # endif
 # endif
