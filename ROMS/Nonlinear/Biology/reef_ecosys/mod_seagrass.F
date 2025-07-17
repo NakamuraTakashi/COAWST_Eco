@@ -1725,6 +1725,19 @@ MODULE mod_seagrass
       sumOUpPos = (DOstockCap*SgCBmF(iCt)-DOstock) / dt
     endif
 
+# if defined SEAGRASS_DEBUG_MODE
+    if (DO_uptake_possible(0) .lt. 0.0d0) then
+      write(*,*) 'yt_debug: negative value in DO_uptake_possible(0)'
+      write(*,*) 'yt_debug: DO_uptake_possible(0) = ', DO_uptake_possible(0)
+      error stop
+    endif
+    if (sum(DO_uptake_possible) .lt. 0.0d0) then
+      write(*,*) 'yt_debug: negative value in sum(DO_uptake_possible)'
+      write(*,*) 'yt_debug: sum(DO_uptake_possible) = ', sum(DO_uptake_possible)
+      error stop
+    endif
+# endif
+
 ! Nutrient uptake rate --------------------------------------------------------------------------
 
 # if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE
@@ -1865,6 +1878,16 @@ MODULE mod_seagrass
     endif
 
 # endif
+
+#   if defined SEAGRASS_DEBUG_MODE
+    DO k=1,Nsed
+      if (NO3_uptake_possible(k) .lt. 0.0d0) then
+        write(*,*) 'yt_debug: negative value in NO3_uptake_possible(k)'
+        write(*,*) 'yt_debug: NO3_uptake_possible(k) = ', NO3_uptake_possible(k)
+        error stop
+      endif
+    ENDDO
+#   endif
 
     ! PO4stockCap                 []                          Factor to multiply phosphorus biomsass to get maximum PO4 stock (stock limit = PO4stockCap*SgPBmF) 
     ! limit uptake so that PO4 stock is limited to 100 percent of biomass P
@@ -2017,12 +2040,28 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
     ! [umol.C/m2.hab s] = [umol.C/m2.lf s] [m2.lf/m2.hab] [             ]
     Phot_limit_light  = P_max            * ELAP         * tanh(PFD/I_k)
 
+# if defined SEAGRASS_DEBUG_MODE
+    if (Phot_limit_light .lt. 0.0d0) then
+      write(*,*) 'yt_debug: negative value in Phot_limit_light'
+      write(*,*) 'yt_debug: Phot_limit_light = ', Phot_limit_light, 'ELAP = ', ELAP, 'PFD = ', PFD, 'I_k = ', I_k
+      error stop
+    endif
+# endif
+
 ! DIC limit ---------------------------------------------------------------------
 
     ! Phot_limit_DIC            [umol.C m-2.sg.hab s-1]     Photosynthesis/growth rate possible as limited by DIC uptake
 
     ! [umol.C/m2.hab s] = [mol.C/mol.CHM] [umol.CHM/m2.hab] [1/s]
     Phot_limit_DIC   =                    DICstock(iCt)  / dt
+
+# if defined SEAGRASS_DEBUG_MODE
+    if (Phot_limit_DIC .lt. 0.0d0) then
+      write(*,*) 'yt_debug: negative value in Phot_limit_DIC'
+      write(*,*) 'yt_debug: Phot_limit_DIC = ', Phot_limit_DIC, 'DICstock(iCt) = ', DICstock(iCt)
+      error stop
+    endif
+# endif
 
 ! Gross Photosythesis rate ---------------------------------------------------------------------
 
@@ -2098,6 +2137,14 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
 
 ! Growth mass balance (remove from stock, add to biomass) ---------------------------------------------------------------------------------------
     
+# if defined SEAGRASS_DEBUG_MODE
+    if (NO3stock(iNt) .lt. 0.0d0) then
+      write(*,*) 'yt_debug: negative value in NO3stock(iNt)'
+      write(*,*) 'yt_debug: NO3stock(iNt) = ', NO3stock(iNt)
+      error stop
+    endif
+# endif
+
     ! remove from stock
     ! delta_DICstock              [umol.DIC m-2.sg.hab s-1]   Rate of change in DICstock
     ! Growth_rate                 [umol.C m-2.sg.hab s-1]     Gross photosynthesis/growth rate
@@ -2200,6 +2247,14 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
         error stop
       endif
 # endif
+
+# if defined SEAGRASS_DEBUG_MODE
+      if (DOstock + delta_DOstock*dt .lt. 0.0d0) then
+        write(*,*) 'yt_debug: negative value in (DOstock + delta_DOstock*dt) after respiration calculation'
+        write(*,*) 'yt_debug: (DOstock + delta_DOstock*dt) = ', (DOstock + delta_DOstock*dt), 'Resp_rate = ', Resp_rate
+        error stop
+      endif
+# endif
       
     else ! if CH2Oavailable < CH2Orequired
       delta_DICstock(:)  = delta_DICstock(:)  + (CH2Ostock(:)+delta_CH2Ostock(:)*dt) / dt
@@ -2210,6 +2265,14 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
       if (CH2Ostock(iCt)+delta_CH2Ostock(iCt)*dt .lt. -1d-5) then
         write(*,*) "yt_debug:     CH2Ostock = ", CH2Ostock(iCt), &
                 "delta_CH2Ostock = ", delta_CH2Ostock(iCt)
+        error stop
+      endif
+# endif
+
+# if defined SEAGRASS_DEBUG_MODE
+      if (DOstock + delta_DOstock*dt .lt. 0.0d0) then
+        write(*,*) 'yt_debug: negative value in (DOstock + delta_DOstock*dt) after respiration calculation'
+        write(*,*) 'yt_debug: (DOstock + delta_DOstock*dt) = ', (DOstock + delta_DOstock*dt), 'Resp_rate = ', Resp_rate
         error stop
       endif
 # endif
@@ -2247,6 +2310,22 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
       delta_SgPBmF(:)    = delta_SgPBmF(:)    - Ungrowth_rate * SgPperC * rSgPBm(:)
       delta_PO4stock(:)  = delta_PO4stock(:)  + Ungrowth_rate * SgPperC * rSgPBm(:)
 #  endif
+
+# if defined SEAGRASS_DEBUG_MODE
+      if (DOstock + delta_DOstock*dt .lt. 0.0d0) then
+        write(*,*) 'yt_debug: negative value in (DOstock + delta_DOstock*dt) after ungrowth calculation'
+        write(*,*) 'yt_debug: (DOstock + delta_DOstock*dt) = ', (DOstock + delta_DOstock*dt), 'Resp_rate = ', Resp_rate
+        error stop
+      endif
+# endif
+
+      if (DOstock + delta_DOstock*dt .le. 0.0d0) then
+        ! if overdraw on DO due to respired mass, get the difference from the ocean
+        ! [mmol.CHEM/m2.hab s]     = [mmol.CHEM/m2.hab s]          - [-umol.DIC/m2.hab]          [1/s] (mmol/1000umol)
+        DO__uptake_rate_from_ocean = DO__uptake_rate_from_ocean    - (DOstock + delta_DOstock*dt) / dt * 0.001d0
+        delta_DOstock = -1d0 * DOstock / dt
+      endif
+
     endif
 
 ! Dieoff from base turnover rate rate -------------------------------------------------------------------------
@@ -2522,23 +2601,23 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
 # endif
 # endif
 
-    if (DICstock(iCt) .lt. 0.0d0) then
+    if (DICstock(iCt) .le. 0.0d0) then
       DICstock(:) = 0.0d0
     endif
-    if (CH2Ostock(iCt) .lt. 0.0d0) then
+    if (CH2Ostock(iCt) .le. 0.0d0) then
       CH2Ostock(:) = 0.0d0
     endif
-    if (DOstock .lt. 0.0d0) then
+    if (DOstock .le. 0.0d0) then
       DOstock = 0.0d0
     endif
 # if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
-    if (NO3stock(iNt) .lt. 0.0d0) then
+    if (NO3stock(iNt) .le. 0.0d0) then
       NO3stock(:) = 0.0d0
     endif
-    if (NH4stock(iNt) .lt. 0.0d0) then
+    if (NH4stock(iNt) .le. 0.0d0) then
       NH4stock(:) = 0.0d0
     endif
-    if (PO4stock(iPt) .lt. 0.0d0) then
+    if (PO4stock(iPt) .le. 0.0d0) then
       PO4stock(:) = 0.0d0
     endif
 # endif
