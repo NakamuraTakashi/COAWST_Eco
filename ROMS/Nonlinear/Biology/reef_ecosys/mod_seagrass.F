@@ -1241,6 +1241,7 @@ MODULE mod_seagrass
     real(8)               :: translocatable_mass        ! [mol.C]                     Biomass that can be translocated between leaf and root as limited by the translocation rate
 
     real(8)               :: ocnDIC                     ! [umol/L]                    Ocean DIC concentration
+    real(8)               :: ocnDO                      ! [umol/L]                    Ocean DO concentration
     real(8)               :: ocnNO3                     ! [umol/L]                    Ocean NO3 concentration
     real(8)               :: ocnNH4                     ! [umol/L]                    Ocean NH4 concentration
     real(8)               :: ocnN                       ! [umol/L]                    NO3 + NH4 concentration of ocean water
@@ -1682,10 +1683,12 @@ MODULE mod_seagrass
     ! ocean_DO__conc              [umol.DO L-1]               DIC concentration of ocean water 
     ! k_lf_DO                     [umol.DO L-1]               Half saturation consentration of DO in water column for respiration
 
+    ocnDO = max(ocean_DO__conc,0.0d0)
+
     ! [umol.DO/m2.hab s]  = [umol.DO/g.lf s] [g.lf/m2.hab] ( Michaelis-Menten term                     )
-    DO_uptake_possible(0) = Lf_DO_uptake_max * LfDryBm     * ocean_DO__conc / (k_lf_DO + ocean_DO__conc)
-    ! [umol.DO/m2.hab s]  = min( [umol.DO/m2.hab s]   ,      [umol.DO/L]     [m/s](1000L/m3)
-    DO_uptake_possible(0) = min( DO_uptake_possible(0), 0.5d0*ocean_DO__conc*dz/dt*1000.0d0 ) ! first order interpolation at low concentration limit to prevent overdraw
+    DO_uptake_possible(0) = Lf_DO_uptake_max * LfDryBm     * ocnDO / (k_lf_DO + ocnDO)
+    ! [umol.DO/m2.hab s]  = min( [umol.DO/m2.hab s]   ,      [umol.DO/L] [m/s](1000L/m3)
+    DO_uptake_possible(0) = min( DO_uptake_possible(0), 0.5d0*ocnDO     *dz/dt*1000.0d0 ) ! first order interpolation at low concentration limit to prevent overdraw
 
 # if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE
     ! DO_uptake_possible(:)       [umol.DO m-2.sg.hab s-1]    DO uptake rate possible in each layer; 0 = water column, 1-Nsed = sediment layers
@@ -1728,7 +1731,8 @@ MODULE mod_seagrass
 # if defined SEAGRASS_DEBUG_MODE
     if (DO_uptake_possible(0) .lt. 0.0d0) then
       write(*,*) 'yt_debug: negative value in DO_uptake_possible(0)'
-      write(*,*) 'yt_debug: DO_uptake_possible(0) = ', DO_uptake_possible(0)
+      write(*,*) 'yt_debug: DO_uptake_possible(0) = ', DO_uptake_possible(0), 'SgCBmF(iCt) = ', SgCBmF(iCt), 'DOstock = ', DOstock &
+              'ocean_DO__conc = ', ocean_DO__conc, 'ocnDO = ', ocnDO
       error stop
     endif
     if (sum(DO_uptake_possible) .lt. 0.0d0) then
