@@ -2817,16 +2817,6 @@ endif
     ! Destroy (erase) initial mass output until net zero is reached, before switching to normal flux
     ! May not properly account for isotope ratios.
 
-    if (InitialC <= 0.0d0) then
-        write(*,*) 'yt_debug: InitialC =', InitialC, 'i =', i, 'j =', j
-    endif
-    if (InitialN <= 0.0d0) then
-        write(*,*) 'yt_debug: InitialN =', InitialN, 'i =', i, 'j =', j
-    endif
-    if (InitialP <= 0.0d0) then
-        write(*,*) 'yt_debug: InitialP =', InitialP, 'i =', i, 'j =', j
-    endif
-
     ! InitialC                    [mmol.C]                    Initial carbon remaining to destroy until net zero
     ! CHEM_uptake_rate_from_ocean [mmol.CHEM m-2.sg.hab s-1]  direction of ocean to seagrass is positive
     ! delta_sed_CHEM(Nsed)        [umol.CHEM L-1 s-1]         Rate of change in CHEM due to flux from roots to sediment (positive means seagrass to sediment)
