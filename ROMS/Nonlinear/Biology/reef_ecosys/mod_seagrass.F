@@ -1732,7 +1732,7 @@ MODULE mod_seagrass
     if (DO_uptake_possible(0) .lt. 0.0d0) then
       write(*,*) 'yt_debug: negative value in DO_uptake_possible(0)'
       write(*,*) 'yt_debug: DO_uptake_possible(0) = ', DO_uptake_possible(0), 'SgCBmF(iCt) = ', SgCBmF(iCt), 'DOstock = ', DOstock &
-              'ocean_DO__conc = ', ocean_DO__conc, 'ocnDO = ', ocnDO
+              , 'ocean_DO__conc = ', ocean_DO__conc, 'ocnDO = ', ocnDO
       error stop
     endif
     if (sum(DO_uptake_possible) .lt. 0.0d0) then
@@ -2319,7 +2319,6 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
       if (DOstock + delta_DOstock*dt .lt. 0.0d0) then
         write(*,*) 'yt_debug: negative value in (DOstock + delta_DOstock*dt) after ungrowth calculation'
         write(*,*) 'yt_debug: (DOstock + delta_DOstock*dt) = ', (DOstock + delta_DOstock*dt), 'Resp_rate = ', Resp_rate
-        error stop
       endif
 # endif
 
