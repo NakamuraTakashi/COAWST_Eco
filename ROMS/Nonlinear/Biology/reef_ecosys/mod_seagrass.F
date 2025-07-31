@@ -162,10 +162,10 @@ MODULE mod_seagrass
 
 # if defined NET_ZERO_MASS_START
 ! >>> Calculate initial seagrass mass balance and destroy (erase) equivalent amount of mass output until net zero is reached, before switching to normal flux <<< !
-    real(8), pointer :: InitialC                                (:,:,:)   ! [mmol.C]                    Initial carbon remaining to destroy until net zero
+    real(8), pointer :: InitialC                                (:,:,:)   ! [mmol.C]                    iSgInitC        Initial carbon remaining to destroy until net zero
 #  if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
-    real(8), pointer :: InitialN                                (:,:,:)   ! [mmol.N]                    Initial nitrogen remaining to destroy until net zero
-    real(8), pointer :: InitialP                                (:,:,:)   ! [mmol.P]                    Initial phosphorus remaining to destroy until net zero
+    real(8), pointer :: InitialN                                (:,:,:)   ! [mmol.N]                    iSgInitN        Initial nitrogen remaining to destroy until net zero
+    real(8), pointer :: InitialP                                (:,:,:)   ! [mmol.P]                    iSgInitP        Initial phosphorus remaining to destroy until net zero
 #  endif
 # endif
 

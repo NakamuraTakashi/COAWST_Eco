@@ -112,6 +112,9 @@
       integer  :: iSgGridResp(Nsg)        ! Seagrass respiration rate per unit ground area (whole grid) [umol.C m-2.grid s-1]
       integer  :: iSgGridNetPhot(Nsg)     ! Seagrass net photosynthesis rate per unit ground area (whole grid) [umol.C m-2.grid s-1]
       integer  :: iSgGridDieoff(Nsg)      ! Seagrass dieoff rate carbon biomass per unit ground area (whole grid) [umol.C m-2.grid s-1]    
+      integer  :: iSgInitC(Nsg)           ! Initial carbon remaining to destroy until net zero  [mmol.C]
+      integer  :: iSgInitN(Nsg)           ! Initial nitrogen remaining to destroy until net zero  [mmol.N]
+      integer  :: iSgInitP(Nsg)           ! Initial phosphorus remaining to destroy until net zero  [mmol.P]
 #endif
 #ifdef MACROALGAE
       integer  :: iAgQC(N_Csp,Nag)
@@ -651,6 +654,18 @@
       DO m=1,Nsg
         ic=ic+1
         iSgGridDieoff(m)=ic
+      END DO
+      DO m=1,Nsg
+        ic=ic+1
+        iSgInitC(m)=ic
+      END DO
+      DO m=1,Nsg
+        ic=ic+1
+        iSgInitN(m)=ic
+      END DO
+      DO m=1,Nsg
+        ic=ic+1
+        iSgInitP(m)=ic
       END DO
 #endif
 #ifdef MACROALGAE
@@ -1229,6 +1244,9 @@
             SGRASS(ng)%GridResp   (m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgGridResp   (m) )
             SGRASS(ng)%GridNetPhot(m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgGridNetPhot(m) )
             SGRASS(ng)%GridDieoff (m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgGridDieoff (m) )
+            SGRASS(ng)%InitialC   (m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgInitC      (m) )
+            SGRASS(ng)%InitialN   (m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgInitN      (m) )
+            SGRASS(ng)%InitialP   (m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgInitP      (m) )
           END DO
 #endif
 #ifdef MACROALGAE  
@@ -1371,6 +1389,9 @@
             OCEAN(ng)%HisBio2d(i,j, iSgGridResp   (m) ) = SGRASS(ng)%GridResp   (m,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgGridNetPhot(m) ) = SGRASS(ng)%GridNetPhot(m,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgGridDieoff (m) ) = SGRASS(ng)%GridDieoff (m,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgInitC      (m) ) = SGRASS(ng)%InitialC   (m,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgInitN      (m) ) = SGRASS(ng)%InitialN   (m,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgInitP      (m) ) = SGRASS(ng)%InitialP   (m,i,j)
           END DO
 #endif
 #ifdef MACROALGAE

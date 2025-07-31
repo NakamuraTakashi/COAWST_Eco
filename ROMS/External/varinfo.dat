@@ -10050,6 +10050,33 @@
   'r2dvar'
   1.0d0
 
+'seagrass_InitialC'                                ! Input/Output
+  'Initial carbon (mmol.C)'
+  'mmol'                                 ! [m2.lf]
+  'seagrass_InitialC, scalar, series'
+  'ocean_time'
+  'iHbio2(iSgInitC(j))'
+  'r2dvar'
+  1.0d0
+
+'seagrass_InitialN'                                ! Input/Output
+  'Initial nitrogen (mmol.N)'
+  'mmol'                                 ! [m2.lf]
+  'seagrass_InitialN, scalar, series'
+  'ocean_time'
+  'iHbio2(iSgInitN(j))'
+  'r2dvar'
+  1.0d0
+
+'seagrass_InitialP'                                ! Input/Output
+  'Initial phosphorus (mmol.P)'
+  'mmol'                                 ! [m2.lf]
+  'seagrass_InitialP, scalar, series'
+  'ocean_time'
+  'iHbio2(iSgInitP(j))'
+  'r2dvar'
+  1.0d0
+
 !----------------------------------------------------------
 ! Macroalgae DiaBio2d parameters
 
