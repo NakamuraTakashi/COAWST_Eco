@@ -577,7 +577,7 @@ MODULE mod_seagrass
     ! SGRASS(ng)%Turnover_rate                        = [0.00002d0     ]                                    ! [umol.C umol-1.C day-1]     Base mass turnover rate (dieoff) in fraction of mass per day                                                  ! tuning
     SGRASS(ng)%Turnover_rate                        = [0.006d0     ]                                    ! [umol.C umol-1.C day-1]     Base mass turnover rate (dieoff) in fraction of mass per day                                                  ! tuning
     ! dieoff when respiration is insufficient
-    SGRASS(ng)%max_anoxic_dieoff_rate               = [ 0.5d0    ]                                    ! [mol.C mol-1.C day-1]       maximum dieoff due to anoxia in fraction of mass per day, represents atypical modes of survival such as anaerobic respiration and cellular canibalism which limits extreme death rates ! tuning
+    SGRASS(ng)%max_anoxic_dieoff_rate               = [ 0.1d0    ]                                    ! [mol.C mol-1.C day-1]       maximum dieoff due to anoxia in fraction of mass per day, represents atypical modes of survival such as anaerobic respiration and cellular canibalism which limits extreme death rates ! tuning
     ! stockpile maximum cap
     SGRASS(ng)%DICstockCap                          = [0.01d0]                                        ! Factor to multiply carbon biomsass to get maximum DIC stock (stock limit = DICstockCap*SgCBmF) 
     SGRASS(ng)%CH2OstockCap                         = [1.0d0]                                         ! Factor to multiply carbon biomsass to get maximum sugar stock (stock limit = CH2OstockCap*SgCBmF) 
@@ -2346,13 +2346,13 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
       ! anoxic_dieoff             [umol.C m-2.sg.hab]         Seagrass dieoff due to anoxia this time step
       ! SgCBmF                    [umol.C m-2.sg.hab]         Seagrass leaf+root carbon-biomass per unit ground area (in seagrass habitat area) updates on fine time interval
 
-      ! ! limit dieoff rate (especially for when DO intake is zero)
-      ! ! max_anoxic_dieoff_rate      [mol.C mol-1.C day-1]       maximum dieoff due to anoxia in fraction of mass per day, represents atypical modes of survival such as anaerobic respiration and cellular canibalism which limits extreme death rates
-      ! ! [mol.C mol-1.C]     = [mol.C mol-1.C day-1] [s]  (day/86400s)
-      ! ! max_dieoff_per_step = max_anoxic_dieoff_rate       * dt / 86400
-      ! if (anoxic_dieoff/SgCBmF(iCt) .gt. max_anoxic_dieoff_rate*dt/86400d0) then
-      !   anoxic_dieoff = SgCBmF(iCt) * max_anoxic_dieoff_rate*dt/86400d0
-      ! endif
+      ! limit dieoff rate (especially for when DO intake is zero)
+      ! max_anoxic_dieoff_rate      [mol.C mol-1.C day-1]       maximum dieoff due to anoxia in fraction of mass per day, represents atypical modes of survival such as anaerobic respiration and cellular canibalism which limits extreme death rates
+      ! [mol.C mol-1.C]     = [mol.C mol-1.C day-1] [s]  (day/86400s)
+      ! max_dieoff_per_step = max_anoxic_dieoff_rate       * dt / 86400
+      if (anoxic_dieoff/SgCBmF(iCt) .gt. max_anoxic_dieoff_rate*dt/86400d0) then
+        anoxic_dieoff = SgCBmF(iCt) * max_anoxic_dieoff_rate*dt/86400d0
+      endif
 
       ! dieoff_rate                 [umol.C m-2.sg.hab s-1]     Seagrass dieoff rate
       dieoff_rate = dieoff_rate + anoxic_dieoff /dt
