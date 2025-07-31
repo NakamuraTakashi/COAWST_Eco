@@ -707,10 +707,12 @@ MODULE mod_seagrass
 
             ! new based on chamber 2012 >>>>>>>>>>>>>>>>>>>
             ! [g.drywt/m2.hab]              = g.drywt / m2.chamber
-            SGRASS(ng)%LfDryBm(species,i,j) = 46.8d0  / 0.45d0 ! from Watanabe chamber experiments 2012
+            ! SGRASS(ng)%LfDryBm(species,i,j) = 46.8d0  / 0.45d0 ! from Watanabe chamber experiments 2012
+            SGRASS(ng)%LfDryBm(species,i,j) = 46.8d0  / 0.45d0 / 100d0 ! 1% of Watanabe chamber experiments 2012
 
             ! [g.drywt/m2.hab]              = g.drywt / m2.chamber
-            SGRASS(ng)%RtDryBm(species,i,j) = 86.5d0  / 0.45d0 ! from Watanabe chamber experiments 2012
+            ! SGRASS(ng)%RtDryBm(species,i,j) = 86.5d0  / 0.45d0 ! from Watanabe chamber experiments 2012
+            SGRASS(ng)%RtDryBm(species,i,j) = 86.5d0  / 0.45d0 / 100d0 ! 1% of Watanabe chamber experiments 2012
 
             ! SGRASS(ng)%LfDryBm(species,i,j) = 0.0d0  ! no seagrass test
             ! SGRASS(ng)%RtDryBm(species,i,j) = 0.0d0  ! no seagrass test
@@ -2814,6 +2816,16 @@ endif
 # if defined NET_ZERO_MASS_START
     ! Destroy (erase) initial mass output until net zero is reached, before switching to normal flux
     ! May not properly account for isotope ratios.
+
+    if (InitialC <= 0.0d0) then
+        write(*,*) 'yt_debug: InitialC =', InitialC, 'i =', i, 'j =', j
+    endif
+    if (InitialN <= 0.0d0) then
+        write(*,*) 'yt_debug: InitialN =', InitialN, 'i =', i, 'j =', j
+    endif
+    if (InitialP <= 0.0d0) then
+        write(*,*) 'yt_debug: InitialP =', InitialP, 'i =', i, 'j =', j
+    endif
 
     ! InitialC                    [mmol.C]                    Initial carbon remaining to destroy until net zero
     ! CHEM_uptake_rate_from_ocean [mmol.CHEM m-2.sg.hab s-1]  direction of ocean to seagrass is positive
