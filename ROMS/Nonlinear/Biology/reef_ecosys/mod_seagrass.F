@@ -792,7 +792,7 @@ MODULE mod_seagrass
             ! SgNperC                     [mol.N mol-1.C]             Species specific seagrass Nitrogen to Carbon ratio
             ! SgPperC                     [mol.P mol-1.C]             Species specific seagrass Phosphorus to Carbon ratio
             ! [mmol.X]                       = [mol.C]                          [mol.X/mol.C]                 [1000 mmol/mol]
-            SGRASS(ng)%InitialC(species,i,j) = SGRASS(ng)%TotSgCBm(species,i,j)                               * 1000.0d0 ! yt_edit to_do need to add this to save/restart parameters?
+            SGRASS(ng)%InitialC(species,i,j) = SGRASS(ng)%TotSgCBm(species,i,j)                               * 1000.0d0
 #  if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
             SGRASS(ng)%InitialN(species,i,j) = SGRASS(ng)%TotSgCBm(species,i,j) * SGRASS(ng)%SgNperC(species) * 1000.0d0
             SGRASS(ng)%InitialP(species,i,j) = SGRASS(ng)%TotSgCBm(species,i,j) * SGRASS(ng)%SgPperC(species) * 1000.0d0
