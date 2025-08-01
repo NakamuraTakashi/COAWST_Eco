@@ -531,6 +531,12 @@ CONTAINS
             SEDECO(ng)%S0  (iS34,k,i,j) = 0.0d0     !S0  (nmol g-1)
 #  endif
           END DO
+          SEDECO(ng)%Sed_Efflux_DO (i,j)  = 0.0d0 ! iSdEfDO   DO  efflux (µmol m-2 s-1)  * direction of sediment to water column is positive
+          SEDECO(ng)%Sed_Efflux_TA (i,j)  = 0.0d0 ! iSdEfTA   Total Alkalinity efflux (µmol m-2 s-1)  * direction of sediment to water column is positive
+          SEDECO(ng)%Sed_Efflux_DIC(i,j)  = 0.0d0 ! iSdEfDIC  DIC efflux (µmol m-2 s-1)  * direction of sediment to water column is positive
+          SEDECO(ng)%Sed_Efflux_NO3(i,j)  = 0.0d0 ! iSdEfNO3  NO3 efflux (µmol m-2 s-1)  * direction of sediment to water column is positive
+          SEDECO(ng)%Sed_Efflux_NH4(i,j)  = 0.0d0 ! iSdEfNH4  NH4 efflux (µmol m-2 s-1)  * direction of sediment to water column is positive
+          SEDECO(ng)%Sed_Efflux_PO4(i,j)  = 0.0d0 ! iSdEfPO4  PO4 efflux (µmol m-2 s-1)  * direction of sediment to water column is positive
         END DO
       END DO
 # endif

@@ -11410,7 +11410,7 @@
   'umolDO m-2 s-1'                                 ! [umol.DO m-2.gridarea s-1]
   'sediment_Efflux_DO, scalar, series'
   'ocean_time'
-  'iHbio2(iSdEfDO(j))'
+  'iHbio2(iSdEfDO)'
   'r2dvar'
   1.0d0
 
@@ -11419,7 +11419,7 @@
   'umolTA m-2 s-1'                                 ! [umol.TA m-2.gridarea s-1]
   'sediment_Efflux_TA, scalar, series'
   'ocean_time'
-  'iHbio2(iSdEfTA(j))'
+  'iHbio2(iSdEfTA)'
   'r2dvar'
   1.0d0
 
@@ -11428,7 +11428,7 @@
   'umolDIC m-2 s-1'                                 ! [umol.DIC m-2.gridarea s-1]
   'sediment_Efflux_DIC, scalar, series'
   'ocean_time'
-  'iHbio2(iSdEfDIC(j))'
+  'iHbio2(iSdEfDIC)'
   'r2dvar'
   1.0d0
 
@@ -11437,7 +11437,7 @@
   'umolNO3 m-2 s-1'                                 ! [umol.NO3 m-2.gridarea s-1]
   'sediment_Efflux_NO3, scalar, series'
   'ocean_time'
-  'iHbio2(iSdEfNO3(j))'
+  'iHbio2(iSdEfNO3)'
   'r2dvar'
   1.0d0
 
@@ -11446,7 +11446,7 @@
   'umolNH4 m-2 s-1'                                 ! [umol.NH4 m-2.gridarea s-1]
   'sediment_Efflux_NH4, scalar, series'
   'ocean_time'
-  'iHbio2(iSdEfNH4(j))'
+  'iHbio2(iSdEfNH4)'
   'r2dvar'
   1.0d0
 
@@ -11455,7 +11455,7 @@
   'umolPO4 m-2 s-1'                                 ! [umol.PO4 m-2.gridarea s-1]
   'sediment_Efflux_PO4, scalar, series'
   'ocean_time'
-  'iHbio2(iSdEfPO4(j))'
+  'iHbio2(iSdEfPO4)'
   'r2dvar'
   1.0d0
 
