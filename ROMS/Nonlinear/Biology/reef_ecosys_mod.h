@@ -693,8 +693,21 @@
           iAgQP(isp,m)=ic
         END DO
       END DO
-
 #endif
+#ifdef SEDIMENT_ECOSYS  
+      ic=ic+1
+      iSdEfDO=ic
+      ic=ic+1
+      iSdEfTA=ic
+      ic=ic+1
+      iSdEfDIC=ic
+      ic=ic+1
+      iSdEfNO3=ic
+      ic=ic+1
+      iSdEfNH4=ic
+      ic=ic+1
+      iSdEfPO4=ic
+      #endif
 !
 !  Set number of 2D history terms.
 !
@@ -829,18 +842,6 @@
         ic=ic+1
         iSdS0(isp)=ic
       END DO  
-      ic=ic+1
-      iSdEfDO=ic
-      ic=ic+1
-      iSdEfTA=ic
-      ic=ic+1
-      iSdEfDIC=ic
-      ic=ic+1
-      iSdEfNO3=ic
-      ic=ic+1
-      iSdEfNH4=ic
-      ic=ic+1
-      iSdEfPO4=ic
 !
 !  Set number of 3D biological sediment history terms.
 !
