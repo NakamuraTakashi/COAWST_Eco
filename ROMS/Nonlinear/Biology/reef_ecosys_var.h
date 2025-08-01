@@ -2303,6 +2303,18 @@
    &                    TRIM(ADJUSTL(Vinfo(5)))
                 END DO
                 varid=varid+1
+              CASE ('iHbio2(iSdEfDO)')
+                iHbio2(iSdEfDO)=varid
+              CASE ('iHbio2(iSdEfTA)')
+                iHbio2(iSdEfTA)=varid
+              CASE ('iHbio2(iSdEfDIC)')
+                iHbio2(iSdEfDIC)=varid
+              CASE ('iHbio2(iSdEfNO3)')
+                iHbio2(iSdEfNO3)=varid
+              CASE ('iHbio2(iSdEfNH4)')
+                iHbio2(iSdEfNH4)=varid
+              CASE ('iHbio2(iSdEfPO4)')
+                iHbio2(iSdEfPO4)=varid
 #endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 

@@ -287,6 +287,12 @@
       integer :: iSdH2S(N_Ssp)       !! hydrogen sulfide         (µmol l-1)
       integer :: iSdSO4(N_Ssp)       !! sulfate   (µmol l-1)
       integer :: iSdS0 (N_Ssp)       !! sulfur    (nmol g-1)
+      integer :: iSdEfDO       !! DO  efflux (µmol m-2 s-1)
+      integer :: iSdEfTA       !! TA  efflux (µmol m-2 s-1)
+      integer :: iSdEfDIC      !! DIC efflux (µmol m-2 s-1)
+      integer :: iSdEfNO3      !! NO3 efflux (µmol m-2 s-1)
+      integer :: iSdEfNH4      !! NH4 efflux (µmol m-2 s-1)
+      integer :: iSdEfPO4      !! PO4 efflux (µmol m-2 s-1)
 #endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 
@@ -823,6 +829,18 @@
         ic=ic+1
         iSdS0(isp)=ic
       END DO  
+      ic=ic+1
+      iSdEfDO=ic
+      ic=ic+1
+      iSdEfTA=ic
+      ic=ic+1
+      iSdEfDIC=ic
+      ic=ic+1
+      iSdEfNO3=ic
+      ic=ic+1
+      iSdEfNH4=ic
+      ic=ic+1
+      iSdEfPO4=ic
 !
 !  Set number of 3D biological sediment history terms.
 !
@@ -1292,6 +1310,12 @@
             SEDECO(ng)%SO4 (:,k,i,j) = OCEAN(ng)%HisBiosed3d(i,j,k,iSdSO4(1):iSdSO4(N_Ssp) )
             SEDECO(ng)%S0  (:,k,i,j) = OCEAN(ng)%HisBiosed3d(i,j,k,iSdS0 (1):iSdS0 (N_Ssp) )
           END DO
+          SEDECO(ng)%Sed_Efflux_DO (i,j) = OCEAN(ng)%HisBio2d(i,j,iSdEfDO)
+          SEDECO(ng)%Sed_Efflux_TA (i,j) = OCEAN(ng)%HisBio2d(i,j,iSdEfTA)
+          SEDECO(ng)%Sed_Efflux_DIC(i,j) = OCEAN(ng)%HisBio2d(i,j,iSdEfDIC)
+          SEDECO(ng)%Sed_Efflux_NO3(i,j) = OCEAN(ng)%HisBio2d(i,j,iSdEfNO3)
+          SEDECO(ng)%Sed_Efflux_NH4(i,j) = OCEAN(ng)%HisBio2d(i,j,iSdEfNH4)
+          SEDECO(ng)%Sed_Efflux_PO4(i,j) = OCEAN(ng)%HisBio2d(i,j,iSdEfPO4)
         END DO
       END DO
 #endif
@@ -1437,6 +1461,12 @@
             OCEAN(ng)%HisBiosed3d(i,j,k,iSdSO4(1):iSdSO4(N_Ssp) ) = SEDECO(ng)%SO4 (:,k,i,j)
             OCEAN(ng)%HisBiosed3d(i,j,k,iSdS0 (1):iSdS0 (N_Ssp) ) = SEDECO(ng)%S0  (:,k,i,j)
           END DO
+          OCEAN(ng)%HisBio2d(i,j,iSdEfDO)  = SEDECO(ng)%Sed_Efflux_DO (i,j)
+          OCEAN(ng)%HisBio2d(i,j,iSdEfTA)  = SEDECO(ng)%Sed_Efflux_TA (i,j)
+          OCEAN(ng)%HisBio2d(i,j,iSdEfDIC) = SEDECO(ng)%Sed_Efflux_DIC(i,j)
+          OCEAN(ng)%HisBio2d(i,j,iSdEfNO3) = SEDECO(ng)%Sed_Efflux_NO3(i,j)
+          OCEAN(ng)%HisBio2d(i,j,iSdEfNH4) = SEDECO(ng)%Sed_Efflux_NH4(i,j)
+          OCEAN(ng)%HisBio2d(i,j,iSdEfPO4) = SEDECO(ng)%Sed_Efflux_PO4(i,j)
         END DO
       END DO
 #endif

@@ -94,7 +94,11 @@ END SUBROUTINE allocate_reef_ecosys
     write(*,*) 'yt_debug: mod_reef_ecosys.F initialize_reef_ecosys() finished coral init'
 # endif
 # ifdef SEDIMENT_ECOSYS
-    CALL initialize_sedecosys(ng, LBi, UBi, LBj, UBj, start_of_new_run)
+    CALL initialize_sedecosys(ng, LBi, UBi, LBj, UBj    &
+                            , start_of_new_run          & ! TRUE = initialize coral, seagass, macroalgae, sediment from start; FALSE = continue from previous run
+                            , XI_size, ETA_size         & ! grid size XI-direction (meters); grid size ETA-direction (meters)
+                            , p_sand                    & ! sand coverage (sand area/grid area)
+                            )
     write(*,*) 'yt_debug: mod_reef_ecosys.F initialize_reef_ecosys() finished sediment init'
 # endif
 # ifdef SEAGRASS
@@ -1211,6 +1215,7 @@ END SUBROUTINE allocate_reef_ecosys
         CALL sedecosys       &
 !         input parameters
           ( ng, i, j         &   ! ng: nested grid number; i,j: position
+          , p_sand           &   !
           , datei            &   ! Date (days since x or elapsed days)
           , dtsed            &   ! Time step (sec)
           , Tmp(1)           &   ! Tmp: Temperature (oC)
