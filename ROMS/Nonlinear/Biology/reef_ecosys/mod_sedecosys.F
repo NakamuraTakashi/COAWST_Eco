@@ -240,7 +240,7 @@ CONTAINS
     logical, intent(in) :: start_of_new_run               ! TRUE = initialize coral, seagass, macroalgae, sediment from start; FALSE = continue from previous run
     real(8), intent(in) :: XI_size (    LBi:UBi,LBj:UBj)  ! grid size XI-direction (meters)
     real(8), intent(in) :: ETA_size(    LBi:UBi,LBj:UBj)  ! grid size ETA-direction (meters)
-    real(8), intent(in) :: p_sand(Nsg,LBi:UBi,LBj:UBj)    ! sand coverage (sed area/grid area)
+    real(8), intent(in) :: p_sand(      LBi:UBi,LBj:UBj)    ! sand coverage (sed area/grid area)
 
     integer k,i,j ! symbols for loop calculations
     !! depth : Diffusive Boundary Layer (DBL)
@@ -1574,19 +1574,19 @@ CONTAINS
     ! TotalFlux / GridArea
     ! Flux * p_sand
     ! [µmol m-2 s-1]    = [nmol cm-2 s-1] * (umol/1000nmol) (10000cm2/m2)
-    Sed_Efflux_DO (i,j) = -10d0 * Flux_DO  * p_sand  ! DO  efflux (µmol m-2 s-1)  * direction of sediment to water column is positive
-    Sed_Efflux_TA (i,j) = -10d0 * Flux_TA  * p_sand  ! Total Alkalinity efflux (µmol m-2 s-1)  * direction of sediment to water column is positive
-    Sed_Efflux_DIC(i,j) = -10d0 * Flux_DIC(iCt) * p_sand  ! DIC efflux (µmol m-2 s-1)  * direction of sediment to water column is positive
-    Sed_Efflux_NO3(i,j) = -10d0 * Flux_NO3(iNt) * p_sand  ! NO3 efflux (µmol m-2 s-1)  * direction of sediment to water column is positive
-    Sed_Efflux_NH4(i,j) = -10d0 * Flux_NH4(iNt) * p_sand  ! NH4 efflux (µmol m-2 s-1)  * direction of sediment to water column is positive
-    Sed_Efflux_PO4(i,j) = -10d0 * Flux_PO4(iPt) * p_sand  ! PO4 efflux (µmol m-2 s-1)  * direction of sediment to water column is positive
-    ! Sed_Efflux_DOC(i,j) = -10d0 * Flux_DOC * p_sand  ! DOC(f,s) effluxes (µmol m-2 s-1) * direction of sediment to water column is positive
-    ! Sed_Efflux_POC(i,j) = -10d0 * Flux_POC * p_sand  ! POC(f,s) effluxes (µmol m-2 s-1) * direction of sediment to water column is positive
-    ! Sed_Efflux_DON(i,j) = -10d0 * Flux_DON * p_sand  ! DON(f,s) effluxes (µmol m-2 s-1) * direction of sediment to water column is positive
-    ! Sed_Efflux_PON(i,j) = -10d0 * Flux_PON * p_sand  ! PON(f,s) effluxes (µmol m-2 s-1) * direction of sediment to water column is positive
-    ! Sed_Efflux_DOP(i,j) = -10d0 * Flux_DOP * p_sand  ! DOP(f,s) effluxes (µmol m-2 s-1) * direction of sediment to water column is positive
-    ! Sed_Efflux_POP(i,j) = -10d0 * Flux_POP * p_sand  ! POP(f,s) effluxes (µmol m-2 s-1) * direction of sediment to water column is positive
-    ! Sed_Efflux_PIC(i,j) = -10d0 * Flux_PIC * p_sand  ! CaCO3 effluxes (µmol m-2 s-1) * direction of sediment to water column is positive
+    SEDECO(ng)%Sed_Efflux_DO (i,j) = -10d0 * Flux_DO  * p_sand  ! DO  efflux (µmol m-2 s-1)  * direction of sediment to water column is positive
+    SEDECO(ng)%Sed_Efflux_TA (i,j) = -10d0 * Flux_TA  * p_sand  ! Total Alkalinity efflux (µmol m-2 s-1)  * direction of sediment to water column is positive
+    SEDECO(ng)%Sed_Efflux_DIC(i,j) = -10d0 * Flux_DIC(iCt) * p_sand  ! DIC efflux (µmol m-2 s-1)  * direction of sediment to water column is positive
+    SEDECO(ng)%Sed_Efflux_NO3(i,j) = -10d0 * Flux_NO3(iNt) * p_sand  ! NO3 efflux (µmol m-2 s-1)  * direction of sediment to water column is positive
+    SEDECO(ng)%Sed_Efflux_NH4(i,j) = -10d0 * Flux_NH4(iNt) * p_sand  ! NH4 efflux (µmol m-2 s-1)  * direction of sediment to water column is positive
+    SEDECO(ng)%Sed_Efflux_PO4(i,j) = -10d0 * Flux_PO4(iPt) * p_sand  ! PO4 efflux (µmol m-2 s-1)  * direction of sediment to water column is positive
+    ! SEDECO(ng)%Sed_Efflux_DOC(i,j) = -10d0 * Flux_DOC * p_sand  ! DOC(f,s) effluxes (µmol m-2 s-1) * direction of sediment to water column is positive
+    ! SEDECO(ng)%Sed_Efflux_POC(i,j) = -10d0 * Flux_POC * p_sand  ! POC(f,s) effluxes (µmol m-2 s-1) * direction of sediment to water column is positive
+    ! SEDECO(ng)%Sed_Efflux_DON(i,j) = -10d0 * Flux_DON * p_sand  ! DON(f,s) effluxes (µmol m-2 s-1) * direction of sediment to water column is positive
+    ! SEDECO(ng)%Sed_Efflux_PON(i,j) = -10d0 * Flux_PON * p_sand  ! PON(f,s) effluxes (µmol m-2 s-1) * direction of sediment to water column is positive
+    ! SEDECO(ng)%Sed_Efflux_DOP(i,j) = -10d0 * Flux_DOP * p_sand  ! DOP(f,s) effluxes (µmol m-2 s-1) * direction of sediment to water column is positive
+    ! SEDECO(ng)%Sed_Efflux_POP(i,j) = -10d0 * Flux_POP * p_sand  ! POP(f,s) effluxes (µmol m-2 s-1) * direction of sediment to water column is positive
+    ! SEDECO(ng)%Sed_Efflux_PIC(i,j) = -10d0 * Flux_PIC * p_sand  ! CaCO3 effluxes (µmol m-2 s-1) * direction of sediment to water column is positive
 
 ! ********************************************************************* !
 !   Print section

@@ -59,9 +59,14 @@ END SUBROUTINE allocate_reef_ecosys
 !!! **********************************************************************
   SUBROUTINE initialize_reef_ecosys(ng, LBi, UBi, LBj, UBj &
       , start_of_new_run    &   ! TRUE = initialize coral, seagass, macroalgae, sediment from start; FALSE = continue from previous run
-# ifdef SEAGRASS
+# if defined SEAGRASS || defined SEDIMENT_ECOSYS
       , XI_size, ETA_size   &   ! grid size XI-direction (meters); grid size ETA-direction (meters)
+# endif
+# if defined SEAGRASS
       , p_sgrass            &   ! seagrass coverage (habitat area in grid / grid area)
+# endif
+# if defined SEDIMENT_ECOSYS
+      , p_sand              &   ! sand coverage (sand area in grid / grid area)
 # endif
     )
 
@@ -81,10 +86,15 @@ END SUBROUTINE allocate_reef_ecosys
 
     integer, intent(in) :: ng, LBi, UBi, LBj, UBj
     logical, intent(in) :: start_of_new_run
-# ifdef SEAGRASS
+# if defined SEAGRASS || defined SEDIMENT_ECOSYS
     real(8), intent(in) :: XI_size (    LBi:UBi,LBj:UBj)   ! grid size XI-direction (meters)
     real(8), intent(in) :: ETA_size(    LBi:UBi,LBj:UBj)   ! grid size ETA-direction (meters)
+# endif
+# ifdef SEAGRASS
     real(8), intent(in) :: p_sgrass(Nsg,LBi:UBi,LBj:UBj)   ! seagrass coverage (habitat area in grid / grid area)
+# endif
+# ifdef SEDIMENT_ECOSYS
+    real(8), intent(in) :: p_sand(      LBi:UBi,LBj:UBj)   ! sand coverage (sand area in grid / grid area)
 # endif
 
     write(*,*) 'yt_debug: mod_reef_ecosys.F initialize_reef_ecosys() start_of_new_run =', start_of_new_run
