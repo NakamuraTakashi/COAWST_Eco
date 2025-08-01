@@ -707,7 +707,7 @@
       iSdEfNH4=ic
       ic=ic+1
       iSdEfPO4=ic
-      #endif
+#endif
 !
 !  Set number of 2D history terms.
 !
