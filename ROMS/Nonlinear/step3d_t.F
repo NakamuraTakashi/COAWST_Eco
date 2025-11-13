@@ -398,6 +398,7 @@
       JLB=BOUNDS(ng)%LBj(-1)
       JUB=BOUNDS(ng)%UBj(-1)
 # endif
+# if !defined OFFLINE && !defined OFFLINE_BIOLOGY /*SKIP 3D tracer advection term*/
 !
 !-----------------------------------------------------------------------
 !  Time-step horizontal advection term.
@@ -412,6 +413,8 @@
 #  define I_RANGE Istr,Iend
 #  define J_RANGE Jstr,Jend
 # endif
+      !$acc kernels
+      !$acc loop independent collapse(3)
       DO k=1,N(ng)
         DO j=J_RANGE
           DO i=I_RANGE
@@ -419,6 +422,7 @@
           END DO
         END DO
       END DO
+      !$acc end kernels
 # undef I_RANGE
 # undef J_RANGE
 # if defined TS_MPDATA || defined TS_HSIMT
@@ -449,6 +453,8 @@
 #  endif
 # endif
 
+      !$acc kernels
+      !$acc loop independent
 # ifdef OFFLINE_BIOLOGY
       T_LOOP : DO ibt=1,NBT
         itrc=idbio(ibt)
@@ -458,6 +464,7 @@
 !
       T_LOOP : DO itrc=1,NT(ng)
 # endif
+        !$acc loop independent
         K_LOOP : DO k=1,N(ng)
 
 # if defined TS_C2HADVECTION
@@ -525,6 +532,7 @@
 !  Fourth-order, centered differences horizontal advective fluxes.
 #  endif
 !
+          !$acc loop independent
           DO j=Jstr,Jend
             DO i=Istrm1,Iendp2
               FX(i,j)=t(i  ,j,k,3,itrc)-                                &
@@ -549,6 +557,7 @@
             END IF
           END IF
 !
+          !$acc loop independent
           DO j=Jstr,Jend
             DO i=Istr-1,Iend+1
 #  if defined TS_U3HADVECTION
@@ -568,6 +577,7 @@
 !
           cff1=1.0_r8/6.0_r8
           cff2=1.0_r8/3.0_r8
+          !$acc loop independent
           DO j=Jstr,Jend
             DO i=Istr,Iend+1
 #  ifdef TS_U3HADVECTION
@@ -586,6 +596,7 @@
             END DO
           END DO
 !
+          !$acc loop independent
           DO j=Jstrm1,Jendp2
             DO i=Istr,Iend
               FE(i,j)=t(i,j  ,k,3,itrc)-                                &
@@ -796,6 +807,7 @@
 # endif
         END DO K_LOOP
       END DO T_LOOP
+      !$acc end kernels
 !
 !-----------------------------------------------------------------------
 !  Time-step vertical advection term.
@@ -1278,7 +1290,8 @@
                     cff3=SOURCES(ng)%Tsrc(is,k,itrc)
 #  endif
                   ELSE
-                    cff3=t(Isrc,Jsrc,k,3,itrc)
+!                    cff3=t(Isrc,Jsrc,k,3,itrc)
+                    cff3=0.0_r8
                   END IF
                   t(Isrc,Jsrc,k,nnew,itrc)=t(Isrc,Jsrc,k,nnew,itrc)+    &
      &                                     cff*SOURCES(ng)%Qsrc(is,k)*  &
@@ -1301,7 +1314,8 @@
               !    [mol/L]
               cff3=SOURCES(ng)%Tsgd(itrc) ! if tracer defined, concentration in from river input
             ELSE
-              cff3=t(i,j,1,3,itrc)  ! if tracer not defined, concentration in is equal to current concentration
+!              cff3=t(i,j,1,3,itrc)  ! if tracer not defined, concentration in is equal to current concentration
+              cff3=0.0_r8
             END IF
             ![m mol/L]      = [m mol/L]          +
             t(i,j,1,nnew,itrc)=t(i,j,1,nnew,itrc)+                 &
@@ -1812,6 +1826,8 @@
 !  floats random walk.
 !-----------------------------------------------------------------------
 !
+      !$acc kernels
+      !$acc loop independent collapse(2)
       DO j=JstrR,JendR
         DO i=IstrR,IendR
           DO k=1,N(ng)
@@ -1819,6 +1835,7 @@
           END DO
         END DO
       END DO
+      !$acc end kernels
 !
 !  Apply periodic boundary conditions.
 !
@@ -1836,6 +1853,7 @@
      &                    dAktdz)
 #  endif
 # endif
+# endif /* !defined OFFLINE && !defined OFFLINE_BIOLOGY */
 
       RETURN
       END SUBROUTINE step3d_t_tile
