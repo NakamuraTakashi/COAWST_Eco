@@ -1280,7 +1280,7 @@
 
       integer, intent(inout) :: Nval
 
-      character (len=256), dimension(200), intent(inout) :: Cval
+      character (len=256), dimension(1000), intent(inout) :: Cval
 
       real(r8), dimension(200), intent(inout) :: Rval
 !

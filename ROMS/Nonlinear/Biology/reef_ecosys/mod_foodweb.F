@@ -86,6 +86,8 @@ CONTAINS
     , Warg           &   ! Aragonite saturation state
     )
 
+  !$acc routine seq
+
 !-----------------------------------------------------------------------
 !
     USE mod_reef_ecosys_param
@@ -162,7 +164,21 @@ CONTAINS
     real(8), intent(out) :: Warg           ! Aragonite saturation state
 
 !!!------------Set parameters  ----------------------------------
-
+    
+!---- Stoichiometric parameters for phytoplankton and zooplankton  --------------------
+! Redfield Ratio (1934) C:N:P -> C:N=6.6  C:P=106    N:P=16
+! Martiny et al  (2014) C:N:P -> C:N=7.4  C:P=163    N:P=22
+! GLODAP Data           C:N:P -> C:N=9.2  C:P=131.9  N:P=14.4
+!                                        Dnfl        Dtm         Ccl         Cya
+    real(8), parameter :: rNCp(4)  = [ 16d0/106d0, 16d0/106d0, 16d0/106d0, 16d0/106d0 ] ! (no dim.) Phy N:C ratio
+    real(8), parameter :: rPCp(4)  = [  1d0/106d0,  1d0/106d0,  1d0/106d0,  1d0/106d0 ] ! (no dim.) Phy P:C ratio
+    real(8), parameter :: rCaCp(4) = [      0.0d0,      0.0d0,      0.5d0,      0.0d0 ]  ! ***** (no dim.) CaCO3:OrgC ratio !!! Need Ref!!!!!!!!!!
+  !                                        Gzoo
+    real(8), parameter :: rNCz(1)  = [ 16d0/106d0 ]    ! (no dim.) Zoo  N:C ratio
+    real(8), parameter :: rPCz(1)  = [  1d0/106d0 ]    ! (no dim.) Zoo  P:C ratio
+  !  real(8), parameter :: rNCz(1)  = [ 16d0/300d0 ]    ! (no dim.) Zoo  N:C ratio  !! For mass balance test
+  !  real(8), parameter :: rPCz(1)  = [  1d0/300d0 ]    ! (no dim.) Zoo  P:C ratio  !! For mass balance test
+  
 !------- Phytoplankton parameters ------------------------
 !
 !  Phytoplankton photosynthesis Parameter         
@@ -767,14 +783,14 @@ CONTAINS
     , POP(:,:)          &   ! Particulate organic phosporius (POP: umol L-1 or nmol g(DW)-1 *solid)
     , PIC(:,iDead)      &   ! PIC (N_Csp,Npim): Particulate inorganic carbon (PIC: umolC L-1), coccolith (CaCO3)
     , Mn2               &   ! Mn2+ (umol L-1) 
-    , MnO2              &   ! MnO2 (nmol g-1) *solid
+    , MnO2              &   ! MnO2 (umol L-1) *solid
     , Fe2               &   ! Fe2+ (umol L-1) 
-    , FeS(:)            &   ! FeS (nmol g(DW)-1) *solid
-    , FeS2(:)           &   ! FeS2 (nmol g(DW)-1) *solid
-    , FeOOH             &   ! FeOOH (nmol g(DW)-1) *solid
-    , FeOOH_PO4(:)      &   ! FeOOH=PO4 (nmol g(DW)-1) *solid
+    , FeS(:)            &   ! FeS (umol L-1) *solid
+    , FeS2(:)           &   ! FeS2 (umol L-1) *solid
+    , FeOOH             &   ! FeOOH (umol L-1) *solid
+    , FeOOH_PO4(:)      &   ! FeOOH=PO4 (umol L-1) *solid
     , H2S(:)            &   ! H2S (umol L-1) 
-    , S0(:)             &   ! S (nmol g(DW)-1) *solid
+    , S0(:)             &   ! S (umol L-1) *solid
     , SO4(:)            &   ! SO42- (umol L-1) 
    ! input and output parameters
     , dDOx_dt           &   ! d[O2]/dt  (umol L-1 s-1) 
@@ -791,14 +807,14 @@ CONTAINS
     , dPOP_dt(:,:)      &   ! dPOP/dt (umol L-1 s-1) or (nmol g(DW)-1) *solid
     , dPIC_dt(:,iDead)  &   ! d CaCO3/dt (umol L-1 s-1) or (nmol g(DW)-1) *solid
     , dMn2_dt           &   ! d[Mn2+]/dt (umol L-1 s-1)
-    , dMnO2_dt          &   ! d[MnO2]/dt (nmol g(DW)-1 s-1) *solid
+    , dMnO2_dt          &   ! d[MnO2]/dt (umol L-1 s-1) *solid
     , dFe2_dt           &   ! d[Fe2+]/dt (umol L-1 s-1)
-    , dFeS_dt(:)        &   ! d[FeS]/dt (nmol g(DW)-1 s-1) *solid
-    , dFeS2_dt(:)       &   ! d[FeS2]/dt (nmol g(DW)-1 s-1) *solid
-    , dFeOOH_dt         &   ! d[FeOOH]/dt (nmol g(DW)-1 s-1) *solid
-    , dFeOOH_PO4_dt(:)  &   ! d[FeOOH=O4]/dt (nmol g(DW)-1 s-1) *solid
+    , dFeS_dt(:)        &   ! d[FeS]/dt (umol L-1 s-1) *solid
+    , dFeS2_dt(:)       &   ! d[FeS2]/dt (umol L-1 s-1) *solid
+    , dFeOOH_dt         &   ! d[FeOOH]/dt (umol L-1 s-1) *solid
+    , dFeOOH_PO4_dt(:)  &   ! d[FeOOH=O4]/dt (umol L-1 s-1) *solid
     , dH2S_dt(:)        &   ! d[H2S]/dt (umol L-1 s-1)
-    , dS0_dt(:)         &   ! d[S]/dt (nmol g(DW)-1 s-1) *solid
+    , dS0_dt(:)         &   ! d[S]/dt (umol L-1 s-1) *solid
     , dSO4_dt(:)        &   ! d[SO42-]/dt (umol L-1 s-1)
     ! output parameters
     , pH                &   ! pH (total scale)
