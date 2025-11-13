@@ -1018,9 +1018,21 @@
                 DO k=1,N(ng)-1
                   FC(Isrc,k)=FC(Isrc,k)+0.5_r8*                         &
      &                       (SOURCES(ng)%Qsrc(is,k  )*                 &
+#   ifdef ONE_TRACER_SOURCE
+     &                        SOURCES(ng)%Tsrc(itrc)+                   &
+#   elif defined TWO_D_TRACER_SOURCE
+     &                        SOURCES(ng)%Tsrc(is,itrc)+                &
+#   else
      &                        SOURCES(ng)%Tsrc(is,k  ,itrc)+            &
+#   endif
      &                        SOURCES(ng)%Qsrc(is,k+1)*                 &
+#   ifdef ONE_TRACER_SOURCE
+     &                        SOURCES(ng)%Tsrc(itrc))
+#   elif defined TWO_D_TRACER_SOURCE
+     &                        SOURCES(ng)%Tsrc(is,itrc))
+#   else
      &                        SOURCES(ng)%Tsrc(is,k+1,itrc))
+#   endif
                 END DO
               END IF
             END DO
