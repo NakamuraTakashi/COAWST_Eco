@@ -18,6 +18,7 @@
       USE mod_coral
       USE mod_seagrass
       USE mod_macroalgae
+      USE mod_bivalve
 !
       implicit none
 !
@@ -112,6 +113,22 @@
       integer  :: iAgQN(N_Nsp,Nag)
       integer  :: iAgQP(N_Psp,Nag)
 #endif
+#ifdef BIVALVE
+      integer  :: iBvDens(Nbv)
+      integer  :: iBvQCe (N_Csp,Nbv)
+      integer  :: iBvQCv (N_Csp,Nbv)
+      integer  :: iBvQCr (N_Csp,Nbv)
+      integer  :: iBvQCh (N_Csp,Nbv)
+      integer  :: iBvQNe (N_Nsp,Nbv)
+      integer  :: iBvQNv (N_Nsp,Nbv)
+      integer  :: iBvQNr (N_Nsp,Nbv)
+      integer  :: iBvQNh (N_Nsp,Nbv)
+      integer  :: iBvQPe (N_Psp,Nbv)
+      integer  :: iBvQPv (N_Psp,Nbv)
+      integer  :: iBvQPr (N_Psp,Nbv)
+      integer  :: iBvQPh (N_Psp,Nbv)
+      integer  :: iBvCaCO3(N_Csp,Nbv)
+# endif
 !
 !  Biological 3D Histrory variable IDs.
 !
@@ -172,6 +189,15 @@
       integer  :: iWarg                       ! aragonite saturation state
       integer  :: iWcal                       ! calcite saturation state
 
+# ifdef BIVALVE
+      integer  :: iBvR (Nbv)
+      integer  :: iBvV (Nbv)
+      integer  :: iBvL (Nbv)
+      integer  :: iBvWd(Nbv)
+      integer  :: iBvWw(Nbv)
+      integer  :: iBvWt(Nbv)
+# endif
+!
 !!! mons light model >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>KM:Add
 # ifdef LIGHT_MODEL
       integer  :: iLight                      ! photon flux density
@@ -649,10 +675,90 @@
 !  Initialize 3D biology indices.
 !
       ic=0     ! ic reset
-!#ifdef CARBON_ISOTOPE
-!      ic=ic+1
-!      id13C=ic  ! +1
-!#endif
+#ifdef BIVALVE
+      DO m=1,Nbv
+        ic=ic+1
+        iBvDens(m)=ic
+      END DO
+      DO m=1,Nbv
+        DO isp=1,N_Csp     
+          ic=ic+1
+          iBvQCe(isp,m)=ic
+        END DO
+      END DO
+      DO m=1,Nbv
+        DO isp=1,N_Csp     
+          ic=ic+1
+          iBvQCv(isp,m)=ic
+        END DO
+      END DO
+      DO m=1,Nbv
+        DO isp=1,N_Csp     
+          ic=ic+1
+          iBvQCr(isp,m)=ic
+        END DO
+      END DO
+      DO m=1,Nbv
+        DO isp=1,N_Csp     
+          ic=ic+1
+          iBvQCh(isp,m)=ic
+        END DO
+      END DO
+      DO m=1,Nbv
+        DO isp=1,N_Nsp     
+          ic=ic+1
+          iBvQNe(isp,m)=ic
+        END DO
+      END DO
+      DO m=1,Nbv
+        DO isp=1,N_Nsp     
+          ic=ic+1
+          iBvQNv(isp,m)=ic
+        END DO
+      END DO
+      DO m=1,Nbv
+        DO isp=1,N_Nsp     
+          ic=ic+1
+          iBvQNr(isp,m)=ic
+        END DO
+      END DO
+      DO m=1,Nbv
+        DO isp=1,N_Nsp     
+          ic=ic+1
+          iBvQNh(isp,m)=ic
+        END DO
+      END DO
+      DO m=1,Nbv
+        DO isp=1,N_Psp     
+          ic=ic+1
+          iBvQPe(isp,m)=ic
+        END DO
+      END DO
+      DO m=1,Nbv
+        DO isp=1,N_Psp     
+          ic=ic+1
+          iBvQPv(isp,m)=ic
+        END DO
+      END DO
+      DO m=1,Nbv
+        DO isp=1,N_Psp     
+          ic=ic+1
+          iBvQPr(isp,m)=ic
+        END DO
+      END DO
+      DO m=1,Nbv
+        DO isp=1,N_Psp     
+          ic=ic+1
+          iBvQPh(isp,m)=ic
+        END DO
+      END DO
+      DO m=1,Nbv
+        DO isp=1,N_Csp     
+          ic=ic+1
+          iBvCaCO3(isp,m)=ic
+        END DO
+      END DO
+#endif
 
 !  Set number of 3D history terms.
 !
@@ -919,51 +1025,77 @@
 !!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<KM:Add
 
 # ifdef CARBON_ISOTOPE
-      ic=ic+1
-      iDICd13C=ic  ! +1
-      DO m=1,Ndom
-        ic=ic+1
-        iDOCd13C(m)
-      END DO
-      DO m=1,Npom
-        ic=ic+1
-        iPOCd13C(m)
-      END DO
-      DO m=1,Nphy
-        ic=ic+1
-        iPhyd13C(m)
-      END DO
-      DO m=1,Nzoo
-        ic=ic+1
-        iZood13C(m)
-      END DO
-      DO m=1,Npim
-        ic=ic+1
-        iPICd13C(m)
-      END DO
+!      ic=ic+1
+!      iDICd13C=ic  ! +1
+!      DO m=1,Ndom
+!        ic=ic+1
+!        iDOCd13C(m)
+!      END DO
+!      DO m=1,Npom
+!        ic=ic+1
+!        iPOCd13C(m)
+!      END DO
+!      DO m=1,Nphy
+!        ic=ic+1
+!        iPhyd13C(m)
+!      END DO
+!      DO m=1,Nzoo
+!        ic=ic+1
+!        iZood13C(m)
+!      END DO
+!      DO m=1,Npim
+!        ic=ic+1
+!        iPICd13C(m)
+!      END DO
 # endif
 # ifdef NITROGEN_ISOTOPE
-      ic=ic+1
-      iNO3d15N=ic  ! +1
-      ic=ic+1
-      iNH4d15N=ic  ! +1
-      DO m=1,Ndom
-        ic=ic+1
-        iDONd15N(m)
-      END DO
-      DO m=1,Npom
-        ic=ic+1
-        iPONd15N(m)
-      END DO
-      DO m=1,Nphy
-        ic=ic+1
-        iPhyd15N(m)
-      END DO
-      DO m=1,Nzoo
-        ic=ic+1
-        iZood15N(m)
-      END DO
+!      ic=ic+1
+!      iNO3d15N=ic  ! +1
+!      ic=ic+1
+!      iNH4d15N=ic  ! +1
+!      DO m=1,Ndom
+!        ic=ic+1
+!        iDONd15N(m)
+!      END DO
+!      DO m=1,Npom
+!        ic=ic+1
+!        iPONd15N(m)
+!      END DO
+!      DO m=1,Nphy
+!        ic=ic+1
+!        iPhyd15N(m)
+!      END DO
+!      DO m=1,Nzoo
+!        ic=ic+1
+!        iZood15N(m)
+!      END DO
 # endif
+#ifdef BIVALVE
+      DO m=1,Nbv
+        ic=ic+1
+        iBvR (m)=ic
+      END DO
+      DO m=1,Nbv
+        ic=ic+1
+        iBvV (m)=ic
+      END DO
+      DO m=1,Nbv
+        ic=ic+1
+        iBvL (m)=ic
+      END DO
+      DO m=1,Nbv
+        ic=ic+1
+        iBvWd(m)=ic
+      END DO
+      DO m=1,Nbv
+        ic=ic+1
+        iBvWw(m)=ic
+      END DO
+      DO m=1,Nbv
+        ic=ic+1
+        iBvWt(m)=ic
+      END DO
+#endif
 
 !  Set number of 3D diagnostic terms.
 !
@@ -1102,7 +1234,7 @@
 
 !***********************************************************************
 
-      SUBROUTINE send_roms_his2reef_ecosys(ng,LBi, UBi, LBj, UBj)
+      SUBROUTINE send_roms_his2reef_ecosys(ng,LBi, UBi, LBj, UBj, N)
 !
 !=======================================================================
 !                                                                      !
@@ -1115,7 +1247,7 @@
 !
 !  Imported variable declarations.
 !
-      integer, intent(in) :: ng, LBi, UBi, LBj, UBj
+      integer, intent(in) :: ng, LBi, UBi, LBj, UBj, N
 !
 !  Local variable declarations.
 !
@@ -1192,6 +1324,34 @@
 #endif
         END DO
       END DO
+!-----------------------------------------------------------------------
+      DO j=LBj, UBj
+        DO i=LBi, UBi
+          DO k=1,N
+#ifdef BIVALVE
+            DO m=1,Nbv
+              BVLV(ng)%dens(  m,k,i,j) = OCEAN(ng)%HisBio3d(i,j,k, iBvDens(m) )
+              BVLV(ng)%QCe (:,m,k,i,j) = OCEAN(ng)%HisBio3d(i,j,k, iBvQCe(1,m):iBvQCe(N_Csp,m) )
+              BVLV(ng)%QCv (:,m,k,i,j) = OCEAN(ng)%HisBio3d(i,j,k, iBvQCv(1,m):iBvQCv(N_Csp,m) )
+              BVLV(ng)%QCr (:,m,k,i,j) = OCEAN(ng)%HisBio3d(i,j,k, iBvQCr(1,m):iBvQCr(N_Csp,m) )
+              BVLV(ng)%QCh (:,m,k,i,j) = OCEAN(ng)%HisBio3d(i,j,k, iBvQCh(1,m):iBvQCh(N_Csp,m) )
+              BVLV(ng)%QNe (:,m,k,i,j) = OCEAN(ng)%HisBio3d(i,j,k, iBvQNe(1,m):iBvQNe(N_Nsp,m) )
+              BVLV(ng)%QNv (:,m,k,i,j) = OCEAN(ng)%HisBio3d(i,j,k, iBvQNv(1,m):iBvQNv(N_Nsp,m) )
+              BVLV(ng)%QNr (:,m,k,i,j) = OCEAN(ng)%HisBio3d(i,j,k, iBvQNr(1,m):iBvQNr(N_Nsp,m) )
+              BVLV(ng)%QNh (:,m,k,i,j) = OCEAN(ng)%HisBio3d(i,j,k, iBvQNh(1,m):iBvQNh(N_Nsp,m) )
+              BVLV(ng)%QPe (:,m,k,i,j) = OCEAN(ng)%HisBio3d(i,j,k, iBvQPe(1,m):iBvQPe(N_Psp,m) )
+              BVLV(ng)%QPv (:,m,k,i,j) = OCEAN(ng)%HisBio3d(i,j,k, iBvQPv(1,m):iBvQPv(N_Psp,m) )
+              BVLV(ng)%QPr (:,m,k,i,j) = OCEAN(ng)%HisBio3d(i,j,k, iBvQPr(1,m):iBvQPr(N_Psp,m) )
+              BVLV(ng)%QPh (:,m,k,i,j) = OCEAN(ng)%HisBio3d(i,j,k, iBvQPh(1,m):iBvQPh(N_Psp,m) )
+              BVLV(ng)%CaCO3(:,m,k,i,j) = OCEAN(ng)%HisBio3d(i,j,k, iBvCaCO3(1,m):iBvCaCO3(N_Csp,m) )
+            END DO
+#endif
+           !  :  (To be updated)
+          END DO
+        END DO
+      END DO
+
+!-----------------------------------------------------------------------
 
 #ifdef SEDIMENT_ECOSYS  
       DO j=LBj, UBj
@@ -1235,7 +1395,7 @@
 
 !***********************************************************************
 
-      SUBROUTINE send_reef_ecosys2roms_his(ng,LBi, UBi, LBj, UBj)
+      SUBROUTINE send_reef_ecosys2roms_his(ng,LBi, UBi, LBj, UBj, N)
 !
 !=======================================================================
 !                                                                      !
@@ -1248,7 +1408,7 @@
 !
 !  Imported variable declarations.
 !
-      integer, intent(in) :: ng, LBi, UBi, LBj, UBj
+      integer, intent(in) :: ng, LBi, UBi, LBj, UBj, N
 !
 !  Local variable declarations.
 !
@@ -1328,6 +1488,34 @@
 #endif
         END DO
       END DO
+!-----------------------------------------------------------------------
+      DO j=LBj, UBj
+        DO i=LBi, UBi
+          DO k=1,N
+#ifdef BIVALVE
+            DO m=1,Nbv
+              OCEAN(ng)%HisBio3d(i,j,k, iBvDens(m) )                  = BVLV(ng)%dens(  m,k,i,j)
+              OCEAN(ng)%HisBio3d(i,j,k, iBvQCe(1,m):iBvQCe(N_Csp,m) ) = BVLV(ng)%QCe (:,m,k,i,j)
+              OCEAN(ng)%HisBio3d(i,j,k, iBvQCv(1,m):iBvQCv(N_Csp,m) ) = BVLV(ng)%QCv (:,m,k,i,j)
+              OCEAN(ng)%HisBio3d(i,j,k, iBvQCr(1,m):iBvQCr(N_Csp,m) ) = BVLV(ng)%QCr (:,m,k,i,j)
+              OCEAN(ng)%HisBio3d(i,j,k, iBvQCh(1,m):iBvQCh(N_Csp,m) ) = BVLV(ng)%QCh (:,m,k,i,j)
+              OCEAN(ng)%HisBio3d(i,j,k, iBvQNe(1,m):iBvQNe(N_Nsp,m) ) = BVLV(ng)%QNe (:,m,k,i,j)
+              OCEAN(ng)%HisBio3d(i,j,k, iBvQNv(1,m):iBvQNv(N_Nsp,m) ) = BVLV(ng)%QNv (:,m,k,i,j)
+              OCEAN(ng)%HisBio3d(i,j,k, iBvQNr(1,m):iBvQNr(N_Nsp,m) ) = BVLV(ng)%QNr (:,m,k,i,j)
+              OCEAN(ng)%HisBio3d(i,j,k, iBvQNh(1,m):iBvQNh(N_Nsp,m) ) = BVLV(ng)%QNh (:,m,k,i,j)
+              OCEAN(ng)%HisBio3d(i,j,k, iBvQPe(1,m):iBvQPe(N_Psp,m) ) = BVLV(ng)%QPe (:,m,k,i,j)
+              OCEAN(ng)%HisBio3d(i,j,k, iBvQPv(1,m):iBvQPv(N_Psp,m) ) = BVLV(ng)%QPv (:,m,k,i,j)
+              OCEAN(ng)%HisBio3d(i,j,k, iBvQPr(1,m):iBvQPr(N_Psp,m) ) = BVLV(ng)%QPr (:,m,k,i,j)
+              OCEAN(ng)%HisBio3d(i,j,k, iBvQPh(1,m):iBvQPh(N_Psp,m) ) = BVLV(ng)%QPh (:,m,k,i,j)
+              OCEAN(ng)%HisBio3d(i,j,k, iBvCaCO3(1,m):iBvCaCO3(N_Csp,m) ) = BVLV(ng)%CaCO3(:,m,k,i,j)
+            END DO
+#endif
+           !  :  (To be updated)
+          END DO
+        END DO
+      END DO
+
+!-----------------------------------------------------------------------
 
 #ifdef SEDIMENT_ECOSYS  
       DO j=LBj, UBj
@@ -1372,7 +1560,7 @@
 !***********************************************************************
 #if defined DIAGNOSTICS_BIO
 
-      SUBROUTINE send_reef_ecosys2roms_dia(ng,LBi, UBi, LBj, UBj)
+      SUBROUTINE send_reef_ecosys2roms_dia(ng,LBi, UBi, LBj, UBj, N)
 !
 !=======================================================================
 !                                                                      !
@@ -1388,7 +1576,7 @@
 !
 !  Imported variable declarations.
 !
-      integer, intent(in) :: ng, LBi, UBi, LBj, UBj
+      integer, intent(in) :: ng, LBi, UBi, LBj, UBj, N
 !
 !  Local variable declarations.
 !
@@ -1450,6 +1638,26 @@
 # endif
         END DO
       END DO
+!-----------------------------------------------------------------------
+      DO j=LBj, UBj
+        DO i=LBi, UBi
+          DO k=1,N
+#ifdef BIVALVE
+            DO m=1,Nbv
+              DIAGS(ng)%DiaBio3d(i,j,k, iBvR (m) ) = BVLV(ng)%R (m,k,i,j)
+              DIAGS(ng)%DiaBio3d(i,j,k, iBvV (m) ) = BVLV(ng)%V (m,k,i,j)
+              DIAGS(ng)%DiaBio3d(i,j,k, iBvL (m) ) = BVLV(ng)%L (m,k,i,j)
+              DIAGS(ng)%DiaBio3d(i,j,k, iBvWd(m) ) = BVLV(ng)%Wd(m,k,i,j)
+              DIAGS(ng)%DiaBio3d(i,j,k, iBvWw(m) ) = BVLV(ng)%Ww(m,k,i,j)
+              DIAGS(ng)%DiaBio3d(i,j,k, iBvWt(m) ) = BVLV(ng)%Wt(m,k,i,j)
+            END DO
+#endif
+           !  :  (To be updated)
+          END DO
+        END DO
+      END DO
+
+!-----------------------------------------------------------------------
 
 # ifdef SEDIMENT_ECOSYS  
       DO k=1,Nsed
@@ -1469,8 +1677,12 @@
       ! yt_edit this subroutine wraps the logic for getting tile bounds and ROMS inputs with the actual initialize_reef_ecosys() call
       SUBROUTINE call_initialize_reef_ecosys_wrapper(ng, tile)
       
+      USE mod_param,        ONLY : N
       USE mod_grid,         ONLY : GRID
       USE mod_reef_ecosys,  ONLY : initialize_reef_ecosys
+# if defined AQUACULTURE && defined BIVALVE
+      USE mod_aquaculture
+# endif
 
       implicit none
       integer, intent(in) :: ng, tile
@@ -1486,16 +1698,36 @@
       LBj=BOUNDS(ng)%LBj(tile)
       UBj=BOUNDS(ng)%UBj(tile)
 
-      CALL initialize_reef_ecosys(ng, IstrR, IendR, JstrR, JendR   &
+!      CALL initialize_reef_ecosys(ng, N(ng)                        &
+!          , GRID(ng)%Hz(IstrR:IendR,JstrR:JendR,N(ng))             &
+!          , IstrR, IendR, JstrR, JendR                             &
+!          , .not. LReadBioINI(2,ng)                                &   ! TRUE = initialize coral, seagass, macroalgae, sediment from start; FALSE = continue from previous run
+!# ifdef SEAGRASS
+!          , GRID(ng)%om_r(IstrR:IendR,JstrR:JendR)                 &   ! grid size XI-direction (meters)
+!          , GRID(ng)%on_r(IstrR:IendR,JstrR:JendR)                 &   ! grid size ETA-direction (meters)
+!          , GRID(ng)%p_sgrass(Nsg,IstrR:IendR,JstrR:JendR)         &   ! seagrass coverage (habitat area in grid / grid area)
+!# endif
+!# ifdef BIVALVE
+!          , GRID(ng)%dens_aqua(Naq,IstrR:IendR,JstrR:JendR)        &   ! Aquaculture density
+!# endif
+!          )
+      CALL initialize_reef_ecosys(ng, N(ng)                        &
+          , GRID(ng)%Hz                                            &
+          , LBi, UBi, LBj, UBj                                     &
           , .not. LReadBioINI(2,ng)                                &   ! TRUE = initialize coral, seagass, macroalgae, sediment from start; FALSE = continue from previous run
 # ifdef SEAGRASS
+          , IstrR, IendR, JstrR, JendR                             &
           , GRID(ng)%om_r(IstrR:IendR,JstrR:JendR)                 &   ! grid size XI-direction (meters)
           , GRID(ng)%on_r(IstrR:IendR,JstrR:JendR)                 &   ! grid size ETA-direction (meters)
           , GRID(ng)%p_sgrass(Nsg,IstrR:IendR,JstrR:JendR)         &   ! seagrass coverage (habitat area in grid / grid area)
 # endif
+# ifdef BIVALVE
+          , GRID(ng)%dens_aqua                                     &   ! Aquaculture density
+# endif
           )
 
-      CALL send_reef_ecosys2roms_his (ng, LBi, UBi, LBj, UBj)
+
+      CALL send_reef_ecosys2roms_his (ng, LBi, UBi, LBj, UBj, N(ng))
       write(*,*) 'yt_debug: mod_reef_ecosys.F initialize_reef_ecosys() finished send_reef_ecosys2roms_his'
     
       END SUBROUTINE call_initialize_reef_ecosys_wrapper

@@ -164,21 +164,7 @@ CONTAINS
     real(8), intent(out) :: Warg           ! Aragonite saturation state
 
 !!!------------Set parameters  ----------------------------------
-    
-!---- Stoichiometric parameters for phytoplankton and zooplankton  --------------------
-! Redfield Ratio (1934) C:N:P -> C:N=6.6  C:P=106    N:P=16
-! Martiny et al  (2014) C:N:P -> C:N=7.4  C:P=163    N:P=22
-! GLODAP Data           C:N:P -> C:N=9.2  C:P=131.9  N:P=14.4
-!                                        Dnfl        Dtm         Ccl         Cya
-    real(8), parameter :: rNCp(4)  = [ 16d0/106d0, 16d0/106d0, 16d0/106d0, 16d0/106d0 ] ! (no dim.) Phy N:C ratio
-    real(8), parameter :: rPCp(4)  = [  1d0/106d0,  1d0/106d0,  1d0/106d0,  1d0/106d0 ] ! (no dim.) Phy P:C ratio
-    real(8), parameter :: rCaCp(4) = [      0.0d0,      0.0d0,      0.5d0,      0.0d0 ]  ! ***** (no dim.) CaCO3:OrgC ratio !!! Need Ref!!!!!!!!!!
-  !                                        Gzoo
-    real(8), parameter :: rNCz(1)  = [ 16d0/106d0 ]    ! (no dim.) Zoo  N:C ratio
-    real(8), parameter :: rPCz(1)  = [  1d0/106d0 ]    ! (no dim.) Zoo  P:C ratio
-  !  real(8), parameter :: rNCz(1)  = [ 16d0/300d0 ]    ! (no dim.) Zoo  N:C ratio  !! For mass balance test
-  !  real(8), parameter :: rPCz(1)  = [  1d0/300d0 ]    ! (no dim.) Zoo  P:C ratio  !! For mass balance test
-  
+
 !------- Phytoplankton parameters ------------------------
 !
 !  Phytoplankton photosynthesis Parameter         

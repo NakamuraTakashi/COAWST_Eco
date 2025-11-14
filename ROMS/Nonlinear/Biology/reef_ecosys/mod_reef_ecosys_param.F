@@ -104,8 +104,8 @@ MODULE mod_reef_ecosys_param
   real(8) :: MnO2_sed  !! Manganese oxide (MnO2) concentration in sediments [nmol/g(DW)]
   real(8) :: FeOOH_sed !! Iron hydroxide (FeOOH) concentration in sediments [nmol/g(DW)]
   real(8) :: FeS2_sed  !! Iron sulfide (FeS2) concentration in sediments [nmol/g(DW)]
-  real(8) :: OrgC_sed  !! Organic carbon in sediments [nmol/g(DW)]
-
+  real(8) :: LPOC_sed  !! Labile Organic carbon in sediments [nmol/g(DW)]
+  real(8) :: RPOC_sed  !! Refractory Organic carbon in sediments [nmol/g(DW)]
   real(8) :: rCaCO3_sed  !! Fraction of Calcium carbonate (CaCO3) in sediments [% DW]
 
 ! ==== CORAL POLYP MODEL PARAMETER SETTINGS ===========================================================
@@ -123,6 +123,10 @@ MODULE mod_reef_ecosys_param
 
   integer, parameter :: Nag = 1    !! Number of algal groups
 
+! ==== BIVALVE MODEL PARAMETER SETTINGS ===========================================================
+
+  integer, parameter :: Nbv = 1    !! Number of bivalve groups
+  integer, parameter ::  iOys  =  1 ! 1: Oyster
 
 
 END MODULE mod_reef_ecosys_param
