@@ -398,7 +398,6 @@
       JLB=BOUNDS(ng)%LBj(-1)
       JUB=BOUNDS(ng)%UBj(-1)
 # endif
-# if !defined OFFLINE && !defined OFFLINE_BIOLOGY /*SKIP 3D tracer advection term*/
 !
 !-----------------------------------------------------------------------
 !  Time-step horizontal advection term.
@@ -1853,7 +1852,6 @@
      &                    dAktdz)
 #  endif
 # endif
-# endif /* !defined OFFLINE && !defined OFFLINE_BIOLOGY */
 
       RETURN
       END SUBROUTINE step3d_t_tile
