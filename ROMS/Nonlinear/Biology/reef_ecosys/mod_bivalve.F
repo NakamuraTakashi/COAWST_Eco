@@ -28,6 +28,7 @@ MODULE mod_bivalve
     real(8), pointer :: CaCO3(:,:,:,:,:)
     real(8), pointer :: Dead_CaCO3(:,:,:,:,:)
     real(8), pointer :: R   (:,:,:,:) 
+    real(8), pointer :: G   (:,:,:,:) 
     real(8), pointer :: V   (:,:,:,:) 
     real(8), pointer :: L   (:,:,:,:) 
     real(8), pointer :: Wd  (:,:,:,:) 
@@ -68,6 +69,7 @@ CONTAINS
     allocate( BVLV(ng)%Dead_CaCO3(N_Csp,Nbv,Nz,LBi:UBi,LBj:UBj) )
 
     allocate( BVLV(ng)%R        (Nbv,Nz,LBi:UBi,LBj:UBj) )
+    allocate( BVLV(ng)%G        (Nbv,Nz,LBi:UBi,LBj:UBj) )
     allocate( BVLV(ng)%V        (Nbv,Nz,LBi:UBi,LBj:UBj) )
     allocate( BVLV(ng)%L        (Nbv,Nz,LBi:UBi,LBj:UBj) )
     allocate( BVLV(ng)%Wd       (Nbv,Nz,LBi:UBi,LBj:UBj) )
@@ -104,6 +106,7 @@ CONTAINS
     !Initialize bivalve variables
      BVLV(ng)%dens(:,:,:,:) = 0.0d0
      BVLV(ng)%R   (:,:,:,:) = 0.0d0
+     BVLV(ng)%G   (:,:,:,:) = 0.0d0
      BVLV(ng)%V   (:,:,:,:) = 0.0d0
      BVLV(ng)%L   (:,:,:,:) = 0.0d0
      BVLV(ng)%Ww  (:,:,:,:) = 0.0d0
@@ -597,6 +600,7 @@ CONTAINS
 
 ! === Bivalve's respiration rate (ummolC s-1 ind.-1) =========================
     R = J_ES + J_EJ + JR_ER !+ (J_EG - J_VG)
+    BVLV(ng)%R(n,k,i,j) = R
 
 !     === Mass balance ===
     dDOx_dt    = dDOx_dt    - R
@@ -648,7 +652,8 @@ CONTAINS
     G = (  (BVLV(ng)%Wt(n,k,i,j)-BVLV(ng)%Ww(n,k,i,j)) * 10.0d0       &
           - BVLV(ng)%CaCO3(iCt,n,k,i,j)                         )/dt
     G = MAX( G, 0.0d0 )
- 
+    BVLV(ng)%G(n,k,i,j) = G
+
 !     === Mass balance ===
     dCaCO3_dt(:) = dCaCO3_dt(:) + G*aC_calc(1:N_Csp)*rDIC(:)
     dDIC_dt(:)   = dDIC_dt(:)   - G*aC_calc(1:N_Csp)*rDIC(:)  ! calcification

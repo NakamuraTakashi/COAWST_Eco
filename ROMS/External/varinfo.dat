@@ -10137,6 +10137,15 @@
   'r3dvar'
   1.0d0
 
+'bivalve_G'                                             ! Input/Output
+  'bivalve calcification rate'
+  'ummolC s-1 ind.-1'                                 ! [ummolC s-1 ind.-1]
+  'bivalve_G, scalar, series'
+  'ocean_time'
+  'iDbio3(iBvG(j))'
+  'r3dvar'
+  1.0d0
+
 'bivalve_V'                                             ! Input/Output
   'bivalve flesh (meat) volume'
   'cm3'                                                 ! [cm3]

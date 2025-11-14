@@ -191,6 +191,7 @@
 
 # ifdef BIVALVE
       integer  :: iBvR (Nbv)
+      integer  :: iBvG (Nbv)
       integer  :: iBvV (Nbv)
       integer  :: iBvL (Nbv)
       integer  :: iBvWd(Nbv)
@@ -1077,6 +1078,10 @@
       END DO
       DO m=1,Nbv
         ic=ic+1
+        iBvG (m)=ic
+      END DO
+      DO m=1,Nbv
+        ic=ic+1
         iBvV (m)=ic
       END DO
       DO m=1,Nbv
@@ -1645,6 +1650,7 @@
 #ifdef BIVALVE
             DO m=1,Nbv
               DIAGS(ng)%DiaBio3d(i,j,k, iBvR (m) ) = BVLV(ng)%R (m,k,i,j)
+              DIAGS(ng)%DiaBio3d(i,j,k, iBvG (m) ) = BVLV(ng)%G (m,k,i,j)
               DIAGS(ng)%DiaBio3d(i,j,k, iBvV (m) ) = BVLV(ng)%V (m,k,i,j)
               DIAGS(ng)%DiaBio3d(i,j,k, iBvL (m) ) = BVLV(ng)%L (m,k,i,j)
               DIAGS(ng)%DiaBio3d(i,j,k, iBvWd(m) ) = BVLV(ng)%Wd(m,k,i,j)
