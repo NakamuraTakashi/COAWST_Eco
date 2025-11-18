@@ -16,10 +16,10 @@ MODULE mod_aquaculture
                                     !  04 Scallop
                                     !  05 Salmon (not used) 
                                     !
-                                    !      01      02      03      04      05
-  real(8), parameter :: diam_aqua(5) = [ 0.15d0, 0.15d0,  0.1d0,  0.1d0,  0.1d0 ] ! Diameter (m)
+                                    !      01      02       03      04      05
+  real(8), parameter :: diam_aqua(5) = [ 0.15d0, 0.3d0,   0.14d0, 0.13d0, 0.1d0 ] ! Diameter (m)
   real(8), parameter :: thck_aqua(5) = [ 0.15d0, 0.05d0,  0.1d0,  0.1d0,  0.1d0 ] ! Thickness (m)
-  real(8), parameter :: hght_aqua(5) = [ 9.0d0 ,  3.0d0,  5.0d0,  5.0d0,  1.0d0 ] ! Height (m)
+  real(8), parameter :: hght_aqua(5) = [ 9.0d0,  2.0d0,  10.0d0, 10.0d0,  1.0d0 ] ! Height (m)
 
   real(8), parameter :: L_oyster_cluster       =  0.4d0  ! Interval of oyster clusters on a rope (m) (20 clusters per 9 m rope; Sakamaki et al., 2022)
   real(8), parameter :: num_oyster_per_cluster = 23.1d0  ! Number of oysters per cluster (23.1+-13.3 indiv./cluster) (Sakamaki et al., 2022 SM)
