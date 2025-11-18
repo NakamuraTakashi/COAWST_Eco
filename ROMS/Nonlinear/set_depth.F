@@ -197,6 +197,13 @@
               z_r(i,j,k)=z_r(i,j,k)-ABS(zice(i,j))
 # endif
               Hz(i,j,k)=z_w(i,j,k)-z_w(i,j,k-1)
+! # if defined YT_DEBUG_MODE
+!                 if (Hz(i,j,k) .lt. 0.0d0) then
+!                   write(*,*) 'yt_debug: set_depth.F 200 negative value in Hz layer thickness. Hz(i,j,k) =', Hz(i,j,k), &
+!                               'i = ', i, 'j = ', j, 'k = ', k
+!                   ! error stop
+!                 endif
+! # endif
             END DO
           END DO
         END DO
@@ -240,6 +247,13 @@
 
               END IF
               Hz(i,j,k)=z_w(i,j,k)-z_w(i,j,k-1)
+! # if defined YT_DEBUG_MODE
+!                 if (Hz(i,j,k) .lt. 0.0d0) then
+!                   write(*,*) 'yt_debug: set_depth.F 245 negative value in Hz layer thickness. Hz(i,j,k) =', Hz(i,j,k), &
+!                               'i = ', i, 'j = ', j, 'k = ', k
+!                   ! error stop
+!                 endif
+! # endif
             END DO
           END DO
         END DO
@@ -283,12 +297,34 @@
               cff2_w=(cff_w+cff1_w*hwater)*hinv
 
               z_w(i,j,k)=Zt_avg1(i,j)+(Zt_avg1(i,j)+hwater)*cff2_w
+! # if defined YT_DEBUG_MODE
+!                 ! if (Hz(i,j,k) .lt. 0.0d0) then
+!                 if (i .eq. 17 .and. j .eq. 163) then
+!                 ! if (i .eq. 35 .and. j .eq. 163) then
+!                   write(*,*) 'yt_debug: set_depth.F 299 z_w(i,j,k) =', z_w(i,j,k), &
+!                               'i = ', i, 'j = ', j, 'k = ', k, &
+!                               'Zt_avg1(i,j) = ', Zt_avg1(i,j), 'hwater = ', hwater, 'cff2_w = ', cff2_w
+!                   ! error stop
+!                 endif
+! # endif
               z_r(i,j,k)=Zt_avg1(i,j)+(Zt_avg1(i,j)+hwater)*cff2_r
 # ifdef ICESHELF
               z_w(i,j,k)=z_w(i,j,k)-ABS(zice(i,j))
               z_r(i,j,k)=z_r(i,j,k)-ABS(zice(i,j))
 # endif
               Hz(i,j,k)=z_w(i,j,k)-z_w(i,j,k-1)
+! # if defined YT_DEBUG_MODE
+!                 if (Hz(i,j,k) .lt. 0.0d0) then
+! !                 if (i .eq. 17 .and. j .eq. 163) then
+! !                   write(*,*) 'yt_debug: set_depth.F 313  Hz(i,j,k) =', Hz(i,j,k), &
+! !                               'i = ', i, 'j = ', j, 'k = ', k, 'z_w(i,j,k) = ', z_w(i,j,k), 'z_w(i,j,k-1) = ', z_w(i,j,k-1)
+! !                   ! error stop
+! !                 endif
+! !                 if (k .eq. 8 .and. Hz(i,j,k) .lt. 0.0d0) then
+!                   write(*,*) 'yt_debug: set_depth.F 313 negative value in Hz layer thickness.'
+! !                   ! error stop
+!                 endif
+! # endif
             END DO
           END DO
         END DO

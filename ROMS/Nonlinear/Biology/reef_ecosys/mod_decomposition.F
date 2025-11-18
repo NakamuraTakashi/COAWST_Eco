@@ -400,12 +400,20 @@ CONTAINS
 
     ! R:  CaCO3 --> Ca2+ + CO3(2-) 
     vdiss = cfs *(-a_diss * Warg + b_diss)* cPIC ! Yamamoto et al. (2012)
-    Vdiss = max(vdiss,0.0d0)
+    vdiss = max(vdiss,0.0d0)
 
 !    if (Vdiss < 0.0d0) then
 !      Vdiss=-1.1d-3*(Warg-1.d0)**1.63d0  ! Calcification rate (nmol cm-2 s-1)
 !    endif
-
+! !!! yuta >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+! # if defined LIN_SIMP_NEAR_ZERO
+!     ! cPIC:   CaCO3 (umolC L-1 or nmol g(DW)-1 *solid)
+!     ! vdiss:  d CaCO3/dt (umol L-1 s-1) or (nmol g(DW)-1) *solid
+!     if (vdiss*dt > 0.5*cPIC) then ! reaction can only consume up to 50% of chem in a layer per time step
+!       vdiss = 0.5*cPIC/dt
+!     endif
+! # endif
+! !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
     R_PIC(:) = R_PIC(:) - vdiss *rPIC(:)
     R_DIC(:) = R_DIC(:) + vdiss *rPIC(:)
     R_TA     = R_TA     + vdiss*2.0d0
@@ -450,14 +458,35 @@ CONTAINS
     ! CPOM decomposition to LPOM and RPOM 
     DO m = 1,Npom-1
       v0 = kcpom_Q10(m) *cfs* POC(iCt,iCPOM)
+! !!! yuta >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+! # if defined LIN_SIMP_NEAR_ZERO
+!       if (v0*dt > 0.5*POC(iCt,iCPOM)) then ! reaction can only consume up to 50% of chem in a layer per time step
+!         v0 = 0.5*POC(iCt,iCPOM)/dt
+!       endif
+! # endif
+! !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
       R_POC(:,iCPOM) = R_POC(:,iCPOM) - v0 *rPOC(:,iCPOM)
       R_POC(:,m)     = R_POC(:,m)     + v0 *rPOC(:,iCPOM)
       
       v0 = kcpom_Q10(m) *cfs* PON(iNt,iCPOM)
+! !!! yuta >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+! # if defined LIN_SIMP_NEAR_ZERO
+!       if (v0*dt > 0.5*PON(iNt,iCPOM)) then ! reaction can only consume up to 50% of chem in a layer per time step
+!         v0 = 0.5*PON(iNt,iCPOM)/dt
+!       endif
+! # endif
+! !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
       R_PON(:,iCPOM) = R_PON(:,iCPOM) - v0 *rPON(:,iCPOM)
       R_PON(:,m)     = R_PON(:,m)     + v0 *rPON(:,iCPOM)
 
       v0 = kcpom_Q10(m) *cfs* POP(iPt,iCPOM)
+! !!! yuta >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+! # if defined LIN_SIMP_NEAR_ZERO
+!       if (v0*dt > 0.5*POP(iPt,iCPOM)) then ! reaction can only consume up to 50% of chem in a layer per time step
+!         v0 = 0.5*POP(iPt,iCPOM)/dt
+!       endif
+! # endif
+! !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
       R_POP(:,iCPOM) = R_POP(:,iCPOM) - v0 *rPOP(:,iCPOM)
       R_POP(:,m)     = R_POP(:,m)     + v0 *rPOP(:,iCPOM)
     END DO

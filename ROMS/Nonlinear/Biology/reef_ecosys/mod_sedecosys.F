@@ -246,8 +246,10 @@ CONTAINS
     !! depth : Diffusive Boundary Layer (DBL)
     real(8), parameter :: dbl = 0.03d0 ! DBL:difussive boundary layer (cm)
 
-    real(8), parameter :: dzmin = 0.1d0
-    real(8), parameter :: dzmax = 2.0d0
+    ! real(8), parameter :: dzmin = 0.1d0
+    ! real(8), parameter :: dzmax = 2.0d0
+    real(8), parameter :: dzmin = 0.5d0 ! yt_edit
+    real(8), parameter :: dzmax = 3.0d0 ! yt_edit
     real(8), parameter :: k_lg = 0.3d0
 
     !! porosity   ( poro = a + b * exp(c * z)   (fossing et al 2004) )
@@ -318,6 +320,19 @@ CONTAINS
       !! soil density (This must be given as an input data actually)
       SEDECO(ng)%rhos_d(k,:,:) = 2.5d0 ! (g/cm3)   ! Note: depth varied density is not properly implemented in geochem
     enddo
+
+# if defined YT_DEBUG_MODE
+    if (ng .eq. 1) then
+      do k = 1,Nsed
+        write(*,*) 'yt_debug: mod_sedecosys.F initialization: ', &
+                      'k = ', k, 'dzr(k) = ', SEDECO(ng)%dzr(k) 
+      enddo
+      do k = 1,Nsed
+        write(*,*) 'yt_debug: mod_sedecosys.F initialization: ', &
+                      'k = ', k, 'zr(k) = ', SEDECO(ng)%zr(k) 
+      enddo
+    endif
+# endif
 
 # if defined SEDIMENT_TESTMODE
       write(50,'(*(g0:,", "))') SEDECO(ng)%dzw(:)
@@ -865,6 +880,102 @@ CONTAINS
     SEDECO(ng)%H2S(:,0,i,j) = H2Samb(:)     ! H2S (umol L-1)
     SEDECO(ng)%SO4(:,0,i,j) = SO4amb(:)     ! SO4 (umol L-1)
 
+! #  if defined YT_DEBUG_MODE
+!     if(Tamb .lt. 0.0d0) then
+!       write(*,*) 'yt_debug: mod_sedecosys.F negative concentration in water column: ', &
+!                       'Tamb = ', Tamb, 'i = ', i, 'j = ', j
+!     end if
+!     if(Samb .lt. 0.0d0) then
+!       write(*,*) 'yt_debug: mod_sedecosys.F negative concentration in water column: ', &
+!                       'Samb = ', Samb, 'i = ', i, 'j = ', j
+!     end if
+!     if(O2amb .lt. 0.0d0) then
+!       write(*,*) 'yt_debug: mod_sedecosys.F negative concentration in water column: ', &
+!                       'O2amb = ', O2amb, 'i = ', i, 'j = ', j
+!     end if
+!     if(TAamb .lt. 0.0d0) then
+!       write(*,*) 'yt_debug: mod_sedecosys.F negative concentration in water column: ', &
+!                       'TAamb = ', TAamb, 'i = ', i, 'j = ', j
+!     end if
+!     DO isp = 1,N_Csp
+!       if(DICamb(isp) .lt. 0.0d0) then
+!         write(*,*) 'yt_debug: mod_sedecosys.F negative concentration in water column: ', &
+!                         'DICamb(isp) = ', DICamb(isp), 'isp = ', isp, 'i = ', i, 'j = ', j
+!       end if
+!     END DO
+!     DO isp = 1,N_Nsp
+!       if(NO3amb(isp) .lt. 0.0d0) then
+!         write(*,*) 'yt_debug: mod_sedecosys.F negative concentration in water column: ', &
+!                         'NO3amb(isp) = ', NO3amb(isp), 'isp = ', isp,  'i = ', i, 'j = ', j
+!       end if
+!       if(NH4amb(isp) .lt. 0.0d0) then
+!         write(*,*) 'yt_debug: mod_sedecosys.F negative concentration in water column: ', &
+!                         'NH4amb(isp) = ', NH4amb(isp), 'isp = ', isp,  'i = ', i, 'j = ', j
+!       end if
+!     END DO
+!     DO isp = 1,N_Psp
+!       if(PO4amb(isp) .lt. 0.0d0) then
+!         write(*,*) 'yt_debug: mod_sedecosys.F negative concentration in water column: ', &
+!                         'PO4amb(isp) = ', PO4amb(isp), 'isp = ', isp,  'i = ', i, 'j = ', j
+!       end if
+!     END DO
+!     DO m = 1,Ndom
+!       DO isp = 1,N_Csp
+!         if(DOCamb(isp,m) .lt. 0.0d0) then
+!           write(*,*) 'yt_debug: mod_sedecosys.F negative concentration in water column: ', &
+!                           'DOCamb(isp,m) = ', DOCamb(isp,m), 'isp = ', isp, 'm = ', m, 'i = ', i, 'j = ', j
+!         end if
+!       END DO
+!       DO isp = 1,N_Nsp
+!         if(DONamb(isp,m) .lt. 0.0d0) then
+!           write(*,*) 'yt_debug: mod_sedecosys.F negative concentration in water column: ', &
+!                           'DONamb(isp,m) = ', DONamb(isp,m), 'isp = ', isp, 'm = ', m, 'i = ', i, 'j = ', j
+!         end if
+!       END DO
+!       DO isp = 1,N_Psp
+!         if(DOPamb(isp,m) .lt. 0.0d0) then
+!           write(*,*) 'yt_debug: mod_sedecosys.F negative concentration in water column: ', &
+!                           'DOPamb(isp,m) = ', DOPamb(isp,m), 'isp = ', isp, 'm = ', m, 'i = ', i, 'j = ', j
+!         end if
+!       END DO
+!     END DO
+
+!     ! yt_debug force zero water column concentration if negative (breaks mass-balance)
+!     !  Solutes (open boundary)
+!     SEDECO(ng)%Tmp(0,i,j)  = max(0.0d0, Tamb)           ! Tmp: Temperature (oC)
+!     SEDECO(ng)%Sal(0,i,j)  = max(0.0d0, Samb)           ! Sal: Salinity (PSU)
+!     SEDECO(ng)%O2 (0,i,j)  = max(0.0d0, O2amb)          ! O2: Dissolved oxygen (umol L-1)
+!     SEDECO(ng)%TA (0,i,j)  = max(0.0d0, TAamb)          ! TA: Total Alkalinity (kg L-1)
+!     DO isp = 1,N_Csp
+!       SEDECO(ng)%DIC(isp,0,i,j)= max(0.0d0, DICamb(isp))    ! DIC: carbon dioxide  (umol L-1)
+!     END DO
+!     DO isp = 1,N_Nsp
+!       SEDECO(ng)%NO3(isp,0,i,j) = max(0.0d0, NO3amb(isp))         ! NO3: NO3 (umol L-1)
+!       SEDECO(ng)%NH4(isp,0,i,j) = max(0.0d0, NH4amb(isp))         ! NH4: NH4 (umol L-1)
+!     END DO
+!     DO isp = 1,N_Psp
+!       SEDECO(ng)%PO4(isp,0,i,j) = max(0.0d0, PO4amb(isp))         ! PO4: PO4 (umol L-1)
+!     END DO
+!     DO m = 1,Ndom
+!       DO isp = 1,N_Csp
+!         SEDECO(ng)%DOC(isp,m,0,i,j) = max(0.0d0, DOCamb(isp,m))   ! DOC: Dissolved organic carbon (umol L-1)
+!       END DO
+!       DO isp = 1,N_Nsp
+!         SEDECO(ng)%DON(isp,m,0,i,j) = max(0.0d0, DONamb(isp,m))   ! DOC: Dissolved organic nitrogen (umol L-1)
+!       END DO
+!       DO isp = 1,N_Psp
+!         SEDECO(ng)%DOP(isp,m,0,i,j) = max(0.0d0, DOPamb(isp,m))   ! DOC: Dissolved organic phosporius (umol L-1)
+!       END DO
+!     END DO
+!     SEDECO(ng)%Mn2(0,i,j) = max(0.0d0, Mn2amb)         ! Mn2 (umol L-1)
+!     SEDECO(ng)%Fe2 (0,i,j) = max(0.0d0, Fe2amb)        ! Fe2 (umol L-1)
+!     DO isp = 1,N_Ssp
+!       SEDECO(ng)%H2S(isp,0,i,j) = max(0.0d0, H2Samb(isp))     ! H2S (umol L-1)
+!       SEDECO(ng)%SO4(isp,0,i,j) = max(0.0d0, SO4amb(isp))     ! SO4 (umol L-1)
+!     END DO
+
+! #  endif
+
 !  Solids (closed boundary)
     SEDECO(ng)%POC(:,:,0,i,j) = SEDECO(ng)%POC(:,:,1,i,j)   ! POC: Particulate organic carbon (nmol g-1)
     SEDECO(ng)%PON(:,:,0,i,j) = SEDECO(ng)%PON(:,:,1,i,j)   ! PON: Particulate organic nitrogen (PON: umol L-1)
@@ -879,7 +990,10 @@ CONTAINS
 ! ********************************************************************* !
 !   Set bottom boundary values
 ! ********************************************************************* !
+
+! *************************************** !
 ! Closed boundary condition
+! *************************************** !
     SEDECO(ng)%Tmp(Nsed,i,j)  = SEDECO(ng)%Tmp(Nsed-1,i,j) ! Tmp: Temperature (oC)
     SEDECO(ng)%Sal(Nsed,i,j)  = SEDECO(ng)%Sal(Nsed-1,i,j) ! Sal: Salinity (PSU)
     SEDECO(ng)%O2 (Nsed,i,j)  = SEDECO(ng)%O2 (Nsed-1,i,j) ! O2: Dissolved oxygen (umol L-1)
@@ -904,6 +1018,96 @@ CONTAINS
     SEDECO(ng)%H2S(:,Nsed,i,j) = SEDECO(ng)%H2S(:,Nsed-1,i,j)  ! H2S (umol L-1)
     SEDECO(ng)%SO4(:,Nsed,i,j) = SEDECO(ng)%SO4(:,Nsed-1,i,j)  ! SO4 (umol L-1)
     SEDECO(ng)%S0 (:,Nsed,i,j) = SEDECO(ng)%S0 (:,Nsed-1,i,j)
+#  if defined SEDECO_SGD
+! *************************************** !
+!   Set bottom boundary values (forcing from SGD)
+! *************************************** !
+
+! #  if defined YT_DEBUG_MODE
+!     if(sgd_Tmp .lt. 0.0d0) then
+!       write(*,*) 'yt_debug: mod_sedecosys.F negative concentration in SGD: ', &
+!                       'sgd_Tmp = ', sgd_Tmp, 'i = ', i, 'j = ', j
+!     end if
+!     if(sgd_Sal .lt. 0.0d0) then
+!       write(*,*) 'yt_debug: mod_sedecosys.F negative concentration in SGD: ', &
+!                       'sgd_Sal = ', sgd_Sal, 'i = ', i, 'j = ', j
+!     end if
+!     if(sgd_DOx .lt. 0.0d0) then
+!       write(*,*) 'yt_debug: mod_sedecosys.F negative concentration in SGD: ', &
+!                       'sgd_DOx = ', sgd_DOx, 'i = ', i, 'j = ', j
+!     end if
+!     if(sgd_TA .lt. 0.0d0) then
+!       write(*,*) 'yt_debug: mod_sedecosys.F negative concentration in SGD: ', &
+!                       'sgd_TA = ', sgd_TA, 'i = ', i, 'j = ', j
+!     end if
+!     DO isp = 1,N_Csp
+!       if(sgd_DIC(isp) .lt. 0.0d0) then
+!         write(*,*) 'yt_debug: mod_sedecosys.F negative concentration in SGD: ', &
+!                         'sgd_DIC(isp) = ', sgd_DIC(isp), 'isp = ', isp, 'i = ', i, 'j = ', j
+!       end if
+!     END DO
+!     DO isp = 1,N_Nsp
+!       if(sgd_NO3(isp) .lt. 0.0d0) then
+!         write(*,*) 'yt_debug: mod_sedecosys.F negative concentration in SGD: ', &
+!                         'sgd_NO3(isp) = ', sgd_NO3(isp), 'isp = ', isp,  'i = ', i, 'j = ', j
+!       end if
+!       if(sgd_NH4(isp) .lt. 0.0d0) then
+!         write(*,*) 'yt_debug: mod_sedecosys.F negative concentration in SGD: ', &
+!                         'sgd_NH4(isp) = ', sgd_NH4(isp), 'isp = ', isp,  'i = ', i, 'j = ', j
+!       end if
+!     END DO
+!     DO isp = 1,N_Psp
+!       if(sgd_PO4(isp) .lt. 0.0d0) then
+!         write(*,*) 'yt_debug: mod_sedecosys.F negative concentration in SGD: ', &
+!                         'sgd_PO4(isp) = ', sgd_PO4(isp), 'isp = ', isp,  'i = ', i, 'j = ', j
+!       end if
+!     END DO
+!     DO m = 1,Ndom
+!       DO isp = 1,N_Csp
+!         if(sgd_DOC(isp,m) .lt. 0.0d0) then
+!           write(*,*) 'yt_debug: mod_sedecosys.F negative concentration in SGD: ', &
+!                           'sgd_DOC(isp,m) = ', sgd_DOC(isp,m), 'isp = ', isp, 'm = ', m, 'i = ', i, 'j = ', j
+!         end if
+!       END DO
+!       DO isp = 1,N_Nsp
+!         if(sgd_DON(isp,m) .lt. 0.0d0) then
+!           write(*,*) 'yt_debug: mod_sedecosys.F negative concentration in SGD: ', &
+!                           'sgd_DON(isp,m) = ', sgd_DON(isp,m), 'isp = ', isp, 'm = ', m, 'i = ', i, 'j = ', j
+!         end if
+!       END DO
+!       DO isp = 1,N_Psp
+!         if(sgd_DOP(isp,m) .lt. 0.0d0) then
+!           write(*,*) 'yt_debug: mod_sedecosys.F negative concentration in SGD: ', &
+!                           'sgd_DOP(isp,m) = ', sgd_DOP(isp,m), 'isp = ', isp, 'm = ', m, 'i = ', i, 'j = ', j
+!         end if
+!       END DO
+!     END DO
+! #  endif
+
+    SEDECO(ng)%Tmp(Nsed,i,j)  = sgd_Tmp           ! Tmp: Temperature (oC)
+    SEDECO(ng)%Sal(Nsed,i,j)  = sgd_Sal           ! Sal: Salinity (PSU)
+    SEDECO(ng)%O2 (Nsed,i,j)  = sgd_DOx          ! O2: Dissolved oxygen (umol L-1)
+    SEDECO(ng)%TA (Nsed,i,j)  = sgd_TA          ! TA: Total Alkalinity (kg L-1)
+    SEDECO(ng)%DIC(:,Nsed,i,j)  = sgd_DIC(:)    ! DIC: carbon dioxide  (umol L-1)
+    SEDECO(ng)%NO3(:,Nsed,i,j) = sgd_NO3(:)         ! NO3: NO3 (umol L-1)
+    SEDECO(ng)%NH4(:,Nsed,i,j) = sgd_NH4(:)         ! NH4: NH4 (umol L-1)
+    SEDECO(ng)%PO4(:,Nsed,i,j) = sgd_PO4(:)         ! PO4: PO4 (umol L-1)
+    SEDECO(ng)%DOC(:,:,Nsed,i,j) = sgd_DOC(:,:)   ! DOC: Dissolved organic carbon (umol L-1)
+!    SEDECO(ng)%POC(:,:,Nsed,i,j) = 0.0d0          ! POC: Particulate organic carbon (nmol g-1)
+    SEDECO(ng)%DON(:,:,Nsed,i,j) = sgd_DON(:,:)   ! DON: Dissolved organic nitrogen (umol L-1)
+!    SEDECO(ng)%PON(:,:,Nsed,i,j) = 0.0d0          ! PON: Particulate organic nitrogen (PON: umol L-1)
+    SEDECO(ng)%DOP(:,:,Nsed,i,j) = sgd_DOP(:,:)   ! DOP: Dissolved organic phosporius (umol L-1)
+!    SEDECO(ng)%POP(:,:,Nsed,i,j) = 0.0d0          ! POP: Particulate organic phosporius (POP: umol L-1)
+!    SEDECO(ng)%PIC(:,Nsed,i,j)  = 0.0d0    ! PIC: Particulate CaCO3 (nmol g-1)
+    ! SEDECO(ng)%Mn2(Nsed,i,j) = 0.0d0         ! Mn2 (umol L-1)
+!    SEDECO(ng)%MnO2(Nsed,i,j) = 0.0d0
+    ! SEDECO(ng)%Fe2 (Nsed,i,j) = 0.0d0        ! Fe2 (umol L-1)
+!    SEDECO(ng)%FeS2(:,Nsed,i,j) = 0.0d0
+!    SEDECO(ng)%FeOOH(Nsed,i,j) = 0.0d0
+    ! SEDECO(ng)%H2S(:,Nsed,i,j) = 0.0d0     ! H2S (umol L-1)
+    SEDECO(ng)%SO4(:,Nsed,i,j) = 0.02824d0*sgd_Sal/35.0d0 *1.0d6  ! SO4 (umol L-1)
+!    SEDECO(ng)%S0 (:,Nsed,i,j) = 0.0d0
+#  endif
 
 ! ********************************************************************* !
 !          Diffusion
@@ -974,6 +1178,59 @@ CONTAINS
       D_SO4(:,k)  = cff*D_SO4(:,k) + DBd(k)
       D_H2S(:,k)  = cff*D_H2S(:,k) + DBd(k)
     ENDDO
+
+! #   if defined YT_DEBUG_MODE
+!     DO k = 1,Nsed
+!       if (D_O2(k) .lt. 0.0d0) then
+!         write(*,*) 'yt_debug: mod_sedecosys.F negative diffusion coefficient error', &
+!                     'D_O2(k) = ', D_O2(k), 'k = ', k, 'i = ', i, 'j = ', j
+!       end if
+!       DO isp = 1,N_Csp
+!         if (D_DIC(isp,k) .lt. 0.0d0) then
+!           write(*,*) 'yt_debug: mod_sedecosys.F negative diffusion coefficient error', &
+!                       'D_DIC(isp,k) = ', D_DIC(isp,k), 'k = ', k, 'isp = ', isp, 'i = ', i, 'j = ', j
+!         end if
+!       END DO
+!       DO isp = 1,N_Nsp
+!         if (D_NO3(isp,k) .lt. 0.0d0) then
+!           write(*,*) 'yt_debug: mod_sedecosys.F negative diffusion coefficient error', &
+!                       'D_NO3(isp,k) = ', D_NO3(isp,k), 'k = ', k, 'isp = ', isp,  'i = ', i, 'j = ', j
+!         end if
+!         if (D_NH4(isp,k) .lt. 0.0d0) then
+!           write(*,*) 'yt_debug: mod_sedecosys.F negative diffusion coefficient error', &
+!                       'D_NH4(isp,k) = ', D_NH4(isp,k), 'k = ', k, 'isp = ', isp,  'i = ', i, 'j = ', j
+!         end if
+!       END DO
+!       DO isp = 1,N_Psp
+!         if (D_PO4(isp,k) .lt. 0.0d0) then
+!           write(*,*) 'yt_debug: mod_sedecosys.F negative diffusion coefficient error', &
+!                       'D_PO4(isp,k) = ', D_PO4(isp,k), 'k = ', k, 'isp = ', isp,  'i = ', i, 'j = ', j
+!         end if
+!       END DO
+!       DO m = 1,Ndom
+!         if (D_DOM(m,k) .lt. 0.0d0) then
+!           write(*,*) 'yt_debug: mod_sedecosys.F negative diffusion coefficient error', &
+!                       'D_DOM(m,k) = ', D_DOM(m,k), 'k = ', k, 'i = ', i, 'j = ', j, 'm = ', m
+!         end if
+!       ENDDO
+!       if (D_Mn2(k) .lt. 0.0d0) then
+!         write(*,*) 'yt_debug: mod_sedecosys.F negative diffusion coefficient error', &
+!                     'D_Mn2(k) = ', D_Mn2(k), 'k = ', k, 'i = ', i, 'j = ', j
+!       end if
+!       if (D_Fe2(k) .lt. 0.0d0) then
+!         write(*,*) 'yt_debug: mod_sedecosys.F negative diffusion coefficient error', &
+!                     'D_Fe2(k) = ', D_Fe2(k), 'k = ', k, 'i = ', i, 'j = ', j
+!       end if
+!       if (D_SO4(1,k) .lt. 0.0d0) then
+!         write(*,*) 'yt_debug: mod_sedecosys.F negative diffusion coefficient error', &
+!                     'D_SO4(1,k) = ', D_SO4(1,k), 'k = ', k, 'i = ', i, 'j = ', j
+!       end if
+!       if (D_H2S(1,k) .lt. 0.0d0) then
+!         write(*,*) 'yt_debug: mod_sedecosys.F negative diffusion coefficient error', &
+!                     'D_H2S(1,k) = ', D_H2S(1,k), 'k = ', k, 'i = ', i, 'j = ', j
+!       end if
+!     ENDDO
+! #   endif
 
 !! ----- Diffusive boundary layer tickness ----- !!
     SEDECO(ng)%dzw(1) = 0.01d0 ! (cm) ???????????? Need update for adding dependency on flow rate ??????????????????????????
@@ -1139,34 +1396,43 @@ CONTAINS
 #  if defined SEDECO_SGD
     DO k = 1,Nsed
       Wd(k)=-sgd_flux ! * SEDECO(ng)%poro(k,i,j)
+! #   if defined YT_DEBUG_MODE
+!       ! Wd: Solutes advection velocity (cm s-1)
+!       if (Wd(k)*dt .gt. SEDECO(ng)%dzr(k)) then
+!         write(*,*) 'yt_debug: mod_sedecosys.F SGD advection*dt exceeds layer thickness', &
+!                     'Wd(k)*dt > dzr(k)      ', &
+!                     'k = ', k, 'Wd(k) = ', Wd(k), 'dt = ', dt, 'dzr(k) = ', SEDECO(ng)%dzr(k), &
+!                     'consider decreasing dt or increasing layer thickness'
+!       end if
+! #   endif
     ENDDO
 
-! *************************************** !
-!   Set bottom boundary values for SGD
-! *************************************** !
-    SEDECO(ng)%Tmp(Nsed,i,j)  = sgd_Tmp           ! Tmp: Temperature (oC)
-    SEDECO(ng)%Sal(Nsed,i,j)  = sgd_Sal           ! Sal: Salinity (PSU)
-    SEDECO(ng)%O2 (Nsed,i,j)  = sgd_DOx          ! O2: Dissolved oxygen (umol L-1)
-    SEDECO(ng)%TA (Nsed,i,j)  = sgd_TA          ! TA: Total Alkalinity (kg L-1)
-    SEDECO(ng)%DIC(:,Nsed,i,j)  = sgd_DIC(:)    ! DIC: carbon dioxide  (umol L-1)
-    SEDECO(ng)%NO3(:,Nsed,i,j) = sgd_NO3(:)         ! NO3: NO3 (umol L-1)
-    SEDECO(ng)%NH4(:,Nsed,i,j) = sgd_NH4(:)         ! NH4: NH4 (umol L-1)
-    SEDECO(ng)%PO4(:,Nsed,i,j) = sgd_PO4(:)         ! PO4: PO4 (umol L-1)
-    SEDECO(ng)%DOC(:,:,Nsed,i,j) = sgd_DOC(:,:)   ! DOC: Dissolved organic carbon (umol L-1)
-!    SEDECO(ng)%POC(:,:,Nsed,i,j) = 0.0d0          ! POC: Particulate organic carbon (nmol g-1)
-    SEDECO(ng)%DON(:,:,Nsed,i,j) = sgd_DON(:,:)   ! DON: Dissolved organic nitrogen (umol L-1)
-!    SEDECO(ng)%PON(:,:,Nsed,i,j) = 0.0d0          ! PON: Particulate organic nitrogen (PON: umol L-1)
-    SEDECO(ng)%DOP(:,:,Nsed,i,j) = sgd_DOP(:,:)   ! DOP: Dissolved organic phosporius (umol L-1)
-!    SEDECO(ng)%POP(:,:,Nsed,i,j) = 0.0d0          ! POP: Particulate organic phosporius (POP: umol L-1)
-!    SEDECO(ng)%PIC(:,Nsed,i,j)  = 0.0d0    ! PIC: Particulate CaCO3 (nmol g-1)
-    SEDECO(ng)%Mn2(Nsed,i,j) = 0.0d0         ! Mn2 (umol L-1)
-!    SEDECO(ng)%MnO2(Nsed,i,j) = 0.0d0
-    SEDECO(ng)%Fe2 (Nsed,i,j) = 0.0d0        ! Fe2 (umol L-1)
-!    SEDECO(ng)%FeS2(:,Nsed,i,j) = 0.0d0
-!    SEDECO(ng)%FeOOH(Nsed,i,j) = 0.0d0
-    SEDECO(ng)%H2S(:,Nsed,i,j) = 0.0d0     ! H2S (umol L-1)
-    SEDECO(ng)%SO4(:,Nsed,i,j) = 0.02824d0*sgd_Sal/35.0d0 *1.0d6  ! SO4 (umol L-1)
-!    SEDECO(ng)%S0 (:,Nsed,i,j) = 0.0d0
+! ! *************************************** !
+! !   Set bottom boundary values for SGD
+! ! *************************************** !
+!     SEDECO(ng)%Tmp(Nsed,i,j)  = sgd_Tmp           ! Tmp: Temperature (oC)
+!     SEDECO(ng)%Sal(Nsed,i,j)  = sgd_Sal           ! Sal: Salinity (PSU)
+!     SEDECO(ng)%O2 (Nsed,i,j)  = sgd_DOx          ! O2: Dissolved oxygen (umol L-1)
+!     SEDECO(ng)%TA (Nsed,i,j)  = sgd_TA          ! TA: Total Alkalinity (kg L-1)
+!     SEDECO(ng)%DIC(:,Nsed,i,j)  = sgd_DIC(:)    ! DIC: carbon dioxide  (umol L-1)
+!     SEDECO(ng)%NO3(:,Nsed,i,j) = sgd_NO3(:)         ! NO3: NO3 (umol L-1)
+!     SEDECO(ng)%NH4(:,Nsed,i,j) = sgd_NH4(:)         ! NH4: NH4 (umol L-1)
+!     SEDECO(ng)%PO4(:,Nsed,i,j) = sgd_PO4(:)         ! PO4: PO4 (umol L-1)
+!     SEDECO(ng)%DOC(:,:,Nsed,i,j) = sgd_DOC(:,:)   ! DOC: Dissolved organic carbon (umol L-1)
+! !    SEDECO(ng)%POC(:,:,Nsed,i,j) = 0.0d0          ! POC: Particulate organic carbon (nmol g-1)
+!     SEDECO(ng)%DON(:,:,Nsed,i,j) = sgd_DON(:,:)   ! DON: Dissolved organic nitrogen (umol L-1)
+! !    SEDECO(ng)%PON(:,:,Nsed,i,j) = 0.0d0          ! PON: Particulate organic nitrogen (PON: umol L-1)
+!     SEDECO(ng)%DOP(:,:,Nsed,i,j) = sgd_DOP(:,:)   ! DOP: Dissolved organic phosporius (umol L-1)
+! !    SEDECO(ng)%POP(:,:,Nsed,i,j) = 0.0d0          ! POP: Particulate organic phosporius (POP: umol L-1)
+! !    SEDECO(ng)%PIC(:,Nsed,i,j)  = 0.0d0    ! PIC: Particulate CaCO3 (nmol g-1)
+!     SEDECO(ng)%Mn2(Nsed,i,j) = 0.0d0         ! Mn2 (umol L-1)
+! !    SEDECO(ng)%MnO2(Nsed,i,j) = 0.0d0
+!     SEDECO(ng)%Fe2 (Nsed,i,j) = 0.0d0        ! Fe2 (umol L-1)
+! !    SEDECO(ng)%FeS2(:,Nsed,i,j) = 0.0d0
+! !    SEDECO(ng)%FeOOH(Nsed,i,j) = 0.0d0
+!     SEDECO(ng)%H2S(:,Nsed,i,j) = 0.0d0     ! H2S (umol L-1)
+!     SEDECO(ng)%SO4(:,Nsed,i,j) = 0.02824d0*sgd_Sal/35.0d0 *1.0d6  ! SO4 (umol L-1)
+! !    SEDECO(ng)%S0 (:,Nsed,i,j) = 0.0d0
 
 !! === Advection Flux calculation ======================================
 
@@ -1453,7 +1719,7 @@ CONTAINS
                                       ,Fw_NH4(isp,k),Fw_NH4(isp,k+1),R_NH4(isp,k) &
                                       ,SEDECO(ng)%dzr(k),cfdd,dt ) 
       ENDDO
-      DO isp=1,N_Nsp
+      DO isp=1,N_Psp
         ! -- PO4 -- !
         SEDECO(ng)%PO4(isp,k,i,j) = massbalance( SEDECO(ng)%PO4(isp,k,i,j)        &
                                       ,Fw_PO4(isp,k),Fw_PO4(isp,k+1),R_PO4(isp,k) &
@@ -1547,6 +1813,262 @@ CONTAINS
                                 ,SEDECO(ng)%dzr(k),cfdd,dt )
       ENDDO
     ENDDO
+
+
+! #  if defined YT_DEBUG_MODE
+! ! ********************************************************************* !
+! !   error catch negative values
+! ! ********************************************************************* !
+
+!     DO k = 1,Nsed
+!       ! -- Sal -- !
+!       if (SEDECO(ng)%Sal(k,i,j) .lt. 0.0d0) then
+!         write(*,*) 'yt_debug: mod_sedecosys.F negative concentration problem', &
+!                     'Sal(k,i,j) = ', SEDECO(ng)%Sal(k,i,j), 'dt = ', dt, 'dzr(k) = ', SEDECO(ng)%dzr(k), &
+!                     'k = ', k, 'i = ', i, 'j = ', j
+!       endif
+!       ! -- O2 -- !
+!       if (SEDECO(ng)%O2(k,i,j) .lt. 0.0d0) then
+!         write(*,*) 'yt_debug: mod_sedecosys.F negative concentration problem', &
+!                     'O2(k,i,j) = ', SEDECO(ng)%O2(k,i,j), 'dt = ', dt, 'dzr(k) = ', SEDECO(ng)%dzr(k), &
+!                     'k = ', k, 'i = ', i, 'j = ', j
+!       endif
+!       ! -- TA -- !
+!       if (SEDECO(ng)%TA(k,i,j) .lt. 0.0d0) then
+!         write(*,*) 'yt_debug: mod_sedecosys.F negative concentration problem', &
+!                     'TA(k,i,j) = ', SEDECO(ng)%TA(k,i,j), 'dt = ', dt, 'dzr(k) = ', SEDECO(ng)%dzr(k), &
+!                     'k = ', k, 'i = ', i, 'j = ', j
+!       endif
+!       ! -- DIC -- !
+!       DO isp=1,N_Csp
+!         if (SEDECO(ng)%DIC(isp,k,i,j) .lt. 0.0d0) then
+!           write(*,*) 'yt_debug: mod_sedecosys.F negative concentration problem', &
+!                       'DIC(isp,k,i,j) = ', SEDECO(ng)%DIC(isp,k,i,j), 'dt = ', dt, 'dzr(k) = ', SEDECO(ng)%dzr(k), &
+!                       'isp = ', isp, 'k = ', k, 'i = ', i, 'j = ', j
+!         endif
+!       ENDDO
+!       DO isp=1,N_Nsp
+!         ! -- NO3 -- !
+!         if (SEDECO(ng)%NO3(isp,k,i,j) .lt. 0.0d0) then
+!           write(*,*) 'yt_debug: mod_sedecosys.F negative concentration problem', &
+!                       'NO3(isp,k,i,j) = ', SEDECO(ng)%NO3(isp,k,i,j), 'dt = ', dt, 'dzr(k) = ', SEDECO(ng)%dzr(k), &
+!                       'isp = ', isp, 'k = ', k, 'i = ', i, 'j = ', j
+!         endif
+!         ! -- NH4 -- !
+!         if (SEDECO(ng)%NH4(isp,k,i,j) .lt. 0.0d0) then
+!           write(*,*) 'yt_debug: mod_sedecosys.F negative concentration problem', &
+!                       'NH4(isp,k,i,j) = ', SEDECO(ng)%NH4(isp,k,i,j), 'dt = ', dt, 'dzr(k) = ', SEDECO(ng)%dzr(k), &
+!                       'isp = ', isp, 'k = ', k, 'i = ', i, 'j = ', j
+!         endif
+!       ENDDO
+!       DO isp=1,N_Psp
+!         ! -- PO4 -- !
+!         if (SEDECO(ng)%PO4(isp,k,i,j) .lt. 0.0d0) then
+!           write(*,*) 'yt_debug: mod_sedecosys.F negative concentration problem', &
+!                       'PO4(isp,k,i,j) = ', SEDECO(ng)%PO4(isp,k,i,j), 'dt = ', dt, 'dzr(k) = ', SEDECO(ng)%dzr(k), &
+!                       'isp = ', isp, 'k = ', k, 'i = ', i, 'j = ', j
+!         endif
+!       ENDDO
+!       ! -- DOM -- !
+!       DO m = 1,Ndom
+!         DO isp=1,N_Csp
+!           if (SEDECO(ng)%DOC(isp,m,k,i,j) .lt. 0.0d0) then
+!             write(*,*) 'yt_debug: mod_sedecosys.F negative concentration problem', &
+!                         'DOC(isp,m,k,i,j) = ', SEDECO(ng)%DOC(isp,m,k,i,j), 'dt = ', dt, 'dzr(k) = ', SEDECO(ng)%dzr(k), &
+!                         'isp = ', isp, 'm = ', m, 'k = ', k, 'i = ', i, 'j = ', j
+!           endif
+!         ENDDO
+!         DO isp=1,N_Nsp
+!           if (SEDECO(ng)%DON(isp,m,k,i,j) .lt. 0.0d0) then
+!             write(*,*) 'yt_debug: mod_sedecosys.F negative concentration problem', &
+!                         'DON(isp,m,k,i,j) = ', SEDECO(ng)%DON(isp,m,k,i,j), 'dt = ', dt, 'dzr(k) = ', SEDECO(ng)%dzr(k), &
+!                         'isp = ', isp, 'm = ', m, 'k = ', k, 'i = ', i, 'j = ', j
+!           endif
+!         ENDDO
+!         DO isp=1,N_Psp
+!           if (SEDECO(ng)%DOP(isp,m,k,i,j) .lt. 0.0d0) then
+!             write(*,*) 'yt_debug: mod_sedecosys.F negative concentration problem', &
+!                         'DOP(isp,m,k,i,j) = ', SEDECO(ng)%DOP(isp,m,k,i,j), 'dt = ', dt, 'dzr(k) = ', SEDECO(ng)%dzr(k), &
+!                         'isp = ', isp, 'm = ', m, 'k = ', k, 'i = ', i, 'j = ', j
+!           endif
+!         ENDDO
+!       ENDDO
+!       ! -- POM (solid) -- !
+!       DO m = 1,Npom
+!         DO isp=1,N_Csp
+!           if (SEDECO(ng)%POC(isp,m,k,i,j) .lt. 0.0d0) then
+!             write(*,*) 'yt_debug: mod_sedecosys.F negative concentration problem', &
+!                         'POC(isp,m,k,i,j) = ', SEDECO(ng)%POC(isp,m,k,i,j), 'dt = ', dt, 'dzr(k) = ', SEDECO(ng)%dzr(k), &
+!                         'isp = ', isp, 'm = ', m, 'k = ', k, 'i = ', i, 'j = ', j
+!           endif
+!         ENDDO
+!         DO isp=1,N_Nsp
+!           if (SEDECO(ng)%PON(isp,m,k,i,j) .lt. 0.0d0) then
+!             write(*,*) 'yt_debug: mod_sedecosys.F negative concentration problem', &
+!                         'PON(isp,m,k,i,j) = ', SEDECO(ng)%PON(isp,m,k,i,j), 'dt = ', dt, 'dzr(k) = ', SEDECO(ng)%dzr(k), &
+!                         'isp = ', isp, 'm = ', m, 'k = ', k, 'i = ', i, 'j = ', j
+!           endif
+!         ENDDO
+!         DO isp=1,N_Psp
+!           if (SEDECO(ng)%POP(isp,m,k,i,j) .lt. 0.0d0) then
+!             write(*,*) 'yt_debug: mod_sedecosys.F negative concentration problem', &
+!                         'POP(isp,m,k,i,j) = ', SEDECO(ng)%POP(isp,m,k,i,j), 'dt = ', dt, 'dzr(k) = ', SEDECO(ng)%dzr(k), &
+!                         'isp = ', isp, 'm = ', m, 'k = ', k, 'i = ', i, 'j = ', j
+!           endif
+!         ENDDO
+!       ENDDO
+!       ! -- PIC (solid) -- !
+!       DO isp=1,N_Csp
+!         if (SEDECO(ng)%PIC(isp,k,i,j) .lt. 0.0d0) then
+!           write(*,*) 'yt_debug: mod_sedecosys.F negative concentration problem', &
+!                       'PIC(isp,k,i,j) = ', SEDECO(ng)%PIC(isp,k,i,j), 'dt = ', dt, 'dzr(k) = ', SEDECO(ng)%dzr(k), &
+!                       'isp = ', isp, 'k = ', k, 'i = ', i, 'j = ', j
+!         endif
+!       ENDDO
+!       ! -- Mn2+ -- !
+!       if (SEDECO(ng)%Mn2(k,i,j) .lt. 0.0d0) then
+!         write(*,*) 'yt_debug: mod_sedecosys.F negative concentration problem', &
+!                     'Mn2(k,i,j) = ', SEDECO(ng)%Mn2(k,i,j), 'dt = ', dt, 'dzr(k) = ', SEDECO(ng)%dzr(k), &
+!                     'k = ', k, 'i = ', i, 'j = ', j
+!       endif
+!       ! -- Fe2+ -- !
+!       if (SEDECO(ng)%Fe2(k,i,j) .lt. 0.0d0) then
+!         write(*,*) 'yt_debug: mod_sedecosys.F negative concentration problem', &
+!                     'Fe2(k,i,j) = ', SEDECO(ng)%Fe2(k,i,j), 'dt = ', dt, 'dzr(k) = ', SEDECO(ng)%dzr(k), &
+!                     'k = ', k, 'i = ', i, 'j = ', j
+!       endif
+!       ! -- MnO2 (solid) -- !
+!       if (SEDECO(ng)%MnO2(k,i,j) .lt. 0.0d0) then
+!         write(*,*) 'yt_debug: mod_sedecosys.F negative concentration problem', &
+!                     'MnO2(k,i,j) = ', SEDECO(ng)%MnO2(k,i,j), 'dt = ', dt, 'dzr(k) = ', SEDECO(ng)%dzr(k), &
+!                     'k = ', k, 'i = ', i, 'j = ', j
+!       endif
+!       ! -- FeOOH (solid) -- !
+!       if (SEDECO(ng)%FeOOH(k,i,j) .lt. 0.0d0) then
+!         write(*,*) 'yt_debug: mod_sedecosys.F negative concentration problem', &
+!                     'FeOOH(k,i,j) = ', SEDECO(ng)%FeOOH(k,i,j), 'dt = ', dt, 'dzr(k) = ', SEDECO(ng)%dzr(k), &
+!                     'k = ', k, 'i = ', i, 'j = ', j
+!       endif
+!       DO isp=1,N_Psp
+!         ! -- FeOOH=PO4 (solid) -- !
+!         if (SEDECO(ng)%FeOOH_PO4(isp,k,i,j) .lt. 0.0d0) then
+!           write(*,*) 'yt_debug: mod_sedecosys.F negative concentration problem', &
+!                       'FeOOH_PO4(isp,k,i,j) = ', SEDECO(ng)%FeOOH_PO4(isp,k,i,j), 'dt = ', dt, 'dzr(k) = ', SEDECO(ng)%dzr(k), &
+!                       'isp = ', isp, 'k = ', k, 'i = ', i, 'j = ', j
+!         endif
+!       ENDDO
+!       DO isp=1,N_Ssp
+!         ! -- FeS (solid) -- !
+!         if (SEDECO(ng)%FeS(isp,k,i,j) .lt. 0.0d0) then
+!           write(*,*) 'yt_debug: mod_sedecosys.F negative concentration problem', &
+!                       'FeS(isp,k,i,j) = ', SEDECO(ng)%FeS(isp,k,i,j), 'dt = ', dt, 'dzr(k) = ', SEDECO(ng)%dzr(k), &
+!                       'isp = ', isp, 'k = ', k, 'i = ', i, 'j = ', j
+!         endif
+!         ! -- FeS2 (solid) -- !
+!         if (SEDECO(ng)%FeS2(isp,k,i,j) .lt. 0.0d0) then
+!           write(*,*) 'yt_debug: mod_sedecosys.F negative concentration problem', &
+!                       'FeS2(isp,k,i,j) = ', SEDECO(ng)%FeS2(isp,k,i,j), 'dt = ', dt, 'dzr(k) = ', SEDECO(ng)%dzr(k), &
+!                       'isp = ', isp, 'k = ', k, 'i = ', i, 'j = ', j
+!         endif
+!         ! -- H2S -- !
+!         if (SEDECO(ng)%H2S(isp,k,i,j) .lt. 0.0d0) then
+!           write(*,*) 'yt_debug: mod_sedecosys.F negative concentration problem', &
+!                       'H2S(isp,k,i,j) = ', SEDECO(ng)%H2S(isp,k,i,j), 'dt = ', dt, 'dzr(k) = ', SEDECO(ng)%dzr(k), &
+!                       'isp = ', isp, 'k = ', k, 'i = ', i, 'j = ', j
+!         endif
+!         ! -- S0 (solid) -- !
+!         if (SEDECO(ng)%S0(isp,k,i,j) .lt. 0.0d0) then
+!           write(*,*) 'yt_debug: mod_sedecosys.F negative concentration problem', &
+!                       'S0(isp,k,i,j) = ', SEDECO(ng)%S0(isp,k,i,j), 'dt = ', dt, 'dzr(k) = ', SEDECO(ng)%dzr(k), &
+!                       'isp = ', isp, 'k = ', k, 'i = ', i, 'j = ', j
+!         endif
+!         ! -- SO4 -- !
+!         if (SEDECO(ng)%SO4(isp,k,i,j) .lt. 0.0d0) then
+!           write(*,*) 'yt_debug: mod_sedecosys.F negative concentration problem', &
+!                       'SO4(isp,k,i,j) = ', SEDECO(ng)%SO4(isp,k,i,j), 'dt = ', dt, 'dzr(k) = ', SEDECO(ng)%dzr(k), &
+!                       'isp = ', isp, 'k = ', k, 'i = ', i, 'j = ', j
+!         endif
+!       ENDDO
+!     ENDDO
+
+!     ! yt_debug if concentration in sediment layer is negative, force to zero (breaks mass-balance)
+!     DO k = 1,Nsed
+!       ! -- Sal -- !
+!       SEDECO(ng)%Sal(k,i,j) = max(0.0d0, SEDECO(ng)%Sal(k,i,j))
+!       ! -- O2 -- !
+!       SEDECO(ng)%O2(k,i,j) = max(0.0d0, SEDECO(ng)%O2(k,i,j))
+!       ! -- TA -- !
+!       SEDECO(ng)%TA(k,i,j) = max(0.0d0, SEDECO(ng)%TA(k,i,j))
+!       ! -- DIC -- !
+!       DO isp=1,N_Csp
+!         SEDECO(ng)%DIC(isp,k,i,j) = max(0.0d0, SEDECO(ng)%DIC(isp,k,i,j))
+!       ENDDO
+!       DO isp=1,N_Nsp
+!         ! -- NO3 -- !
+!         SEDECO(ng)%NO3(isp,k,i,j) = max(0.0d0, SEDECO(ng)%NO3(isp,k,i,j))
+!         ! -- NH4 -- !
+!         SEDECO(ng)%NH4(isp,k,i,j) = max(0.0d0, SEDECO(ng)%NH4(isp,k,i,j)) 
+!       ENDDO
+!       DO isp=1,N_Psp
+!         ! -- PO4 -- !
+!         SEDECO(ng)%PO4(isp,k,i,j) = max(0.0d0, SEDECO(ng)%PO4(isp,k,i,j))
+!       ENDDO
+!       ! -- DOM -- !
+!       DO m = 1,Ndom
+!         DO isp=1,N_Csp
+!           SEDECO(ng)%DOC(isp,m,k,i,j) = max(0.0d0, SEDECO(ng)%DOC(isp,m,k,i,j))    
+!         ENDDO
+!         DO isp=1,N_Nsp
+!           SEDECO(ng)%DON(isp,m,k,i,j) = max(0.0d0, SEDECO(ng)%DON(isp,m,k,i,j)) 
+!         ENDDO
+!         DO isp=1,N_Psp
+!           SEDECO(ng)%DOP(isp,m,k,i,j) = max(0.0d0, SEDECO(ng)%DOP(isp,m,k,i,j))
+!         ENDDO
+!       ENDDO
+!       ! -- POM (solid) -- !
+!       DO m = 1,Npom
+!         DO isp=1,N_Csp
+!           SEDECO(ng)%POC(isp,m,k,i,j) = max(0.0d0, SEDECO(ng)%POC(isp,m,k,i,j))
+!         ENDDO
+!         DO isp=1,N_Nsp
+!           SEDECO(ng)%PON(isp,m,k,i,j) = max(0.0d0, SEDECO(ng)%PON(isp,m,k,i,j))
+!         ENDDO
+!         DO isp=1,N_Psp
+!           SEDECO(ng)%POP(isp,m,k,i,j) = max(0.0d0, SEDECO(ng)%POP(isp,m,k,i,j))
+!         ENDDO
+!       ENDDO
+!       ! -- PIC (solid) -- !
+!       DO isp=1,N_Csp
+!         SEDECO(ng)%PIC(isp,k,i,j) = max(0.0d0, SEDECO(ng)%PIC(isp,k,i,j))  
+!       ENDDO
+!       ! -- Mn2+ -- !
+!       SEDECO(ng)%Mn2(k,i,j) = max(0.0d0, SEDECO(ng)%Mn2(k,i,j))
+!       ! -- Fe2+ -- !
+!       SEDECO(ng)%Fe2(k,i,j) = max(0.0d0, SEDECO(ng)%Fe2(k,i,j))
+!       ! -- MnO2 (solid) -- !
+!       SEDECO(ng)%MnO2(k,i,j) = max(0.0d0, SEDECO(ng)%MnO2(k,i,j))
+!       ! -- FeOOH (solid) -- !
+!       SEDECO(ng)%FeOOH(k,i,j) = max(0.0d0, SEDECO(ng)%FeOOH(k,i,j))
+!       DO isp=1,N_Psp
+!         ! -- FeOOH=PO4 (solid) -- !
+!         SEDECO(ng)%FeOOH_PO4(isp,k,i,j) = max(0.0d0, SEDECO(ng)%FeOOH_PO4(isp,k,i,j))
+!       ENDDO
+!       DO isp=1,N_Ssp
+!         ! -- FeS (solid) -- !
+!         SEDECO(ng)%FeS(isp,k,i,j) = max(0.0d0, SEDECO(ng)%FeS(isp,k,i,j))
+!         ! -- FeS2 (solid) -- !
+!         SEDECO(ng)%FeS2(isp,k,i,j) = max(0.0d0, SEDECO(ng)%FeS2(isp,k,i,j))
+!         ! -- H2S -- !
+!         SEDECO(ng)%H2S(isp,k,i,j) = max(0.0d0, SEDECO(ng)%H2S(isp,k,i,j))
+!          ! -- S0 (solid) -- !
+!         SEDECO(ng)%S0(isp,k,i,j) = max(0.0d0, SEDECO(ng)%S0(isp,k,i,j))
+!         ! -- SO4 -- !
+!         SEDECO(ng)%SO4(isp,k,i,j) = max(0.0d0, SEDECO(ng)%SO4(isp,k,i,j))
+!       ENDDO
+!     ENDDO
+
+! #  endif
+
 
 ! ********************************************************************* !
 !   set output parameters
@@ -1643,30 +2165,41 @@ CONTAINS
   end function Ficks
 
 !! --- Upstream Advection Flux calculation ------------------------------------------ !!
-  real(8) function AdvUp(u,C1,C2)
+  real(8) function AdvUp(u,C1,C2) ! downwards is positive
     implicit none
-    real(8), intent(in) :: u
-    real(8), intent(in) :: C1
-    real(8), intent(in) :: C2
-    ! if      u>0, AdvUp = u*C1  
+    real(8), intent(in) :: u            ! Solutes advection velocity      (cm s-1)    downwards is positive
+    real(8), intent(in) :: C1           ! Concentration of above layer    (nmol cm-3)
+    real(8), intent(in) :: C2           ! Concentration of this layer
+    ! if      u>0, AdvUp = u*C1         ! (cm s-1)*(nmol cm-3)=(nmol cm-2 s-1)
     ! else if u<0, AdvUp = u*C2
     AdvUp = ((u+abs(u))*C1 + (u-abs(u))*C2)*0.5d0
+
     return
   end function AdvUp
 
 !! --- Mass balance calculation in sediment column ---------------------------- !!
   real(8) function massbalance(C,FTin,FTout,R,dz,cff,dt)
     implicit none
-    real(8),intent(in) :: C             ! concentration                   (umol L-1 = nmol cm-3)
-    real(8),intent(in) :: FTin          ! total flux (IN)                 (nmol cm-2 s-1)
-    real(8),intent(in) :: FTout         ! total flux (OUT)                (nmol cm-2 s-1)
-    real(8),intent(in) :: R             ! Net prodution and consumption   (nmol cm-3 s-1)
-    real(8),intent(in) :: dz            ! layer thickness                 (cm)
-    real(8),intent(in) :: cff           ! porosity                        (cm_w3 cm_s-3)
-    real(8),intent(in) :: dt            ! time step                       (s)
+    real(8),intent(in) :: C             ! concentration                                   (umol L-1 = nmol cm-3)
+    real(8),intent(in) :: FTin          ! total flux from above layer to this layer       (nmol cm-2 s-1)
+    real(8),intent(in) :: FTout         ! total flux from this layer to below layer       (nmol cm-2 s-1)
+    real(8),intent(in) :: R             ! Net prodution and consumption                   (nmol cm-3 s-1)
+    real(8),intent(in) :: dz            ! layer thickness                                 (cm)
+    real(8),intent(in) :: cff           ! porosity                                        (cm_w3 cm_s-3)
+    real(8),intent(in) :: dt            ! time step                                       (s)
 
     massbalance = C + ((FTin - FTout)/dz + R)/cff * dt
 !  [nmol cm_w-3] = [nmol cm_w-3] + ([nmol cm_s-2 s-1]/(cm_s) + [nmol cm_s-3 s-1])/[cm_w3 cm_s-3] * [s] 
+
+! #   if defined YT_DEBUG_MODE
+!     if (massbalance .lt. 0.0d0) then
+!       write(*,*) 'yt_debug: mod_sedecosys.F negative concentration problem: ', &
+!                   'massbalance = C + ((FTin - FTout)/dz + R)/cff * dt', &
+!                   'massbalance = ', massbalance, 'C = ', C, 'FTin = ', FTin, 'FTout = ', FTout, &
+!                   'dz = ', dz, 'R = ', R, 'cff = ', cff, 'dt = ', dt
+!     end if
+! #   endif
+
     return
   end function massbalance
 

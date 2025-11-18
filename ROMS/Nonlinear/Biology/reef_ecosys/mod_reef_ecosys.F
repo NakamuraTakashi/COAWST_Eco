@@ -296,7 +296,7 @@ END SUBROUTINE allocate_reef_ecosys
     integer, intent(in) :: ng,i,j     
     integer, intent(in) :: N
     integer, intent(in) :: isplitc     
-    integer, intent(in) :: isplitsed     
+    integer, intent(inout) :: isplitsed     
     real(8), intent(in) :: date
     real(8), intent(in) :: dt         
     real(8), intent(in) :: dz(N)      
@@ -494,12 +494,19 @@ END SUBROUTINE allocate_reef_ecosys
     real(8), save :: dsec = 0.0d0 !sec
 # endif
 
+# if defined SEAGRASS_DEBUG_MODE
+    if (dz(1) .lt. 0.0d0) then
+      write(*,*) 'yt_debug: negative value in z layer thickness. dz(1) =', dz(1), &
+                  'i = ', i, 'j = ', j
+      error stop
+    endif
+# endif
+
 !-----------------------------------------------------------------------
 ! Initialize all time difference values (d_XXX)
 !-----------------------------------------------------------------------
       
     dtc = dt/dble(isplitc)                  ! Internal time step for coral polyp model (sec)
-    dtsed = dt/dble(isplitsed)              ! Internal time step for sediment ecosystem model (sec)
     
     DO k=1,N
 
@@ -1217,6 +1224,24 @@ END SUBROUTINE allocate_reef_ecosys
       Fdep_FeS2(iS34) = Ci_from_Ct_delta(Fdep_FeS2(iSt), 0.0d0, R34S_VCDT) !!!! Check needed
       Fdep_S0  (iS34) = Ci_from_Ct_delta(Fdep_S0  (iSt), 0.0d0, R34S_VCDT) !!!! Check needed
 #    endif
+#   endif
+
+#   if defined DYNAMIC_ISPLITSED
+      isplitsed = 1
+      dtsed = dt
+
+      ! sgd_flux: Solutes advection velocity (cm s-1)
+      DO WHILE (abs(sgd_flux)*dtsed .gt. minval(SEDECO(ng)%dzr)*0.5d0) ! max courant number set as 0.5
+        isplitsed = isplitsed + 1
+        dtsed = dt/dble(isplitsed)              ! Internal time step for sediment ecosystem model (sec)
+        write(*,*) 'yt_debug: mod_sedecosys.F SGD advection*dt exceeds layer thickness/2 (courant number over 0.5)'
+        write(*,*) 'yt_debug: mod_sedecosys.F new dynamic values set: isplitsed = ', isplitsed, 'dtsed = ', dtsed
+      END DO
+
+#   else
+
+      dtsed = dt/dble(isplitsed)              ! Internal time step for sediment ecosystem model (sec)
+
 #   endif
 
       DO m=1,isplitsed   !!! Loop for sediment model: dtc <= 0.05 sec

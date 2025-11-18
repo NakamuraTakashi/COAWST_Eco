@@ -579,6 +579,14 @@
 
 !----- Ecosystem model ----------------------------------------
 
+! # if defined SEAGRASS_DEBUG_MODE
+!     if (Hz(i,j,1) .lt. 0.0d0) then
+!       write(*,*) 'yt_debug: reef_ecosys.h negative value in Hz layer thickness. Hz(i,j,:) =', Hz(i,j,:), &
+!                   'i = ', i, 'j = ', j
+!       error stop
+!     endif
+! # endif
+
             CALL reef_ecosys           &
 !          input parameters
      &            (ng, i, j            &   ! ng: nested grid number; i,j: position

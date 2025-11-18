@@ -1720,6 +1720,23 @@ MODULE mod_seagrass
     endif
 # endif
 
+# if defined SEAGRASS_DEBUG_MODE
+    if (DO_uptake_possible(0) .lt. 0.0d0) then
+      write(*,*) 'yt_debug_asdf: negative value in DO_uptake_possible(0)'
+      write(*,*) 'yt_debug_asdf: DO_uptake_possible(0) = ', DO_uptake_possible(0), &
+              'Lf_DO_uptake_max = ', Lf_DO_uptake_max, &
+              'LfDryBm = ', LfDryBm, &
+              'k_lf_DO = ', k_lf_DO, &
+              'SgCBmF(iCt) = ', SgCBmF(iCt), &
+              'DOstock = ', DOstock , 'ocean_DO__conc = ', ocean_DO__conc, 'ocnDO = ', ocnDO, &
+              'dz = ', dz, 'dt = ', dt
+    endif
+    if (sum(DO_uptake_possible) .lt. 0.0d0) then
+      write(*,*) 'yt_debug_asdf: negative value in sum(DO_uptake_possible)'
+      write(*,*) 'yt_debug_asdf: sum(DO_uptake_possible) = ', sum(DO_uptake_possible)
+    endif
+# endif
+
     ! limit uptake so that DO stock is limited to 100 percent of biomass C
     if (DOstock .ge. DOstockCap*SgCBmF(iCt)) then
       DO_uptake_possible(:) = 0d0
@@ -2317,12 +2334,12 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
       delta_PO4stock(:)  = delta_PO4stock(:)  + Ungrowth_rate * SgPperC * rSgPBm(:)
 #  endif
 
-# if defined SEAGRASS_DEBUG_MODE
-      if (DOstock + delta_DOstock*dt .lt. 0.0d0) then
-        write(*,*) 'yt_debug: negative value in (DOstock + delta_DOstock*dt) after ungrowth calculation'
-        write(*,*) 'yt_debug: (DOstock + delta_DOstock*dt) = ', (DOstock + delta_DOstock*dt), 'Resp_rate = ', Resp_rate
-      endif
-# endif
+! # if defined SEAGRASS_DEBUG_MODE
+!       if (DOstock + delta_DOstock*dt .lt. 0.0d0) then
+!         write(*,*) 'yt_debug: negative value in (DOstock + delta_DOstock*dt) after ungrowth calculation'
+!         write(*,*) 'yt_debug: (DOstock + delta_DOstock*dt) = ', (DOstock + delta_DOstock*dt), 'Resp_rate = ', Resp_rate
+!       endif
+! # endif
 
       if (DOstock + delta_DOstock*dt .le. 0.0d0) then
         ! if overdraw on DO due to respired mass, get the difference from the ocean
