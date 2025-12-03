@@ -622,8 +622,8 @@ CONTAINS
     , sgd_DOP        &  ! SGD concentration coming in through bottom: DOC: Total dissolved organic phosphrous (DOP: umol L-1)
 # endif
 !   output parameters
-    , Flux_Tmp       &  ! Temperature flux (oC cm s-1)  * direction of water column to sediment is positive
-    , Flux_Sal       &  ! Salinity flux (PSU cm s-1)  * direction of water column to sediment is positive
+    , Flux_Tmp       &  ! Temperature flux (oC cm-2 s-1)  * direction of water column to sediment is positive
+    , Flux_Sal       &  ! Salinity flux (PSU cm-2 s-1)  * direction of water column to sediment is positive
     , Flux_DO        &  ! DO  flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
     , Flux_TA        &  ! Total Alkalinity flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
     , Flux_DIC       &  ! DIC flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
@@ -748,7 +748,7 @@ CONTAINS
     integer :: k, m, isp, isp2    ! symbol for loop cal
   
 !! -- Diffusion coefficient -----------------------------------------
-    real(8) :: D_Tmp(Nsed)
+    real(8) :: D_Tmp(Nsed)  ! cm-2 s-1????
     real(8) :: D_Sal(Nsed)
     real(8) :: D_O2 (Nsed)
     real(8) :: D_TA (Nsed)
@@ -2156,10 +2156,11 @@ CONTAINS
   ! General
   real(8) function Ficks(D,C1,C2,dz)
     implicit none
-    real(8), intent(in) :: D
-    real(8), intent(in) :: C1
-    real(8), intent(in) :: C2
-    real(8), intent(in) :: dz
+    real(8), intent(in) :: D   ! Diffusion coefficient   (cm2 s-1)
+    real(8), intent(in) :: C1  ! Concentration of above layer    (nmol cm-3)
+    real(8), intent(in) :: C2  ! Concentration of this layer
+    real(8), intent(in) :: dz  ! layer thickness   (cm)
+    ! [nmol/cm2 s] =  [cm2/s] * [nmol/cm3] / [cm]
     Ficks =  D * (C1 - C2)/dz
     return
   end function Ficks

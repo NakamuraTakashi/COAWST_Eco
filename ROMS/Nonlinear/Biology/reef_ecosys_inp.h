@@ -752,8 +752,13 @@
             WRITE (out,60) ng
             WRITE (out,70) CrlIter(ng), 'CrlIter',                      &
      &            'Number of iterations for nonlinear convergence.'
+# if defined DYNAMIC_ISPLITSED
+            WRITE (out,70) 1, 'SedIter',                      &
+     &            'Dynamic number of iterations for nonlinear convergence.'
+# else
             WRITE (out,70) SedIter(ng), 'SedIter',                      &
      &            'Number of iterations for nonlinear convergence.'
+# endif
             WRITE (out,90) PARfrac(ng), 'PARfrac',                      &
      &            'Fraction of shortwave radiation that is',            &
      &            'photosynthetically active (nondimensional).'

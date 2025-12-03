@@ -204,8 +204,8 @@ END SUBROUTINE allocate_reef_ecosys
     , Fdep_sed       &   ! Sedimentation rate (g cm-2 s-1) (Positive: sedimentation; Negative: erosion)
 # endif
 !   output parameters
-    , dTemp_dt       &   ! dTemp_dt(N)           : Temperature (oC s-1)
-    , dSalt_dt       &   ! dSalt_dt(N)           : Salinity (PSU s-1)
+    , dTemp_dt       &   ! dTemp_dt(N)           : Temperature (oC L-1 s-1)
+    , dSalt_dt       &   ! dSalt_dt(N)           : Salinity (PSU L-1 s-1)
     , dDOx_dt        &   ! dDOx_dt(N)            : dDOx/dt  (umol O2 L-1 s-1) 
     , dTA_dt         &   ! dTA_dt(N)             : dTA/dt   (umol kg-1 s-1) 
     , dDIC_dt        &   ! dDIC_dt(N_Csp,N)      : dDIC/dt  (umol C kg-1 s-1)  1 mmol m-3 = 1 umol L-1 = 1/1.024 umol kg-1
@@ -992,7 +992,7 @@ END SUBROUTINE allocate_reef_ecosys
 !!! yuta_seagrass >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
     ! write(*,*) 'yt_debug: PFD = ', PFD, 'PFDbott = ', PFDbott
     DO icl=1,Nsg    
-      IF(p_sgrass(icl) .gt. 0.0d0) THEN 
+      IF(p_sgrass(icl) .gt. 0.0d0 .and. SGRASS(ng)%SgCBmF(iCt,icl,i,j) .gt. 0.0d0) THEN 
 
         CALL seagrass           &
 !       input parameters
@@ -1003,9 +1003,7 @@ END SUBROUTINE allocate_reef_ecosys
           , date                &   ! Date (days since x or elapsed days) yt_edit best if in phase with clock to maintain consistency on restart
           , dt                  &   ! Time step (sec)
           , p_sgrass(:)         &   ! seagrass coverage (every species)
-#  if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE || defined SEAGRASS_ROOT_POM
           , p_sand              &   ! Sediment coverage
-#  endif
           , PFD                 &   ! Photon flux density (umol m-2 s-1)
           , rho_sw(1)           &   ! Density of seawater (g cm-3)
           , DIC(:,1)*rho_sw(1)  &   ! DIC (umol l-1)            ! [umol/L] = [umol/kg] [g/cm3] (kg/1000g)(1000cm3/L)
@@ -1084,6 +1082,8 @@ END SUBROUTINE allocate_reef_ecosys
           , dz(1)          &   ! vertical layer thickness (m)
           , date           &   ! Date (days since x or elapsed days) yt_edit best if in phase with clock to maintain consistency on restart
           , dt             &   ! Time step (sec)
+          , p_sgrass(:)    &   ! seagrass coverage (every species)
+          , p_sand         &   ! Sediment coverage
           )
       END IF
     END DO
@@ -1299,8 +1299,8 @@ END SUBROUTINE allocate_reef_ecosys
           , sgd_DOP(:,:)      &   ! SGD concentration coming in through bottom: DOC: Total dissolved organic phosphrous (DOP: umol L-1)
 #   endif
 !         output parameters
-          , Flux_Tmp          &   ! Temperature flux (oC cm s-1)  * direction of water column to sediment is positive
-          , Flux_Sal          &   ! Salinity flux (PSU cm s-1)  * direction of water column to sediment is positive
+          , Flux_Tmp          &   ! Temperature flux (oC cm-2 s-1)  * direction of water column to sediment is positive
+          , Flux_Sal          &   ! Salinity flux (PSU cm-2 s-1)  * direction of water column to sediment is positive
           , Flux_DO           &   ! DO  flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
           , Flux_TA           &   ! Total Alkalinity flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
           , Flux_DIC(:)       &   ! DIC flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
@@ -1329,15 +1329,20 @@ END SUBROUTINE allocate_reef_ecosys
         )
 
       END DO
-      ! 1 oC cm s-1 = 0.01 oC m s-1, or  1 PSU cm s-1 = 0.01 PSU m s-1
-      ! cff: convert [oC cm s-1] to [oC s-1], or convert [PSU cm s-1] to [PSU s-1]
 
-      ! 1 nmol cm-2 s-1 = 0.01 mmol m-2 s-1, 1 mmol m-3 = 1 umol L-1 = 1/1.024 umol kg-1
-      ! cff: convert [nmol cm-2 s-1] to [umol L-1 s-1]
-
-      cff=0.01d0 /dz(1) * p_sand
+      ! (change in water temp)[oC/L s] = - (temp flux)[oC/cm2 s] * [10000cm2/m2] / depth[m] * [m3/1000L] * (sandy fraction 0~1)
+      ! (change in water temp)[oC/L s] = - (temp flux)[oC s] * 10 * [/L] * (sandy fraction 0~1)
+      !  = [10000cm2/m2] / dz[m] * [m3/1000L] * (0~1)
+      cff=10d0 /dz(1) * p_sand      
+      ! [oC/L s]  = [oC/L s]    - [oC/cm2 s] * [10000cm2/m2] / [m] * [m3/1000L] * (0~1)
       dTemp_dt(1) = dTemp_dt(1) - Flux_Tmp  * cff
       dSalt_dt(1) = dSalt_dt(1) - Flux_Sal  * cff
+
+      ! (change in water chem)[umol/L s] = - (chem flux)[nmol/cm2 s] * [10000cm2/m2] / depth[m] * [m3/1000L] * [umol/1000nmol] (sandy fraction 0~1)
+      ! (change in water chem)[umol/L s] = - (chem flux)[umol s] * 0.01 * [/L] * (sandy fraction 0~1)
+      !  = [10000cm2/m2] / dz[m] * [m3/1000L] [umol/1000nmol] * (0~1)
+      cff=0.01d0 /dz(1) * p_sand      
+      ! [umol/L s] = [umol/L s] - [nmol/cm2 s] * [10000cm2/m2] / dz[m] * [m3/1000L] [umol/1000nmol] * (0~1)
       dDOx_dt(1) = dDOx_dt(1) - Flux_DO  * cff
       dTA_dt (1) = dTA_dt (1) - Flux_TA  * cff/rho_sw(1)
       dDIC_dt(:,1) = dDIC_dt(:,1) - Flux_DIC(:) * cff/rho_sw(1)

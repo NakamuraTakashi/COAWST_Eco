@@ -153,8 +153,8 @@
 #ifdef MACROALGAE
      &                         p_algae,                                 &
 #endif
-#ifdef SEDIMENT_ECOSYS
      &                         p_sand,                                  &
+#ifdef SEDIMENT_ECOSYS
 # if defined SEDECO_SGD && defined SGD_ON
      &                         sgd_src,                                 &
      &                         pm,                                      &
@@ -225,8 +225,8 @@
 # ifdef MACROALGAE
       real(r8), intent(inout) :: p_algae(:,LBi:,LBj:)
 # endif
-# ifdef SEDIMENT_ECOSYS
       real(r8), intent(inout) :: p_sand(LBi:,LBj:)
+# ifdef SEDIMENT_ECOSYS
 #  if defined SEDECO_SGD && defined SGD_ON
       real(r8), intent(inout) :: sgd_src(LBi:,LBj:)
       real(r8), intent(in)    :: pm(LBi:,LBj:)
@@ -525,6 +525,7 @@
             COTl(:) = t(i,j,:,nstp,iCOTl)     &   ! COTl(N): COT starfish larvae (umol L-1)
 #endif
 #if defined SEDECO_SGD && defined SGD_ON
+            ! [cm s-1]= [m3 s-1] [m-1] [m-1] [] [100 cm m-1]
             sgd_flux  = Qsgd*pm(i,j)*pn(i,j)*sgd_src(i,j)*100.0_r8  ! m/s => 100 cm/s; sumbarine groundwater discharge rate of grid (cm s-1)
             sgd_Tmp   = Tsgd(iTemp) 
             sgd_Sal   = Tsgd(iSalt) 
