@@ -86,7 +86,7 @@ CONTAINS
     end do
     C_R = kT * C_Rmax * V**(2.0d0/3.0d0) / (1.0d0 + cff) ! Clearance rate (L s-1)
 
-    J_Rc = C_R * c2e  ! Required enertgy for water exchange (J s-1)
+    J_Rc = C_R * c2e  ! Required energy for water exchange (J s-1)
 
   end subroutine clearance_rate
 
@@ -150,31 +150,32 @@ CONTAINS
 !======================================================================================
 ! Mobilization flux (umolC s-1) (Saraiva et al., 2012)
 !======================================================================================
-  subroutine mobilization_flux(       &
+  subroutine mobilization_flux(             &
     ! input parameters
-      V, M_E, J_ES, cond, kappa, k_m  &
+      V, M_E, J_ES, cond, kappa, E_G, mu_E  &
     ! output parameters
     , J_EC)
 
     ! input parameters
     real(8), intent(in ) :: V       ! Body Volume (cm3)
-    real(8), intent(in ) :: M_E     ! Reserve biomass (umolC)
+    real(8), intent(in ) :: M_E     ! Reserve biomass (mmolC)
     real(8), intent(in ) :: J_ES    ! Somatic maintenance rate (umolC s-1)
     real(8), intent(in ) :: cond    ! Energy conductance (cm s-1)
     real(8), intent(in ) :: kappa   ! Allocation fraction to growth and somatic maintenance
-    real(8), intent(in ) :: k_m     ! Volume-specific Somatic maintenance rate (umol s-1 cm-3)
-                                    ! [E_G] (J cm-3)  Specific cost for structure
-                                    ! mu_E  (J mol−1)  (Bivalve reserve chemical potential)
-                                    ! k_m = [E_G]/mu_E = umolC cm-3
+    real(8), intent(in ) :: E_G     ! Specific cost for structure, [E_G] (J cm-3)  
+    real(8), intent(in ) :: mu_E    ! Bivalve reserve chemical potential, mu_E  (J mol−1)
     ! output parameters
     real(8), intent(out) :: J_EC  ! Mobilization flux (umolC s-1)
 
     real(8) :: E_m   !Reserve density (umolC cm-3)
+    real(8) :: k_m   !Volume-specific Somatic maintenance rate (umol s-1 cm-3)
+                     ! k_m = [E_G]/mu_E = umolC cm-3
 
-    E_m = M_E / V  ! Reserve density (umolC cm-3)
+    E_m = M_E*1.0d3 / V   ! Reserve density (umolC cm-3)
+    k_m = E_G/mu_E*1.0d6  ! Volume-specific Somatic maintenance rate (umol s-1 cm-3)
 
-!    J_EC = E_m/(k_m+kappa*E_m)*(k_m*cond*V**(2.0d0/3.0d0) + J_ES)  ! Mobilization flux (umolC s-1)
     J_EC = E_m/(k_m+kappa*E_m)*(k_m*cond*V**(2.0d0/3.0d0) + J_ES)  ! Mobilization flux (umolC s-1)
+!    J_EC = E_m/(k_m+kappa*E_m)*(k_m*cond*V**(2.0d0/3.0d0)) + J_ES  ! Mobilization flux (umolC s-1)
 
   end subroutine mobilization_flux
 
@@ -183,20 +184,18 @@ CONTAINS
 !======================================================================================
   subroutine somatic_maintenance( &
     ! input parameters
-      V, k_s                      &
+      V, p_M, mu_E                &
     ! output parameters
     , J_ES)
 
     ! input parameters
     real(8), intent(in ) :: V     ! Body Volume (cm3)
-    real(8), intent(in ) :: k_s   ! Volume-specific Somatic maintenance rate (umol s-1 cm-3)
-                                  ! [p_M] (J s-1 cm-3)  (volume specific somatic maintenance rate)
-                                  ! mu_E  (J mol−1)  (Bivalve reserve chemical potential)
-                                  ! k_s = [p_M]/mu_E = umol s-1 cm-3
+    real(8), intent(in ) :: p_M   ! volume specific somatic maintenance rate, [p_M] (J s-1 cm-3)
+    real(8), intent(in ) :: mu_E  ! Bivalve reserve chemical potential, mu_E  (J mol−1) 
     ! output parameters
     real(8), intent(out) :: J_ES  ! Somatic maintenance rate (umolC s-1)
 
-    J_ES = k_s * V  ! Somatic maintenance rate (umolC s-1)
+    J_ES = p_M/mu_E*1.0d6 * V  ! Somatic maintenance rate (umolC s-1)
 
   end subroutine somatic_maintenance
 
@@ -210,12 +209,12 @@ CONTAINS
     , J_EJ)
 
     ! input parameters
-    real(8), intent(in ) :: M_H   ! Bivalve reproduction buffer (umolC)
+    real(8), intent(in ) :: M_H   ! Bivalve reproduction buffer (mmolC)
     real(8), intent(in ) :: k_J   ! Volume-specific maturity maintenance rate coefficient (s-1)
     ! output parameters
     real(8), intent(out) :: J_EJ  ! Maturity maintenance rate (umolC s-1)
 
-    J_EJ = k_J * M_H  ! Maturity maintenance rate (umolC s-1)
+    J_EJ = k_J * M_H*1.0d3 ! Maturity maintenance rate (umolC s-1)
 
   end subroutine maturity_maintenance
 
@@ -224,18 +223,18 @@ CONTAINS
 !======================================================================================
   subroutine growth(    &
     ! input parameters
-      J_EC, J_EJ, kappa &
+      J_EC, J_ES, kappa &
     ! output parameters
     , J_EG)
 
     ! input parameters
     real(8), intent(out) :: J_EC  ! Mobilization flux (umolC s-1)
-    real(8), intent(in ) :: J_EJ  ! Maturity maintenance rate (umolC s-1)
+    real(8), intent(in ) :: J_ES  ! Somatic maintenance rate (umolC s-1)
     real(8), intent(in ) :: kappa ! Allocation fraction to growth and somatic maintenance
     ! output parameters
     real(8), intent(out) :: J_EG  ! Growth rate (umolC s-1)
 
-    J_EG = kappa*J_EC - J_EJ  ! Growth rate (umolC s-1)
+    J_EG = kappa*J_EC - J_ES  ! Growth rate (umolC s-1)
 
   end subroutine growth
 
@@ -245,31 +244,36 @@ CONTAINS
   subroutine maturity_reproduction(                   &
     ! input parameters
       M_H, J_EC, J_EJ, kappa, Mp_H                    &
-    , M_R, kappa_R, Rspawn, GSR, GSRsmawn, T, Tspawn  &
+    , M_R, kappa_R, Rspawn, GSR, GSRspawn, T, Tspawn  &
+    , date                                            &
     ! output parameters
     , J_ER, JM_ER, JR_ER, Jspawn_ER)
 
     ! input parameters
-    real(8), intent(in ) :: M_H   ! Bivalve maturity investment (umolC)
+    real(8), intent(in ) :: M_H   ! Bivalve maturity investment (mmolC)
     real(8), intent(in ) :: J_EC  ! Mobilization flux (umolC s-1)
     real(8), intent(in ) :: J_EJ  ! Maturity maintenance rate (umolC s-1)
     real(8), intent(in ) :: kappa ! Allocation fraction to growth and somatic maintenance
-    real(8), intent(in ) :: Mp_H  ! Cumulative maturity at puberty (umolC)
+    real(8), intent(in ) :: Mp_H  ! Cumulative maturity at puberty (mmolC)
                                   ! E_Hp (J)  Maturity at puberty
                                   ! mu_E (J molC−1),  Energy content of reserves
                                   ! Mp_H = E_Hp/mu_E = umolC
-    real(8), intent(in ) :: M_R      ! Bivalve reproduction buffer (umolC)
+    real(8), intent(in ) :: M_R      ! Bivalve reproduction buffer (mmolC)
     real(8), intent(in ) :: kappa_R  ! (no dim.) Reproduction efficiency
-    real(8), intent(in ) :: Rspawn   ! (s) Spawning period
+    real(8), intent(in ) :: Rspawn   ! (days) Spawning period
     real(8), intent(in ) :: GSR      ! (molC molC−1) Gonado-somatic ratio
-    real(8), intent(in ) :: GSRsmawn ! (molC molC−1) Gonado-somatic ratio to spawn
+    real(8), intent(in ) :: GSRspawn ! (molC molC−1) Gonado-somatic ratio to spawn
     real(8), intent(in ) :: T        ! (oC) Temperature
     real(8), intent(in ) :: Tspawn   ! (oC) Minimum temperature for spawning
+    real(8), intent(in ) :: date     ! Date (days since x or elapsed days)
     ! output parameters
     real(8), intent(out) :: J_ER  ! Flux allocated to reproduction/maturity (umolC s-1)
     real(8), intent(out) :: JM_ER ! Flux to maturity (umolC s-1)
     real(8), intent(out) :: JR_ER ! Flux to reproduction buffer (umolC s-1)
     real(8), intent(out) :: Jspawn_ER ! Spawning (umolC s-1)
+
+    real(8), save :: date_end_spawning = 0.0d0  ! Date at the end of spawning (days since x or elapsed days)
+    real(8), save :: Jspawn_ER0 = 0.0d0  ! Date at the end of spawning (days since x or elapsed days)
 
     J_ER = (1.0d0 - kappa)*J_EC - J_EJ ! Flux allocated to reproduction/maturity (umolC s-1)
 
@@ -281,8 +285,13 @@ CONTAINS
       JR_ER = J_ER  ! Flux to reproduction buffer (umolC s-1)
     end if
 
-    if(GSR>=GSRsmawn .and. T>=Tspawn) then
-      Jspawn_ER = kappa_R * M_R / Rspawn
+    if(GSR>=GSRspawn .and. T>=Tspawn .and. date_end_spawning < date) then
+      date_end_spawning = date + Rspawn
+      Jspawn_ER0 = kappa_R * M_R*1.0d3 / Rspawn / 86400.0d0  ! Spawning (umolC s-1)
+    end if
+
+    if(date_end_spawning >= date) then
+      Jspawn_ER = Jspawn_ER0
     else
       Jspawn_ER = 0.0d0
     end if

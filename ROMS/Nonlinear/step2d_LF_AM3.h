@@ -1049,9 +1049,9 @@
 # if defined WET_DRY && defined MASKING
           zeta(i,j,knew)=zeta(i,j,knew)+                                &
      &                   (Dcrit(ng)-h(i,j))*(1.0_r8-rmask(i,j))
-          IF (zeta(i,j,knew).le.(Dcrit(ng)-h(i,j))) THEN  !!!<<<<<<<<<<<<<<<<<< TN: recovered from the commented part
-            zeta(i,j,knew)=Dcrit(ng)-h(i,j)               !!!<<<<<<<<<<<<<<<<<< TN: recovered from the commented part
-          END IF                                          !!!<<<<<<<<<<<<<<<<<< TN: recovered from the commented part
+!         IF (zeta(i,j,knew).le.(Dcrit(ng)-h(i,j))) THEN
+!           zeta(i,j,knew)=Dcrit(ng)-h(i,j)
+!         END IF
 # endif
         END DO
       END DO

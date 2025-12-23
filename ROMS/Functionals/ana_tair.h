@@ -95,6 +95,12 @@
           Tair(i,j)=15.0_r8
         END DO
       END DO
+#elif defined ANA_ATM_CONST
+      DO j=JstrT,JendT
+        DO i=IstrT,IendT
+          Tair(i,j)=15.0_r8
+        END DO
+      END DO
 #else
       ana_tair.h: no values provided for Tair.
 #endif

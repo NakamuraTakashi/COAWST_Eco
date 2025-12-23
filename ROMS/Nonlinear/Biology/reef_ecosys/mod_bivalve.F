@@ -96,6 +96,10 @@ CONTAINS
     real(8), intent(in) :: dz(LBi:UBi,LBj:UBj,Nz)
     real(8), intent(in) :: dens_aqua(Naq,LBi:UBi,LBj:UBj)     ! Density of oyster aquaculture (rope m-3)
     logical, intent(in) :: start_of_new_run               ! TRUE = initialize; FALSE = continue from previous run
+! --- Dynamic Energy Budget (DEB) model parameters ---
+    real(8), parameter :: delta_M(1) = [   0.245d0] ! (no dim.)      Shape parameter (0.175: Van der Veer et al., 2006; 0.245: Sakamaki et al., 2025)
+    real(8), parameter :: C2Wd(1) = [12.0d0/0.51d0] ! (g(dw) molC−1) [carbon mass]/[dry mass] = 0.51+-0.07 (Sakamaki et al. 2022; Sakamaki et al. 2020; Fujibayashi et al. 2021). 
+    real(8), parameter :: Ww2Wd(1)   = [   0.19d0 ] ! (g(dw) cm−3)   ! 0.19+-0.02 g(dw)/g(ww), 1g(ww)/cm3 (Sakamaki et al. 2022; Sakamaki et al. 2020; Fujibayashi et al. 2021). 
     real(8) :: R13C
     integer :: i,j,k,n
 
@@ -148,21 +152,12 @@ CONTAINS
              if (n.eq.iOys) then ! 01: Oyster
                if (BVLV(ng)%dens(iOys,k,i,j) > 0.0d0) then
                  !--- Shell length (cm) -----------------
-                 BVLV(ng)%L(n,k,i,j)  = 5.0d0  ! cm 
-                 !--- Total (shell + flesh) weight (g) (L (cm) -> Wt g(ww)) (Kobayashi et al., 1997)-----------------
-                 BVLV(ng)%Wt(n,k,i,j) = 0.105d0  * BVLV(ng)%L(n,k,i,j)**2.967d0 ! g(wet weight)
-                 !--- Wet flesh (meat) weight (g) (L (cm) -> Ww g(dw)) (Kobayashi et al., 1997)-----------------
-                 BVLV(ng)%Ww(n,k,i,j) = 0.0126d0 * BVLV(ng)%L(n,k,i,j)**2.941d0 ! g(wet weight)
-                 !--- Flesh (meat) volume (g) (Ww (g) -> V (cm3)) -----------------
-                 BVLV(ng)%V(n,k,i,j)  = BVLV(ng)%Ww(n,k,i,j) / 1.0d0 ! 1.0 g/cm3
-                 !--- Dry flesh (meat) weight (g) (Ww g(ww) -> Wd g(dw)) -----------------
-                 BVLV(ng)%Wd(n,k,i,j) = BVLV(ng)%Ww(n,k,i,j)*0.19d0   ! 0.19+-0.02 g(dw)/g(ww) (Sakamaki et al. 2022; Sakamaki et al. 2020; Fujibayashi et al. 2021). 
-                 !--- CaCO3 in living bivalve (mmolC ind.-1)
-                 BVLV(ng)%CaCO3(iCt,n,k,i,j) = (BVLV(ng)%Wt(n,k,i,j)-BVLV(ng)%Ww(n,k,i,j)) * 10.0d0 ! = 1000.0d0 / 100.09d0 ! g -> mmol CaCO3               BVLV(ng)%QCv(iCt,n,k,i,j) = BVLV(ng)%Wd(n,k,i,j)*0.51d0/12.0d0 * 1.0d3 *0.9d0! mmolC individual-1
-                                                                        ! [carbon mass]/[dry mass] = 0.51+-0.07 (Sakamaki et al. 2022; Sakamaki et al. 2020; Fujibayashi et al. 2021). 
+                 BVLV(ng)%L(n,k,i,j)  = 0.5d0  ! cm
+                 !--- Body volume (cm3) ----------------- 
+                 BVLV(ng)%V(n,k,i,j)  = (delta_M(n)*BVLV(ng)%L(n,k,i,j))**3.0d0  ! mmolC -> cm3
                                                                         ! w_V   = 12.0d0/0.51d0 (g(dw) molC−1) [carbon mass]/[dry mass]=0.51d0 (Sakamaki et al. 2022; Sakamaki et al. 2020; Fujibayashi et al. 2021). 
-                 BVLV(ng)%QCv(iCt,n,k,i,j) = BVLV(ng)%Wd(n,k,i,j)/(12.0d0/0.51d0) * 1.0d3 *0.8d0! mmolC individual-1
-                 BVLV(ng)%QCe(iCt,n,k,i,j) = BVLV(ng)%QCv(iCt,n,k,i,j) *0.2d0  ! mmolC individual-1
+                 BVLV(ng)%QCv(iCt,n,k,i,j) = BVLV(ng)%V(n,k,i,j)*Ww2Wd(n)/C2Wd(n)*1.0d3 *0.99d0! mmolC individual-1
+                 BVLV(ng)%QCe(iCt,n,k,i,j) = BVLV(ng)%QCv(iCt,n,k,i,j) *0.01d0  ! mmolC individual-1
                  BVLV(ng)%QCr(iCt,n,k,i,j) = 0.0d0 ! mmolC individual-1
                  BVLV(ng)%QCh(iCt,n,k,i,j) = 0.0d0 ! mmolC individual-1
                  BVLV(ng)%QNv(iNt,n,k,i,j) = BVLV(ng)%QCv(iCt,n,k,i,j)*16.0d0/106.0d0  ! mmolN individual-1
@@ -173,7 +168,17 @@ CONTAINS
                  BVLV(ng)%QPe(iPt,n,k,i,j) = BVLV(ng)%QCe(iCt,n,k,i,j)* 1.0d0/106.0d0  ! mmolP individual-1
                  BVLV(ng)%QPr(iPt,n,k,i,j) = BVLV(ng)%QCr(iCt,n,k,i,j)* 1.0d0/106.0d0  ! mmolP individual-1
                  BVLV(ng)%QPh(iPt,n,k,i,j) = BVLV(ng)%QCh(iCt,n,k,i,j)* 1.0d0/106.0d0  ! mmolP individual-1
-
+                 !--- Total dry weight (g) (mmolC -> g(dw)) -----------------
+                 BVLV(ng)%Wd(n,k,i,j) = (  BVLV(ng)%QCe(iCt,n,k,i,j) + BVLV(ng)%QCv(iCt,n,k,i,j)    &
+                                         + BVLV(ng)%QCr(iCt,n,k,i,j) + BVLV(ng)%QCh(iCt,n,k,i,j) )  &
+                                         * C2Wd(n) * 1.0d-3  ! mmolC -> g(dw)  !!!!! Check the conversion factor !!!!!!
+                 !--- Wet flesh (meat) weight (g) (Wd g(dw)-> Ww g(ww)) -----------------
+                 BVLV(ng)%Ww(n,k,i,j) = BVLV(ng)%Wd(n,k,i,j) / Ww2Wd(n)
+                 !--- Total (shell + flesh) weight (g) (L (cm) -> Wt g(ww)) (Kobayashi et al., 1997)-----------------
+                 BVLV(ng)%Wt(n,k,i,j) = 0.105d0 * BVLV(ng)%L(n,k,i,j)**2.967d0 ! g(wet weight)
+                 !--- CaCO3 in living bivalve (mmolC ind.-1)
+                 BVLV(ng)%CaCO3(iCt,n,k,i,j) = (BVLV(ng)%Wt(n,k,i,j)-BVLV(ng)%Ww(n,k,i,j)) * 10.0d0 ! = 1000.0d0 / 100.09d0 ! g -> mmol CaCO3               BVLV(ng)%QCv(iCt,n,k,i,j) = BVLV(ng)%Wd(n,k,i,j)*0.51d0/12.0d0 * 1.0d3 *0.9d0! mmolC individual-1
+                                                                        ! [carbon mass]/[dry mass] = 0.51+-0.07 (Sakamaki et al. 2022; Sakamaki et al. 2020; Fujibayashi et al. 2021). 
                end if
              end if
  
@@ -272,7 +277,7 @@ CONTAINS
     real(8), parameter :: AE(4,1) = reshape( [ 0.75d0,    0.75d0,    0.75d0,     0.75d0    ], [4,1] ) ! to bivalve (no dim.)      Assimilation efficiency
 
 ! --- Dynamic Energy Budget (DEB) model parameters ---
-    real(8), parameter :: delta_M(1) = [   0.175d0] ! (no dim.)      Shape parameter (Van der Veer et al., 2006)
+    real(8), parameter :: delta_M(1) = [   0.245d0] ! (no dim.)      Shape parameter (0.175: Van der Veer et al., 2006; 0.245: Sakamaki et al., 2025)
     real(8), parameter :: C2Wd(1) = [12.0d0/0.51d0] ! (g(dw) molC−1) [carbon mass]/[dry mass] = 0.51+-0.07 (Sakamaki et al. 2022; Sakamaki et al. 2020; Fujibayashi et al. 2021). 
     real(8), parameter :: Ww2Wd(1)   = [   0.19d0 ] ! (g(dw) cm−3)   ! 0.19+-0.02 g(dw)/g(ww), 1g(ww)/cm3 (Sakamaki et al. 2022; Sakamaki et al. 2020; Fujibayashi et al. 2021). 
     real(8), parameter :: Tref(1)    = [  293.15d0] ! (K) Refernce temperature
@@ -286,15 +291,15 @@ CONTAINS
     real(8), parameter :: T_AL(1)    = [75000.0d0 ] ! (K) Arrhenius temp. for lower boundary (Van der Veer et al., 2006)
   ! --- Photoplankton ingestion parameters ---
     ! Maximum surface area specific clearance rate (L s-1 cm-2)
-    !  0.096 (m3 d−1 cm−2), Saraiva et al. (2011b)
-!    real(8), parameter :: C_Rmax  (1) = [ 1.0d-6 ] !Maximum surface area specific clearance rate (L s-1 cm-2)
-    ! {P_Xm}      = 560 J cm-3 d-1　（Van der Veer et al., 2006)
-    ! {P_Xm}/mu_E = 1.06d-3 molC cm-3 d-1 = 1.22d-2 umolC cm-3 s-1
-!    real(8), parameter :: C_Rmax  (1) = [ 1.22d-2 ] !Maximum surface area specific clearance rate (L s-1 cm-2)
-    real(8), parameter :: C_Rmax  (1) = [ 1.0d-4 ] !!!! Tuning parameter !!! Maximum surface area specific clearance rate (L s-1 cm-2)
+    !  0.096 (m3 d−1 cm−2) = 1.1d-3 (L s-1 cm-2) for mussels,  Saraiva et al. (2011b)
+    !  The clearance rate of oysters may be two times higher than that of mussels. (Check is needed!!)
+!    real(8), parameter :: C_Rmax  (1) = [ 2.2d-3 ] !Maximum surface area specific clearance rate (L s-1 cm-2)
+    real(8), parameter :: C_Rmax  (1) = [ 2.2d-2 ] !Maximum surface area specific clearance rate (L s-1 cm-2)
+!    real(8), parameter :: C_Rmax  (1) = [ 1.5d-3 ] !Maximum surface area specific clearance rate (L s-1 cm-2)
     ! Maximum surface area specific filtration rate (umol s−1 cm−2)
     !  4.8d-4 (molC d−1 cm−2), Rosland et al. (2009)
     real(8), parameter :: J_XiFmax(4,1) = reshape( [ 0.0693d0,  0.0693d0,  0.0693d0,   0.0693d0  ], [4,1] ) ! to Oyster
+!    real(8), parameter :: J_XiFmax(4,1) = reshape( [ 5.56d-3, 5.56d-3,  5.56d-3,  5.56d-3  ], [4,1] ) ! to Oyster
     ! Algal binding probability (no dim.)
     !  0.4 (no dim.),  Saraiva et al. (2011a)
     real(8), parameter :: rho_XiI (4,1) = reshape( [ 0.4d0, 0.4d0, 0.4d0, 0.4d0 ], [4,1] ) ! to Oyster
@@ -306,45 +311,23 @@ CONTAINS
   ! --- Assimiration related parameters ---
     real(8), parameter :: y_EX(1) = [ 0.75d0 ] ! Yield coefficient of reserves in algal structure (Saraiva et al., 2012)
   ! --- Somatic maintenance related parameters ---
-    ! [p_M] = 18.5 (J d-1 cm-3),  volume specific somatic maintenance rate (Ren & Schiel, 2008)
+    real(8), parameter :: mu_E(1) = [ 5.29d5 ] ! (J molC-1), Energy content of reserves (Ren & Schiel, 2008)
     ! mu_E = 22.49 (J mg−1) = 5.29d5 (J molC-1),  Energy content of reserves (Ren & Schiel, 2008)
     !                        12.0d0/0.51d0 (g(dw) molC−1) [carbon mass]/[dry mass]=0.51d0 (Sakamaki et al. 2022; Sakamaki et al. 2020; Fujibayashi et al. 2021). 
-    ! k_s = [p_M]/mu_E = 3.496d-5 molC d-1 cm-3 = 4.05d-4 umolC s-1 cm-3
-!    real(8), parameter :: k_s(1) = [ 4.05d-4 ] ! (umolC s-1 cm-3), volume specific somatic maintenance rate
-    real(8), parameter :: k_s(1) = [ 4.05d-5 ] ! (umolC s-1 cm-3), Test!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    real(8), parameter :: p_M(1) = [ 2.14d-4 ] ! (J s-1 cm-3), volume specific somatic maintenance rate (18.5 (J d-1 cm-3): Ren & Schiel, 2008)
   ! --- Mobilization flux related parameters ---
-    ! [E_G] = 2900 (J cm-3)  Specific cost for structure (Ren & Schiel, 2008)
-    ! mu_E = 22.49 (J mg−1) = 5.29d5 (J molC-1),  Energy content of reserves (Ren & Schiel, 2008)
-    !                        12.0d0/0.51d0 (g(dw) molC−1) [carbon mass]/[dry mass]=0.51d0 (Sakamaki et al. 2022; Sakamaki et al. 2020; Fujibayashi et al. 2021). 
-    ! k_m = [E_G]/mu_E = 5.480d-3 molC cm-3 = 5.48d3 umolC cm-3
-    real(8), parameter :: k_m(1)  = [ 5.48d3  ]  ! (umolC cm-3)
-    real(8), parameter :: cond(1) = [ 2.12d-6 ]  ! (cm s-1) Energy conductance; 0.18 (cm d-1), (van der Veer et al. 2006)
-    real(8), parameter :: kappa(1)= [ 0.45d0  ]  ! (no dim.) Allocation fraction to growth and somatic maintenance, (van der Veer et al. 2006)
-  ! --- Maturity maintenance related parameters ---
-    ! [p_M] = 18.5 (J d-1 cm-3),  volume specific somatic maintenance rate (Ren & Schiel, 2008)
-    ! [E_G] = 2900 (J cm-3)  Specific cost for structure (Ren & Schiel, 2008)
-    ! k_J = k_M = [p_M]/[E_G] = 6.38d-3 d-1 = 7.38d-8 s-1
-    real(8), parameter :: k_J(1) = [ 7.38d-8 ] ! (s-1)
-  ! --- Growth related parameters ---
-    ! y_VE = [M_V]*mu_E/[E_G]
-    !        [M_V] = d_V/w_V
-    ! mu_E = 22.49 (J mg−1) = 5.29d5 (J molC-1),  Energy content of reserves (Ren & Schiel, 2008)
-    ! [E_G] = 2900 (J cm-3)  Specific cost for structure (Ren & Schiel, 2008)
-    ! d_V   = 0.19 (g(dw)/cm3)  0.19+-0.02 g(dw)/g(ww) (Sakamaki et al. 2022; Sakamaki et al. 2020; Fujibayashi et al. 2021).
-    !                           1.0 g(ww)/cm3 
-    ! w_V   = 12.0d0/0.51d0 (g(dw) molC−1) [carbon mass]/[dry mass]=0.51d0 (Sakamaki et al. 2022; Sakamaki et al. 2020; Fujibayashi et al. 2021). 
-    ! [M_V] = d_V/w_V = 0.19d0 / (12.0d0/0.51d0) = 8.075d-3 molC cm-3
-    ! y_VE = [M_V]*mu_E/[E_G] = 8.075d-3 * 5.29d5 / 2900 = 1.472d0 (no dim.)
-!    real(8), parameter :: y_VE(1) = [ 1.472d0 ] ! (no dim.) ??????????????
+    real(8), parameter :: E_G(1)  = [ 2.9d3 ]  !  Specific cost for structure ([E_G] = 2900 (J cm-3), Ren & Schiel, 2008)
+    real(8), parameter :: cond(1) = [ 3.83d-6 ]  ! (cm s-1) Energy conductance; 0.01381 (cm h-1), (Monaco & McQuaid, 2018)
+    real(8), parameter :: kappa(1)= [ 0.55d0  ]  ! (no dim.) Allocation fraction to growth and somatic maintenance, (Ren & Schiel, 2008)
   ! --- Maturity and reproduction related parameters --- 
     ! E_Hp (J) = 1.58d-2 (J)  Maturity at puberty (Saraiva et al., 2011)
     ! mu_E = 22.49 (J mg−1) = 5.29d5 (J molC-1),  Energy content of reserves (Ren & Schiel, 2008)
     !                        12.0d0/0.51d0 (g(dw) molC−1) [carbon mass]/[dry mass]=0.51d0 (Sakamaki et al. 2022; Sakamaki et al. 2020; Fujibayashi et al. 2021). 
     ! Mp_H = E_Hp/mu_E = 2.99d-4 molC = 2.99d-1 mmolC
-    real(8), parameter :: Mp_H(1)     = [ 2.99d-1 ]  ! Cumulative maturity at puberty (umolC) (Saraiva et al., 2011)
+    real(8), parameter :: Mp_H(1)     = [ 1.0d0 ]  ! Cumulative maturity at puberty (mmolC) (2.99d-1; Saraiva et al., 2011)
     real(8), parameter :: kappa_R(1)  = [ 0.7d0  ]  ! (no dim.) Reproduction efficiency (Pouvreau et al., 2006)
-    real(8), parameter :: Rspawn(1)   = [ 86400.0d0 ]  ! (s) Spawning period (1 day? assumed in Saraiva et al. (2012))
-    real(8), parameter :: GSRsmawn(1) = [ 0.46d0 ]  ! (molC molC−1) Gonado-somatic ratio to spawn (Bernard et al., 2011)
+    real(8), parameter :: Rspawn(1)   = [ 1.0d0 ]  ! (days) Spawning period (1 day? assumed in Saraiva et al. (2012))
+    real(8), parameter :: GSRspawn(1) = [ 0.46d0 ]  ! (molC molC−1) Gonado-somatic ratio to spawn (0.46d0; Bernard et al., 2011)
     real(8), parameter :: Tspawn(1)   = [ 19.0d0 ]  ! (oC) Minimum temperature for spawning, (Bernard et al., 2011)
   ! --- Mortality (s-1) --- 
     real(8), parameter :: BM(1)   = [ 0.0d0 ]  ! (s-1) Background mortality rate
@@ -366,10 +349,12 @@ CONTAINS
     real(8) :: JM_ER ! Flux to maturity (umolC s-1)
     real(8) :: JR_ER ! Flux to reproduction buffer (umolC s-1)
     real(8) :: Jspawn_ER ! Spawning (umolC s-1)
+    real(8) :: k_J   ! Volume-specific maturity maintenance rate (s-1)
     real(8) :: GSR   ! Gonado-somatic ratio
     real(8) :: R     ! Respiration rate (umolC s-1)
     real(8) :: G, G0 ! Calcification rate (umolC s-1)
     real(8) :: Mort  ! Mortality rate (population dens. s-1)
+    real(8) :: Ltmp  ! Shell length (cm) (temporal variable)
 
     real(8) :: rQCe(N_Csp),rQCv(N_Csp),rQCr(N_Csp),rQCh(N_Csp)
     real(8) :: rQNe(N_Nsp),rQNv(N_Nsp),rQNr(N_Nsp),rQNh(N_Nsp)
@@ -476,16 +461,18 @@ CONTAINS
 !======================================================================================
 
 ! === Somatic maintenance rate (umolC s-1) (Saraiva et al., 2012) =======
-  CALL somatic_maintenance(           &
+  CALL somatic_maintenance(                 &
     ! input parameters
-      BVLV(ng)%V(n,k,i,j), k_s(n)  &
+      BVLV(ng)%V(n,k,i,j), p_M(n), mu_E(n)  &
     ! output parameters
     , J_ES)
 
 ! === Maturity maintenance rate (umolC s-1) (Saraiva et al., 2012) ====== 
-  CALL maturity_maintenance(                &
+    k_J = p_M(n) / E_G(n)  ! Volume-specific maturity maintenance rate (s-1)
+                           ! s-1 = (J s-1 cm-3)/(J cm-3)
+    CALL maturity_maintenance(                &
     ! input parameters
-      BVLV(ng)%QCh(iCt,n,k,i,j), k_J(n)  &
+      BVLV(ng)%QCh(iCt,n,k,i,j), k_J          &
     ! output parameters
     , J_EJ)
 
@@ -549,7 +536,7 @@ CONTAINS
     CALL mobilization_flux(                          &
     ! input parameters
       BVLV(ng)%V(n,k,i,j), BVLV(ng)%QCe(iCt,n,k,i,j) &
-    , J_ES, cond(n), kappa(n), k_m(n)                &
+    , J_ES, cond(n), kappa(n), E_G(n), mu_E(n)       &
     ! output parameters
     , J_EC)
 
@@ -561,7 +548,7 @@ CONTAINS
 ! === Growth (umolC s-1) (Saraiva et al., 2012) =========================
     CALL growth(              &
     ! input parameters
-      J_EC, J_EJ, kappa(n)    &
+      J_EC, J_ES, kappa(n)    &
     ! output parameters
     , J_EG )
 
@@ -581,7 +568,8 @@ CONTAINS
     ! input parameters
       BVLV(ng)%QCh(iCt,n,k,i,j), J_EC, J_EJ, kappa(n), Mp_H(n)  &
     , BVLV(ng)%QCr(iCt,n,k,i,j), kappa_R(n), Rspawn(n)          &
-    , GSR, GSRsmawn(n), Tmp, Tspawn(n)                          &
+    , GSR, GSRspawn(n), Tmp, Tspawn(n)                          &
+    , date                                                      &
     ! output parameters
     , J_ER, JM_ER, JR_ER, Jspawn_ER)
 
@@ -629,6 +617,9 @@ CONTAINS
     BVLV(ng)%QPe(:,n,k,i,j) = BVLV(ng)%QPe(:,n,k,i,j) + dQPe_dt(:)*1.0d-3 * dt
     BVLV(ng)%QPr(:,n,k,i,j) = BVLV(ng)%QPr(:,n,k,i,j) + dQPr_dt(:)*1.0d-3 * dt
     BVLV(ng)%QPh(:,n,k,i,j) = BVLV(ng)%QPh(:,n,k,i,j) + dQPh_dt(:)*1.0d-3 * dt
+!--- Body volume V (cm3) -----------------
+!    BVLV(ng)%V(n,k,i,j)  = BVLV(ng)%V(n,k,i,j) + ( J_EG / k_m(n) ) * dt  ! umolC s-1 -> cm3
+    BVLV(ng)%V(n,k,i,j)  = BVLV(ng)%QCv(iCt,n,k,i,j) * C2Wd(n)/ Ww2Wd(n) * 1.0d-3  ! mmolC -> g(dw)  ! umolC -> cm3
 
 !--- Total dry weight (g) (mmolC -> g(dw)) -----------------
     BVLV(ng)%Wd(n,k,i,j) = (  BVLV(ng)%QCe(iCt,n,k,i,j) + BVLV(ng)%QCv(iCt,n,k,i,j)    &
@@ -637,9 +628,11 @@ CONTAINS
 !--- Wet flesh (meat) weight (g) (Wd g(dw)-> Ww g(ww)) -----------------
     BVLV(ng)%Ww(n,k,i,j) = BVLV(ng)%Wd(n,k,i,j) / Ww2Wd(n)
 !--- Flesh (meat) volume (g) (Ww (g) -> V (cm3)) -----------------
-    BVLV(ng)%V(n,k,i,j)  = BVLV(ng)%Ww(n,k,i,j) / 1.0d0 ! 1.0 g/cm3
+!    BVLV(ng)%V(n,k,i,j)  = BVLV(ng)%Ww(n,k,i,j) / 1.0d0 ! 1.0 g/cm3
 !--- Shell length (cm) ( Ww g(dw) -> L (cm); Kobayashi et al., 1997) -----------------
-    BVLV(ng)%L(n,k,i,j)  = 4.42d0 * BVLV(ng)%Ww(n,k,i,j)**0.340d0
+!    BVLV(ng)%L(n,k,i,j)  = 4.42d0 * BVLV(ng)%Ww(n,k,i,j)**0.340d0
+    Ltmp = V2L( BVLV(ng)%V(n,k,i,j), delta_M(n) )
+    BVLV(ng)%L(n,k,i,j)  = max(Ltmp, BVLV(ng)%L(n,k,i,j)) ! Prevent decreasing shell length
 !--- Total (shell + flesh) weight (g) (L (cm) -> Wt g(ww)) (Kobayashi et al., 1997)-----------------
     BVLV(ng)%Wt(n,k,i,j) = 0.105d0 * BVLV(ng)%L(n,k,i,j)**2.967d0 ! g(wet weight)
 
@@ -663,23 +656,23 @@ CONTAINS
     BVLV(ng)%CaCO3(:,n,k,i,j) = BVLV(ng)%CaCO3(:,n,k,i,j) + dCaCO3_dt(:) * dt
 
 !===== Unit adjustment ===========================================
-
-    dDOx_dt       = dDOx_dt       * BVLV(ng)%dens(n,k,i,j)
-    dTA_dt        = dTA_dt        * BVLV(ng)%dens(n,k,i,j)
-    dDIC_dt(:)    = dDIC_dt(:)    * BVLV(ng)%dens(n,k,i,j)
-    dNH4_dt(:)    = dNH4_dt(:)    * BVLV(ng)%dens(n,k,i,j)
-    dPO4_dt(:)    = dPO4_dt(:)    * BVLV(ng)%dens(n,k,i,j)
-    dDOC_dt(:,:)  = dDOC_dt(:,:)  * BVLV(ng)%dens(n,k,i,j)
-    dPOC_dt(:,:)  = dPOC_dt(:,:)  * BVLV(ng)%dens(n,k,i,j)
-    dPOC_dt(:,:)  = dPOC_dt(:,:)  * BVLV(ng)%dens(n,k,i,j)
-    dDON_dt(:,:)  = dDON_dt(:,:)  * BVLV(ng)%dens(n,k,i,j)
-    dPON_dt(:,:)  = dPON_dt(:,:)  * BVLV(ng)%dens(n,k,i,j)
-    dDOP_dt(:,:)  = dDOP_dt(:,:)  * BVLV(ng)%dens(n,k,i,j)
-    dPOP_dt(:,:)  = dPOP_dt(:,:)  * BVLV(ng)%dens(n,k,i,j)
-    dPhyC_dt(:,:) = dPhyC_dt(:,:) * BVLV(ng)%dens(n,k,i,j)
-    dPhyN_dt(:,:) = dPhyN_dt(:,:) * BVLV(ng)%dens(n,k,i,j)
-    dPhyP_dt(:,:) = dPhyP_dt(:,:) * BVLV(ng)%dens(n,k,i,j)
-    dPIC_dt (:,:) = dPIC_dt (:,:) * BVLV(ng)%dens(n,k,i,j)
+ ! [umol L-1 s-1] = [umol indiv.-1 s-1] * [indiv. m-3] * 1.0d-3 [m3 L-1]
+    dDOx_dt       = dDOx_dt       * BVLV(ng)%dens(n,k,i,j)*1.0d-3
+    dTA_dt        = dTA_dt        * BVLV(ng)%dens(n,k,i,j)*1.0d-3
+    dDIC_dt(:)    = dDIC_dt(:)    * BVLV(ng)%dens(n,k,i,j)*1.0d-3
+    dNH4_dt(:)    = dNH4_dt(:)    * BVLV(ng)%dens(n,k,i,j)*1.0d-3
+    dPO4_dt(:)    = dPO4_dt(:)    * BVLV(ng)%dens(n,k,i,j)*1.0d-3
+    dDOC_dt(:,:)  = dDOC_dt(:,:)  * BVLV(ng)%dens(n,k,i,j)*1.0d-3
+    dPOC_dt(:,:)  = dPOC_dt(:,:)  * BVLV(ng)%dens(n,k,i,j)*1.0d-3
+    dPOC_dt(:,:)  = dPOC_dt(:,:)  * BVLV(ng)%dens(n,k,i,j)*1.0d-3
+    dDON_dt(:,:)  = dDON_dt(:,:)  * BVLV(ng)%dens(n,k,i,j)*1.0d-3
+    dPON_dt(:,:)  = dPON_dt(:,:)  * BVLV(ng)%dens(n,k,i,j)*1.0d-3
+    dDOP_dt(:,:)  = dDOP_dt(:,:)  * BVLV(ng)%dens(n,k,i,j)*1.0d-3
+    dPOP_dt(:,:)  = dPOP_dt(:,:)  * BVLV(ng)%dens(n,k,i,j)*1.0d-3
+    dPhyC_dt(:,:) = dPhyC_dt(:,:) * BVLV(ng)%dens(n,k,i,j)*1.0d-3
+    dPhyN_dt(:,:) = dPhyN_dt(:,:) * BVLV(ng)%dens(n,k,i,j)*1.0d-3
+    dPhyP_dt(:,:) = dPhyP_dt(:,:) * BVLV(ng)%dens(n,k,i,j)*1.0d-3
+    dPIC_dt (:,:) = dPIC_dt (:,:) * BVLV(ng)%dens(n,k,i,j)*1.0d-3
 
     dDIC_dt(:) = dDIC_dt(:)/rho_sw !(umol L-1 s-1) -> (umol kg-1 s-1)
     dTA_dt     = dTA_dt/rho_sw     !(umol L-1 s-1) -> (umol kg-1 s-1)

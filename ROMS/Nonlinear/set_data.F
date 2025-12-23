@@ -1259,7 +1259,11 @@
       END IF
 #  else
       ic=0
+#  if defined OFFLINE_T_PASSIVE
+      DO itrc=1,NAT
+#  else
       DO itrc=1,NT(ng)
+#  endif
         IF (LtracerCLM(itrc,ng)) THEN
           ic=ic+1
           CALL set_3dfld_tile (ng, tile, iNLM, idTclm(itrc),            &
@@ -2457,10 +2461,10 @@
 #  ifdef ANA_TOBC
         CALL ana_tobc (ng, tile, iNLM)
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
-#   if defined OFFLINE_BIOLOGY
+#   if defined OFFLINE_BIOLOGY || defined OFFLINE_T_PASSIVE
         CALL ana_tobc_bio (ng, tile, iNLM)
 #   endif
-#  elif defined ANA_TOBC_BIO && !defined OFFLINE_BIOLOGY
+#  elif defined ANA_TOBC_BIO && (!defined OFFLINE_BIOLOGY || !defined OFFLINE_T_PASSIVE)
 
         IF (DOMAIN(ng)%SouthWest_Test(tile)) THEN
            DO itrc=1,NAT

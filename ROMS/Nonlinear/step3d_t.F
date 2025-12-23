@@ -434,6 +434,9 @@
 # ifdef OFFLINE_BIOLOGY
         DO ibt=1,NBT
           itrc=idbio(ibt)
+# elif defined OFFLINE_T_PASSIVE
+        DO ibt=1,NPT
+          itrc=inert(ibt)
 # else
         DO itrc=1,NT(ng)
 # endif
@@ -457,6 +460,9 @@
 # ifdef OFFLINE_BIOLOGY
       T_LOOP : DO ibt=1,NBT
         itrc=idbio(ibt)
+# elif defined OFFLINE_T_PASSIVE
+      T_LOOP : DO ibt=1,NPT
+        itrc=inert(ibt)
 # else
 !
 !  Compute horizontal tracer advection fluxes.
@@ -821,6 +827,9 @@
 #ifdef OFFLINE_BIOLOGY
         DO ibt=1,NBT
           itrc=idbio(ibt)
+#elif defined OFFLINE_T_PASSIVE
+        DO ibt=1,NPT
+          itrc=inert(ibt)
 #else
         DO itrc=1,NT(ng)
 #endif
@@ -1381,6 +1390,9 @@
 #ifdef OFFLINE_BIOLOGY
       DO ibt=1,NBT
         itrc=idbio(ibt)
+#elif defined OFFLINE_T_PASSIVE
+      DO ibt=1,NPT
+        itrc=inert(ibt)
 #else
       DO itrc=1,NT(ng)
 #endif
@@ -1498,6 +1510,9 @@
 #ifdef OFFLINE_BIOLOGY
         DO ibt=1,NBT
           itrc=idbio(ibt)
+#elif defined OFFLINE_T_PASSIVE
+        DO ibt=1,NPT
+          itrc=inert(ibt)
 #elif defined TS_VAR
         DO itrc=1,NAT
 #else

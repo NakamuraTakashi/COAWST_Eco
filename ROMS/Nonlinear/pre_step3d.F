@@ -377,6 +377,9 @@
 #  ifdef OFFLINE_BIOLOGY
       T_LOOP1 :DO ibt=1,NBT
         itrc=idbio(ibt)
+#  elif defined OFFLINE_T_PASSIVE
+      T_LOOP1 :DO ibt=1,NPT
+        itrc=inert(ibt)
 #  else
       T_LOOP1 :DO itrc=1,NT(ng)
 #  endif
@@ -667,6 +670,9 @@
 #ifdef OFFLINE_BIOLOGY
         T_LOOP2: DO ibt=1,NBT
           itrc=idbio(ibt)
+#elif defined OFFLINE_T_PASSIVE
+        T_LOOP2: DO ibt=1,NPT
+          itrc=inert(ibt)
 #else
         T_LOOP2: DO itrc=1,NT(ng)
 #endif
@@ -1073,6 +1079,9 @@
 #ifdef OFFLINE_BIOLOGY
         DO ibt=1,NBT
           itrc=idbio(ibt)
+#elif defined OFFLINE_T_PASSIVE
+        DO ibt=1,NPT
+          itrc=inert(ibt)
 #else
         DO itrc=1,NT(ng)
 #endif
@@ -1144,7 +1153,7 @@
         END DO
       END DO
 # endif /* !TS_FIXED */
-# if !defined OFFLINE_BIOLOGY
+# if !defined OFFLINE
 !
 !=======================================================================
 !  3D momentum equation in the XI-direction.
@@ -1368,6 +1377,9 @@
 #  ifdef OFFLINE_BIOLOGY
       DO ibt=1,NBT
         itrc=idbio(ibt)
+#  elif defined OFFLINE_T_PASSIVE
+      DO ibt=1,NPT
+        itrc=inert(ibt)
 #  else
       DO itrc=1,NT(ng)
 #  endif
