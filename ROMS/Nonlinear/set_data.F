@@ -1259,11 +1259,7 @@
       END IF
 #  else
       ic=0
-#  if defined OFFLINE_T_PASSIVE
-      DO itrc=1,NAT
-#  else
       DO itrc=1,NT(ng)
-#  endif
         IF (LtracerCLM(itrc,ng)) THEN
           ic=ic+1
           CALL set_3dfld_tile (ng, tile, iNLM, idTclm(itrc),            &

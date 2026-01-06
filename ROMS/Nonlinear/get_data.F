@@ -1964,11 +1964,7 @@
 !  Tracers.
 !
       ic=0
-# if defined OFFLINE_T_PASSIVE
-      DO i=1,NAT
-# else
       DO i=1,NT(ng)
-# endif
         IF (LtracerCLM(i,ng)) THEN
           ic=ic+1
           CALL get_3dfld (ng, iNLM, idTclm(i),                          &
