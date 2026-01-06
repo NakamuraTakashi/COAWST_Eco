@@ -201,6 +201,7 @@
       USE pt3dbc_mod, ONLY : pt3dbc_tile
 # endif
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+      USE mod_forces
 # ifdef OFFLINE_BIOLOGY
       USE mod_biology, ONLY : idbio
 # endif
@@ -1298,8 +1299,13 @@
                     cff3=SOURCES(ng)%Tsrc(is,k,itrc)
 #  endif
                   ELSE
-!                    cff3=t(Isrc,Jsrc,k,3,itrc)
-                    cff3=0.0_r8
+                    IF (itrc.eq.itemp) THEN
+                      cff3= max(0.0_r8, FORCES(ng) % Tair(Isrc,Jsrc))  !! Apply air temperature to river temperature
+!                      cff3= t(Isrc,Jsrc,N(ng),3,itrc)  !! Apply SST to river temperature
+                    ELSE
+!                      cff3=t(Isrc,Jsrc,k,3,itrc)
+                      cff3=0.0_r8
+                    END IF
                   END IF
                   t(Isrc,Jsrc,k,nnew,itrc)=t(Isrc,Jsrc,k,nnew,itrc)+    &
      &                                     cff*SOURCES(ng)%Qsrc(is,k)*  &
