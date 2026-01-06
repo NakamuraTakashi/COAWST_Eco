@@ -87,6 +87,11 @@
       real(r8), allocatable :: CD_VEG(:,:)
       real(r8), allocatable :: VEG_MASSDENS(:,:)
       real(r8), allocatable :: VEGHMIXCOEF(:,:)
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#if defined AQUACULTURE
+      real(r8), allocatable :: F_AQUA_DENS(:,:)
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
 #if defined MANGROVE_DRAG
       real(r8), allocatable :: SPE_MANGR(:,:)
