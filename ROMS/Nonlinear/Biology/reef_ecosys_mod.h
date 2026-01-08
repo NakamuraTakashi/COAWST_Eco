@@ -180,6 +180,20 @@
       integer  :: ipHt_                       ! pH (total scale)
       integer  :: iWarg                       ! aragonite saturation state
       integer  :: iWcal                       ! calcite saturation state
+      integer :: iDOCTot(N_Csp)       ! Total Dissolved organic C-concentration
+      integer :: iPOCTot(N_Csp)       ! Total Particulate organic C-concentration
+      integer :: iDONTot(N_Nsp)       ! Total Dissolved organic N-concentration
+      integer :: iPONTot(N_Nsp)       ! Total Particulate organic N-concentration
+      integer :: iDOPTot(N_Psp)       ! Total Dissolved organic P-concentration
+      integer :: iPOPTot(N_Psp)       ! Total Particulate organic P-concentration
+      integer :: iPhyCTot(N_Csp)      ! Total Phytoplankton1 density
+      integer :: iZooCTot(N_Csp)      ! Total Zooplankton density
+      integer :: iPhyNTot(N_Nsp)      ! Total Phytoplankton1 density
+      integer :: iZooNTot(N_Nsp)      ! Total Zooplankton density
+      integer :: iPhyPTot(N_Psp)      ! Total Phytoplankton1 density
+      integer :: iZooPTot(N_Psp)      ! Total Zooplankton density
+      integer :: iPICTot(N_Csp)       ! Total Particulate inorganic C-concentration
+
 
 !!! mons light model >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>KM:Add
 # ifdef LIGHT_MODEL
@@ -440,6 +454,8 @@
 !-----------------------------------------------------------------------
 
       NBT=i
+    !  write(*,*) 'NBT = ', NBT
+
 !---------------------------------------------------------------------
 !
 !  Allocate biological tracer vector.
@@ -712,6 +728,7 @@
 !  Set number of 2D history terms.
 !
       NHbio2d=ic
+      ! write(*,*) 'NHbio2d = ', NHbio2d
 !
 !  Allocate biological history vectors
 !
@@ -731,6 +748,7 @@
 !  Set number of 3D history terms.
 !
       NHbio3d=ic
+      ! write(*,*) 'NHbio3d = ', NHbio3d
 
       IF (.not.allocated(iHbio3)) THEN
         allocate ( iHbio3(NHbio3d) )
@@ -846,6 +864,7 @@
 !  Set number of 3D biological sediment history terms.
 !
       NHbiosed3d=ic
+      ! write(*,*) 'NHbiosed3d = ', NHbiosed3d
 !
 !  Allocate biological history vectors
 !
@@ -966,6 +985,7 @@
 !  Set number of 2D diagnostic terms.
 !
       NDbio2d=ic
+      ! write(*,*) 'NDbio2d = ', NDbio2d
 !
 !  Allocate biological diagnostic vectors
 !
@@ -984,6 +1004,61 @@
       iWarg=ic
       ic=ic+1
       iWcal=ic
+
+!!!  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+      DO isp=1,N_Csp     
+        ic=ic+1    
+        iDOCTot(isp)=ic
+      END DO
+      DO isp=1,N_Csp     
+        ic=ic+1    
+        iPOCTot(isp)=ic
+      END DO
+      DO isp=1,N_Nsp     
+        ic=ic+1    
+        iDONTot(isp)=ic
+      END DO
+      DO isp=1,N_Nsp     
+        ic=ic+1    
+        iPONTot(isp)=ic
+      END DO
+      DO isp=1,N_Psp     
+        ic=ic+1    
+        iDOPTot(isp)=ic
+      END DO
+      DO isp=1,N_Psp     
+        ic=ic+1    
+        iPOPTot(isp)=ic
+      END DO
+      DO isp=1,N_Csp     
+        ic=ic+1    
+        iPhyCTot(isp)=ic
+      END DO
+      DO isp=1,N_Csp     
+        ic=ic+1    
+        iZooCTot(isp)=ic
+      END DO
+      DO isp=1,N_Nsp     
+        ic=ic+1    
+        iPhyNTot(isp)=ic
+      END DO
+      DO isp=1,N_Nsp     
+        ic=ic+1    
+        iZooNTot(isp)=ic
+      END DO
+      DO isp=1,N_Psp     
+        ic=ic+1    
+        iPhyPTot(isp)=ic
+      END DO
+      DO isp=1,N_Psp     
+        ic=ic+1    
+        iZooPTot(isp)=ic
+      END DO
+      DO isp=1,N_Csp     
+        ic=ic+1    
+        iPICTot(isp)=ic
+      END DO
+!!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 
 !!! mons light model >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>KM:Add
 # ifdef LIGHT_MODEL
@@ -1042,6 +1117,7 @@
 !  Set number of 3D diagnostic terms.
 !
       NDbio3d=ic
+      ! write(*,*) 'NDbio3d = ', NDbio3d
 
 
       IF (.not.allocated(iDbio3)) THEN
@@ -1489,6 +1565,7 @@
 
       USE mod_geochem
       USE mod_diags
+      USE mod_stepping
 !
 !  Imported variable declarations.
 !
@@ -1552,6 +1629,7 @@
             DIAGS(ng)%DiaBio2d(i,j, iAgPn(m) ) = ALGAE(ng)%Pg(m,i,j)-ALGAE(ng)%R (m,i,j)
           END DO
 # endif
+
         END DO
       END DO
 
@@ -1564,6 +1642,106 @@
         END DO
       END DO
 # endif
+
+
+!!!  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+      DO j=LBj, UBj
+        DO i=LBi, UBi
+          DO isp=1,N_Csp
+            DIAGS(ng)%DiaBio3d(i,j,:,iDOCTot(isp)) = 0
+            DO m=1,Ndom    
+              DIAGS(ng)%DiaBio3d(i,j,:,iDOCTot(isp)) &
+              = DIAGS(ng)%DiaBio3d(i,j,:,iDOCTot(isp)) + OCEAN(ng)%t(i,j,:,nnew(ng),iDOC(isp,m))
+            END DO
+          END DO
+          DO isp=1,N_Csp
+            DIAGS(ng)%DiaBio3d(i,j,:,iPOCTot(isp)) = 0
+            DO m=1,Npom    
+              DIAGS(ng)%DiaBio3d(i,j,:,iPOCTot(isp)) &
+              = DIAGS(ng)%DiaBio3d(i,j,:,iPOCTot(isp)) + OCEAN(ng)%t(i,j,:,nnew(ng),iPOC(isp,m))
+            END DO
+          END DO
+          DO isp=1,N_Nsp
+            DIAGS(ng)%DiaBio3d(i,j,:,iDONTot(isp)) = 0
+            DO m=1,Ndom    
+              DIAGS(ng)%DiaBio3d(i,j,:,iDONTot(isp)) &
+              = DIAGS(ng)%DiaBio3d(i,j,:,iDONTot(isp)) + OCEAN(ng)%t(i,j,:,nnew(ng),iDON(isp,m))
+            END DO
+          END DO
+          DO isp=1,N_Nsp
+            DIAGS(ng)%DiaBio3d(i,j,:,iPONTot(isp)) = 0
+            DO m=1,Npom    
+              DIAGS(ng)%DiaBio3d(i,j,:,iPONTot(isp)) &
+              = DIAGS(ng)%DiaBio3d(i,j,:,iPONTot(isp)) + OCEAN(ng)%t(i,j,:,nnew(ng),iPON(isp,m))
+            END DO
+          END DO
+          DO isp=1,N_Psp
+            DIAGS(ng)%DiaBio3d(i,j,:,iDOPTot(isp)) = 0
+            DO m=1,Ndom    
+              DIAGS(ng)%DiaBio3d(i,j,:,iDOPTot(isp)) &
+              = DIAGS(ng)%DiaBio3d(i,j,:,iDOPTot(isp)) + OCEAN(ng)%t(i,j,:,nnew(ng),iDOP(isp,m))
+            END DO
+          END DO
+          DO isp=1,N_Psp
+            DIAGS(ng)%DiaBio3d(i,j,:,iPOPTot(isp)) = 0
+            DO m=1,Npom    
+              DIAGS(ng)%DiaBio3d(i,j,:,iPOPTot(isp)) &
+              = DIAGS(ng)%DiaBio3d(i,j,:,iPOPTot(isp)) + OCEAN(ng)%t(i,j,:,nnew(ng),iPOP(isp,m))
+            END DO
+          END DO
+          DO isp=1,N_Csp
+            DIAGS(ng)%DiaBio3d(i,j,:,iPhyCTot(isp)) = 0
+            DO m=1,Nphy    
+              DIAGS(ng)%DiaBio3d(i,j,:,iPhyCTot(isp)) &
+              = DIAGS(ng)%DiaBio3d(i,j,:,iPhyCTot(isp)) + OCEAN(ng)%t(i,j,:,nnew(ng),iPhyC(isp,m))
+            END DO
+          END DO
+          DO isp=1,N_Csp
+            DIAGS(ng)%DiaBio3d(i,j,:,iZooCTot(isp)) = 0
+            DO m=1,Nzoo    
+              DIAGS(ng)%DiaBio3d(i,j,:,iZooCTot(isp)) &
+              = DIAGS(ng)%DiaBio3d(i,j,:,iZooCTot(isp)) + OCEAN(ng)%t(i,j,:,nnew(ng),iZooC(isp,m))
+            END DO
+          END DO
+          DO isp=1,N_Nsp
+            DIAGS(ng)%DiaBio3d(i,j,:,iPhyNTot(isp)) = 0
+            DO m=1,Nphy    
+              DIAGS(ng)%DiaBio3d(i,j,:,iPhyNTot(isp)) &
+              = DIAGS(ng)%DiaBio3d(i,j,:,iPhyNTot(isp)) + OCEAN(ng)%t(i,j,:,nnew(ng),iPhyN(isp,m))
+            END DO
+          END DO
+          DO isp=1,N_Nsp
+            DIAGS(ng)%DiaBio3d(i,j,:,iZooNTot(isp)) = 0
+            DO m=1,Nzoo    
+              DIAGS(ng)%DiaBio3d(i,j,:,iZooNTot(isp)) &
+              = DIAGS(ng)%DiaBio3d(i,j,:,iZooNTot(isp)) + OCEAN(ng)%t(i,j,:,nnew(ng),iZooN(isp,m))
+            END DO
+          END DO
+          DO isp=1,N_Psp
+            DIAGS(ng)%DiaBio3d(i,j,:,iPhyPTot(isp)) = 0
+            DO m=1,Nphy    
+              DIAGS(ng)%DiaBio3d(i,j,:,iPhyPTot(isp)) &
+              = DIAGS(ng)%DiaBio3d(i,j,:,iPhyPTot(isp)) + OCEAN(ng)%t(i,j,:,nnew(ng),iPhyP(isp,m))
+            END DO
+          END DO
+          DO isp=1,N_Psp
+            DIAGS(ng)%DiaBio3d(i,j,:,iZooPTot(isp)) = 0
+            DO m=1,Nzoo    
+              DIAGS(ng)%DiaBio3d(i,j,:,iZooPTot(isp)) &
+              = DIAGS(ng)%DiaBio3d(i,j,:,iZooPTot(isp)) + OCEAN(ng)%t(i,j,:,nnew(ng),iZooP(isp,m))
+            END DO
+          END DO
+          DO isp=1,N_Csp
+            DIAGS(ng)%DiaBio3d(i,j,:,iPICTot(isp)) = 0
+            DO m=1,Npim    
+              DIAGS(ng)%DiaBio3d(i,j,:,iPICTot(isp)) &
+              = DIAGS(ng)%DiaBio3d(i,j,:,iPICTot(isp)) + OCEAN(ng)%t(i,j,:,nnew(ng),iPIC(isp,m))
+            END DO
+          END DO
+        END DO
+      END DO
+!!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+
 
       END SUBROUTINE send_reef_ecosys2roms_dia
 #endif

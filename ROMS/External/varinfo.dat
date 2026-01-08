@@ -9328,12 +9328,30 @@
   'r3dvar'
   1.0d0
 
+'DOCTot'                                           ! Input/Output
+  'total dissolved organic carbon'
+  'umolC L-1'                       ! [umolC L-1]
+  'DOCTot, scalar, series'
+  'ocean_time'
+  'iDbio3(iDOCTot(i))'
+  'r3dvar'
+  1.0d0
+
 'POC'                                           ! Input/Output
   'particulate organic carbon'
   'umolC L-1'                       ! [umolC L-1]
   'POC, scalar, series'
   'ocean_time'
   'idTvar(iPOC(i,j))'
+  'r3dvar'
+  1.0d0
+
+'POCTot'                                           ! Input/Output
+  'total particulate organic carbon'
+  'umolC L-1'                       ! [umolC L-1]
+  'POCTot, scalar, series'
+  'ocean_time'
+  'iDbio3(iPOCTot(i))'
   'r3dvar'
   1.0d0
 
@@ -9346,12 +9364,30 @@
   'r3dvar'
   1.0d0
 
+'DONTot'                                              ! Input/Output
+  'total dissolved organic nitrogen concentration'
+  'umolN L-1'                     ! [umolN L-1]
+  'DONTot, scalar, series'
+  'ocean_time'
+  'iDbio3(iDONTot(i))'
+  'r3dvar'
+  1.0d0
+
 'PON'                                              ! Input/Output
   'particulate organic nitrogen concentration'
   'umolN L-1'                     ! [umolN L-1]
   'PON, scalar, series'
   'ocean_time'
   'idTvar(iPON(i,j))'
+  'r3dvar'
+  1.0d0
+
+'PONTot'                                              ! Input/Output
+  'total particulate organic nitrogen concentration'
+  'umolN L-1'                     ! [umolN L-1]
+  'PONTot, scalar, series'
+  'ocean_time'
+  'iDbio3(iPONTot(i))'
   'r3dvar'
   1.0d0
 
@@ -9364,12 +9400,30 @@
   'r3dvar'
   1.0d0
 
+'DOPTot'                                              ! Input/Output
+  'total dissolved organic phosphorus concentration'
+  'umolP L-1'                     ! [umolP L-1]
+  'DOPTot, scalar, series'
+  'ocean_time'
+  'iDbio3(iDOPTot(i))'
+  'r3dvar'
+  1.0d0
+
 'POP'                                              ! Input/Output
   'particulate organic phosphorus concentration'
   'umolP L-1'                     ! [umolP L-1]
   'POP, scalar, series'
   'ocean_time'
   'idTvar(iPOP(i,j))'
+  'r3dvar'
+  1.0d0
+
+'POPTot'                                              ! Input/Output
+  'particulate organic phosphorus concentration'
+  'umolP L-1'                     ! [umolP L-1]
+  'POPTot, scalar, series'
+  'ocean_time'
+  'iDbio3(iPOPTot(i))'
   'r3dvar'
   1.0d0
 
@@ -9382,12 +9436,30 @@
   'r3dvar'
   1.0d0
 
+'PhyCTot'                                    ! Input/Output
+  'total phytoplankton C bimass'
+  'umolC L-1'                     ! [umolC L-1]
+  'PhyCTot, scalar, series'
+  'ocean_time'
+  'iDbio3(iPhyCTot(i))'
+  'r3dvar'
+  1.0d0
+
 'ZooC'                                      ! Input/Output
   'zooplankton C bimass'
   'umolC L-1'                     ! [umolC L-1]
   'ZooC, scalar, series'
   'ocean_time'
   'idTvar(iZooC(i,j))'
+  'r3dvar'
+  1.0d0
+
+'ZooCTot'                                      ! Input/Output
+  'total zooplankton C bimass'
+  'umolC L-1'                     ! [umolC L-1]
+  'ZooCTot, scalar, series'
+  'ocean_time'
+  'iDbio3(iZooCTot(i))'
   'r3dvar'
   1.0d0
 
@@ -9400,12 +9472,30 @@
   'r3dvar'
   1.0d0
 
+'PhyNTot'                                    ! Input/Output
+  'total phytoplankton N bimass'
+  'umolN L-1'                     ! [umolN L-1]
+  'PhyNTot, scalar, series'
+  'ocean_time'
+  'iDbio3(iPhyNTot(i))'
+  'r3dvar'
+  1.0d0
+
 'ZooN'                                      ! Input/Output
   'zooplankton N bimass'
   'umolN L-1'                     ! [umolN L-1]
   'ZooN, scalar, series'
   'ocean_time'
   'idTvar(iZooN(i,j))'
+  'r3dvar'
+  1.0d0
+
+'ZooNTot'                                      ! Input/Output
+  'total zooplankton N bimass'
+  'umolN L-1'                     ! [umolN L-1]
+  'ZooNTot, scalar, series'
+  'ocean_time'
+  'iDbio3(iZooNTot(i))'
   'r3dvar'
   1.0d0
 
@@ -9418,6 +9508,15 @@
   'r3dvar'
   1.0d0
 
+'PhyPTot'                                    ! Input/Output
+  'total phytoplankton P bimass'
+  'umolP L-1'                     ! [umolP L-1]
+  'PhyPTot, scalar, series'
+  'ocean_time'
+  'iDbio3(iPhyPTot(i))'
+  'r3dvar'
+  1.0d0
+
 'ZooP'                                      ! Input/Output
   'zooplankton P bimass'
   'umolP L-1'                     ! [umolP L-1]
@@ -9427,12 +9526,30 @@
   'r3dvar'
   1.0d0
 
+'ZooPTot'                                      ! Input/Output
+  'total zooplankton P bimass'
+  'umolP L-1'                     ! [umolP L-1]
+  'ZooPTot, scalar, series'
+  'ocean_time'
+  'iDbio3(iZooPTot(i))'
+  'r3dvar'
+  1.0d0
+
 'PIC'                                           ! Input/Output
   'particulate inorganic carbon'
   'umolC L-1'                       ! [umolC L-1]
   'PIC, scalar, series'
   'ocean_time'
   'idTvar(iPIC(i,j))'
+  'r3dvar'
+  1.0d0
+
+'PICTot'                                           ! Input/Output
+  'total particulate inorganic carbon'
+  'umolC L-1'                       ! [umolC L-1]
+  'PICTot, scalar, series'
+  'ocean_time'
+  'iDbio3(iPICTot(i))'
   'r3dvar'
   1.0d0
 

@@ -1,6 +1,8 @@
 
 !!!=== Copyright (c) 2012-2025 Takashi NAKAMURA  =====
 
+#include "cppdefs.h"
+
 module mod_geochem
 
   implicit none

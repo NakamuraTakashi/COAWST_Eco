@@ -529,6 +529,295 @@
               CASE ('iDbio3(iWcal)')
                 iDbio3(iWcal)=varid
 
+!!! >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+              CASE ('iDbio3(iDOCTot(i))')
+                load=.FALSE.
+                varid=varid-1
+                DO i=1,N_Csp
+                  varid=varid+1
+                  iDbio3(iDOCTot(i))=varid
+                  DO ng=1,Ngrids
+                    Fscale(varid,ng)=scale
+                    Iinfo(1,varid,ng)=gtype
+                  END DO
+                  WRITE (Vname(1,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(1))), '_',i
+                  WRITE (Vname(2,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(2))), ', tracer ', i
+                  WRITE (Vname(3,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(3)))
+                  WRITE (Vname(4,varid),'(a,a)')                      &
+   &                    TRIM(Vname(1,varid)), ', scalar, series'
+                  WRITE (Vname(5,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(5)))
+                END DO
+                varid=varid+1
+              CASE ('iDbio3(iPOCTot(i))')
+                load=.FALSE.
+                varid=varid-1
+                DO i=1,N_Csp
+                  varid=varid+1
+                  iDbio3(iPOCTot(i))=varid
+                  DO ng=1,Ngrids
+                    Fscale(varid,ng)=scale
+                    Iinfo(1,varid,ng)=gtype
+                  END DO
+                  WRITE (Vname(1,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(1))), '_',i
+                  WRITE (Vname(2,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(2))), ', tracer ', i
+                  WRITE (Vname(3,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(3)))
+                  WRITE (Vname(4,varid),'(a,a)')                      &
+   &                    TRIM(Vname(1,varid)), ', scalar, series'
+                  WRITE (Vname(5,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(5)))
+                END DO
+                varid=varid+1
+              CASE ('iDbio3(iDONTot(i))')
+                load=.FALSE.
+                varid=varid-1
+                DO i=1,N_Nsp
+                  varid=varid+1
+                  iDbio3(iDONTot(i))=varid
+                  DO ng=1,Ngrids
+                    Fscale(varid,ng)=scale
+                    Iinfo(1,varid,ng)=gtype
+                  END DO
+                  WRITE (Vname(1,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(1))), '_',i
+                  WRITE (Vname(2,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(2))), ', tracer ', i
+                  WRITE (Vname(3,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(3)))
+                  WRITE (Vname(4,varid),'(a,a)')                      &
+   &                    TRIM(Vname(1,varid)), ', scalar, series'
+                  WRITE (Vname(5,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(5)))
+                END DO
+                varid=varid+1
+              CASE ('iDbio3(iPONTot(i))')
+                load=.FALSE.
+                varid=varid-1
+                DO i=1,N_Nsp
+                  varid=varid+1
+                  iDbio3(iPONTot(i))=varid
+                  DO ng=1,Ngrids
+                    Fscale(varid,ng)=scale
+                    Iinfo(1,varid,ng)=gtype
+                  END DO
+                  WRITE (Vname(1,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(1))), '_',i
+                  WRITE (Vname(2,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(2))), ', tracer ', i
+                  WRITE (Vname(3,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(3)))
+                  WRITE (Vname(4,varid),'(a,a)')                      &
+   &                    TRIM(Vname(1,varid)), ', scalar, series'
+                  WRITE (Vname(5,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(5)))
+                END DO
+                varid=varid+1
+              CASE ('iDbio3(iDOPTot(i))')
+                load=.FALSE.
+                varid=varid-1
+                DO i=1,N_Psp
+                  varid=varid+1
+                  iDbio3(iDOPTot(i))=varid
+                  DO ng=1,Ngrids
+                    Fscale(varid,ng)=scale
+                    Iinfo(1,varid,ng)=gtype
+                  END DO
+                  WRITE (Vname(1,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(1))), '_',i
+                  WRITE (Vname(2,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(2))), ', tracer ', i
+                  WRITE (Vname(3,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(3)))
+                  WRITE (Vname(4,varid),'(a,a)')                      &
+   &                    TRIM(Vname(1,varid)), ', scalar, series'
+                  WRITE (Vname(5,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(5)))
+                END DO
+                varid=varid+1
+              CASE ('iDbio3(iPOPTot(i))')
+                load=.FALSE.
+                varid=varid-1
+                DO i=1,N_Psp
+                  varid=varid+1
+                  iDbio3(iPOPTot(i))=varid
+                  DO ng=1,Ngrids
+                    Fscale(varid,ng)=scale
+                    Iinfo(1,varid,ng)=gtype
+                  END DO
+                  WRITE (Vname(1,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(1))), '_',i
+                  WRITE (Vname(2,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(2))), ', tracer ', i
+                  WRITE (Vname(3,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(3)))
+                  WRITE (Vname(4,varid),'(a,a)')                      &
+   &                    TRIM(Vname(1,varid)), ', scalar, series'
+                  WRITE (Vname(5,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(5)))
+                END DO
+                varid=varid+1
+              CASE ('iDbio3(iPhyCTot(i))')
+                load=.FALSE.
+                varid=varid-1
+                DO i=1,N_Csp
+                  varid=varid+1
+                  iDbio3(iPhyCTot(i))=varid
+                  DO ng=1,Ngrids
+                    Fscale(varid,ng)=scale
+                    Iinfo(1,varid,ng)=gtype
+                  END DO
+                  WRITE (Vname(1,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(1))), '_',i
+                  WRITE (Vname(2,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(2))), ', tracer ', i
+                  WRITE (Vname(3,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(3)))
+                  WRITE (Vname(4,varid),'(a,a)')                      &
+   &                    TRIM(Vname(1,varid)), ', scalar, series'
+                  WRITE (Vname(5,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(5)))
+                END DO
+                varid=varid+1
+              CASE ('iDbio3(iZooCTot(i))')
+                load=.FALSE.
+                varid=varid-1
+                DO i=1,N_Csp
+                  varid=varid+1
+                  iDbio3(iZooCTot(i))=varid
+                  DO ng=1,Ngrids
+                    Fscale(varid,ng)=scale
+                    Iinfo(1,varid,ng)=gtype
+                  END DO
+                  WRITE (Vname(1,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(1))), '_',i
+                  WRITE (Vname(2,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(2))), ', tracer ', i
+                  WRITE (Vname(3,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(3)))
+                  WRITE (Vname(4,varid),'(a,a)')                      &
+   &                    TRIM(Vname(1,varid)), ', scalar, series'
+                  WRITE (Vname(5,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(5)))
+                END DO
+                varid=varid+1
+              CASE ('iDbio3(iPhyNTot(i))')
+                load=.FALSE.
+                varid=varid-1
+                DO i=1,N_Nsp
+                  varid=varid+1
+                  iDbio3(iPhyNTot(i))=varid
+                  DO ng=1,Ngrids
+                    Fscale(varid,ng)=scale
+                    Iinfo(1,varid,ng)=gtype
+                  END DO
+                  WRITE (Vname(1,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(1))), '_',i
+                  WRITE (Vname(2,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(2))), ', tracer ', i
+                  WRITE (Vname(3,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(3)))
+                  WRITE (Vname(4,varid),'(a,a)')                      &
+   &                    TRIM(Vname(1,varid)), ', scalar, series'
+                  WRITE (Vname(5,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(5)))
+                END DO
+                varid=varid+1
+              CASE ('iDbio3(iZooNTot(i))')
+                load=.FALSE.
+                varid=varid-1
+                DO i=1,N_Nsp
+                  varid=varid+1
+                  iDbio3(iZooNTot(i))=varid
+                  DO ng=1,Ngrids
+                    Fscale(varid,ng)=scale
+                    Iinfo(1,varid,ng)=gtype
+                  END DO
+                  WRITE (Vname(1,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(1))), '_',i
+                  WRITE (Vname(2,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(2))), ', tracer ', i
+                  WRITE (Vname(3,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(3)))
+                  WRITE (Vname(4,varid),'(a,a)')                      &
+   &                    TRIM(Vname(1,varid)), ', scalar, series'
+                  WRITE (Vname(5,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(5)))
+                END DO
+                varid=varid+1
+              CASE ('iDbio3(iPhyPTot(i))')
+                load=.FALSE.
+                varid=varid-1
+                DO i=1,N_Psp
+                  varid=varid+1
+                  iDbio3(iPhyPTot(i))=varid
+                  DO ng=1,Ngrids
+                    Fscale(varid,ng)=scale
+                    Iinfo(1,varid,ng)=gtype
+                  END DO
+                  WRITE (Vname(1,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(1))), '_',i
+                  WRITE (Vname(2,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(2))), ', tracer ', i
+                  WRITE (Vname(3,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(3)))
+                  WRITE (Vname(4,varid),'(a,a)')                      &
+   &                    TRIM(Vname(1,varid)), ', scalar, series'
+                  WRITE (Vname(5,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(5)))
+                END DO
+                varid=varid+1
+              CASE ('iDbio3(iZooPTot(i))')
+                load=.FALSE.
+                varid=varid-1
+                DO i=1,N_Psp
+                  varid=varid+1
+                  iDbio3(iZooPTot(i))=varid
+                  DO ng=1,Ngrids
+                    Fscale(varid,ng)=scale
+                    Iinfo(1,varid,ng)=gtype
+                  END DO
+                  WRITE (Vname(1,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(1))), '_',i
+                  WRITE (Vname(2,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(2))), ', tracer ', i
+                  WRITE (Vname(3,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(3)))
+                  WRITE (Vname(4,varid),'(a,a)')                      &
+   &                    TRIM(Vname(1,varid)), ', scalar, series'
+                  WRITE (Vname(5,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(5)))
+                END DO
+                varid=varid+1
+              CASE ('iDbio3(iPICTot(i))')
+                load=.FALSE.
+                varid=varid-1
+                DO i=1,N_Csp
+                  varid=varid+1
+                  iDbio3(iPICTot(i))=varid
+                  DO ng=1,Ngrids
+                    Fscale(varid,ng)=scale
+                    Iinfo(1,varid,ng)=gtype
+                  END DO
+                  WRITE (Vname(1,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(1))), '_',i
+                  WRITE (Vname(2,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(2))), ', tracer ', i
+                  WRITE (Vname(3,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(3)))
+                  WRITE (Vname(4,varid),'(a,a)')                      &
+   &                    TRIM(Vname(1,varid)), ', scalar, series'
+                  WRITE (Vname(5,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(5)))
+                END DO
+                varid=varid+1
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+
 !!! mons light model >>>>>s>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>KM:Add
 # if defined LIGHT_MODEL
               CASE ('iDbio3(iLight)')

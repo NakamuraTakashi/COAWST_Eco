@@ -1057,12 +1057,28 @@
         DO i=Istr,Iend
           zeta(i,j,knew)=zeta_new(i,j)
 # if defined WET_DRY && defined MASKING
+          ! IF (i .eq. 9 .and. j .eq. 60 .and. zeta(i,j,knew).le.(Dcrit(ng)-h(i,j)) .and. rmask(i,j) .gt. 0.5) THEN
+          !   write(*,*) 'yt_debug: step2d_LF_AM3.h original i = ', i, 'j = ', j, &
+          !     'zeta(i,j,knew) = ', zeta(i,j,knew), 'Dcrit(ng) = ', Dcrit(ng), 'h(i,j) = ', h(i,j)
+          ! END IF
           zeta(i,j,knew)=zeta(i,j,knew)+                                &
      &                   (Dcrit(ng)-h(i,j))*(1.0_r8-rmask(i,j))
 ! YT_DEBUG uncommented following three lines to resolve negative Hz layer thickness problem
-          IF (zeta(i,j,knew).le.(Dcrit(ng)-h(i,j))) THEN
-            zeta(i,j,knew)=Dcrit(ng)-h(i,j)
-          END IF
+          ! IF (zeta(i,j,knew).le.(Dcrit(ng)-h(i,j)) .and. rmask(i,j) .gt. 0.5) THEN
+          !   zeta(i,j,knew)=Dcrit(ng)-h(i,j)
+          ! END IF
+! YT_DEBUG modification of above three lines to resolve negative Hz layer thickness problem, and 
+          ! IF (zeta(i,j,knew).le.(Dcrit(ng)-h(i,j)) .and. rmask(i,j) .gt. 0.5) THEN
+          !   cff = Dcrit(ng)-h(i,j) - zeta(i,j,knew)
+          !   zeta(i,j,knew)=Dcrit(ng)-h(i,j)
+          ! END IF
+          ! IF (i .eq. 9 .and. j .eq. 60 .and. zeta(i,j,knew).le.(Dcrit(ng)-h(i,j)) .and. rmask(i,j) .gt. 0.5) THEN
+          !   write(*,*) 'yt_debug: step2d_LF_AM3.h after correction i = ', i, 'j = ', j, &
+          !     'zeta(i,j,knew) = ', zeta(i,j,knew), 'Dcrit(ng) = ', Dcrit(ng), 'h(i,j) = ', h(i,j)
+          !   zeta(i,j,knew)=Dcrit(ng)-h(i,j)
+          !   write(*,*) 'yt_debug: step2d_LF_AM3.h  i = ', i, 'j = ', j, &
+          !     'zeta adjustment = ', cff
+          ! END IF
 # endif
         END DO
       END DO

@@ -89,8 +89,8 @@
 #ifdef MACROALGAE
      &                   GRID(ng) % p_algae,                            &
 #endif
-#ifdef SEDIMENT_ECOSYS
      &                   GRID(ng) % p_sand,                             &
+#ifdef SEDIMENT_ECOSYS
 # if defined SEDECO_SGD && defined SGD_ON
      &                   GRID(ng) % sgd_src,                            &
      &                   GRID(ng) % pm,                                 &
@@ -228,7 +228,7 @@
       real(r8), intent(inout) :: p_sand(LBi:,LBj:)
 # ifdef SEDIMENT_ECOSYS
 #  if defined SEDECO_SGD && defined SGD_ON
-      real(r8), intent(inout) :: sgd_src(LBi:,LBj:)
+      real(r8), intent(in) :: sgd_src(LBi:,LBj:)
       real(r8), intent(in)    :: pm(LBi:,LBj:)
       real(r8), intent(in)    :: pn(LBi:,LBj:)
       real(r8), intent(in)    :: Qsgd
@@ -286,7 +286,7 @@
 # ifdef SEDIMENT_ECOSYS
       real(r8), intent(inout) :: p_sand(LBi:UBi,LBj:UBj)
 #  if defined SEDECO_SGD && defined SGD_ON
-      real(r8), intent(inout) :: sgd_src(LBi:UBi,LBj:UBj)
+      real(r8), intent(in) :: sgd_src(LBi:UBi,LBj:UBj)
       real(r8), intent(in)    :: pm(LBi:UBi,LBj:UBj)
       real(r8), intent(in)    :: pn(LBi:UBi,LBj:UBj)
       real(r8), intent(in)    :: Qsgd
@@ -430,6 +430,11 @@
           IF (rmask(i,j).eq.1.0_r8) THEN
 # endif
 
+
+            ! if (i .eq. 10 .and. j .eq. 65) then
+            !   write(*,*) 'yt_debug: i = ', i, 'j = ', j, 'k = ', 1, 't(i,j,k,nstp,iTemp)', t(i,j,1,nstp,iTemp)
+            ! end if
+
 !=== Import ROMS tracer arrays into REEF_ECOSYS model arrays ===
             Tmp(:) = t(i,j,:,nstp,iTemp)       
             Sal(:) = t(i,j,:,nstp,iSalt)       
@@ -525,8 +530,17 @@
             COTl(:) = t(i,j,:,nstp,iCOTl)     &   ! COTl(N): COT starfish larvae (umol L-1)
 #endif
 #if defined SEDECO_SGD && defined SGD_ON
-            ! [cm s-1]= [m3 s-1] [m-1] [m-1] [] [100 cm m-1]
-            sgd_flux  = Qsgd*pm(i,j)*pn(i,j)*sgd_src(i,j)*100.0_r8  ! m/s => 100 cm/s; sumbarine groundwater discharge rate of grid (cm s-1)
+            if (p_sand(i,j) .gt. 0.0d0) then
+              ! [cm s-1]= [m3 s-1] [m-1] [m-1] [] [100 cm m-1]
+              sgd_flux  = Qsgd*pm(i,j)*pn(i,j)/p_sand(i,j)*sgd_src(i,j)*100.0_r8  ! m/s => 100 cm/s; sumbarine groundwater discharge rate (cm s-1) SGD only occurs in sandy areas
+            else
+              sgd_flux = 0.0d0
+            end if
+
+            ! if (i .eq. 5 .and. j .eq. 14) then
+            !   write(*,*) 'yt_debug: i = ', i, 'j = ', j, 'Qsgd*sgd_src(i,j) = ', Qsgd*sgd_src(i,j)
+            ! end if
+
             sgd_Tmp   = Tsgd(iTemp) 
             sgd_Sal   = Tsgd(iSalt) 
             sgd_DOx   = Tsgd(iDO  )
@@ -580,13 +594,13 @@
 
 !----- Ecosystem model ----------------------------------------
 
-! # if defined SEAGRASS_DEBUG_MODE
-!     if (Hz(i,j,1) .lt. 0.0d0) then
-!       write(*,*) 'yt_debug: reef_ecosys.h negative value in Hz layer thickness. Hz(i,j,:) =', Hz(i,j,:), &
-!                   'i = ', i, 'j = ', j
-!       error stop
-!     endif
-! # endif
+# if defined SEAGRASS_DEBUG_MODE
+    if (Hz(i,j,1) .lt. 0.0d0) then
+      write(*,*) 'yt_debug: reef_ecosys.h negative value in Hz layer thickness. Hz(i,j,:) =', Hz(i,j,:), &
+                  'i = ', i, 'j = ', j
+      error stop
+    endif
+# endif
 
             CALL reef_ecosys           &
 !          input parameters
@@ -660,8 +674,8 @@
      &            , Fdep_sed           &   ! Sedimentation rate (g cm-2 s-1) (Positive: sedimentation; Negative: erosion)
 #endif
 !   output parameters
-     &            , dTemp_dt           &   ! dTemp_dt(N)           : Temperature (oC s-1)
-     &            , dSalt_dt           &   ! dSalt_dt(N)           : Salinity (PSU s-1)
+     &            , dTemp_dt           &   ! dTemp_dt(N)           : Temperature (oC L-1 s-1)
+     &            , dSalt_dt           &   ! dSalt_dt(N)           : Salinity (PSU L-1 s-1)
      &            , dDOx_dt            &   ! dDOx_dt(N)            : dDOx/dt  (umol O2 L-1 s-1) 
      &            , dTA_dt             &   ! dTA_dt(N)             : dTA/dt   (umol kg-1 s-1) 
      &            , dDIC_dt            &   ! dDIC_dt(N_Csp,N)      : dDIC/dt  (umol C kg-1 s-1)  1 mmol m-3 = 1 umol L-1 = 1/1.024 umol kg-1
@@ -802,6 +816,7 @@
             DiaBio3d(i,j,:,ipHt_) = pH(:)
             DiaBio3d(i,j,:,iWarg) = Warg(:)
             DiaBio3d(i,j,:,iWcal) = Wcal(:)
+
 !!! mons light model >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>KM:Add
 # if defined LIGHT_MODEL
             DiaBio3d(i,j,:,iLight) = PFDk(:)
@@ -832,7 +847,7 @@
 !-----------------------------------------------------------------------
 
             DO k=1,N(ng)
-  
+
               DO itrc=1,NAT
   
                 IF(dtrc_dt(k,itrc)*0.0_r8 /= 0.0_r8) THEN  !!!---------Error Handling: Check NAN
@@ -846,6 +861,10 @@
     &                                +dtrc_dt(k,itrc)*dt(ng)*Hz(i,j,k)
   
               END DO
+
+              ! if (i .eq. 10 .and. j .eq. 65 .and. k .eq. 1) then
+              !   write(*,*) 'yt_debug: i = ', i, 'j = ', j, 'k = ', k, 't(i,j,k,nnew,iTemp)/Hz(i,j,k) = ', t(i,j,k,nnew,iTemp)/Hz(i,j,k), 'dtrc_dt(k,iTemp)*dt(ng) = ', dtrc_dt(k,iTemp)*dt(ng)
+              ! end if
   
   
               DO itrc=1,NBT

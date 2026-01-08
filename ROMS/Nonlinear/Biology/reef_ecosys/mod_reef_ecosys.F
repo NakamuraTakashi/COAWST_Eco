@@ -349,7 +349,7 @@ END SUBROUTINE allocate_reef_ecosys
     real(8), intent(in) :: COTl(N)         ! COT starfish larvae (umol L-1)
 # endif
 # if defined SEDECO_SGD && defined SGD_ON
-    real(8), intent(in) :: sgd_flux        ! sumbarine groundwater discharge rate of grid (cm s-1)  
+    real(8), intent(in) :: sgd_flux        ! sumbarine groundwater discharge rate (cm s-1)  
     real(8), intent(in) :: sgd_Tmp         ! SGD concentration coming in through bottom: Tmp: Temperature (oC)
     real(8), intent(in) :: sgd_Sal         ! SGD concentration coming in through bottom: Sal: Salinity (PSU)
     real(8), intent(in) :: sgd_DIC(N_Csp)  ! SGD concentration coming in through bottom: DIC: Total dissolved inorganic carbon (DIC: umol kg-1)
@@ -1285,7 +1285,7 @@ END SUBROUTINE allocate_reef_ecosys
           , Fdep_FeS2(:)      &  ! FeS2 depositoin flux (nmol cm-2 s-1)
           , Fdep_S0(:)        &  ! S0 depositoin flux (nmol cm-2 s-1)
 #   if defined SEDECO_SGD && defined SGD_ON
-          , sgd_flux/p_sand   &   ! SGD rate (cm s-1) * SGD only occures sand area. 
+          , sgd_flux          &   ! SGD rate (cm s-1) * SGD only occures sand area. 
           , sgd_Tmp           &   ! SGD concentration coming in through bottom: Tmp: Temperature (oC)
           , sgd_Sal           &   ! SGD concentration coming in through bottom: Sal: Salinity (PSU)
           , sgd_DOx           &   ! SGD concentration coming in through bottom: DOx: Dissolved oxygen (umol L-1)
@@ -1299,8 +1299,8 @@ END SUBROUTINE allocate_reef_ecosys
           , sgd_DOP(:,:)      &   ! SGD concentration coming in through bottom: DOC: Total dissolved organic phosphrous (DOP: umol L-1)
 #   endif
 !         output parameters
-          , Flux_Tmp          &   ! Temperature flux (oC cm-2 s-1)  * direction of water column to sediment is positive
-          , Flux_Sal          &   ! Salinity flux (PSU cm-2 s-1)  * direction of water column to sediment is positive
+          , Flux_Tmp          &   ! Temperature flux (moC cm-2 s-1)  * direction of water column to sediment is positive
+          , Flux_Sal          &   ! Salinity flux (mPSU cm-2 s-1)  * direction of water column to sediment is positive
           , Flux_DO           &   ! DO  flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
           , Flux_TA           &   ! Total Alkalinity flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
           , Flux_DIC(:)       &   ! DIC flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
@@ -1330,13 +1330,17 @@ END SUBROUTINE allocate_reef_ecosys
 
       END DO
 
-      ! (change in water temp)[oC/L s] = - (temp flux)[oC/cm2 s] * [10000cm2/m2] / depth[m] * [m3/1000L] * (sandy fraction 0~1)
-      ! (change in water temp)[oC/L s] = - (temp flux)[oC s] * 10 * [/L] * (sandy fraction 0~1)
+      ! (change in water temp)[oC/L s] = - (temp flux)[moC/cm2 s] * [10000cm2/m2] / depth[m] * [m3/1000L] * [oC/1000 moC] * (sandy fraction 0~1)
+      ! (change in water temp)[oC/L s] = - (temp flux)[oC s] * 0.01 * [/L] * (sandy fraction 0~1)
       !  = [10000cm2/m2] / dz[m] * [m3/1000L] * (0~1)
-      cff=10d0 /dz(1) * p_sand      
+      cff=0.01d0 /dz(1) * p_sand      
       ! [oC/L s]  = [oC/L s]    - [oC/cm2 s] * [10000cm2/m2] / [m] * [m3/1000L] * (0~1)
       dTemp_dt(1) = dTemp_dt(1) - Flux_Tmp  * cff
       dSalt_dt(1) = dSalt_dt(1) - Flux_Sal  * cff
+
+      ! if (i .eq. 5 .and. j .eq. 14) then
+      !   write(*,*) 'yt_debug: i = ', i, 'j = ', j, 'dTemp_dt(1) = ', dTemp_dt(1)
+      ! end if
 
       ! (change in water chem)[umol/L s] = - (chem flux)[nmol/cm2 s] * [10000cm2/m2] / depth[m] * [m3/1000L] * [umol/1000nmol] (sandy fraction 0~1)
       ! (change in water chem)[umol/L s] = - (chem flux)[umol s] * 0.01 * [/L] * (sandy fraction 0~1)
@@ -1374,6 +1378,14 @@ END SUBROUTINE allocate_reef_ecosys
 #  endif
 
     END IF 
+# endif
+
+# if defined SEAGRASS_DEBUG_MODE
+    if (dz(1) .lt. 0.0d0) then
+      write(*,*) 'yt_debug: line 1381 negative value in z layer thickness. dz(1) =', dz(1), &
+                  'i = ', i, 'j = ', j
+      error stop
+    endif
 # endif
 
 # if defined ECOSYS_TESTMODE

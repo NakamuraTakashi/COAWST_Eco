@@ -321,18 +321,18 @@ CONTAINS
       SEDECO(ng)%rhos_d(k,:,:) = 2.5d0 ! (g/cm3)   ! Note: depth varied density is not properly implemented in geochem
     enddo
 
-# if defined YT_DEBUG_MODE
-    if (ng .eq. 1) then
-      do k = 1,Nsed
-        write(*,*) 'yt_debug: mod_sedecosys.F initialization: ', &
-                      'k = ', k, 'dzr(k) = ', SEDECO(ng)%dzr(k) 
-      enddo
-      do k = 1,Nsed
-        write(*,*) 'yt_debug: mod_sedecosys.F initialization: ', &
-                      'k = ', k, 'zr(k) = ', SEDECO(ng)%zr(k) 
-      enddo
-    endif
-# endif
+! # if defined YT_DEBUG_MODE
+!     if (ng .eq. 1) then
+!       do k = 1,Nsed
+!         write(*,*) 'yt_debug: mod_sedecosys.F initialization: ', &
+!                       'k = ', k, 'dzr(k) = ', SEDECO(ng)%dzr(k) 
+!       enddo
+!       do k = 1,Nsed
+!         write(*,*) 'yt_debug: mod_sedecosys.F initialization: ', &
+!                       'k = ', k, 'zr(k) = ', SEDECO(ng)%zr(k) 
+!       enddo
+!     endif
+! # endif
 
 # if defined SEDIMENT_TESTMODE
       write(50,'(*(g0:,", "))') SEDECO(ng)%dzw(:)
@@ -444,10 +444,13 @@ CONTAINS
       DO j=LBj,UBj
         DO i=LBi,UBi
           DO k=0,Nsed
-            SEDECO(ng)%Tmp(k,i,j)  = 25.0d0     
-            SEDECO(ng)%Sal(k,i,j)  = 34.0d0
+            ! SEDECO(ng)%Tmp(k,i,j)  = 25.0d0   
+            SEDECO(ng)%Tmp(k,i,j)  = 24.4d0  ! Kawahata 2000 Shiraho Spring water (N1)     
+            ! SEDECO(ng)%Sal(k,i,j)  = 34.0d0
+            SEDECO(ng)%Sal(k,i,j)  = 0.33d0  ! Kawahata 2000 Shiraho Spring water (N1) 
             SEDECO(ng)%O2 (k,i,j)  =  0.0d0        !DO  (umol L-1)
-            SEDECO(ng)%TA(k,i,j)  = 2232.0d0 ! TA (umol kg-1)
+            ! SEDECO(ng)%TA(k,i,j)  = 2232.0d0 ! TA (umol kg-1)
+            SEDECO(ng)%TA(k,i,j)  = 2934.0d0 ! TA (umol kg-1)    ! Kawahata 2000 Shiraho Spring water (N1) 
             cSO4 = 0.02824d0*34.0d0/35.0d0 *1.0d6  ! SO4 (umol L-1)
       
             ! initialize 
@@ -622,8 +625,8 @@ CONTAINS
     , sgd_DOP        &  ! SGD concentration coming in through bottom: DOC: Total dissolved organic phosphrous (DOP: umol L-1)
 # endif
 !   output parameters
-    , Flux_Tmp       &  ! Temperature flux (oC cm-2 s-1)  * direction of water column to sediment is positive
-    , Flux_Sal       &  ! Salinity flux (PSU cm-2 s-1)  * direction of water column to sediment is positive
+    , Flux_Tmp       &  ! Temperature flux (moC cm-2 s-1)  * direction of water column to sediment is positive
+    , Flux_Sal       &  ! Salinity flux (mPSU cm-2 s-1)  * direction of water column to sediment is positive
     , Flux_DO        &  ! DO  flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
     , Flux_TA        &  ! Total Alkalinity flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
     , Flux_DIC       &  ! DIC flux (nmol cm-2 s-1)  * direction of water column to sediment is positive
@@ -1239,9 +1242,9 @@ CONTAINS
 ! --- Solutes ----
     DIFF_LOOP: DO k = 1,Nsed
     
-      Fw_Tmp(k) = Ficks(D_Tmp(k),SEDECO(ng)%Tmp(k-1,i,j),SEDECO(ng)%Tmp(k,i,j),SEDECO(ng)%dzw(k))
-      Fw_Sal(k) = Ficks(D_Sal(k),SEDECO(ng)%Sal(k-1,i,j),SEDECO(ng)%Sal(k,i,j),SEDECO(ng)%dzw(k))
-      Fw_O2 (k) = Ficks(D_O2 (k),SEDECO(ng)%O2 (k-1,i,j),SEDECO(ng)%O2 (k,i,j),SEDECO(ng)%dzw(k))
+      Fw_Tmp(k) = Ficks(D_Tmp(k),SEDECO(ng)%Tmp(k-1,i,j),SEDECO(ng)%Tmp(k,i,j),SEDECO(ng)%dzw(k))  ! [moC/cm2 s]
+      Fw_Sal(k) = Ficks(D_Sal(k),SEDECO(ng)%Sal(k-1,i,j),SEDECO(ng)%Sal(k,i,j),SEDECO(ng)%dzw(k))  ! [mPSU/cm2 s]
+      Fw_O2 (k) = Ficks(D_O2 (k),SEDECO(ng)%O2 (k-1,i,j),SEDECO(ng)%O2 (k,i,j),SEDECO(ng)%dzw(k))  ! [nmol/cm2 s]
       Fw_TA (k) = Ficks(D_O2 (k),SEDECO(ng)%TA (k-1,i,j),SEDECO(ng)%TA (k,i,j),SEDECO(ng)%dzw(k))
       DO isp = 1,N_Csp
         Fw_DIC(isp,k) = Ficks(D_DIC(isp,k),SEDECO(ng)%DIC(isp,k-1,i,j),SEDECO(ng)%DIC(isp,k,i,j),SEDECO(ng)%dzw(k))
@@ -1322,9 +1325,9 @@ CONTAINS
 
 ! --- Solutes, Flux in sediment column ----
     ADV_D_LOOP: DO k = 1,Nsed
-      Fw_Tmp(k) = Fw_Tmp(k) + AdvUp(Wd(k),SEDECO(ng)%Tmp(k-1,i,j),SEDECO(ng)%Tmp(k,i,j))
-      Fw_Sal(k) = Fw_Sal(k) + AdvUp(Wd(k),SEDECO(ng)%Sal(k-1,i,j),SEDECO(ng)%Sal(k,i,j))
-      Fw_O2 (k) = Fw_O2 (k) + AdvUp(Wd(k),SEDECO(ng)%O2 (k-1,i,j),SEDECO(ng)%O2 (k,i,j))
+      Fw_Tmp(k) = Fw_Tmp(k) + AdvUp(Wd(k),SEDECO(ng)%Tmp(k-1,i,j),SEDECO(ng)%Tmp(k,i,j))  ! [moC/cm2 s]
+      Fw_Sal(k) = Fw_Sal(k) + AdvUp(Wd(k),SEDECO(ng)%Sal(k-1,i,j),SEDECO(ng)%Sal(k,i,j))  ! [mPSU/cm2 s]
+      Fw_O2 (k) = Fw_O2 (k) + AdvUp(Wd(k),SEDECO(ng)%O2 (k-1,i,j),SEDECO(ng)%O2 (k,i,j))  ! [nmol/cm2 s]
       Fw_TA (k) = Fw_TA (k) + AdvUp(Wd(k),SEDECO(ng)%TA (k-1,i,j),SEDECO(ng)%TA (k,i,j))
       DO isp = 1,N_Csp
         Fw_DIC(isp,k) = Fw_DIC(isp,k) + AdvUp(Wd(k),SEDECO(ng)%DIC(isp,k-1,i,j),SEDECO(ng)%DIC(isp,k,i,j))
@@ -1436,11 +1439,15 @@ CONTAINS
 
 !! === Advection Flux calculation ======================================
 
+    ! if (i .eq. 10 .and. j .eq. 65) then
+    !   write(*,*) 'yt_debug: i = ', i, 'j = ', j, 'Tamb = ', Tamb, 'SEDECO(ng)%Tmp(1,i,j) = ', SEDECO(ng)%Tmp(1,i,j)
+    ! end if
+
 ! --- Solutes, Flux in sediment column ----
     ADV_SGD_LOOP: DO k = 1,Nsed
-      Fw_Tmp(k) = Fw_Tmp(k) + AdvUp(Wd(k),SEDECO(ng)%Tmp(k-1,i,j),SEDECO(ng)%Tmp(k,i,j))
-      Fw_Sal(k) = Fw_Sal(k) + AdvUp(Wd(k),SEDECO(ng)%Sal(k-1,i,j),SEDECO(ng)%Sal(k,i,j))
-      Fw_O2 (k) = Fw_O2 (k) + AdvUp(Wd(k),SEDECO(ng)%O2 (k-1,i,j),SEDECO(ng)%O2 (k,i,j))
+      Fw_Tmp(k) = Fw_Tmp(k) + AdvUp(Wd(k),SEDECO(ng)%Tmp(k-1,i,j),SEDECO(ng)%Tmp(k,i,j))  ! [moC/cm2 s]
+      Fw_Sal(k) = Fw_Sal(k) + AdvUp(Wd(k),SEDECO(ng)%Sal(k-1,i,j),SEDECO(ng)%Sal(k,i,j))  ! [mPSU/cm2 s]
+      Fw_O2 (k) = Fw_O2 (k) + AdvUp(Wd(k),SEDECO(ng)%O2 (k-1,i,j),SEDECO(ng)%O2 (k,i,j))  ! [nmol/cm2 s]
       Fw_TA (k) = Fw_TA (k) + AdvUp(Wd(k),SEDECO(ng)%TA (k-1,i,j),SEDECO(ng)%TA (k,i,j))
       DO isp = 1,N_Csp
         Fw_DIC(isp,k) = Fw_DIC(isp,k) + AdvUp(Wd(k),SEDECO(ng)%DIC(isp,k-1,i,j),SEDECO(ng)%DIC(isp,k,i,j))
@@ -1690,15 +1697,15 @@ CONTAINS
       ! -- Tmp -- !
       SEDECO(ng)%Tmp(k,i,j) = massbalance( SEDECO(ng)%Tmp(k,i,j)   &
                                ,Fw_Tmp(k),Fw_Tmp(k+1),R_Tmp(k)     &
-                               ,SEDECO(ng)%dzr(k),cfdd,dt)
+                               ,SEDECO(ng)%dzr(k),cfdd,dt) ! [oC L-1]
       ! -- Sal -- !
       SEDECO(ng)%Sal(k,i,j) = massbalance( SEDECO(ng)%Sal(k,i,j)   &
                                ,Fw_Sal(k),Fw_Sal(k+1),R_Sal(k)     &
-                               ,SEDECO(ng)%dzr(k),cfdd,dt)
+                               ,SEDECO(ng)%dzr(k),cfdd,dt) ! [PSU L-1]
       ! -- O2 -- !
       SEDECO(ng)%O2(k,i,j) = massbalance( SEDECO(ng)%O2(k,i,j)   &
                                ,Fw_O2(k),Fw_O2(k+1),R_O2(k)      &
-                               ,SEDECO(ng)%dzr(k),cfdd,dt)
+                               ,SEDECO(ng)%dzr(k),cfdd,dt) ! [umol L-1]
       ! -- TA -- !
       SEDECO(ng)%TA(k,i,j) = massbalance( SEDECO(ng)%TA(k,i,j)   &
                                ,Fw_TA(k),Fw_TA(k+1),R_TA(k)      &
@@ -2073,9 +2080,10 @@ CONTAINS
 ! ********************************************************************* !
 !   set output parameters
 ! ********************************************************************* !
-    Flux_Tmp = Fw_Tmp(1)
-    Flux_Sal = Fw_Sal(1) 
-    Flux_DO  = Fw_O2 (1) 
+
+    Flux_Tmp = Fw_Tmp(1)  ! [moC/cm2 s]
+    Flux_Sal = Fw_Sal(1)  ! [mPSU/cm2 s]
+    Flux_DO  = Fw_O2 (1)  ! [nmol/cm2 s]
     Flux_TA  = Fw_TA (1) 
     Flux_DIC(:) = Fw_DIC(:,1)
     Flux_NO3(:) = Fw_NO3(:,1)
@@ -2115,6 +2123,10 @@ CONTAINS
     ! SEDECO(ng)%Sed_Efflux_DOP(i,j) = -10d0 * Flux_DOP * p_sand  ! DOP(f,s) effluxes (µmol m-2 s-1) * direction of sediment to water column is positive
     ! SEDECO(ng)%Sed_Efflux_POP(i,j) = -10d0 * Flux_POP * p_sand  ! POP(f,s) effluxes (µmol m-2 s-1) * direction of sediment to water column is positive
     ! SEDECO(ng)%Sed_Efflux_PIC(i,j) = -10d0 * Flux_PIC * p_sand  ! CaCO3 effluxes (µmol m-2 s-1) * direction of sediment to water column is positive
+
+    ! if (i .eq. 10 .and. j .eq. 65) then
+    !   write(*,*) 'yt_debug: i = ', i, 'j = ', j, 'Flux_Tmp = ', Flux_Tmp
+    ! end if
 
 ! ********************************************************************* !
 !   Print section
@@ -2157,10 +2169,12 @@ CONTAINS
   real(8) function Ficks(D,C1,C2,dz)
     implicit none
     real(8), intent(in) :: D   ! Diffusion coefficient   (cm2 s-1)
-    real(8), intent(in) :: C1  ! Concentration of above layer    (nmol cm-3)
+    real(8), intent(in) :: C1  ! Concentration of above layer    (umol L-1) or (nmol cm-3); (oC L-1) or (moC cm-3); (PSU L-1) or (mPSU cm3)
     real(8), intent(in) :: C2  ! Concentration of this layer
     real(8), intent(in) :: dz  ! layer thickness   (cm)
     ! [nmol/cm2 s] =  [cm2/s] * [nmol/cm3] / [cm]
+    ! [moC/cm2 s] = [cm2/s] * [moC cm-3] / [cm]
+    ! [mPSU/cm2 s] = [cm2/s] * [mPSU cm-3] / [cm]
     Ficks =  D * (C1 - C2)/dz
     return
   end function Ficks
@@ -2169,10 +2183,13 @@ CONTAINS
   real(8) function AdvUp(u,C1,C2) ! downwards is positive
     implicit none
     real(8), intent(in) :: u            ! Solutes advection velocity      (cm s-1)    downwards is positive
-    real(8), intent(in) :: C1           ! Concentration of above layer    (nmol cm-3)
+    real(8), intent(in) :: C1           ! Concentration of above layer    (umol L-1) or (nmol cm-3); (oC L-1) or (moC cm-3); (PSU L-1) or (mPSU cm3)
     real(8), intent(in) :: C2           ! Concentration of this layer
     ! if      u>0, AdvUp = u*C1         ! (cm s-1)*(nmol cm-3)=(nmol cm-2 s-1)
     ! else if u<0, AdvUp = u*C2
+    ! [nmol/cm2 s] = [cm/s] * [nmol/cm3]
+    ! [moC/cm2 s] = [cm/s] * [moC/cm3]
+    ! [mPSU/cm2 s] = [cm/s] * [mPSU/cm3]
     AdvUp = ((u+abs(u))*C1 + (u-abs(u))*C2)*0.5d0
 
     return
@@ -2181,16 +2198,18 @@ CONTAINS
 !! --- Mass balance calculation in sediment column ---------------------------- !!
   real(8) function massbalance(C,FTin,FTout,R,dz,cff,dt)
     implicit none
-    real(8),intent(in) :: C             ! concentration                                   (umol L-1 = nmol cm-3)
-    real(8),intent(in) :: FTin          ! total flux from above layer to this layer       (nmol cm-2 s-1)
-    real(8),intent(in) :: FTout         ! total flux from this layer to below layer       (nmol cm-2 s-1)
+    real(8),intent(in) :: C             ! concentration                                   (umol L-1) or (nmol cm-3); (oC L-1) or (moC cm-3); (PSU L-1) or (mPSU cm3)
+    real(8),intent(in) :: FTin          ! total flux from above layer to this layer       (nmol cm-2 s-1); (moC cm-2 s-1); (mPSU cm-2 s-1)
+    real(8),intent(in) :: FTout         ! total flux from this layer to below layer       (nmol cm-2 s-1); (moC cm-2 s-1); (mPSU cm-2 s-1)
     real(8),intent(in) :: R             ! Net prodution and consumption                   (nmol cm-3 s-1)
     real(8),intent(in) :: dz            ! layer thickness                                 (cm)
     real(8),intent(in) :: cff           ! porosity                                        (cm_w3 cm_s-3)
     real(8),intent(in) :: dt            ! time step                                       (s)
 
+    ! [nmol cm_w-3] = [nmol cm_w-3] + ([nmol cm_s-2 s-1]/(cm_s) + [nmol cm_s-3 s-1])/[cm_w3 cm_s-3] * [s] 
+    ! [moC cm-3] = [moC cm-3] + ([moC cm-2 s-1]/[cm])/[cm3 cm-3] * [s] 
+    ! [mPSU cm-3] = [mPSU cm-3] + ([mPSU cm-2 s-1]/[cm])/[cm3 cm-3] * [s] 
     massbalance = C + ((FTin - FTout)/dz + R)/cff * dt
-!  [nmol cm_w-3] = [nmol cm_w-3] + ([nmol cm_s-2 s-1]/(cm_s) + [nmol cm_s-3 s-1])/[cm_w3 cm_s-3] * [s] 
 
 ! #   if defined YT_DEBUG_MODE
 !     if (massbalance .lt. 0.0d0) then
