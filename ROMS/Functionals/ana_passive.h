@@ -147,6 +147,18 @@
         END DO
       END DO
 # endif
+#elif defined DYE_ZERO_START
+      DO ip=1,NPT
+        itrc=inert(ip)
+        DO k=1,N(ng)
+          DO j=JstrT,JendT
+            DO i=IstrT,IendT
+              t(i,j,k,1,itrc)=0.0_r8
+              t(i,j,k,2,itrc)=t(i,j,k,1,itrc)
+            END DO
+          END DO
+        END DO
+      END DO
 #else
       ana_passive.h: no values provided for t(:,:,:,1,inert(itrc))
 #endif

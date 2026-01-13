@@ -2179,6 +2179,517 @@
 # endif
 #endif
 
+! ==== Bivalve parameters ===============================================
+#ifdef BIVALVE
+              CASE ('iHbio3(iBvDens(j))')
+                load=.FALSE.
+                varid=varid-1
+                DO j=1,Nbv
+                  varid=varid+1
+                  iHbio3(iBvDens(j))=varid
+                  DO ng=1,Ngrids
+                    Fscale(varid,ng)=scale
+                    Iinfo(1,varid,ng)=gtype
+                  END DO
+                  WRITE (Vname(1,varid),'(a,i2.2)')                   &
+   &                    TRIM(ADJUSTL(Vinfo(1))), j
+                  WRITE (Vname(2,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(2))), ', functional group ', j
+                  WRITE (Vname(3,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(3)))
+                  WRITE (Vname(4,varid),'(a,a)')                      &
+   &                    TRIM(Vname(1,varid)), ', scalar, series'
+                  WRITE (Vname(5,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(5)))
+                END DO
+                varid=varid+1
+              CASE ('iHbio3(iBvQCe(i,j))')
+                load=.FALSE.
+                varid=varid-1
+                DO j=1,Nbv
+                  DO i=1,N_Csp
+                    varid=varid+1
+                    iHbio3(iBvQCe(i,j))=varid
+                    DO ng=1,Ngrids
+                      Fscale(varid,ng)=scale
+                      Iinfo(1,varid,ng)=gtype
+                    END DO
+                    WRITE (Vname(1,varid),'(a,i2.2,a,i2.2)')            &
+   &                      TRIM(ADJUSTL(Vinfo(1))), j,'_',i
+                    WRITE (Vname(2,varid),'(a,a,i2.2,a,i2.2)')          &
+   &                      TRIM(ADJUSTL(Vinfo(2)))                       &
+                          ,', functional group ', j, ', tracer ', i
+                    WRITE (Vname(3,varid),'(a)')                        &
+   &                      TRIM(ADJUSTL(Vinfo(3)))
+                    WRITE (Vname(4,varid),'(a,a)')                      &
+   &                      TRIM(Vname(1,varid)), ', scalar, series'
+                    WRITE (Vname(5,varid),'(a)')                        &
+   &                      TRIM(ADJUSTL(Vinfo(5)))
+                  END DO
+                END DO
+                varid=varid+1
+              CASE ('iHbio3(iBvQCv(i,j))')
+                load=.FALSE.
+                varid=varid-1
+                DO j=1,Nbv
+                  DO i=1,N_Csp
+                    varid=varid+1
+                    iHbio3(iBvQCv(i,j))=varid
+                    DO ng=1,Ngrids
+                      Fscale(varid,ng)=scale
+                      Iinfo(1,varid,ng)=gtype
+                    END DO
+                    WRITE (Vname(1,varid),'(a,i2.2,a,i2.2)')            &
+   &                      TRIM(ADJUSTL(Vinfo(1))), j,'_',i
+                    WRITE (Vname(2,varid),'(a,a,i2.2,a,i2.2)')          &
+   &                      TRIM(ADJUSTL(Vinfo(2)))                       &
+                          ,', functional group ', j, ', tracer ', i
+                    WRITE (Vname(3,varid),'(a)')                        &
+   &                      TRIM(ADJUSTL(Vinfo(3)))
+                    WRITE (Vname(4,varid),'(a,a)')                      &
+   &                      TRIM(Vname(1,varid)), ', scalar, series'
+                    WRITE (Vname(5,varid),'(a)')                        &
+   &                      TRIM(ADJUSTL(Vinfo(5)))
+                  END DO
+                END DO
+                varid=varid+1
+              CASE ('iHbio3(iBvQCr(i,j))')
+                load=.FALSE.
+                varid=varid-1
+                DO j=1,Nbv
+                  DO i=1,N_Csp
+                    varid=varid+1
+                    iHbio3(iBvQCr(i,j))=varid
+                    DO ng=1,Ngrids
+                      Fscale(varid,ng)=scale
+                      Iinfo(1,varid,ng)=gtype
+                    END DO
+                    WRITE (Vname(1,varid),'(a,i2.2,a,i2.2)')            &
+   &                      TRIM(ADJUSTL(Vinfo(1))), j,'_',i
+                    WRITE (Vname(2,varid),'(a,a,i2.2,a,i2.2)')          &
+   &                      TRIM(ADJUSTL(Vinfo(2)))                       &
+                          ,', functional group ', j, ', tracer ', i
+                    WRITE (Vname(3,varid),'(a)')                        &
+   &                      TRIM(ADJUSTL(Vinfo(3)))
+                    WRITE (Vname(4,varid),'(a,a)')                      &
+   &                      TRIM(Vname(1,varid)), ', scalar, series'
+                    WRITE (Vname(5,varid),'(a)')                        &
+   &                      TRIM(ADJUSTL(Vinfo(5)))
+                  END DO
+                END DO
+                varid=varid+1
+              CASE ('iHbio3(iBvQCh(i,j))')
+                load=.FALSE.
+                varid=varid-1
+                DO j=1,Nbv
+                  DO i=1,N_Csp
+                    varid=varid+1
+                    iHbio3(iBvQCh(i,j))=varid
+                    DO ng=1,Ngrids
+                      Fscale(varid,ng)=scale
+                      Iinfo(1,varid,ng)=gtype
+                    END DO
+                    WRITE (Vname(1,varid),'(a,i2.2,a,i2.2)')            &
+   &                      TRIM(ADJUSTL(Vinfo(1))), j,'_',i
+                    WRITE (Vname(2,varid),'(a,a,i2.2,a,i2.2)')          &
+   &                      TRIM(ADJUSTL(Vinfo(2)))                       &
+                          ,', functional group ', j, ', tracer ', i
+                    WRITE (Vname(3,varid),'(a)')                        &
+   &                      TRIM(ADJUSTL(Vinfo(3)))
+                    WRITE (Vname(4,varid),'(a,a)')                      &
+   &                      TRIM(Vname(1,varid)), ', scalar, series'
+                    WRITE (Vname(5,varid),'(a)')                        &
+   &                      TRIM(ADJUSTL(Vinfo(5)))
+                  END DO
+                END DO
+                varid=varid+1
+
+              CASE ('iHbio3(iBvQNe(i,j))')
+                load=.FALSE.
+                varid=varid-1
+                DO j=1,Nbv
+                  DO i=1,N_Nsp
+                    varid=varid+1
+                    iHbio3(iBvQNe(i,j))=varid
+                    DO ng=1,Ngrids
+                      Fscale(varid,ng)=scale
+                      Iinfo(1,varid,ng)=gtype
+                    END DO
+                    WRITE (Vname(1,varid),'(a,i2.2,a,i2.2)')            &
+   &                      TRIM(ADJUSTL(Vinfo(1))), j,'_',i
+                    WRITE (Vname(2,varid),'(a,a,i2.2,a,i2.2)')          &
+   &                      TRIM(ADJUSTL(Vinfo(2)))                       &
+                          ,', functional group ', j, ', tracer ', i
+                    WRITE (Vname(3,varid),'(a)')                        &
+   &                      TRIM(ADJUSTL(Vinfo(3)))
+                    WRITE (Vname(4,varid),'(a,a)')                      &
+   &                      TRIM(Vname(1,varid)), ', scalar, series'
+                    WRITE (Vname(5,varid),'(a)')                        &
+   &                      TRIM(ADJUSTL(Vinfo(5)))
+                  END DO
+                END DO
+                varid=varid+1
+              CASE ('iHbio3(iBvQNv(i,j))')
+                load=.FALSE.
+                varid=varid-1
+                DO j=1,Nbv
+                  DO i=1,N_Nsp
+                    varid=varid+1
+                    iHbio3(iBvQNv(i,j))=varid
+                    DO ng=1,Ngrids
+                      Fscale(varid,ng)=scale
+                      Iinfo(1,varid,ng)=gtype
+                    END DO
+                    WRITE (Vname(1,varid),'(a,i2.2,a,i2.2)')            &
+   &                      TRIM(ADJUSTL(Vinfo(1))), j,'_',i
+                    WRITE (Vname(2,varid),'(a,a,i2.2,a,i2.2)')          &
+   &                      TRIM(ADJUSTL(Vinfo(2)))                       &
+                          ,', functional group ', j, ', tracer ', i
+                    WRITE (Vname(3,varid),'(a)')                        &
+   &                      TRIM(ADJUSTL(Vinfo(3)))
+                    WRITE (Vname(4,varid),'(a,a)')                      &
+   &                      TRIM(Vname(1,varid)), ', scalar, series'
+                    WRITE (Vname(5,varid),'(a)')                        &
+   &                      TRIM(ADJUSTL(Vinfo(5)))
+                  END DO
+                END DO
+                varid=varid+1
+              CASE ('iHbio3(iBvQNr(i,j))')
+                load=.FALSE.
+                varid=varid-1
+                DO j=1,Nbv
+                  DO i=1,N_Nsp
+                    varid=varid+1
+                    iHbio3(iBvQNr(i,j))=varid
+                    DO ng=1,Ngrids
+                      Fscale(varid,ng)=scale
+                      Iinfo(1,varid,ng)=gtype
+                    END DO
+                    WRITE (Vname(1,varid),'(a,i2.2,a,i2.2)')            &
+   &                      TRIM(ADJUSTL(Vinfo(1))), j,'_',i
+                    WRITE (Vname(2,varid),'(a,a,i2.2,a,i2.2)')          &
+   &                      TRIM(ADJUSTL(Vinfo(2)))                       &
+                          ,', functional group ', j, ', tracer ', i
+                    WRITE (Vname(3,varid),'(a)')                        &
+   &                      TRIM(ADJUSTL(Vinfo(3)))
+                    WRITE (Vname(4,varid),'(a,a)')                      &
+   &                      TRIM(Vname(1,varid)), ', scalar, series'
+                    WRITE (Vname(5,varid),'(a)')                        &
+   &                      TRIM(ADJUSTL(Vinfo(5)))
+                  END DO
+                END DO
+                varid=varid+1
+              CASE ('iHbio3(iBvQNh(i,j))')
+                load=.FALSE.
+                varid=varid-1
+                DO j=1,Nbv
+                  DO i=1,N_Nsp
+                    varid=varid+1
+                    iHbio3(iBvQNh(i,j))=varid
+                    DO ng=1,Ngrids
+                      Fscale(varid,ng)=scale
+                      Iinfo(1,varid,ng)=gtype
+                    END DO
+                    WRITE (Vname(1,varid),'(a,i2.2,a,i2.2)')            &
+   &                      TRIM(ADJUSTL(Vinfo(1))), j,'_',i
+                    WRITE (Vname(2,varid),'(a,a,i2.2,a,i2.2)')          &
+   &                      TRIM(ADJUSTL(Vinfo(2)))                       &
+                          ,', functional group ', j, ', tracer ', i
+                    WRITE (Vname(3,varid),'(a)')                        &
+   &                      TRIM(ADJUSTL(Vinfo(3)))
+                    WRITE (Vname(4,varid),'(a,a)')                      &
+   &                      TRIM(Vname(1,varid)), ', scalar, series'
+                    WRITE (Vname(5,varid),'(a)')                        &
+   &                      TRIM(ADJUSTL(Vinfo(5)))
+                  END DO
+                END DO
+                varid=varid+1
+
+              CASE ('iHbio3(iBvQPe(i,j))')
+                load=.FALSE.
+                varid=varid-1
+                DO j=1,Nbv
+                  DO i=1,N_Psp
+                    varid=varid+1
+                    iHbio3(iBvQPe(i,j))=varid
+                    DO ng=1,Ngrids
+                      Fscale(varid,ng)=scale
+                      Iinfo(1,varid,ng)=gtype
+                    END DO
+                    WRITE (Vname(1,varid),'(a,i2.2,a,i2.2)')            &
+   &                      TRIM(ADJUSTL(Vinfo(1))), j,'_',i
+                    WRITE (Vname(2,varid),'(a,a,i2.2,a,i2.2)')          &
+   &                      TRIM(ADJUSTL(Vinfo(2)))                       &
+                          ,', functional group ', j, ', tracer ', i
+                    WRITE (Vname(3,varid),'(a)')                        &
+   &                      TRIM(ADJUSTL(Vinfo(3)))
+                    WRITE (Vname(4,varid),'(a,a)')                      &
+   &                      TRIM(Vname(1,varid)), ', scalar, series'
+                    WRITE (Vname(5,varid),'(a)')                        &
+   &                      TRIM(ADJUSTL(Vinfo(5)))
+                  END DO
+                END DO
+                varid=varid+1
+              CASE ('iHbio3(iBvQPv(i,j))')
+                load=.FALSE.
+                varid=varid-1
+                DO j=1,Nbv
+                  DO i=1,N_Psp
+                    varid=varid+1
+                    iHbio3(iBvQPv(i,j))=varid
+                    DO ng=1,Ngrids
+                      Fscale(varid,ng)=scale
+                      Iinfo(1,varid,ng)=gtype
+                    END DO
+                    WRITE (Vname(1,varid),'(a,i2.2,a,i2.2)')            &
+   &                      TRIM(ADJUSTL(Vinfo(1))), j,'_',i
+                    WRITE (Vname(2,varid),'(a,a,i2.2,a,i2.2)')          &
+   &                      TRIM(ADJUSTL(Vinfo(2)))                       &
+                          ,', functional group ', j, ', tracer ', i
+                    WRITE (Vname(3,varid),'(a)')                        &
+   &                      TRIM(ADJUSTL(Vinfo(3)))
+                    WRITE (Vname(4,varid),'(a,a)')                      &
+   &                      TRIM(Vname(1,varid)), ', scalar, series'
+                    WRITE (Vname(5,varid),'(a)')                        &
+   &                      TRIM(ADJUSTL(Vinfo(5)))
+                  END DO
+                END DO
+                varid=varid+1
+              CASE ('iHbio3(iBvQPr(i,j))')
+                load=.FALSE.
+                varid=varid-1
+                DO j=1,Nbv
+                  DO i=1,N_Psp
+                    varid=varid+1
+                    iHbio3(iBvQPr(i,j))=varid
+                    DO ng=1,Ngrids
+                      Fscale(varid,ng)=scale
+                      Iinfo(1,varid,ng)=gtype
+                    END DO
+                    WRITE (Vname(1,varid),'(a,i2.2,a,i2.2)')            &
+   &                      TRIM(ADJUSTL(Vinfo(1))), j,'_',i
+                    WRITE (Vname(2,varid),'(a,a,i2.2,a,i2.2)')          &
+   &                      TRIM(ADJUSTL(Vinfo(2)))                       &
+                          ,', functional group ', j, ', tracer ', i
+                    WRITE (Vname(3,varid),'(a)')                        &
+   &                      TRIM(ADJUSTL(Vinfo(3)))
+                    WRITE (Vname(4,varid),'(a,a)')                      &
+   &                      TRIM(Vname(1,varid)), ', scalar, series'
+                    WRITE (Vname(5,varid),'(a)')                        &
+   &                      TRIM(ADJUSTL(Vinfo(5)))
+                  END DO
+                END DO
+                varid=varid+1
+              CASE ('iHbio3(iBvQPh(i,j))')
+                load=.FALSE.
+                varid=varid-1
+                DO j=1,Nbv
+                  DO i=1,N_Psp
+                    varid=varid+1
+                    iHbio3(iBvQPh(i,j))=varid
+                    DO ng=1,Ngrids
+                      Fscale(varid,ng)=scale
+                      Iinfo(1,varid,ng)=gtype
+                    END DO
+                    WRITE (Vname(1,varid),'(a,i2.2,a,i2.2)')            &
+   &                      TRIM(ADJUSTL(Vinfo(1))), j,'_',i
+                    WRITE (Vname(2,varid),'(a,a,i2.2,a,i2.2)')          &
+   &                      TRIM(ADJUSTL(Vinfo(2)))                       &
+                          ,', functional group ', j, ', tracer ', i
+                    WRITE (Vname(3,varid),'(a)')                        &
+   &                      TRIM(ADJUSTL(Vinfo(3)))
+                    WRITE (Vname(4,varid),'(a,a)')                      &
+   &                      TRIM(Vname(1,varid)), ', scalar, series'
+                    WRITE (Vname(5,varid),'(a)')                        &
+   &                      TRIM(ADJUSTL(Vinfo(5)))
+                  END DO
+                END DO
+                varid=varid+1
+
+              CASE ('iHbio3(iBvCaCO3(i,j))')
+                load=.FALSE.
+                varid=varid-1
+                DO j=1,Nbv
+                  DO i=1,N_Csp
+                    varid=varid+1
+                    iHbio3(iBvCaCO3(i,j))=varid
+                    DO ng=1,Ngrids
+                      Fscale(varid,ng)=scale
+                      Iinfo(1,varid,ng)=gtype
+                    END DO
+                    WRITE (Vname(1,varid),'(a,i2.2,a,i2.2)')            &
+   &                      TRIM(ADJUSTL(Vinfo(1))), j,'_',i
+                    WRITE (Vname(2,varid),'(a,a,i2.2,a,i2.2)')          &
+   &                      TRIM(ADJUSTL(Vinfo(2)))                       &
+                          ,', functional group ', j, ', tracer ', i
+                    WRITE (Vname(3,varid),'(a)')                        &
+   &                      TRIM(ADJUSTL(Vinfo(3)))
+                    WRITE (Vname(4,varid),'(a,a)')                      &
+   &                      TRIM(Vname(1,varid)), ', scalar, series'
+                    WRITE (Vname(5,varid),'(a)')                        &
+   &                      TRIM(ADJUSTL(Vinfo(5)))
+                  END DO
+                END DO
+                varid=varid+1
+
+# if defined DIAGNOSTICS_BIO
+              CASE ('iDbio3(iBvR(j))')
+                load=.FALSE.
+                varid=varid-1
+                DO j=1,Nbv
+                  varid=varid+1
+                  iDbio3(iBvR(j))=varid
+                  DO ng=1,Ngrids
+                    Fscale(varid,ng)=scale
+                    Iinfo(1,varid,ng)=gtype
+                  END DO
+                  WRITE (Vname(1,varid),'(a,i2.2)')                   &
+   &                    TRIM(ADJUSTL(Vinfo(1))), j
+                  WRITE (Vname(2,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(2))), ', functional group ', j
+                  WRITE (Vname(3,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(3)))
+                  WRITE (Vname(4,varid),'(a,a)')                      &
+   &                    TRIM(Vname(1,varid)), ', scalar, series'
+                  WRITE (Vname(5,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(5)))
+                END DO
+                varid=varid+1
+              CASE ('iDbio3(iBvG(j))')
+                load=.FALSE.
+                varid=varid-1
+                DO j=1,Nbv
+                  varid=varid+1
+                  iDbio3(iBvG(j))=varid
+                  DO ng=1,Ngrids
+                    Fscale(varid,ng)=scale
+                    Iinfo(1,varid,ng)=gtype
+                  END DO
+                  WRITE (Vname(1,varid),'(a,i2.2)')                   &
+   &                    TRIM(ADJUSTL(Vinfo(1))), j
+                  WRITE (Vname(2,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(2))), ', functional group ', j
+                  WRITE (Vname(3,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(3)))
+                  WRITE (Vname(4,varid),'(a,a)')                      &
+   &                    TRIM(Vname(1,varid)), ', scalar, series'
+                  WRITE (Vname(5,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(5)))
+                END DO
+                varid=varid+1
+              CASE ('iDbio3(iBvV(j))')
+                load=.FALSE.
+                varid=varid-1
+                DO j=1,Nbv
+                  varid=varid+1
+                  iDbio3(iBvV(j))=varid
+                  DO ng=1,Ngrids
+                    Fscale(varid,ng)=scale
+                    Iinfo(1,varid,ng)=gtype
+                  END DO
+                  WRITE (Vname(1,varid),'(a,i2.2)')                   &
+   &                    TRIM(ADJUSTL(Vinfo(1))), j
+                  WRITE (Vname(2,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(2))), ', functional group ', j
+                  WRITE (Vname(3,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(3)))
+                  WRITE (Vname(4,varid),'(a,a)')                      &
+   &                    TRIM(Vname(1,varid)), ', scalar, series'
+                  WRITE (Vname(5,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(5)))
+                END DO
+                varid=varid+1
+              CASE ('iDbio3(iBvL(j))')
+                load=.FALSE.
+                varid=varid-1
+                DO j=1,Nbv
+                  varid=varid+1
+                  iDbio3(iBvL(j))=varid
+                  DO ng=1,Ngrids
+                    Fscale(varid,ng)=scale
+                    Iinfo(1,varid,ng)=gtype
+                  END DO
+                  WRITE (Vname(1,varid),'(a,i2.2)')                   &
+   &                    TRIM(ADJUSTL(Vinfo(1))), j
+                  WRITE (Vname(2,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(2))), ', functional group ', j
+                  WRITE (Vname(3,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(3)))
+                  WRITE (Vname(4,varid),'(a,a)')                      &
+   &                    TRIM(Vname(1,varid)), ', scalar, series'
+                  WRITE (Vname(5,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(5)))
+                END DO
+                varid=varid+1
+              CASE ('iDbio3(iBvWd(j))')
+                load=.FALSE.
+                varid=varid-1
+                DO j=1,Nbv
+                  varid=varid+1
+                  iDbio3(iBvWd(j))=varid
+                  DO ng=1,Ngrids
+                    Fscale(varid,ng)=scale
+                    Iinfo(1,varid,ng)=gtype
+                  END DO
+                  WRITE (Vname(1,varid),'(a,i2.2)')                   &
+   &                    TRIM(ADJUSTL(Vinfo(1))), j
+                  WRITE (Vname(2,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(2))), ', functional group ', j
+                  WRITE (Vname(3,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(3)))
+                  WRITE (Vname(4,varid),'(a,a)')                      &
+   &                    TRIM(Vname(1,varid)), ', scalar, series'
+                  WRITE (Vname(5,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(5)))
+                END DO
+                varid=varid+1
+              CASE ('iDbio3(iBvWw(j))')
+                load=.FALSE.
+                varid=varid-1
+                DO j=1,Nbv
+                  varid=varid+1
+                  iDbio3(iBvWw(j))=varid
+                  DO ng=1,Ngrids
+                    Fscale(varid,ng)=scale
+                    Iinfo(1,varid,ng)=gtype
+                  END DO
+                  WRITE (Vname(1,varid),'(a,i2.2)')                   &
+   &                    TRIM(ADJUSTL(Vinfo(1))), j
+                  WRITE (Vname(2,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(2))), ', functional group ', j
+                  WRITE (Vname(3,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(3)))
+                  WRITE (Vname(4,varid),'(a,a)')                      &
+   &                    TRIM(Vname(1,varid)), ', scalar, series'
+                  WRITE (Vname(5,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(5)))
+                END DO
+                varid=varid+1
+              CASE ('iDbio3(iBvWt(j))')
+                load=.FALSE.
+                varid=varid-1
+                DO j=1,Nbv
+                  varid=varid+1
+                  iDbio3(iBvWt(j))=varid
+                  DO ng=1,Ngrids
+                    Fscale(varid,ng)=scale
+                    Iinfo(1,varid,ng)=gtype
+                  END DO
+                  WRITE (Vname(1,varid),'(a,i2.2)')                   &
+   &                    TRIM(ADJUSTL(Vinfo(1))), j
+                  WRITE (Vname(2,varid),'(a,a,i2.2)')                 &
+   &                    TRIM(ADJUSTL(Vinfo(2))), ', functional group ', j
+                  WRITE (Vname(3,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(3)))
+                  WRITE (Vname(4,varid),'(a,a)')                      &
+   &                    TRIM(Vname(1,varid)), ', scalar, series'
+                  WRITE (Vname(5,varid),'(a)')                        &
+   &                    TRIM(ADJUSTL(Vinfo(5)))
+                END DO
+                varid=varid+1
+# endif
+#endif
+
 ! ==== Sediment parameters ===============================================
 !!! yuta_edits_for_masa >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
 #ifdef SEDIMENT_ECOSYS

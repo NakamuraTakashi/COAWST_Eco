@@ -96,6 +96,18 @@
           Hair(i,j)=0.776_r8
         END DO
       END DO
+#elif defined OFFLINE
+      DO j=JstrT,JendT
+        DO i=IstrT,IendT
+          Hair(i,j)=0.8_r8
+        END DO
+      END DO
+#elif defined ANA_ATM_CONST
+      DO j=JstrT,JendT
+        DO i=IstrT,IendT
+          Hair(i,j)=0.8_r8
+        END DO
+      END DO
 #else
       ana_humidity.h: no values provided for Hair.
 #endif

@@ -579,9 +579,9 @@ MODULE mod_seagrass
     ! dieoff when respiration is insufficient
     SGRASS(ng)%max_anoxic_dieoff_rate               = [ 0.1d0    ]                                    ! [mol.C mol-1.C day-1]       maximum dieoff due to anoxia in fraction of mass per day, represents atypical modes of survival such as anaerobic respiration and cellular canibalism which limits extreme death rates ! tuning
     ! stockpile maximum cap
-    SGRASS(ng)%DICstockCap                          = [0.01d0]                                        ! Factor to multiply carbon biomsass to get maximum DIC stock (stock limit = DICstockCap*SgCBmF) 
+    SGRASS(ng)%DICstockCap                          = [1.0d0]                                         ! Factor to multiply carbon biomsass to get maximum DIC stock (stock limit = DICstockCap*SgCBmF) 
     SGRASS(ng)%CH2OstockCap                         = [1.0d0]                                         ! Factor to multiply carbon biomsass to get maximum sugar stock (stock limit = CH2OstockCap*SgCBmF) 
-    SGRASS(ng)%DOstockCap                           = [0.01d0]                                        ! Factor to multiply carbon biomsass to get maximum DO stock (stock limit = DOstockCap*SgCBmF) 
+    SGRASS(ng)%DOstockCap                           = [1.0d0]                                         ! Factor to multiply carbon biomsass to get maximum DO stock (stock limit = DOstockCap*SgCBmF) 
 # if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
 #  if defined SEAGRASS_IMMEDIATE_NO3_TO_NH4_CONVERSION
     SGRASS(ng)%NO3stockCap                          = [0.0d0]                                         ! Factor to multiply nitrogen biomsass to get maximum NO3 stock (stock limit = NO3stockCap*SgNBmF) 
@@ -1669,9 +1669,9 @@ MODULE mod_seagrass
     if (DICstock(iCt) .ge. DICstockCap*SgCBmF(iCt)) then
       DIC_uptake_possible(:) = 0d0
       sumCUpPos = 0d0
-    elseif (DICstock(iCt) + sumCUpPos*dt .gt. DICstockCap*SgCBmF(iCt)) then
-      DIC_uptake_possible(:) = DIC_uptake_possible(:) * (DICstockCap*SgCBmF(iCt)-DICstock(iCt))/(sumCUpPos*dt)
-      sumCUpPos = (DICstockCap*SgCBmF(iCt)-DICstock(iCt))/dt
+    elseif (DICstock(iCt) + sumCUpPos .gt. DICstockCap*SgCBmF(iCt)) then
+      DIC_uptake_possible(:) = DIC_uptake_possible(:) * (DICstockCap*SgCBmF(iCt)-DICstock(iCt))/sumCUpPos
+      sumCUpPos = DICstockCap*SgCBmF(iCt)-DICstock(iCt)
     endif
 
 ! DO uptake rate --------------------------------------------------------------------------
@@ -1721,10 +1721,9 @@ MODULE mod_seagrass
     if (DOstock .ge. DOstockCap*SgCBmF(iCt)) then
       DO_uptake_possible(:) = 0d0
       sumOUpPos = 0d0
-    elseif (DOstock + sumOUpPos*dt .gt. DOstockCap*SgCBmF(iCt)) then
-      ! new amount added/dt = old amount added/dt     amount that can be added        / old amount added
-      DO_uptake_possible(:) = DO_uptake_possible(:) * (DOstockCap*SgCBmF(iCt)-DOstock)/(sumOUpPos*dt)
-      sumOUpPos = (DOstockCap*SgCBmF(iCt)-DOstock) / dt
+    elseif (DOstock + sumOUpPos .gt. DOstockCap*SgCBmF(iCt)) then
+      DO_uptake_possible(:) = DO_uptake_possible(:) * (DOstockCap*SgCBmF(iCt)-DOstock)/sumOUpPos
+      sumOUpPos = DOstockCap*SgCBmF(iCt)-DOstock
     endif
 
 # if defined SEAGRASS_DEBUG_MODE
@@ -1865,9 +1864,9 @@ MODULE mod_seagrass
     if (NO3stock(iNt) .ge. NO3stockCap*SgNBmF(iNt)) then
       NO3_uptake_possible(:) = 0d0
       sumNO3UpPos = 0d0
-    elseif (NO3stock(iNt) + sumNO3UpPos*dt .gt. NO3stockCap*SgNBmF(iNt)) then
-      NO3_uptake_possible(:) = NO3_uptake_possible(:) * (NO3stockCap*SgNBmF(iNt)-NO3stock(iNt))/(sumNO3UpPos*dt)
-      sumNO3UpPos = (NO3stockCap*SgNBmF(iNt)-NO3stock(iNt))/dt
+    elseif (NO3stock(iNt) + sumNO3UpPos .gt. NO3stockCap*SgNBmF(iNt)) then
+      NO3_uptake_possible(:) = NO3_uptake_possible(:) * (NO3stockCap*SgNBmF(iNt)-NO3stock(iNt))/sumNO3UpPos
+      sumNO3UpPos = NO3stockCap*SgNBmF(iNt)-NO3stock(iNt)
     endif
 
     ! NH4stockCap                 []                          Factor to multiply nitrogen biomsass to get maximum NH4 stock (stock limit = NH4stockCap*SgNBmF) 
@@ -1875,9 +1874,9 @@ MODULE mod_seagrass
     if (NH4stock(iNt) .ge. NH4stockCap*SgNBmF(iNt)) then
       NH4_uptake_possible(:) = 0d0
       sumNH4UpPos = 0d0
-    elseif (NH4stock(iNt) + sumNH4UpPos*dt .gt. NH4stockCap*SgNBmF(iNt)) then
-      NH4_uptake_possible(:) = NH4_uptake_possible(:) * (NH4stockCap*SgNBmF(iNt)-NH4stock(iNt))/(sumNH4UpPos*dt)
-      sumNH4UpPos = (NH4stockCap*SgNBmF(iNt)-NH4stock(iNt))/dt
+    elseif (NH4stock(iNt) + sumNH4UpPos .gt. NH4stockCap*SgNBmF(iNt)) then
+      NH4_uptake_possible(:) = NH4_uptake_possible(:) * (NH4stockCap*SgNBmF(iNt)-NH4stock(iNt))/sumNH4UpPos
+      sumNH4UpPos = NH4stockCap*SgNBmF(iNt)-NH4stock(iNt)
     endif
 
 # endif
@@ -1897,9 +1896,9 @@ MODULE mod_seagrass
     if (PO4stock(iPt) .ge. PO4stockCap*SgPBmF(iPt)) then
       PO4_uptake_possible(:) = 0d0
       sumPUpPos = 0d0
-    elseif (PO4stock(iPt) + sumPUpPos*dt .gt. PO4stockCap*SgPBmF(iPt)) then
-      PO4_uptake_possible(:) = PO4_uptake_possible(:) * (PO4stockCap*SgPBmF(iPt)-PO4stock(iPt))/(sumPUpPos*dt)
-      sumPUpPos = (PO4stockCap*SgPBmF(iPt)-PO4stock(iPt))/dt
+    elseif (PO4stock(iPt) + sumPUpPos .gt. PO4stockCap*SgPBmF(iPt)) then
+      PO4_uptake_possible(:) = PO4_uptake_possible(:) * (PO4stockCap*SgPBmF(iPt)-PO4stock(iPt))/sumPUpPos
+      sumPUpPos = PO4stockCap*SgPBmF(iPt)-PO4stock(iPt)
     endif
 
     sumNUpPos = sumNO3UpPos + sumNH4UpPos
@@ -2195,7 +2194,7 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
     ! Resp_limit_DO               [umol.C m-2.sg.hab s-1]     Respiration/un-growth rate possible as limited by DO uptake
 
     ! [umol.C/m2.hab s] = [mol.C/mol.CHM] [umol.CHM/m2.hab] [1/s]
-    Resp_limit_DO       =                 (DOstock+delta_DOstock*dt) / dt
+    Resp_limit_DO       =                 DOstock           / dt
 
 ! Respiration/ungrowth -------------------------------------------------------------------------------
 
