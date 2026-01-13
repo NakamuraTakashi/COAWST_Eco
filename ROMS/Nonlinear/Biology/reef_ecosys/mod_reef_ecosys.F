@@ -104,12 +104,11 @@ END SUBROUTINE allocate_reef_ecosys
     real(8), intent(in) :: dz(LBi:UBi,LBj:UBj,Nz)           ! Thicknesses (m) of vertical RHO-points.
     logical, intent(in) :: start_of_new_run
 # if defined SEAGRASS || defined SEDIMENT_ECOSYS
-    integer, intent(in) :: IstrR, IendR, JstrR, JendR
-    real(8), intent(in) :: XI_size (    IstrR:IendR,JstrR:JendR)   ! grid size XI-direction (meters)
-    real(8), intent(in) :: ETA_size(    IstrR:IendR,JstrR:JendR)   ! grid size ETA-direction (meters)
+    real(8), intent(in) :: XI_size (    LBi:UBi,LBj:UBj)   ! grid size XI-direction (meters)
+    real(8), intent(in) :: ETA_size(    LBi:UBi,LBj:UBj)   ! grid size ETA-direction (meters)
 # endif
 # ifdef SEAGRASS
-    real(8), intent(in) :: p_sgrass(Nsg,IstrR:IendR,JstrR:JendR)   ! seagrass coverage (habitat area in grid / grid area)
+    real(8), intent(in) :: p_sgrass(Nsg,LBi:UBi,LBj:UBj)   ! seagrass coverage (habitat area in grid / grid area)
 # endif
 # ifdef BIVALVE
     real(8), intent(in) :: dens_aqua(Naq,LBi:UBi,LBj:UBj)   ! Aquaculture density
@@ -130,10 +129,10 @@ END SUBROUTINE allocate_reef_ecosys
                             , XI_size, ETA_size         & ! grid size XI-direction (meters); grid size ETA-direction (meters)
                             , p_sand                    & ! sand coverage (sand area/grid area)
                             )
-    write(*,*) 'yt_debug: mod_reef_ecosys.F initialize_reef_ecosys() finished sediment init'
+    write(*,*) 'mod_reef_ecosys.F initialize_reef_ecosys() finished sediment init'
 # endif
 # ifdef SEAGRASS
-    CALL initialize_seagrass( ng, IstrR, IendR, JstrR, JendR    &
+    CALL initialize_seagrass( ng, LBi, UBi, LBj, UBj    &
                             , start_of_new_run          & ! TRUE = initialize coral, seagass, macroalgae, sediment from start; FALSE = continue from previous run
                             , XI_size, ETA_size         & ! grid size XI-direction (meters); grid size ETA-direction (meters)
                             , p_sgrass                  & ! seagrass coverage (habitat area/grid area)

@@ -1488,10 +1488,10 @@
         END DO
       END DO
 !-----------------------------------------------------------------------
+#ifdef BIVALVE
       DO j=LBj, UBj
         DO i=LBi, UBi
           DO k=1,N
-#ifdef BIVALVE
             DO m=1,Nbv
               BVLV(ng)%dens(  m,k,i,j) = OCEAN(ng)%HisBio3d(i,j,k, iBvDens(m) )
               BVLV(ng)%QCe (:,m,k,i,j) = OCEAN(ng)%HisBio3d(i,j,k, iBvQCe(1,m):iBvQCe(N_Csp,m) )
@@ -1508,11 +1508,11 @@
               BVLV(ng)%QPh (:,m,k,i,j) = OCEAN(ng)%HisBio3d(i,j,k, iBvQPh(1,m):iBvQPh(N_Psp,m) )
               BVLV(ng)%CaCO3(:,m,k,i,j) = OCEAN(ng)%HisBio3d(i,j,k, iBvCaCO3(1,m):iBvCaCO3(N_Csp,m) )
             END DO
-#endif
            !  :  (To be updated)
           END DO
         END DO
       END DO
+#endif
 
 !-----------------------------------------------------------------------
 
@@ -1667,10 +1667,10 @@
         END DO
       END DO
 !-----------------------------------------------------------------------
+#ifdef BIVALVE
       DO j=LBj, UBj
         DO i=LBi, UBi
           DO k=1,N
-#ifdef BIVALVE
             DO m=1,Nbv
               OCEAN(ng)%HisBio3d(i,j,k, iBvDens(m) )                  = BVLV(ng)%dens(  m,k,i,j)
               OCEAN(ng)%HisBio3d(i,j,k, iBvQCe(1,m):iBvQCe(N_Csp,m) ) = BVLV(ng)%QCe (:,m,k,i,j)
@@ -1687,11 +1687,11 @@
               OCEAN(ng)%HisBio3d(i,j,k, iBvQPh(1,m):iBvQPh(N_Psp,m) ) = BVLV(ng)%QPh (:,m,k,i,j)
               OCEAN(ng)%HisBio3d(i,j,k, iBvCaCO3(1,m):iBvCaCO3(N_Csp,m) ) = BVLV(ng)%CaCO3(:,m,k,i,j)
             END DO
-#endif
            !  :  (To be updated)
           END DO
         END DO
       END DO
+#endif
 
 !-----------------------------------------------------------------------
 
@@ -1757,7 +1757,7 @@
 
       USE mod_geochem
       USE mod_diags
-      USE mod_stepping
+      USE mod_stepping, ONLY: nnew
 !
 !  Imported variable declarations.
 !
@@ -1824,11 +1824,12 @@
 
         END DO
       END DO
+
 !-----------------------------------------------------------------------
+#ifdef BIVALVE
       DO j=LBj, UBj
         DO i=LBi, UBi
           DO k=1,N
-#ifdef BIVALVE
             DO m=1,Nbv
               DIAGS(ng)%DiaBio3d(i,j,k, iBvR (m) ) = BVLV(ng)%R (m,k,i,j)
               DIAGS(ng)%DiaBio3d(i,j,k, iBvG (m) ) = BVLV(ng)%G (m,k,i,j)
@@ -1838,30 +1839,11 @@
               DIAGS(ng)%DiaBio3d(i,j,k, iBvWw(m) ) = BVLV(ng)%Ww(m,k,i,j)
               DIAGS(ng)%DiaBio3d(i,j,k, iBvWt(m) ) = BVLV(ng)%Wt(m,k,i,j)
             END DO
-#endif
            !  :  (To be updated)
           END DO
         END DO
       END DO
-!-----------------------------------------------------------------------
-      DO j=LBj, UBj
-        DO i=LBi, UBi
-          DO k=1,N
-#ifdef BIVALVE
-            DO m=1,Nbv
-              DIAGS(ng)%DiaBio3d(i,j,k, iBvR (m) ) = BVLV(ng)%R (m,k,i,j)
-              DIAGS(ng)%DiaBio3d(i,j,k, iBvG (m) ) = BVLV(ng)%G (m,k,i,j)
-              DIAGS(ng)%DiaBio3d(i,j,k, iBvV (m) ) = BVLV(ng)%V (m,k,i,j)
-              DIAGS(ng)%DiaBio3d(i,j,k, iBvL (m) ) = BVLV(ng)%L (m,k,i,j)
-              DIAGS(ng)%DiaBio3d(i,j,k, iBvWd(m) ) = BVLV(ng)%Wd(m,k,i,j)
-              DIAGS(ng)%DiaBio3d(i,j,k, iBvWw(m) ) = BVLV(ng)%Ww(m,k,i,j)
-              DIAGS(ng)%DiaBio3d(i,j,k, iBvWt(m) ) = BVLV(ng)%Wt(m,k,i,j)
-            END DO
 #endif
-           !  :  (To be updated)
-          END DO
-        END DO
-      END DO
 
 !-----------------------------------------------------------------------
 
@@ -2024,7 +2006,6 @@
           , LBi, UBi, LBj, UBj                                     &
           , .not. LReadBioINI(2,ng)                                &   ! TRUE = initialize coral, seagass, macroalgae, sediment from start; FALSE = continue from previous run
 # if defined SEAGRASS || defined SEDIMENT_ECOSYS
-          , IstrR, IendR, JstrR, JendR                             &
           , GRID(ng)%om_r(IstrR:IendR,JstrR:JendR)                 &   ! grid size XI-direction (meters)
           , GRID(ng)%on_r(IstrR:IendR,JstrR:JendR)                 &   ! grid size ETA-direction (meters)
 # endif
