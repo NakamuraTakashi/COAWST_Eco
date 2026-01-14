@@ -2387,7 +2387,7 @@
 
 #   endif
 
-        CALL send_roms_his2reef_ecosys (ng, LBi, UBi, LBj, UBj, N(ng))
+        CALL send_roms_his2reef_ecosys (ng, LBi, UBi, LBj, UBj)
         write(*,*) 'yt_debug send_roms_his2reef_ecosys() finished'
 
 #  endif

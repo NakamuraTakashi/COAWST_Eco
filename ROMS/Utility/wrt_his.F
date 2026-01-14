@@ -4994,7 +4994,7 @@
 
 #if defined REEF_ECOSYS
 
-      CALL send_reef_ecosys2roms_his(ng,LBi, UBi, LBj, UBj, N(ng))
+      CALL send_reef_ecosys2roms_his(ng,LBi, UBi, LBj, UBj)
 !
 !  Write out time-dependent Biological 2D fields.
 !

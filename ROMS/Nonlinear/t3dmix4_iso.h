@@ -258,9 +258,6 @@
 #ifdef OFFLINE_BIOLOGY
       T_LOOP : DO ibt=1,NBT
         itrc=idbio(ibt)
-#elif defined OFFLINE_T_PASSIVE
-      T_LOOP : DO ibt=1,NPT
-        itrc=inert(ibt)
 #else
       T_LOOP : DO itrc=1,NT(ng)
 #endif

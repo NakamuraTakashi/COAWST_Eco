@@ -194,7 +194,7 @@
 #endif
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
 #ifdef REEF_ECOSYS
-          CALL allocate_reef_ecosys(ng, Ngrids, N(ng), LBi, UBi, LBj, UBj)
+          CALL allocate_reef_ecosys(ng, Ngrids, LBi, UBi, LBj, UBj)
 #endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
           IF (LuvSrc(ng).or.LwSrc(ng).or.ANY(LtracerSrc(:,ng))) THEN

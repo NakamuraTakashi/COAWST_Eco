@@ -86,8 +86,6 @@ CONTAINS
     , Warg           &   ! Aragonite saturation state
     )
 
-  !$acc routine seq
-
 !-----------------------------------------------------------------------
 !
     USE mod_reef_ecosys_param
@@ -769,14 +767,14 @@ CONTAINS
     , POP(:,:)          &   ! Particulate organic phosporius (POP: umol L-1 or nmol g(DW)-1 *solid)
     , PIC(:,iDead)      &   ! PIC (N_Csp,Npim): Particulate inorganic carbon (PIC: umolC L-1), coccolith (CaCO3)
     , Mn2               &   ! Mn2+ (umol L-1) 
-    , MnO2              &   ! MnO2 (umol L-1) *solid
+    , MnO2              &   ! MnO2 (nmol g-1) *solid
     , Fe2               &   ! Fe2+ (umol L-1) 
-    , FeS(:)            &   ! FeS (umol L-1) *solid
-    , FeS2(:)           &   ! FeS2 (umol L-1) *solid
-    , FeOOH             &   ! FeOOH (umol L-1) *solid
-    , FeOOH_PO4(:)      &   ! FeOOH=PO4 (umol L-1) *solid
+    , FeS(:)            &   ! FeS (nmol g(DW)-1) *solid
+    , FeS2(:)           &   ! FeS2 (nmol g(DW)-1) *solid
+    , FeOOH             &   ! FeOOH (nmol g(DW)-1) *solid
+    , FeOOH_PO4(:)      &   ! FeOOH=PO4 (nmol g(DW)-1) *solid
     , H2S(:)            &   ! H2S (umol L-1) 
-    , S0(:)             &   ! S (umol L-1) *solid
+    , S0(:)             &   ! S (nmol g(DW)-1) *solid
     , SO4(:)            &   ! SO42- (umol L-1) 
    ! input and output parameters
     , dDOx_dt           &   ! d[O2]/dt  (umol L-1 s-1) 
@@ -793,14 +791,14 @@ CONTAINS
     , dPOP_dt(:,:)      &   ! dPOP/dt (umol L-1 s-1) or (nmol g(DW)-1) *solid
     , dPIC_dt(:,iDead)  &   ! d CaCO3/dt (umol L-1 s-1) or (nmol g(DW)-1) *solid
     , dMn2_dt           &   ! d[Mn2+]/dt (umol L-1 s-1)
-    , dMnO2_dt          &   ! d[MnO2]/dt (umol L-1 s-1) *solid
+    , dMnO2_dt          &   ! d[MnO2]/dt (nmol g(DW)-1 s-1) *solid
     , dFe2_dt           &   ! d[Fe2+]/dt (umol L-1 s-1)
-    , dFeS_dt(:)        &   ! d[FeS]/dt (umol L-1 s-1) *solid
-    , dFeS2_dt(:)       &   ! d[FeS2]/dt (umol L-1 s-1) *solid
-    , dFeOOH_dt         &   ! d[FeOOH]/dt (umol L-1 s-1) *solid
-    , dFeOOH_PO4_dt(:)  &   ! d[FeOOH=O4]/dt (umol L-1 s-1) *solid
+    , dFeS_dt(:)        &   ! d[FeS]/dt (nmol g(DW)-1 s-1) *solid
+    , dFeS2_dt(:)       &   ! d[FeS2]/dt (nmol g(DW)-1 s-1) *solid
+    , dFeOOH_dt         &   ! d[FeOOH]/dt (nmol g(DW)-1 s-1) *solid
+    , dFeOOH_PO4_dt(:)  &   ! d[FeOOH=O4]/dt (nmol g(DW)-1 s-1) *solid
     , dH2S_dt(:)        &   ! d[H2S]/dt (umol L-1 s-1)
-    , dS0_dt(:)         &   ! d[S]/dt (umol L-1 s-1) *solid
+    , dS0_dt(:)         &   ! d[S]/dt (nmol g(DW)-1 s-1) *solid
     , dSO4_dt(:)        &   ! d[SO42-]/dt (umol L-1 s-1)
     ! output parameters
     , pH                &   ! pH (total scale)

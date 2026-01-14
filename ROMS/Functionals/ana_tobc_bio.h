@@ -87,7 +87,7 @@
 !
 !  Local variable declarations.
 !
-      integer :: i, ised, ip, j, k, isp, m
+      integer :: i, ised, itrc, j, k, isp, m
       real(r8) :: cff
 
 #include "set_bounds.h"
@@ -166,84 +166,6 @@
             CALL set_reef_ecosys_vertical_profile(                      &
      &             ng, -z_r(i,Jend+1,k), BOUNDARY(ng)%t_north(i,k,:) )
 
-          END DO
-        END DO
-      END IF
-
-!==========================================================================      
-#else
-! ---- Eastern boundary -----------------------------------------------
-      IF (ANY(LBC(ieast,isTvar(:),ng)%acquire).and.                     &
-     &    DOMAIN(ng)%Eastern_Edge(tile)) THEN
-        DO k=1,N(ng)
-          DO j=JstrT,JendT
-# if defined T_PASSIVE && defined ANA_TOBC_PASSIVE
-            DO ip=1,NPT
-              BOUNDARY(ng)%t_east(j,k,inert(ip))=0.0_r8
-            END DO
-# endif
-# if defined SEDIMENT && defined ANA_TOBC_SED
-            DO ised=1,NST
-              BOUNDARY(ng)%t_east(j,k,idsed(ised))=0.0_r8
-            END DO
-# endif
-          END DO
-        END DO
-      END IF
-
-! ---- Western boundary -----------------------------------------------
-      IF (ANY(LBC(iwest,isTvar(:),ng)%acquire).and.                     &
-     &    DOMAIN(ng)%Western_Edge(tile)) THEN
-        DO k=1,N(ng)
-          DO j=JstrT,JendT
-# if defined T_PASSIVE && defined ANA_TOBC_PASSIVE
-            DO ip=1,NPT
-              BOUNDARY(ng)%t_west(j,k,inert(ip))=0.0_r8
-            END DO
-# endif
-# if defined SEDIMENT && defined ANA_TOBC_SED
-            DO ised=1,NST
-              BOUNDARY(ng)%t_west(j,k,idsed(ised))=0.0_r8
-            END DO
-# endif
-          END DO
-        END DO
-      END IF
-
-! ---- Southern boundary -----------------------------------------------
-      IF (ANY(LBC(isouth,isTvar(:),ng)%acquire).and.                    &
-     &    DOMAIN(ng)%Southern_Edge(tile)) THEN
-        DO k=1,N(ng)
-          DO i=IstrT,IendT
-# if defined T_PASSIVE && defined ANA_TOBC_PASSIVE
-            DO ip=1,NPT
-              BOUNDARY(ng)%t_south(i,k,inert(ip))=0.0_r8
-            END DO
-# endif
-# if defined SEDIMENT && defined ANA_TOBC_SED
-            DO ised=1,NST
-              BOUNDARY(ng)%t_south(i,k,idsed(ised))=0.0_r8
-            END DO
-# endif
-          END DO
-        END DO
-      END IF
-
-! ---- Northern boundary -----------------------------------------------
-      IF (ANY(LBC(inorth,isTvar(:),ng)%acquire).and.                    &
-     &    DOMAIN(ng)%Northern_Edge(tile)) THEN
-        DO k=1,N(ng)
-          DO i=IstrT,IendT
-# if defined T_PASSIVE && defined ANA_TOBC_PASSIVE
-            DO ip=1,NPT
-              BOUNDARY(ng)%t_north(i,k,inert(ip))=0.0_r8
-            END DO
-# endif
-# if defined SEDIMENT && defined ANA_TOBC_SED
-            DO ised=1,NST
-              BOUNDARY(ng)%t_north(i,k,idsed(ised))=0.0_r8
-            END DO
-# endif
           END DO
         END DO
       END IF

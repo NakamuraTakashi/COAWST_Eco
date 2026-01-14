@@ -2062,12 +2062,6 @@
       is=LEN_TRIM(Coptions)+1
       Coptions(is:is+17)=' OFFLINE_BIOLOGY,'
 #endif
-#if defined OFFLINE_T_PASSIVE
-      IF (Master) WRITE (stdout,20) 'OFFLINE_T_PASSIVE',                &
-     &   'Offline run (use model fields from history files).'
-      is=LEN_TRIM(Coptions)+1
-      Coptions(is:is+17)=' OFFLINE_T_PASSIVE,'
-#endif
 #if defined ONE_TRACER_SOURCE
       IF (Master) WRITE (stdout,20) 'ONE_TRACER_SOURCE',                &
      &   'One value per tracer for all sources.'

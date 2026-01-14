@@ -243,7 +243,7 @@
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN:add
 #  if defined REEF_ECOSYS
 !     Send diagnostic fields from reef_ecosys to roms dia.
-      CALL send_reef_ecosys2roms_dia(ng,LBi, UBi, LBj, UBj, N(ng))
+      CALL send_reef_ecosys2roms_dia(ng,LBi, UBi, LBj, UBj)
 
       DO ivar=1,NDbio2d
         ifield=iDbio2(ivar)

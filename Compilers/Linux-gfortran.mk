@@ -88,10 +88,6 @@ ifdef USE_OpenMP
            FFLAGS += -fopenmp
 endif
 
-ifdef USE_OpenACC
-           FFLAGS += -fopenacc -foffload=-lgfortran -fopt-info-optimized-omp
-endif
-
 ifdef USE_DEBUG
            FFLAGS += -g -fbounds-check -fbacktrace
            FFLAGS += -finit-real=nan -ffpe-trap=invalid,zero,overflow

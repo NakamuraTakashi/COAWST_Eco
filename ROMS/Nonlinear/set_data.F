@@ -1528,13 +1528,7 @@
       SOURCES(ng)%Qsgd(1)=SOURCES(ng)%Qbar(Nsrc(ng))
       SOURCES(ng)%Qsgd(2:N(ng))=0.0_r8
       DO itrc=1,NT(ng)
-#  ifdef ONE_TRACER_SOURCE
-        SOURCES(ng)%Tsgd(itrc)=SOURCES(ng)%Tsrc(itrc)
-#  elif defined TWO_D_TRACER_SOURCE
-        SOURCES(ng)%Tsgd(itrc)=SOURCES(ng)%Tsrc(Nsrc(ng),itrc)
-#  else
         SOURCES(ng)%Tsgd(itrc)=SOURCES(ng)%Tsrc(Nsrc(ng),1,itrc)  !!!!!!!!!!!!!!!!!!!!!!!!!!Test case
-#  endif
       END DO
 # endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
@@ -2457,10 +2451,10 @@
 #  ifdef ANA_TOBC
         CALL ana_tobc (ng, tile, iNLM)
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
-#   if defined OFFLINE_BIOLOGY || defined OFFLINE_T_PASSIVE
+#   if defined OFFLINE_BIOLOGY
         CALL ana_tobc_bio (ng, tile, iNLM)
 #   endif
-#  elif defined ANA_TOBC_BIO && (!defined OFFLINE_BIOLOGY || !defined OFFLINE_T_PASSIVE)
+#  elif defined ANA_TOBC_BIO && !defined OFFLINE_BIOLOGY
 
         IF (DOMAIN(ng)%SouthWest_Test(tile)) THEN
            DO itrc=1,NAT

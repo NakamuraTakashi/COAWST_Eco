@@ -113,7 +113,7 @@
       character (len=40 ) :: KeyWord, text
       character (len=50 ) :: label
       character (len=256) :: fname, line
-      character (len=256), dimension(1000) :: Cval
+      character (len=256), dimension(200) :: Cval
 !
 !-----------------------------------------------------------------------
 !  Initialize.

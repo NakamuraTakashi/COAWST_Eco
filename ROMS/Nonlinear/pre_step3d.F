@@ -377,9 +377,6 @@
 #  ifdef OFFLINE_BIOLOGY
       T_LOOP1 :DO ibt=1,NBT
         itrc=idbio(ibt)
-#  elif defined OFFLINE_T_PASSIVE
-      T_LOOP1 :DO ibt=1,NPT
-        itrc=inert(ibt)
 #  else
       T_LOOP1 :DO itrc=1,NT(ng)
 #  endif
@@ -670,9 +667,6 @@
 #ifdef OFFLINE_BIOLOGY
         T_LOOP2: DO ibt=1,NBT
           itrc=idbio(ibt)
-#elif defined OFFLINE_T_PASSIVE
-        T_LOOP2: DO ibt=1,NPT
-          itrc=inert(ibt)
 #else
         T_LOOP2: DO itrc=1,NT(ng)
 #endif
@@ -1024,21 +1018,9 @@
                 DO k=1,N(ng)-1
                   FC(Isrc,k)=FC(Isrc,k)+0.5_r8*                         &
      &                       (SOURCES(ng)%Qsrc(is,k  )*                 &
-#   ifdef ONE_TRACER_SOURCE
-     &                        SOURCES(ng)%Tsrc(itrc)+                   &
-#   elif defined TWO_D_TRACER_SOURCE
-     &                        SOURCES(ng)%Tsrc(is,itrc)+                &
-#   else
      &                        SOURCES(ng)%Tsrc(is,k  ,itrc)+            &
-#   endif
      &                        SOURCES(ng)%Qsrc(is,k+1)*                 &
-#   ifdef ONE_TRACER_SOURCE
-     &                        SOURCES(ng)%Tsrc(itrc))
-#   elif defined TWO_D_TRACER_SOURCE
-     &                        SOURCES(ng)%Tsrc(is,itrc))
-#   else
      &                        SOURCES(ng)%Tsrc(is,k+1,itrc))
-#   endif
                 END DO
               END IF
             END DO
@@ -1079,9 +1061,6 @@
 #ifdef OFFLINE_BIOLOGY
         DO ibt=1,NBT
           itrc=idbio(ibt)
-#elif defined OFFLINE_T_PASSIVE
-        DO ibt=1,NPT
-          itrc=inert(ibt)
 #else
         DO itrc=1,NT(ng)
 #endif
@@ -1153,7 +1132,7 @@
         END DO
       END DO
 # endif /* !TS_FIXED */
-# if !defined OFFLINE
+# if !defined OFFLINE_BIOLOGY
 !
 !=======================================================================
 !  3D momentum equation in the XI-direction.
@@ -1377,9 +1356,6 @@
 #  ifdef OFFLINE_BIOLOGY
       DO ibt=1,NBT
         itrc=idbio(ibt)
-#  elif defined OFFLINE_T_PASSIVE
-      DO ibt=1,NPT
-        itrc=inert(ibt)
 #  else
       DO itrc=1,NT(ng)
 #  endif

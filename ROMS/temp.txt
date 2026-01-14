@@ -1,0 +1,216 @@
+! seemed to resolve issue by uncommenting
+                                                            ! step2d_LF_AM3.h 1062
+IF (zeta(i,j,knew).le.(Dcrit(ng)-h(i,j))) THEN
+  zeta(i,j,knew)=Dcrit(ng)-h(i,j)
+END IF
+
+
+
+
+
+
+Zt_avg1(i,j)=Zt_avg1(i,j)+cff1*zeta(i,j,krhs)               ! step2d_LF_AM3.h 824
+
+cff1=weight(1,iif(ng)-1,ng)                                 ! step2d_LF_AM3.h 819
+
+!  Weights for the time average of 2D fields.
+real(r8), allocatable :: weight(:,:,:)                      ! mod_scalars.F 778
+!    iif           Timestep counter for 2D primitive equations.
+integer, allocatable :: iif(:)                              ! mod_scalars.F 251
+
+! zeta free surface (time averaged ssh + time varying ssh)
+allocate ( OCEAN(ng) % zeta(LBi:UBi,LBj:UBj,3) )            ! mod_ocean.F 425
+
+                                                            ! forcing.F 167
+# ifdef SOLVE3D
+      IF (iic(ng).eq.ntstart(ng)) THEN
+        DO j=JstrR,JendR
+          DO i=IstrR,IendR
+            zeta(i,j,Kfrc)=zeta(i,j,Kfrc)+f_zeta(i,j)
+          END DO
+        END DO
+      ELSE
+        DO j=JstrR,JendR
+          DO i=IstrR,IendR
+            Zt_avg1(i,j)=Zt_avg1(i,j)+f_zeta(i,j)
+          END DO
+        END DO
+      END IF
+
+! adjoint linear free surface (???)
+!                                                            ! ad_forcing.F 228
+#  ifdef SOLVE3D
+      DO j=JstrR,JendR
+        DO i=IstrR,IendR
+          f_zeta(i,j)=f_zeta(i,j)+ad_Zt_avg1(i,j)
+        END DO
+      END DO
+#  else
+
+!                                                             ! ad_set_depth.F
+!
+!-----------------------------------------------------------------------
+!  Original formulation: Compute vertical depths (meters, negative) at
+!                        RHO- and W-points, and vertical grid
+!  thicknesses. Various stretching functions are possible.
+!
+!         z_w(x,y,s,t) = Zo_w + zeta(x,y,t) * [1.0 + Zo_w / h(x,y)]
+!
+!                 Zo_w = hc * [s(k) - C(k)] + C(k) * h(x,y)
+!
+!-----------------------------------------------------------------------
+!
+              ad_Zt_avg1(i,j)=ad_Zt_avg1(i,j)+(1.0_r8+z_r0*hinv)*ad_z_r(i,j,k)
+              ad_Zt_avg1(i,j)=ad_Zt_avg1(i,j)+(1.0_r8+z_w0*hinv)*ad_z_w(i,j,k)
+              ad_Zt_avg1(i,j)=ad_Zt_avg1(i,j)+ad_z_r(i,j,k)+adfac
+              ad_Zt_avg1(i,j)=ad_Zt_avg1(i,j)+ad_z_w(i,j,k)+adfac
+
+
+
+
+
+
+
+
+
+! maybe no impact???
+                                                            ! nesting.F
+!-----------------------------------------------------------------------
+!  Process free-surface.
+!-----------------------------------------------------------------------
+!
+      FREE_SURFACE : IF (LputFsur) THEN
+        DO m=1,Rcontact(cr)%Npoints
+          i=Rcontact(cr)%Irg(m)
+          j=Rcontact(cr)%Jrg(m)
+          IF (((IstrT.le.i).and.(i.le.IendT)).and.                      &
+     &        ((JstrT.le.j).and.(j.le.JendT))) THEN
+            my_value=Wold*(Rcontact(cr)%Lweight(1,m)*                   &
+     &                                  REFINED(cr)%zeta(1,m,told)+     &
+     &                     Rcontact(cr)%Lweight(2,m)*                   &
+     &                                  REFINED(cr)%zeta(2,m,told)+     &
+     &                     Rcontact(cr)%Lweight(3,m)*                   &
+     &                                  REFINED(cr)%zeta(3,m,told)+     &
+     &                     Rcontact(cr)%Lweight(4,m)*                   &
+     &                                  REFINED(cr)%zeta(4,m,told))+    &
+     &               Wnew*(Rcontact(cr)%Lweight(1,m)*                   &
+     &                                  REFINED(cr)%zeta(1,m,tnew)+     &
+     &                     Rcontact(cr)%Lweight(2,m)*                   &
+     &                                  REFINED(cr)%zeta(2,m,tnew)+     &
+     &                     Rcontact(cr)%Lweight(3,m)*                   &
+     &                                  REFINED(cr)%zeta(3,m,tnew)+     &
+     &                     Rcontact(cr)%Lweight(4,m)*                   &
+     &                                  REFINED(cr)%zeta(4,m,tnew))
+# ifdef MASKING
+            my_value=my_value*GRID(ng)%rmask(i,j)
+# endif
+# ifdef WET_DRY
+            IF (my_value.le.(Dcrit(ng)-GRID(ng)%h(i,j))) THEN
+              my_value=Dcrit(ng)-GRID(ng)%h(i,j)
+            END IF
+# endif
+            OCEAN(ng)%zeta(i,j,1)=my_value
+            OCEAN(ng)%zeta(i,j,2)=my_value
+            OCEAN(ng)%zeta(i,j,3)=my_value
+# ifdef SOLVE3D
+            COUPLING(ng)%Zt_avg1(i,j)=my_value
+# endif
+
+
+
+
+
+
+
+
+
+
+
+
+z_w(i,j,k)=Zt_avg1(i,j)+(Zt_avg1(i,j)+hwater)*cff2_w        ! set_depth.F 299
+! before problem occurs:
+! Zt_avg1(i,j) =  -0.55421279756268260      hwater =    1.1420484137571401      cff2_w =  -0.87803311886787183     
+! Zt_avg1(i,j) =  -0.55421279756268260      hwater =    1.1420484137571401      cff2_w =  -0.75366709812636257     
+! Zt_avg1(i,j) =  -0.55421279756268260      hwater =    1.1420484137571401      cff2_w =  -0.62738794875085591     
+! Zt_avg1(i,j) =  -0.55421279756268260      hwater =    1.1420484137571401      cff2_w =  -0.49999999999999994     
+! Zt_avg1(i,j) =  -0.55421279756268260      hwater =    1.1420484137571401      cff2_w =  -0.37261205124914398     
+! Zt_avg1(i,j) =  -0.55421279756268260      hwater =    1.1420484137571401      cff2_w =  -0.24633290187363732     
+! Zt_avg1(i,j) =  -0.55421279756268260      hwater =    1.1420484137571401      cff2_w =  -0.12196688113212797     
+! Zt_avg1(i,j) =  -0.55421279756268260      hwater =    1.1420484137571401      cff2_w =   0.0000000000000000      
+! = -0.55 + (-0.55 + 1.14)*-0.87
+! = -0.55 + (0.59)*-0.87
+! = -0.55 + -0.51
+! = -1.06
+
+! when problem occurs:
+! Zt_avg1(i,j) =   -1.3207959335813426      hwater =    1.1420484137571401      cff2_w =  -0.87803311886787183     
+! Zt_avg1(i,j) =   -1.3207959335813426      hwater =    1.1420484137571401      cff2_w =  -0.75366709812636257     
+! Zt_avg1(i,j) =   -1.3207959335813426      hwater =    1.1420484137571401      cff2_w =  -0.62738794875085591     
+! Zt_avg1(i,j) =   -1.3207959335813426      hwater =    1.1420484137571401      cff2_w =  -0.49999999999999994     
+! Zt_avg1(i,j) =   -1.3207959335813426      hwater =    1.1420484137571401      cff2_w =  -0.37261205124914398     
+! Zt_avg1(i,j) =   -1.3207959335813426      hwater =    1.1420484137571401      cff2_w =  -0.24633290187363732     
+! Zt_avg1(i,j) =   -1.3207959335813426      hwater =    1.1420484137571401      cff2_w =  -0.12196688113212797     
+! Zt_avg1(i,j) =   -1.3207959335813426      hwater =    1.1420484137571401      cff2_w =   0.0000000000000000     
+! = -1.32 + (-1.32 + 1.14)*-0.87
+! = -1.32 + (-0.18)*-0.87
+! = -1.32 + 0.16
+! = -1.16
+
+! problem occurs when abs(Zt_avg1) > abs(hwater)
+
+hwater=h(i,j)     ! set_depth.F 186
+! h is bathymetry???
+
+
+
+
+Hz(i,j,k)=z_w(i,j,k)-z_w(i,j,k-1)                           ! set_depth.F 314
+! layer thickness = shallower layer depth - deeper layer depth
+! ex. 2 = -5 - (-7)
+! Hz is layer thickness
+! z_w is depth of each layer (I think)
+! down is negative
+! k = 1 is the deepest layer, k = 8 is the shallowest layer
+!
+! problem is that Hz becomes negative at i = 17, j = 163
+!
+! before problem occurs:
+!  yt_debug: set_depth.F 299 z_w(i,j,k) = -1.0703519370315193       i =           17 j =          163 k =            1 Zt_avg1(i,j) =  -0.55421279756268260      hwater =    1.1420484137571401      cff2_w =  -0.87803311886787183     
+!  yt_debug: set_depth.F 299 z_w(i,j,k) = -0.99724516059528157      i =           17 j =          163 k =            2 Zt_avg1(i,j) =  -0.55421279756268260      hwater =    1.1420484137571401      cff2_w =  -0.75366709812636257     
+!  yt_debug: set_depth.F 299 z_w(i,j,k) = -0.92301377900961867      i =           17 j =          163 k =            3 Zt_avg1(i,j) =  -0.55421279756268260      hwater =    1.1420484137571401      cff2_w =  -0.62738794875085591     
+!  yt_debug: set_depth.F 299 z_w(i,j,k) = -0.84813060565991127      i =           17 j =          163 k =            4 Zt_avg1(i,j) =  -0.55421279756268260      hwater =    1.1420484137571401      cff2_w =  -0.49999999999999994     
+!  yt_debug: set_depth.F 299 z_w(i,j,k) = -0.77324743231020387      i =           17 j =          163 k =            5 Zt_avg1(i,j) =  -0.55421279756268260      hwater =    1.1420484137571401      cff2_w =  -0.37261205124914398     
+!  yt_debug: set_depth.F 299 z_w(i,j,k) = -0.69901605072454098      i =           17 j =          163 k =            6 Zt_avg1(i,j) =  -0.55421279756268260      hwater =    1.1420484137571401      cff2_w =  -0.24633290187363732     
+!  yt_debug: set_depth.F 299 z_w(i,j,k) = -0.62590927428830323      i =           17 j =          163 k =            7 Zt_avg1(i,j) =  -0.55421279756268260      hwater =    1.1420484137571401      cff2_w =  -0.12196688113212797     
+!  yt_debug: set_depth.F 299 z_w(i,j,k) = -0.55421279756268260      i =           17 j =          163 k =            8 Zt_avg1(i,j) =  -0.55421279756268260      hwater =    1.1420484137571401      cff2_w =    0.0000000000000000      
+! 0.08 = -0.99 - (-1.07)
+
+! when problem occurs:
+!  yt_debug: set_depth.F 299 z_w(i,j,k) =  -1.1638496912602012      i =           17 j =          163 k =            1 Zt_avg1(i,j) =   -1.3207959335813426      hwater =    1.1420484137571401      cff2_w =  -0.87803311886787183     
+!  yt_debug: set_depth.F 299 z_w(i,j,k) =  -1.1860798090181515      i =           17 j =          163 k =            2 Zt_avg1(i,j) =   -1.3207959335813426      hwater =    1.1420484137571401      cff2_w =  -0.75366709812636257     
+!  yt_debug: set_depth.F 299 z_w(i,j,k) =  -1.2086518937745332      i =           17 j =          163 k =            3 Zt_avg1(i,j) =   -1.3207959335813426      hwater =    1.1420484137571401      cff2_w =  -0.62738794875085591     
+!  yt_debug: set_depth.F 299 z_w(i,j,k) =  -1.2314221736692414      i =           17 j =          163 k =            4 Zt_avg1(i,j) =   -1.3207959335813426      hwater =    1.1420484137571401      cff2_w =  -0.49999999999999994     
+!  yt_debug: set_depth.F 299 z_w(i,j,k) =  -1.2541924535639495      i =           17 j =          163 k =            5 Zt_avg1(i,j) =   -1.3207959335813426      hwater =    1.1420484137571401      cff2_w =  -0.37261205124914398     
+!  yt_debug: set_depth.F 299 z_w(i,j,k) =  -1.2767645383203312      i =           17 j =          163 k =            6 Zt_avg1(i,j) =   -1.3207959335813426      hwater =    1.1420484137571401      cff2_w =  -0.24633290187363732     
+!  yt_debug: set_depth.F 299 z_w(i,j,k) =  -1.2989946560782815      i =           17 j =          163 k =            7 Zt_avg1(i,j) =   -1.3207959335813426      hwater =    1.1420484137571401      cff2_w =  -0.12196688113212797     
+!  yt_debug: set_depth.F 299 z_w(i,j,k) =  -1.3207959335813426      i =           17 j =          163 k =            8 Zt_avg1(i,j) =   -1.3207959335813426      hwater =    1.1420484137571401      cff2_w =    0.0000000000000000     
+! -0.02 = -1.18 - (-1.16)
+
+!  yt_debug: set_depth.F 299 z_w(i,j,k) =  -2.0412576783670877      i =           20 j =          163 k =            1 Zt_avg1(i,j) =   0.28972712465680428      hwater =    2.3560448933541598      cff2_w =  -0.88102254735322116     
+!  yt_debug: set_depth.F 299 z_w(i,j,k) =  -1.7138667437803747      i =           20 j =          163 k =            2 Zt_avg1(i,j) =   0.28972712465680428      hwater =    2.3560448933541598      cff2_w =  -0.75728137375322258     
+!  yt_debug: set_depth.F 299 z_w(i,j,k) =  -1.3764253157723290      i =           20 j =          163 k =            3 Zt_avg1(i,j) =   0.28972712465680428      hwater =    2.3560448933541598      cff2_w =  -0.62974150043423305     
+!  yt_debug: set_depth.F 299 z_w(i,j,k) =  -1.0331588843486779      i =           20 j =          163 k =            4 Zt_avg1(i,j) =   0.28972712465680428      hwater =    2.3560448933541598      cff2_w =  -0.50000000000000000     
+!  yt_debug: set_depth.F 299 z_w(i,j,k) = -0.68989245292502688      i =           20 j =          163 k =            5 Zt_avg1(i,j) =   0.28972712465680428      hwater =    2.3560448933541598      cff2_w =  -0.37025849956576701     
+!  yt_debug: set_depth.F 299 z_w(i,j,k) = -0.35245102491698110      i =           20 j =          163 k =            6 Zt_avg1(i,j) =   0.28972712465680428      hwater =    2.3560448933541598      cff2_w =  -0.24271862624677745     
+!  yt_debug: set_depth.F 299 z_w(i,j,k) =  -2.5060090330267903E-002 i =           20 j =          163 k =            7 Zt_avg1(i,j) =   0.28972712465680428      hwater =    2.3560448933541598      cff2_w =  -0.11897745264677892     
+!  yt_debug: set_depth.F 299 z_w(i,j,k) =  0.28972712465680428      i =           20 j =          163 k =            8 Zt_avg1(i,j) =   0.28972712465680428      hwater =    2.3560448933541598      cff2_w =    0.0000000000000000     
+
+!  yt_debug: set_depth.F 299 z_w(i,j,k) =  -32.895403287299310      i =           35 j =          163 k =            1 Zt_avg1(i,j) =   0.22173288319479351      hwater =    35.775712411499022      cff2_w =  -0.91998573508147585     
+!  yt_debug: set_depth.F 299 z_w(i,j,k) =  -28.734201930552342      i =           35 j =          163 k =            2 Zt_avg1(i,j) =   0.22173288319479351      hwater =    35.775712411499022      cff2_w =  -0.80438860526625666     
+!  yt_debug: set_depth.F 299 z_w(i,j,k) =  -23.551587898374315      i =           35 j =          163 k =            3 Zt_avg1(i,j) =   0.22173288319479351      hwater =    35.775712411499022      cff2_w =  -0.66041688755822348     
+!  yt_debug: set_depth.F 299 z_w(i,j,k) =  -17.776989764152116      i =           35 j =          163 k =            4 Zt_avg1(i,j) =   0.22173288319479351      hwater =    35.775712411499022      cff2_w =  -0.50000000000000000     
+!  yt_debug: set_depth.F 299 z_w(i,j,k) =  -12.002391629929914      i =           35 j =          163 k =            5 Zt_avg1(i,j) =   0.22173288319479351      hwater =    35.775712411499022      cff2_w =  -0.33958311244177641     
+!  yt_debug: set_depth.F 299 z_w(i,j,k) =  -6.8197775977518829      i =           35 j =          163 k =            6 Zt_avg1(i,j) =   0.22173288319479351      hwater =    35.775712411499022      cff2_w =  -0.19561139473374312     
+!  yt_debug: set_depth.F 299 z_w(i,j,k) =  -2.6585762410049152      i =           35 j =          163 k =            7 Zt_avg1(i,j) =   0.22173288319479351      hwater =    35.775712411499022      cff2_w =   -8.0014264918524064E-002
+!  yt_debug: set_depth.F 299 z_w(i,j,k) =  0.22173288319479351      i =           35 j =          163 k =            8 Zt_avg1(i,j) =   0.22173288319479351      hwater =    35.775712411499022      cff2_w =    0.0000000000000000     
+

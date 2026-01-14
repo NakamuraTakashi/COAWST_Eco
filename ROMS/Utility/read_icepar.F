@@ -35,7 +35,7 @@
 
       character (len=40) :: KeyWord
       character (len=256) :: line
-      character (len=256), dimension(1000) :: Cval
+      character (len=256), dimension(200) :: Cval
 
 !
 !-----------------------------------------------------------------------

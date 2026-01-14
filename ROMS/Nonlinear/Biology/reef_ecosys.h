@@ -420,9 +420,8 @@
 #include "set_bounds.h"
 
 !-----------------------------------------------------------------------
-    !$acc kernels
-    !$acc loop independent collapse(2)
       DO j=Jstr,Jend
+
         DO i=Istr,Iend
 ! Set initial zero 
           dtrc_dt(:,:)=0.0_r8
@@ -892,7 +891,6 @@
 #endif
         END DO
       END DO
-    !$acc end kernels
 !-----------------------------------------------------------------------
 
       RETURN

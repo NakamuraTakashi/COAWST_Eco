@@ -97,10 +97,6 @@ ifdef USE_OpenMP
            FFLAGS += -mp
 endif
 
-ifdef USE_OpenACC
-           FFLAGS += -acc -gpu=managed -Minfo=accel
-endif
-
 # According to the PGI manual, the -u -Bstatic flags initializes
 # the symbol table with -Bstatic, which is undefined for the linker.
 # An undefined symbol triggers loading of the first member of an
