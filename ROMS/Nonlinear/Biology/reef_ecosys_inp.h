@@ -73,7 +73,7 @@
 
       character (len=40 ) :: KeyWord
       character (len=256) :: line
-      character (len=256), dimension(200) :: Cval
+      character (len=256), dimension(1000) :: Cval
 
       ! yt_debug = 0
 !
@@ -279,9 +279,12 @@
             CASE ('FeS2_sed')
               Npts=load_r(Nval, Rval, 1, Rsed1)
               FeS2_sed = Rsed1(1)
-            CASE ('OrgC_sed')
+            CASE ('LPOC_sed')
               Npts=load_r(Nval, Rval, 1, Rsed1)
-              OrgC_sed = Rsed1(1)
+              LPOC_sed = Rsed1(1)
+            CASE ('RPOC_sed')
+              Npts=load_r(Nval, Rval, 1, Rsed1)
+              RPOC_sed = Rsed1(1)
             CASE ('rCaCO3_sed')
               Npts=load_r(Nval, Rval, 1, Rsed1)
               rCaCO3_sed = Rsed1(1)
@@ -878,8 +881,10 @@
      &            'FeOOH in sediments [nmol/g(DW)].'
             WRITE (out,80) FeS2_sed, 'FeS2_sed',                        &
      &            'FeS2 in sediments [nmol/g(DW)].'
-            WRITE (out,80) OrgC_sed, 'OrgC_sed',                        &
-     &            'OrgC in sediments [nmol/g(DW)].'
+            WRITE (out,80) LPOC_sed, 'LPOC_sed',                        &
+     &            'LPOC in sediments [nmol/g(DW)].'
+            WRITE (out,80) RPOC_sed, 'RPOC_sed',                        &
+     &            'RPOC in sediments [nmol/g(DW)].'
             WRITE (out,80) rCaCO3_sed, 'rCaCO3_sed',                    &
      &            'Fraction of CaCO3 in sediments [g(CaCO3)/g(DW)].'
 #endif

@@ -11,7 +11,7 @@
 !!! **                                                                                              **
 !!! ** -------------------------------------------------------------------------------------------- **
 !!! **                                                                                              **
-!!! **    This is the updated seagrass module devloped by Yuta A. Takagi (2023-2025)                **
+!!! **    This is the updated seagrass module devloped by Yuta A. Takagi (2023-2026)                **
 !!! **    Use CPP flag SEAGRASS in your header file to enable                                       **
 !!! **                                                                                              **
 !!! **************************************************************************************************

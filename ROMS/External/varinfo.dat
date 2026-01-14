@@ -10195,6 +10195,201 @@
   1.0d0
 
 !----------------------------------------------------------
+! Bivalve HisBio3d parameters
+
+'bivalve_dens'                                ! Input/Output
+  'bivalve density'
+  'Indiv. m-3'                                ! [Indiv. m-3]
+  'bivalve_dens, scalar, series'
+  'ocean_time'
+  'iHbio3(iBvDens(j))'
+  'r3dvar'
+  1.0d0
+
+'bivalve_QCe'                                ! Input/Output
+  'bivalve QCe'
+  'mmolC indiv.-1'                           ! [mmolC indiv.-1]
+  'bivalve_QCe, scalar, series'
+  'ocean_time'
+  'iHbio3(iBvQCe(i,j))'
+  'r3dvar'
+  1.0d0
+
+'bivalve_QCv'                                ! Input/Output
+  'bivalve QCv'
+  'mmolC indiv.-1'                           ! [mmolC indiv.-1]
+  'bivalve_QCv, scalar, series'
+  'ocean_time'
+  'iHbio3(iBvQCv(i,j))'
+  'r3dvar'
+  1.0d0
+
+'bivalve_QCr'                                ! Input/Output
+  'bivalve QCr'
+  'mmolC indiv.-1'                           ! [mmolC indiv.-1]
+  'bivalve_QCr, scalar, series'
+  'ocean_time'
+  'iHbio3(iBvQCr(i,j))'
+  'r3dvar'
+  1.0d0
+
+'bivalve_QCh'                                ! Input/Output
+  'bivalve QCh'
+  'mmolC indiv.-1'                           ! [mmolC indiv.-1]
+  'bivalve_QCh, scalar, series'
+  'ocean_time'
+  'iHbio3(iBvQCh(i,j))'
+  'r3dvar'
+  1.0d0
+
+'bivalve_QNe'                                ! Input/Output
+  'bivalve QNe'
+  'mmolN indiv.-1'                           ! [mmolN indiv.-1]
+  'bivalve_QNe, scalar, series'
+  'ocean_time'
+  'iHbio3(iBvQNe(i,j))'
+  'r3dvar'
+  1.0d0
+
+'bivalve_QNv'                                ! Input/Output
+  'bivalve QNv'
+  'mmolN indiv.-1'                           ! [mmolN indiv.-1]
+  'bivalve_QNv, scalar, series'
+  'ocean_time'
+  'iHbio3(iBvQNv(i,j))'
+  'r3dvar'
+  1.0d0
+
+'bivalve_QNr'                                ! Input/Output
+  'bivalve QNr'
+  'mmolN indiv.-1'                           ! [mmolN indiv.-1]
+  'bivalve_QNr, scalar, series'
+  'ocean_time'
+  'iHbio3(iBvQNr(i,j))'
+  'r3dvar'
+  1.0d0
+
+'bivalve_QNh'                                ! Input/Output
+  'bivalve QNh'
+  'mmolN indiv.-1'                           ! [mmolN indiv.-1]
+  'bivalve_QNh, scalar, series'
+  'ocean_time'
+  'iHbio3(iBvQNh(i,j))'
+  'r3dvar'
+  1.0d0
+
+'bivalve_QPe'                                ! Input/Output
+  'bivalve QPe'
+  'mmolP indiv.-1'                           ! [mmolP indiv.-1]
+  'bivalve_QPe, scalar, series'
+  'ocean_time'
+  'iHbio3(iBvQPe(i,j))'
+  'r3dvar'
+  1.0d0
+
+'bivalve_QPv'                                ! Input/Output
+  'bivalve QPv'
+  'mmolP indiv.-1'                           ! [mmolP indiv.-1]
+  'bivalve_QPv, scalar, series'
+  'ocean_time'
+  'iHbio3(iBvQPv(i,j))'
+  'r3dvar'
+  1.0d0
+
+'bivalve_QPr'                                ! Input/Output
+  'bivalve QPr'
+  'mmolP indiv.-1'                           ! [mmolP indiv.-1]
+  'bivalve_QPr, scalar, series'
+  'ocean_time'
+  'iHbio3(iBvQPr(i,j))'
+  'r3dvar'
+  1.0d0
+
+'bivalve_QPh'                                ! Input/Output
+  'bivalve QPh'
+  'mmolP indiv.-1'                           ! [mmolP indiv.-1]
+  'bivalve_QPh, scalar, series'
+  'ocean_time'
+  'iHbio3(iBvQPh(i,j))'
+  'r3dvar'
+  1.0d0
+
+'bivalve_CaCO3'                                ! Input/Output
+  'bivalve CaCO3'
+  'mmolC indiv.-1'                           ! [mmolC indiv.-1]
+  'bivalve_CaCO3, scalar, series'
+  'ocean_time'
+  'iHbio3(iBvCaCO3(i,j))'
+  'r3dvar'
+  1.0d0
+
+!----------------------------------------------------------
+! Bivalve DiaBio3d parameters
+
+'bivalve_R'                                             ! Input/Output
+  'bivalve respiration rate'
+  'ummolC s-1 ind.-1'                                 ! [ummolC s-1 ind.-1]
+  'bivalve_R, scalar, series'
+  'ocean_time'
+  'iDbio3(iBvR(j))'
+  'r3dvar'
+  1.0d0
+
+'bivalve_G'                                             ! Input/Output
+  'bivalve calcification rate'
+  'ummolC s-1 ind.-1'                                 ! [ummolC s-1 ind.-1]
+  'bivalve_G, scalar, series'
+  'ocean_time'
+  'iDbio3(iBvG(j))'
+  'r3dvar'
+  1.0d0
+
+'bivalve_V'                                             ! Input/Output
+  'bivalve flesh (meat) volume'
+  'cm3'                                                 ! [cm3]
+  'bivalve_V, scalar, series'
+  'ocean_time'
+  'iDbio3(iBvV(j))'
+  'r3dvar'
+  1.0d0
+
+'bivalve_L'                                             ! Input/Output
+  'bivalve shell length'
+  'cm'                                                 ! [cm]
+  'bivalve_L, scalar, series'
+  'ocean_time'
+  'iDbio3(iBvL(j))'
+  'r3dvar'
+  1.0d0
+
+'bivalve_Wd'                                             ! Input/Output
+  'bivalve dry flesh (meat) weight'
+  'g(Dw)'                                                 ! [g(Dw)]
+  'bivalve_Wd, scalar, series'
+  'ocean_time'
+  'iDbio3(iBvWd(j))'
+  'r3dvar'
+  1.0d0
+
+'bivalve_Ww'                                             ! Input/Output
+  'bivalve wet flesh (meat) weight'
+  'g(Ww)'                                                 ! [g(Ww)]
+  'bivalve_Ww, scalar, series'
+  'ocean_time'
+  'iDbio3(iBvWw(j))'
+  'r3dvar'
+  1.0d0
+
+'bivalve_Wt'                                             ! Input/Output
+  'bivalve Total (shell + flesh) weight'
+  'g(Ww)'                                                 ! [g(Ww)]
+  'bivalve_Wt, scalar, series'
+  'ocean_time'
+  'iDbio3(iBvWt(j))'
+  'r3dvar'
+  1.0d0
+
+!----------------------------------------------------------
 ! Macroalgae DiaBio2d parameters
 
 'algal_Pg'                                             ! Input/Output

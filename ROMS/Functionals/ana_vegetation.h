@@ -160,7 +160,7 @@
       DO iveg=1,Naq  !! Aquaculture drag
         DO j=JstrT,JendT
           DO i=IstrT,IendT
-            plant(i,j,iveg,pdens)=dens_aqua(iveg,i,j)  !Density
+            plant(i,j,iveg,pdens)=dens_aqua(iveg,i,j)*F_AQUA_DENS(iveg,ng) !Density
 !            plant(i,j,iveg,pdiam)=diam_aqua      !Diameter
             plant(i,j,iveg,pdiam)=diam_aqua(iveg)! 0.1d0 !diam_aqua(iveg)      !Diameter
             plant(i,j,iveg,phght)=hght_aqua(iveg)!10.0d0 !hght_aqua(iveg)      !Height

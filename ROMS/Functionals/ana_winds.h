@@ -129,6 +129,20 @@
           Vwind(i,j)=v_wind
         END DO
       END DO
+#elif defined OFFLINE
+      DO j=JstrT,JendT
+        DO i=IstrT,IendT
+          Uwind(i,j)=0.0_r8
+          Vwind(i,j)=0.0_r8
+        END DO
+      END DO
+#elif defined ANA_ATM_CONST
+      DO j=JstrT,JendT
+        DO i=IstrT,IendT
+          Uwind(i,j)=0.0_r8
+          Vwind(i,j)=0.0_r8
+        END DO
+      END DO
 #else
       ana_winds.h: no values provided for Uwind and Vwind.
 #endif
