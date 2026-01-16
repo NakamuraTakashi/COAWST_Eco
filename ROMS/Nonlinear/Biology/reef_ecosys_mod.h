@@ -1630,6 +1630,11 @@
 #endif
 #ifdef SEAGRASS
           DO m=1,Nsg
+! # ifdef SEAGRASS_DEBUG_MODE
+!             if(SGRASS(ng)%TotSgCBm   (m,i,j) /= SGRASS(ng)%TotSgCBm   (m,i,j)) then ! check for nan
+!               write(*,*) 'yt_debug: TotSgCBm (m,i,j) = ', SGRASS(ng)%TotSgCBm   (m,i,j), 'm = ', m, 'i = ', i, 'j = ', j
+!             endif
+! # endif
             OCEAN(ng)%HisBio2d(i,j, iSgSgCBm(1,m):iSgSgCBm(N_Csp,m) ) = SGRASS(ng)%SgCBmF(:,m,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgSgNBm(1,m):iSgSgNBm(N_Nsp,m) ) = SGRASS(ng)%SgNBmF(:,m,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgSgPBm(1,m):iSgSgPBm(N_Psp,m) ) = SGRASS(ng)%SgPBmF(:,m,i,j)
@@ -1987,7 +1992,7 @@
 
       CALL initialize_reef_ecosys(ng, N(ng)                        &
           , GRID(ng)%Hz                                            &
-          , LBi, UBi, LBj, UBj                                     &
+          , IstrR, IendR, JstrR, JendR                                     &
           , .not. LReadBioINI(2,ng)                                &   ! TRUE = initialize coral, seagass, macroalgae, sediment from start; FALSE = continue from previous run
 # if defined SEAGRASS || defined SEDIMENT_ECOSYS
           , GRID(ng)%om_r(IstrR:IendR,JstrR:JendR)                 &   ! grid size XI-direction (meters)

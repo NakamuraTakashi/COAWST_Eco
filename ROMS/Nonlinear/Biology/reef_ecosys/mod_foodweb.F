@@ -202,6 +202,8 @@ CONTAINS
     real(8), parameter :: k_Rp(4) = [ 3.0d-7,   5.0d-7,   1.0d-7,   1.0d-7   ]    ! (s-1)    (!!!Tuning parameters!!!)
 !  Temperature coefficient for PhyC respiration rate (0.03d0 d-1; Kawamiya et al., 1995)
     real(8), parameter :: b_Rp(4) = [ 0.0519d0, 0.0519d0, 0.0519d0, 0.0519d0 ] ! (degC-1)
+!  Half saturation constant for michaelis-menten dependence on DO concentration in phytoplankton respiration
+    real(8), parameter :: halfsat_Rp = 10.0d0      ! (µmol L-1)       arbitrary low value
 
 !  Mortality rate at 0 oC (0.00562d0 umol-1 d-1; 0.0585L/umolN/day? 0.0088; Kishi et al., 2001)0.0066     
     real(8), parameter :: k_Mp(4) = [ 1.0d-7,   5.0d-7,   6.5d-8,   6.5d-8   ] ! (L umol-1 s-1)
@@ -220,6 +222,7 @@ CONTAINS
 
     real(8), parameter :: k_Rz(1) = [ 6.0d-8    ]  ! (s-1)            zooplankton respiration rate at 0  oC  																					!!!(Tuning) Check
     real(8), parameter :: b_Rz(1) = [ 0.0693d0  ]  ! (degC-1)         Temperature coefficient for ZooC respiration rate (Kawamiya et al., 1995)
+    real(8), parameter :: halfsat_Rz = 10.0d0      ! (µmol L-1)       arbitrary low value
     real(8), parameter :: k_Mz(1) = [ 5.0d-8    ]  ! (L umol-1 s-1)   zooplankton mortality rate at 0 oC 3.0d0/86400.0d0(0.0088d0 umol-1 d-1; Kawamiya et al., 1995)
     real(8), parameter :: b_Mz(1) = [ 0.0693d0  ]  ! (degC-1)         Temperature coefficient for ZooC mortality (Kawamiya et al., 1995)
     real(8), parameter :: rLPOMzoo = 0.42d0  ! (Labile POM)/(Total POM) of zooplankton tissue (no dim.) 
@@ -227,11 +230,14 @@ CONTAINS
 !------- Microbial loop parameters  -------
 !                                            from     LDOM      RDOM
     real(8), parameter :: k_Gdoc2z(2,1) = reshape( [ 1.0d-8,    0.0d0    ], [2,1] ) ! to Gzoo ! (s-1)          Maximum grazing rate of DOC by ZooC at 0 oC (0.3d0 d-1; Kawamiya et al., 1995)
+    ! real(8), parameter :: k_Gdoc2z(2,1) = reshape( [ 0.0d0 ,    0.0d0    ], [2,1] ) ! to Gzoo ! (s-1)          Maximum grazing rate of DOC by ZooC at 0 oC  yt_debug just for testing
 !                                            from     LDOM      RDOM
     real(8), parameter :: b_Gdoc2z(2,1) = reshape( [ 0.0693d0,  0.0693d0 ], [2,1] ) ! to Gzoo ! (degC-1)       Temperature coefficient of DOC grazing by ZooC (Kawamiya et al., 1995)
 
 !                                            from     LPOM      RPOM      CPOM
-    real(8), parameter :: k_Gpoc2z(3,1) = reshape( [ 1.0d-7,   1.0d-7,    1.0d-9   ], [3,1] ) ! to Gzoo ! (s-1)          Maximum grazing rate of POC by ZooC at 0 oC (0.3d0 d-1; Kawamiya et al., 1995)
+    ! real(8), parameter :: k_Gpoc2z(3,1) = reshape( [ 1.0d-7,   1.0d-7,    1.0d-9   ], [3,1] ) ! to Gzoo ! (s-1)          Maximum grazing rate of POC by ZooC at 0 oC (0.3d0 d-1; Kawamiya et al., 1995)
+    real(8), parameter :: k_Gpoc2z(3,1) = reshape( [ 1.0d-7,   0.0d0,    1.0d-9   ], [3,1] ) ! to Gzoo ! (s-1)          Maximum grazing rate of POC by ZooC at 0 oC (0.3d0 d-1; Kawamiya et al., 1995)
+    ! real(8), parameter :: k_Gpoc2z(3,1) = reshape( [ 0.0d0 ,   0.0d0 ,    1.0d-9   ], [3,1] ) ! to Gzoo ! (s-1)          Maximum grazing rate of POC by ZooC at 0 oC  yt_debug just for testing
 !                                            from     LPOM      RPOM      CPOM
     real(8), parameter :: b_Gpoc2z(3,1) = reshape( [ 0.0693d0, 0.0693d0,  0.0693d0 ], [3,1] ) ! to Gzoo ! (degC-1)       Temperature coefficient of DOC grazing by ZooC (Kawamiya et al., 1995)
 !                                            from     LDOM      RDOM
@@ -557,7 +563,8 @@ CONTAINS
 
 !----- Respiration rate (umolC L-1 s-1) -----------------
 
-      Rp = k_Rp(k) * exp(b_Rp(k)*Tmp) * cPhyC
+      ! Rp = k_Rp(k) * exp(b_Rp(k)*Tmp) * cPhyC
+      Rp = k_Rp(k) * exp(b_Rp(k)*Tmp) * cPhyC * (DOx / (halfsat_Rp + DOx))  ! yt_edit: added michaelis-menten term for DO dependence
 
 !     === Mass balance ===
 
@@ -650,7 +657,7 @@ CONTAINS
 
         cf1 =  MIN( DOC(iCt,m), DON(iNt,m)/rNCz(k) , DOP(iPt,m)/rPCz(k) )
         cf1 =  MAX( cf1,0.0d0 )  !!! Error handling
-        Gdoc2z = k_Gdoc2z(m,k) * exp(b_Gdoc2z(m,k)*Tmp) * cf1 * cZooC ! yt_edit consider making this michaelis-menten dependent on ZooC to not exceed exceed 100% uptake
+        Gdoc2z = k_Gdoc2z(m,k) * exp(b_Gdoc2z(m,k)*Tmp) * cf1 * cZooC
         Gdoc2z = MAX( Gdoc2z, 0.0d0 )  !!! Error handling
 
 !     === Mass balance ===
@@ -694,7 +701,8 @@ CONTAINS
   
 !----- Respiration rate (umolC L-1 s-1) -----------------
 
-      Rz = k_Rz(k) * exp(b_Rz(k)*Tmp) * cZooC
+      ! Rz = k_Rz(k) * exp(b_Rz(k)*Tmp) * cZooC
+      Rz = k_Rz(k) * exp(b_Rz(k)*Tmp) * cZooC * (DOx / (halfsat_Rz + DOx))  ! yt_edit: added michaelis-menten term for DO dependence
 
 !     === Mass balance ===
 

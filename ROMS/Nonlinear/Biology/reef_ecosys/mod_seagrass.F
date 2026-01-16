@@ -434,6 +434,10 @@ MODULE mod_seagrass
     enddo
     SGRASS(ng)%root_mass_profile(1, :) = SGRASS(ng)%root_mass_profile(1, :) / sum(SGRASS(ng)%root_mass_profile(1, :)); ! Mass ratio of roots in each layer (total must sum to 1.0)
     SGRASS(ng)%root_mass_profile(1, 1) = 1.0d0 - sum(SGRASS(ng)%root_mass_profile(1, 2:Nsed));                         ! make up for numerical inaccuracy to force to sum to 1.0
+    do k=1,Nsed
+      write(*,*) 'seagrass root mass profile: k = ', k, 'zr(k) = ', SEDECO(ng)%zr(k), 'root_mass_profile(1, k) = ' &
+                                                   , SGRASS(ng)%root_mass_profile(1, k)
+    enddo
     write(*,*) 'yt_debug: mod_seagrass.F initialize_seagrass() after root_mass_profile assigment'
     
 # endif

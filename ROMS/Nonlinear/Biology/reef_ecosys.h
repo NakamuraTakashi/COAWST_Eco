@@ -453,6 +453,42 @@
             DO isp=1,N_Psp     
               PO4(isp,:) = t(i,j,:,nstp,iPO4(isp))       
             END DO
+# if defined YT_DEBUG_MODE
+            DO k=1,N(ng)
+              if (Tmp(k) .lt. 0d0 .or. Tmp(k) .gt. 50d0) then
+                write(*,*) 'yt_debug: Temperature problem: Tmp = ', Tmp(k), 'i = ', i, 'j = ', j, 'k = ', k
+                ! error stop
+              endif
+              if (Sal(k) .lt. -2.5d0 .or. Sal(k) .gt. 100d0) then
+                write(*,*) 'yt_debug: Salinity problem: Sal = ', Sal(k), 'i = ', i, 'j = ', j, 'k = ', k
+                ! error stop
+              endif
+              if (DOx(k) .lt. -1d0 .or. DOx(k) .gt. 1000d0) then
+                write(*,*) 'yt_debug: DO problem: DOx = ', DOx(k), 'i = ', i, 'j = ', j, 'k = ', k
+                ! error stop
+              endif
+              if (TA(k) .lt. 1000d0 .or. TA(k) .gt. 10000d0) then
+                write(*,*) 'yt_debug: Alkalinity problem: TA = ', TA(k), 'i = ', i, 'j = ', j, 'k = ', k
+                ! error stop
+              endif
+              if (DIC(iCt,k) .lt. 0d0 .or. DIC(iCt,k) .gt. 10000d0) then
+                write(*,*) 'yt_debug: DIC problem: DIC = ', DIC(iCt,k), 'i = ', i, 'j = ', j, 'k = ', k
+                ! error stop
+              endif
+              if (NO3(iNt,k) .lt. -1d0 .or. NO3(iNt,k) .gt. 1000d0) then
+                write(*,*) 'yt_debug: NO3 problem: NO3 = ', NO3(iNt,k), 'i = ', i, 'j = ', j, 'k = ', k
+                ! error stop
+              endif
+              if (NH4(iNt,k) .lt. -1d0 .or. NH4(iNt,k) .gt. 1000d0) then
+                write(*,*) 'yt_debug: NH4 problem: NH4 = ', NH4(iNt,k), 'i = ', i, 'j = ', j, 'k = ', k
+                ! error stop
+              endif
+              if (PO4(iPt,k) .lt. -1d0 .or. PO4(iPt,k) .gt. 1000d0) then
+                write(*,*) 'yt_debug: PO4 problem: PO4 = ', PO4(iPt,k), 'i = ', i, 'j = ', j, 'k = ', k
+                ! error stop
+              endif
+            END DO
+# endif
             DO m=1,Ndom    
               DO isp=1,N_Csp     
                 DOC(isp,m,:) = t(i,j,:,nstp,iDOC(isp,m))
@@ -530,6 +566,43 @@
             COTe(:) = t(i,j,:,nstp,iCOTe)     &   ! COTe(N): COT starfish egg (umol L-1)
             COTl(:) = t(i,j,:,nstp,iCOTl)     &   ! COTl(N): COT starfish larvae (umol L-1)
 #endif
+
+! for safety, change negative values to zero beore input to reef_ecosys >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> YT:ADD
+            DO k=1,N(ng)
+              Tmp(k) = max(Tmp(k), 0d0)
+              Sal(k) = max(Sal(k), 0d0)
+              DOx(k) = max(DOx(k), 0d0)
+              TA(k) = max(TA(k), 0d0)
+              DIC(iCt,k) = max(DIC(iCt,k), 0d0)
+              NO3(iNt,k) = max(NO3(iNt,k), 0d0)
+              NH4(iNt,k) = max(NH4(iNt,k), 0d0)
+              PO4(iPt,k) = max(PO4(iPt,k), 0d0)
+              DO m=1,Ndom
+                DOC(iCt,m,k) = max(DOC(iCt,m,k), 0d0)
+                DON(iNt,m,k) = max(DON(iNt,m,k), 0d0)
+                DOP(iPt,m,k) = max(DOP(iPt,m,k), 0d0)
+              END DO 
+              DO m=1,Npom
+                POC(iCt,m,k) = max(POC(iCt,m,k), 0d0)
+                PON(iNt,m,k) = max(PON(iNt,m,k), 0d0)
+                POP(iPt,m,k) = max(POP(iPt,m,k), 0d0)
+              END DO 
+              DO m=1,Nphy
+                PhyC(iCt,m,k) = max(PhyC(iCt,m,k), 0d0)
+                PhyN(iNt,m,k) = max(PhyN(iNt,m,k), 0d0)
+                PhyP(iPt,m,k) = max(PhyP(iPt,m,k), 0d0)
+              END DO 
+              DO m=1,Nzoo
+                ZooC(iCt,m,k) = max(ZooC(iCt,m,k), 0d0)
+                ZooN(iNt,m,k) = max(ZooN(iNt,m,k), 0d0)
+                ZooP(iPt,m,k) = max(ZooP(iPt,m,k), 0d0)
+              END DO 
+              DO m=1,Npim
+                PIC(iCt,m,k) = max(PIC(iCt,m,k), 0d0)
+              END DO 
+            END DO
+! <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< YT:ADD
+
 #if defined SEDECO_SGD && defined SGD_ON
             if (p_sand(i,j) .gt. 0.0d0) then
               ! [cm s-1]= [m3 s-1] [m-1] [m-1] [] [100 cm m-1]
