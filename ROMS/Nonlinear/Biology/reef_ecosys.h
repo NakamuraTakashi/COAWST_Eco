@@ -453,42 +453,42 @@
             DO isp=1,N_Psp     
               PO4(isp,:) = t(i,j,:,nstp,iPO4(isp))       
             END DO
-# if defined YT_DEBUG_MODE
-            DO k=1,N(ng)
-              if (Tmp(k) .lt. 0d0 .or. Tmp(k) .gt. 50d0) then
-                write(*,*) 'yt_debug: Temperature problem: Tmp = ', Tmp(k), 'i = ', i, 'j = ', j, 'k = ', k
-                ! error stop
-              endif
-              if (Sal(k) .lt. -2.5d0 .or. Sal(k) .gt. 100d0) then
-                write(*,*) 'yt_debug: Salinity problem: Sal = ', Sal(k), 'i = ', i, 'j = ', j, 'k = ', k
-                ! error stop
-              endif
-              if (DOx(k) .lt. -1d0 .or. DOx(k) .gt. 1000d0) then
-                write(*,*) 'yt_debug: DO problem: DOx = ', DOx(k), 'i = ', i, 'j = ', j, 'k = ', k
-                ! error stop
-              endif
-              if (TA(k) .lt. 1000d0 .or. TA(k) .gt. 10000d0) then
-                write(*,*) 'yt_debug: Alkalinity problem: TA = ', TA(k), 'i = ', i, 'j = ', j, 'k = ', k
-                ! error stop
-              endif
-              if (DIC(iCt,k) .lt. 0d0 .or. DIC(iCt,k) .gt. 10000d0) then
-                write(*,*) 'yt_debug: DIC problem: DIC = ', DIC(iCt,k), 'i = ', i, 'j = ', j, 'k = ', k
-                ! error stop
-              endif
-              if (NO3(iNt,k) .lt. -1d0 .or. NO3(iNt,k) .gt. 1000d0) then
-                write(*,*) 'yt_debug: NO3 problem: NO3 = ', NO3(iNt,k), 'i = ', i, 'j = ', j, 'k = ', k
-                ! error stop
-              endif
-              if (NH4(iNt,k) .lt. -1d0 .or. NH4(iNt,k) .gt. 1000d0) then
-                write(*,*) 'yt_debug: NH4 problem: NH4 = ', NH4(iNt,k), 'i = ', i, 'j = ', j, 'k = ', k
-                ! error stop
-              endif
-              if (PO4(iPt,k) .lt. -1d0 .or. PO4(iPt,k) .gt. 1000d0) then
-                write(*,*) 'yt_debug: PO4 problem: PO4 = ', PO4(iPt,k), 'i = ', i, 'j = ', j, 'k = ', k
-                ! error stop
-              endif
-            END DO
-# endif
+! # if defined YT_DEBUG_MODE
+!             DO k=1,N(ng)
+!               if (Tmp(k) .lt. 0d0 .or. Tmp(k) .gt. 50d0) then
+!                 write(*,*) 'yt_debug: Temperature problem: Tmp = ', Tmp(k), 'i = ', i, 'j = ', j, 'k = ', k
+!                 ! error stop
+!               endif
+!               if (Sal(k) .lt. -3d0 .or. Sal(k) .gt. 100d0) then
+!                 write(*,*) 'yt_debug: Salinity problem: Sal = ', Sal(k), 'i = ', i, 'j = ', j, 'k = ', k
+!                 ! error stop
+!               endif
+!               if (DOx(k) .lt. -1d0 .or. DOx(k) .gt. 1000d0) then
+!                 write(*,*) 'yt_debug: DO problem: DOx = ', DOx(k), 'i = ', i, 'j = ', j, 'k = ', k
+!                 ! error stop
+!               endif
+!               if (TA(k) .lt. 1000d0 .or. TA(k) .gt. 10000d0) then
+!                 write(*,*) 'yt_debug: Alkalinity problem: TA = ', TA(k), 'i = ', i, 'j = ', j, 'k = ', k
+!                 ! error stop
+!               endif
+!               if (DIC(iCt,k) .lt. 0d0 .or. DIC(iCt,k) .gt. 10000d0) then
+!                 write(*,*) 'yt_debug: DIC problem: DIC = ', DIC(iCt,k), 'i = ', i, 'j = ', j, 'k = ', k
+!                 ! error stop
+!               endif
+!               if (NO3(iNt,k) .lt. -1d0 .or. NO3(iNt,k) .gt. 1000d0) then
+!                 write(*,*) 'yt_debug: NO3 problem: NO3 = ', NO3(iNt,k), 'i = ', i, 'j = ', j, 'k = ', k
+!                 ! error stop
+!               endif
+!               if (NH4(iNt,k) .lt. -1d0 .or. NH4(iNt,k) .gt. 1000d0) then
+!                 write(*,*) 'yt_debug: NH4 problem: NH4 = ', NH4(iNt,k), 'i = ', i, 'j = ', j, 'k = ', k
+!                 ! error stop
+!               endif
+!               if (PO4(iPt,k) .lt. -1d0 .or. PO4(iPt,k) .gt. 1000d0) then
+!                 write(*,*) 'yt_debug: PO4 problem: PO4 = ', PO4(iPt,k), 'i = ', i, 'j = ', j, 'k = ', k
+!                 ! error stop
+!               endif
+!             END DO
+! # endif
             DO m=1,Ndom    
               DO isp=1,N_Csp     
                 DOC(isp,m,:) = t(i,j,:,nstp,iDOC(isp,m))
