@@ -88,25 +88,34 @@
 # endif
 #endif
 #ifdef SEAGRASS
-      integer  :: iSgSgCBm(N_Csp,Nsg)  ! Seagrass leaf+root carbon-biomass per unit ground area (in seagrass habitat area) [umol.C m-2.sg.hab]
-      integer  :: iSgSgNBm(N_Nsp,Nsg)  ! Seagrass leaf+root carbon-biomass per unit ground area (in seagrass habitat area) [umol.C m-2.sg.hab]
-      integer  :: iSgSgPBm(N_Psp,Nsg)  ! Seagrass leaf+root carbon-biomass per unit ground area (in seagrass habitat area) [umol.C m-2.sg.hab]
-      integer  :: iSgLfCBm(Nsg)        ! Seagrass leaf carbon-biomass per unit ground area (in seagrass habitat area) [umol.lf.C m-2.sg.hab]
-      integer  :: iSgRtCBm(Nsg)        ! Seagrass root carbon-biomass per unit ground area (in seagrass habitat area) [umol.rt.C m-2.sg.hab]
-      integer  :: iSgTotSgCBmS(Nsg)    ! SgTotSgCBm of last growth interval (For internal use only, need to save to restart file, but use SgTotSgCBm for output)
-      integer  :: iSgTotSgCBm(Nsg)     ! Total seagrass carbon-biomass in grid [mol.C.tot]
-      integer  :: iSgTotLfCBm(Nsg)     ! Total seagrass above ground carbon-biomass in grid [mol.C.lf]
-      integer  :: iSgTotRtCBm(Nsg)     ! Total seagrass below ground carbon-biomass in grid [mol.C.rt]
-      integer  :: iSgLAI(Nsg)          ! Leaf area index: one-sided green leaf area per unit ground surface area [m2.lf m-2.sg.hab]
-      integer  :: iSgTotLA(Nsg)        ! Total one-sided green leaf area in grid [m2.lf]
-      integer  :: iSgGridELAP(Nsg)     ! Effective leaf area projection on ground (whole grid) [m2.lf.proj m-2.grid]
-      integer  :: iSgGridPhot(Nsg)     ! Seagrass gross photosynthesis rate per unit ground area (whole grid) [umol.C m-2.grid s-1]
-      integer  :: iSgGridGrow(Nsg)     ! Seagrass growth rate per unit ground area (whole grid) [umol.C m-2.grid s-1]
-      integer  :: iSgPhotLim(Nsg)      ! Seagrass photosynthesis limiting factor: 1 = light; 2 = Carbon stock
-      integer  :: iSgGrowLim(Nsg)      ! Seagrass growth limiting factor: 1 = Sugar stock; 2 = Nitrogen stock; 3 = Phosphorus stock
-      integer  :: iSgGridResp(Nsg)     ! Seagrass respiration rate per unit ground area (whole grid) [umol.C m-2.grid s-1]
-      integer  :: iSgGridNetPhot(Nsg)  ! Seagrass net photosynthesis rate per unit ground area (whole grid) [umol.C m-2.grid s-1]
-      integer  :: iSgGridDieoff(Nsg)   ! Seagrass dieoff rate carbon biomass per unit ground area (whole grid) [umol.C m-2.grid s-1]    
+      integer  :: iSgSgCBm(N_Csp,Nsg)     ! Seagrass leaf+root carbon-biomass per unit ground area (in seagrass habitat area) [umol.C m-2.sg.hab]
+      integer  :: iSgSgNBm(N_Nsp,Nsg)     ! Seagrass leaf+root carbon-biomass per unit ground area (in seagrass habitat area) [umol.C m-2.sg.hab]
+      integer  :: iSgSgPBm(N_Psp,Nsg)     ! Seagrass leaf+root carbon-biomass per unit ground area (in seagrass habitat area) [umol.C m-2.sg.hab]
+      integer  :: iSgDICstock(N_Csp,Nsg)  ! Seagrass internal DIC stock per unit ground area (in seagrass habitat area) [umol.C m-2.sg.hab]
+      integer  :: iSgCH2Ostock(N_Csp,Nsg) ! Seagrass internal sugar stock per unit ground area (in seagrass habitat area) [umol.C m-2.sg.hab]
+      integer  :: iSgDOstock(Nsg)         ! Seagrass internal DO stock per unit ground area (in seagrass habitat area) [umol.O m-2.sg.hab]
+      integer  :: iSgNO3stock(N_Nsp,Nsg)  ! Seagrass internal NO3 stock per unit ground area (in seagrass habitat area) [umol.N m-2.sg.hab]
+      integer  :: iSgNH4stock(N_Nsp,Nsg)  ! Seagrass internal NH4 stock per unit ground area (in seagrass habitat area) [umol.N m-2.sg.hab]
+      integer  :: iSgPO4stock(N_Psp,Nsg)  ! Seagrass internal PO4 stock per unit ground area (in seagrass habitat area) [umol.P m-2.sg.hab]
+      integer  :: iSgLfCBm(Nsg)           ! Seagrass leaf carbon-biomass per unit ground area (in seagrass habitat area) [umol.lf.C m-2.sg.hab]
+      integer  :: iSgRtCBm(Nsg)           ! Seagrass root carbon-biomass per unit ground area (in seagrass habitat area) [umol.rt.C m-2.sg.hab]
+      integer  :: iSgTotSgCBmS(Nsg)       ! SgTotSgCBm of last growth interval (For internal use only, need to save to restart file, but use SgTotSgCBm for output)
+      integer  :: iSgTotSgCBm(Nsg)        ! Total seagrass carbon-biomass in grid [mol.C.tot]
+      integer  :: iSgTotLfCBm(Nsg)        ! Total seagrass above ground carbon-biomass in grid [mol.C.lf]
+      integer  :: iSgTotRtCBm(Nsg)        ! Total seagrass below ground carbon-biomass in grid [mol.C.rt]
+      integer  :: iSgLAI(Nsg)             ! Leaf area index: one-sided green leaf area per unit ground surface area [m2.lf m-2.sg.hab]
+      integer  :: iSgTotLA(Nsg)           ! Total one-sided green leaf area in grid [m2.lf]
+      integer  :: iSgGridELAP(Nsg)        ! Effective leaf area projection on ground (whole grid) [m2.lf.proj m-2.grid]
+      integer  :: iSgGridPhot(Nsg)        ! Seagrass gross photosynthesis rate per unit ground area (whole grid) [umol.C m-2.grid s-1]
+      integer  :: iSgGridGrow(Nsg)        ! Seagrass growth rate per unit ground area (whole grid) [umol.C m-2.grid s-1]
+      integer  :: iSgPhotLim(Nsg)         ! Seagrass photosynthesis limiting factor: 1 = light; 2 = Carbon stock
+      integer  :: iSgGrowLim(Nsg)         ! Seagrass growth limiting factor: 1 = Sugar stock; 2 = Nitrogen stock; 3 = Phosphorus stock
+      integer  :: iSgGridResp(Nsg)        ! Seagrass respiration rate per unit ground area (whole grid) [umol.C m-2.grid s-1]
+      integer  :: iSgGridNetPhot(Nsg)     ! Seagrass net photosynthesis rate per unit ground area (whole grid) [umol.C m-2.grid s-1]
+      integer  :: iSgGridDieoff(Nsg)      ! Seagrass dieoff rate carbon biomass per unit ground area (whole grid) [umol.C m-2.grid s-1]    
+      integer  :: iSgInitC(Nsg)           ! Initial carbon remaining to destroy until net zero  [mmol.C]
+      integer  :: iSgInitN(Nsg)           ! Initial nitrogen remaining to destroy until net zero  [mmol.N]
+      integer  :: iSgInitP(Nsg)           ! Initial phosphorus remaining to destroy until net zero  [mmol.P]
 #endif
 #ifdef MACROALGAE
       integer  :: iAgQC(N_Csp,Nag)
@@ -188,6 +197,25 @@
       integer  :: ipHt_                       ! pH (total scale)
       integer  :: iWarg                       ! aragonite saturation state
       integer  :: iWcal                       ! calcite saturation state
+      integer :: iDOCTot(N_Csp)       ! Total Dissolved organic C-concentration
+      integer :: iPOCTot(N_Csp)       ! Total Particulate organic C-concentration
+      integer :: iDONTot(N_Nsp)       ! Total Dissolved organic N-concentration
+      integer :: iPONTot(N_Nsp)       ! Total Particulate organic N-concentration
+      integer :: iDOPTot(N_Psp)       ! Total Dissolved organic P-concentration
+      integer :: iPOPTot(N_Psp)       ! Total Particulate organic P-concentration
+      integer :: iPhyCTot(N_Csp)      ! Total Phytoplankton1 density
+      integer :: iZooCTot(N_Csp)      ! Total Zooplankton density
+      integer :: iPhyNTot(N_Nsp)      ! Total Phytoplankton1 density
+      integer :: iZooNTot(N_Nsp)      ! Total Zooplankton density
+      integer :: iPhyPTot(N_Psp)      ! Total Phytoplankton1 density
+      integer :: iZooPTot(N_Psp)      ! Total Zooplankton density
+      integer :: iPICTot(N_Csp)       ! Total Particulate inorganic C-concentration
+
+!!! mons light model >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>KM:Add
+# ifdef LIGHT_MODEL
+      integer  :: iLight                      ! photon flux density
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<KM:Add
 
 # ifdef BIVALVE
       integer  :: iBvR (Nbv)
@@ -198,12 +226,7 @@
       integer  :: iBvWw(Nbv)
       integer  :: iBvWt(Nbv)
 # endif
-!
-!!! mons light model >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>KM:Add
-# ifdef LIGHT_MODEL
-      integer  :: iLight                      ! photon flux density
-# endif
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<KM:Add
+
 
 # ifdef CARBON_ISOTOPE
       integer  :: iDICd13C                    ! d13C of total inorganic carbon
@@ -305,6 +328,12 @@
       integer :: iSdH2S(N_Ssp)       !! hydrogen sulfide         (µmol l-1)
       integer :: iSdSO4(N_Ssp)       !! sulfate   (µmol l-1)
       integer :: iSdS0 (N_Ssp)       !! sulfur    (nmol g-1)
+      integer :: iSdEfDO       !! DO  efflux (µmol m-2 s-1)
+      integer :: iSdEfTA       !! TA  efflux (µmol m-2 s-1)
+      integer :: iSdEfDIC      !! DIC efflux (µmol m-2 s-1)
+      integer :: iSdEfNO3      !! NO3 efflux (µmol m-2 s-1)
+      integer :: iSdEfNH4      !! NH4 efflux (µmol m-2 s-1)
+      integer :: iSdEfPO4      !! PO4 efflux (µmol m-2 s-1)
 #endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 
@@ -452,6 +481,8 @@
 !-----------------------------------------------------------------------
 
       NBT=i
+    !  write(*,*) 'NBT = ', NBT
+
 !---------------------------------------------------------------------
 !
 !  Allocate biological tracer vector.
@@ -576,6 +607,40 @@
         END DO
       END DO
       DO m=1,Nsg
+        DO isp=1,N_Csp     
+          ic=ic+1
+          iSgDICstock(isp,m)=ic
+        END DO
+      END DO
+      DO m=1,Nsg
+        DO isp=1,N_Csp     
+          ic=ic+1
+          iSgCH2Ostock(isp,m)=ic
+        END DO
+      END DO
+      DO m=1,Nsg
+        ic=ic+1
+        iSgDOstock(m)=ic
+      END DO
+      DO m=1,Nsg
+        DO isp=1,N_Nsp     
+          ic=ic+1
+          iSgNO3stock(isp,m)=ic
+        END DO
+      END DO
+      DO m=1,Nsg
+        DO isp=1,N_Nsp     
+          ic=ic+1
+          iSgNH4stock(isp,m)=ic
+        END DO
+      END DO
+      DO m=1,Nsg
+        DO isp=1,N_Psp     
+          ic=ic+1
+          iSgPO4stock(isp,m)=ic
+        END DO
+      END DO
+      DO m=1,Nsg
         ic=ic+1
         iSgLfCBm(m)=ic
       END DO
@@ -639,6 +704,18 @@
         ic=ic+1
         iSgGridDieoff(m)=ic
       END DO
+      DO m=1,Nsg
+        ic=ic+1
+        iSgInitC(m)=ic
+      END DO
+      DO m=1,Nsg
+        ic=ic+1
+        iSgInitN(m)=ic
+      END DO
+      DO m=1,Nsg
+        ic=ic+1
+        iSgInitP(m)=ic
+      END DO
 #endif
 #ifdef MACROALGAE
       DO m=1,Nag
@@ -659,12 +736,26 @@
           iAgQP(isp,m)=ic
         END DO
       END DO
-
+#endif
+#ifdef SEDIMENT_ECOSYS  
+      ic=ic+1
+      iSdEfDO=ic
+      ic=ic+1
+      iSdEfTA=ic
+      ic=ic+1
+      iSdEfDIC=ic
+      ic=ic+1
+      iSdEfNO3=ic
+      ic=ic+1
+      iSdEfNH4=ic
+      ic=ic+1
+      iSdEfPO4=ic
 #endif
 !
 !  Set number of 2D history terms.
 !
       NHbio2d=ic
+      ! write(*,*) 'NHbio2d = ', NHbio2d
 !
 !  Allocate biological history vectors
 !
@@ -764,6 +855,7 @@
 !  Set number of 3D history terms.
 !
       NHbio3d=ic
+      ! write(*,*) 'NHbio3d = ', NHbio3d
 
       IF (.not.allocated(iHbio3)) THEN
         allocate ( iHbio3(NHbio3d) )
@@ -879,6 +971,7 @@
 !  Set number of 3D biological sediment history terms.
 !
       NHbiosed3d=ic
+      ! write(*,*) 'NHbiosed3d = ', NHbiosed3d
 !
 !  Allocate biological history vectors
 !
@@ -999,6 +1092,7 @@
 !  Set number of 2D diagnostic terms.
 !
       NDbio2d=ic
+      ! write(*,*) 'NDbio2d = ', NDbio2d
 !
 !  Allocate biological diagnostic vectors
 !
@@ -1017,6 +1111,61 @@
       iWarg=ic
       ic=ic+1
       iWcal=ic
+
+!!!  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+      DO isp=1,N_Csp     
+        ic=ic+1    
+        iDOCTot(isp)=ic
+      END DO
+      DO isp=1,N_Csp     
+        ic=ic+1    
+        iPOCTot(isp)=ic
+      END DO
+      DO isp=1,N_Nsp     
+        ic=ic+1    
+        iDONTot(isp)=ic
+      END DO
+      DO isp=1,N_Nsp     
+        ic=ic+1    
+        iPONTot(isp)=ic
+      END DO
+      DO isp=1,N_Psp     
+        ic=ic+1    
+        iDOPTot(isp)=ic
+      END DO
+      DO isp=1,N_Psp     
+        ic=ic+1    
+        iPOPTot(isp)=ic
+      END DO
+      DO isp=1,N_Csp     
+        ic=ic+1    
+        iPhyCTot(isp)=ic
+      END DO
+      DO isp=1,N_Csp     
+        ic=ic+1    
+        iZooCTot(isp)=ic
+      END DO
+      DO isp=1,N_Nsp     
+        ic=ic+1    
+        iPhyNTot(isp)=ic
+      END DO
+      DO isp=1,N_Nsp     
+        ic=ic+1    
+        iZooNTot(isp)=ic
+      END DO
+      DO isp=1,N_Psp     
+        ic=ic+1    
+        iPhyPTot(isp)=ic
+      END DO
+      DO isp=1,N_Psp     
+        ic=ic+1    
+        iZooPTot(isp)=ic
+      END DO
+      DO isp=1,N_Csp     
+        ic=ic+1    
+        iPICTot(isp)=ic
+      END DO
+!!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
 
 !!! mons light model >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>KM:Add
 # ifdef LIGHT_MODEL
@@ -1105,6 +1254,7 @@
 !  Set number of 3D diagnostic terms.
 !
       NDbio3d=ic
+      ! write(*,*) 'NDbio3d = ', NDbio3d
 
 
       IF (.not.allocated(iDbio3)) THEN
@@ -1305,6 +1455,12 @@
             SGRASS(ng)%SgCBmF   (:,m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgSgCBm(1,m):iSgSgCBm(N_Csp,m) )
             SGRASS(ng)%SgNBmF   (:,m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgSgNBm(1,m):iSgSgNBm(N_Nsp,m) )
             SGRASS(ng)%SgPBmF   (:,m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgSgPBm(1,m):iSgSgPBm(N_Psp,m) )
+            SGRASS(ng)%DICstock (:,m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgDICstock(1,m):iSgDICstock(N_Csp,m) )
+            SGRASS(ng)%CH2Ostock(:,m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgCH2Ostock(1,m):iSgCH2Ostock(N_Csp,m) )
+            SGRASS(ng)%DOstock    (m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgDOstock    (m) )
+            SGRASS(ng)%NO3stock (:,m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgNO3stock(1,m):iSgNO3stock(N_Nsp,m) )
+            SGRASS(ng)%NH4stock (:,m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgNH4stock(1,m):iSgNH4stock(N_Nsp,m) )
+            SGRASS(ng)%PO4stock (:,m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgPO4stock(1,m):iSgPO4stock(N_Psp,m) )
             SGRASS(ng)%LfCBm      (m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgLfCBm      (m) )
             SGRASS(ng)%RtCBm      (m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgRtCBm      (m) )
             SGRASS(ng)%TotSgCBm   (m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgTotSgCBmS  (m) )
@@ -1320,6 +1476,9 @@
             SGRASS(ng)%GridResp   (m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgGridResp   (m) )
             SGRASS(ng)%GridNetPhot(m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgGridNetPhot(m) )
             SGRASS(ng)%GridDieoff (m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgGridDieoff (m) )
+            SGRASS(ng)%InitialC   (m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgInitC      (m) )
+            SGRASS(ng)%InitialN   (m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgInitN      (m) )
+            SGRASS(ng)%InitialP   (m,i,j) = OCEAN(ng)%HisBio2d(i,j, iSgInitP      (m) )
           END DO
 #endif
 #ifdef MACROALGAE  
@@ -1330,10 +1489,10 @@
         END DO
       END DO
 !-----------------------------------------------------------------------
+#ifdef BIVALVE
       DO j=LBj, UBj
         DO i=LBi, UBi
           DO k=1,N
-#ifdef BIVALVE
             DO m=1,Nbv
               BVLV(ng)%dens(  m,k,i,j) = OCEAN(ng)%HisBio3d(i,j,k, iBvDens(m) )
               BVLV(ng)%QCe (:,m,k,i,j) = OCEAN(ng)%HisBio3d(i,j,k, iBvQCe(1,m):iBvQCe(N_Csp,m) )
@@ -1350,11 +1509,11 @@
               BVLV(ng)%QPh (:,m,k,i,j) = OCEAN(ng)%HisBio3d(i,j,k, iBvQPh(1,m):iBvQPh(N_Psp,m) )
               BVLV(ng)%CaCO3(:,m,k,i,j) = OCEAN(ng)%HisBio3d(i,j,k, iBvCaCO3(1,m):iBvCaCO3(N_Csp,m) )
             END DO
-#endif
            !  :  (To be updated)
           END DO
         END DO
       END DO
+#endif
 
 !-----------------------------------------------------------------------
 
@@ -1393,6 +1552,12 @@
             SEDECO(ng)%SO4 (:,k,i,j) = OCEAN(ng)%HisBiosed3d(i,j,k,iSdSO4(1):iSdSO4(N_Ssp) )
             SEDECO(ng)%S0  (:,k,i,j) = OCEAN(ng)%HisBiosed3d(i,j,k,iSdS0 (1):iSdS0 (N_Ssp) )
           END DO
+          SEDECO(ng)%Sed_Efflux_DO (i,j) = OCEAN(ng)%HisBio2d(i,j,iSdEfDO)
+          SEDECO(ng)%Sed_Efflux_TA (i,j) = OCEAN(ng)%HisBio2d(i,j,iSdEfTA)
+          SEDECO(ng)%Sed_Efflux_DIC(i,j) = OCEAN(ng)%HisBio2d(i,j,iSdEfDIC)
+          SEDECO(ng)%Sed_Efflux_NO3(i,j) = OCEAN(ng)%HisBio2d(i,j,iSdEfNO3)
+          SEDECO(ng)%Sed_Efflux_NH4(i,j) = OCEAN(ng)%HisBio2d(i,j,iSdEfNH4)
+          SEDECO(ng)%Sed_Efflux_PO4(i,j) = OCEAN(ng)%HisBio2d(i,j,iSdEfPO4)
         END DO
       END DO
 #endif
@@ -1465,9 +1630,20 @@
 #endif
 #ifdef SEAGRASS
           DO m=1,Nsg
+! # ifdef SEAGRASS_DEBUG_MODE
+!             if(SGRASS(ng)%TotSgCBm   (m,i,j) /= SGRASS(ng)%TotSgCBm   (m,i,j)) then ! check for nan
+!               write(*,*) 'yt_debug: TotSgCBm (m,i,j) = ', SGRASS(ng)%TotSgCBm   (m,i,j), 'm = ', m, 'i = ', i, 'j = ', j
+!             endif
+! # endif
             OCEAN(ng)%HisBio2d(i,j, iSgSgCBm(1,m):iSgSgCBm(N_Csp,m) ) = SGRASS(ng)%SgCBmF(:,m,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgSgNBm(1,m):iSgSgNBm(N_Nsp,m) ) = SGRASS(ng)%SgNBmF(:,m,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgSgPBm(1,m):iSgSgPBm(N_Psp,m) ) = SGRASS(ng)%SgPBmF(:,m,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgDICstock(1,m):iSgDICstock(N_Csp,m) ) = SGRASS(ng)%DICstock(:,m,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgCH2Ostock(1,m):iSgCH2Ostock(N_Csp,m) ) = SGRASS(ng)%CH2Ostock(:,m,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgDOstock    (m) ) = SGRASS(ng)%DOstock (m,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgNO3stock(1,m):iSgNO3stock(N_Nsp,m) ) = SGRASS(ng)%NO3stock(:,m,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgNH4stock(1,m):iSgNH4stock(N_Nsp,m) ) = SGRASS(ng)%NH4stock(:,m,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgPO4stock(1,m):iSgPO4stock(N_Psp,m) ) = SGRASS(ng)%PO4stock(:,m,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgLfCBm      (m) ) = SGRASS(ng)%LfCBm      (m,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgRtCBm      (m) ) = SGRASS(ng)%RtCBm      (m,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgTotSgCBmS  (m) ) = SGRASS(ng)%TotSgCBm   (m,i,j)
@@ -1484,6 +1660,9 @@
             OCEAN(ng)%HisBio2d(i,j, iSgGridResp   (m) ) = SGRASS(ng)%GridResp   (m,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgGridNetPhot(m) ) = SGRASS(ng)%GridNetPhot(m,i,j)
             OCEAN(ng)%HisBio2d(i,j, iSgGridDieoff (m) ) = SGRASS(ng)%GridDieoff (m,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgInitC      (m) ) = SGRASS(ng)%InitialC   (m,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgInitN      (m) ) = SGRASS(ng)%InitialN   (m,i,j)
+            OCEAN(ng)%HisBio2d(i,j, iSgInitP      (m) ) = SGRASS(ng)%InitialP   (m,i,j)
           END DO
 #endif
 #ifdef MACROALGAE
@@ -1494,10 +1673,10 @@
         END DO
       END DO
 !-----------------------------------------------------------------------
+#ifdef BIVALVE
       DO j=LBj, UBj
         DO i=LBi, UBi
           DO k=1,N
-#ifdef BIVALVE
             DO m=1,Nbv
               OCEAN(ng)%HisBio3d(i,j,k, iBvDens(m) )                  = BVLV(ng)%dens(  m,k,i,j)
               OCEAN(ng)%HisBio3d(i,j,k, iBvQCe(1,m):iBvQCe(N_Csp,m) ) = BVLV(ng)%QCe (:,m,k,i,j)
@@ -1514,11 +1693,11 @@
               OCEAN(ng)%HisBio3d(i,j,k, iBvQPh(1,m):iBvQPh(N_Psp,m) ) = BVLV(ng)%QPh (:,m,k,i,j)
               OCEAN(ng)%HisBio3d(i,j,k, iBvCaCO3(1,m):iBvCaCO3(N_Csp,m) ) = BVLV(ng)%CaCO3(:,m,k,i,j)
             END DO
-#endif
            !  :  (To be updated)
           END DO
         END DO
       END DO
+#endif
 
 !-----------------------------------------------------------------------
 
@@ -1557,6 +1736,12 @@
             OCEAN(ng)%HisBiosed3d(i,j,k,iSdSO4(1):iSdSO4(N_Ssp) ) = SEDECO(ng)%SO4 (:,k,i,j)
             OCEAN(ng)%HisBiosed3d(i,j,k,iSdS0 (1):iSdS0 (N_Ssp) ) = SEDECO(ng)%S0  (:,k,i,j)
           END DO
+          OCEAN(ng)%HisBio2d(i,j,iSdEfDO)  = SEDECO(ng)%Sed_Efflux_DO (i,j)
+          OCEAN(ng)%HisBio2d(i,j,iSdEfTA)  = SEDECO(ng)%Sed_Efflux_TA (i,j)
+          OCEAN(ng)%HisBio2d(i,j,iSdEfDIC) = SEDECO(ng)%Sed_Efflux_DIC(i,j)
+          OCEAN(ng)%HisBio2d(i,j,iSdEfNO3) = SEDECO(ng)%Sed_Efflux_NO3(i,j)
+          OCEAN(ng)%HisBio2d(i,j,iSdEfNH4) = SEDECO(ng)%Sed_Efflux_NH4(i,j)
+          OCEAN(ng)%HisBio2d(i,j,iSdEfPO4) = SEDECO(ng)%Sed_Efflux_PO4(i,j)
         END DO
       END DO
 #endif
@@ -1578,6 +1763,7 @@
 
       USE mod_geochem
       USE mod_diags
+      USE mod_stepping, ONLY: nnew
 !
 !  Imported variable declarations.
 !
@@ -1644,10 +1830,10 @@
         END DO
       END DO
 !-----------------------------------------------------------------------
+#ifdef BIVALVE
       DO j=LBj, UBj
         DO i=LBi, UBi
           DO k=1,N
-#ifdef BIVALVE
             DO m=1,Nbv
               DIAGS(ng)%DiaBio3d(i,j,k, iBvR (m) ) = BVLV(ng)%R (m,k,i,j)
               DIAGS(ng)%DiaBio3d(i,j,k, iBvG (m) ) = BVLV(ng)%G (m,k,i,j)
@@ -1657,11 +1843,11 @@
               DIAGS(ng)%DiaBio3d(i,j,k, iBvWw(m) ) = BVLV(ng)%Ww(m,k,i,j)
               DIAGS(ng)%DiaBio3d(i,j,k, iBvWt(m) ) = BVLV(ng)%Wt(m,k,i,j)
             END DO
-#endif
            !  :  (To be updated)
           END DO
         END DO
       END DO
+#endif
 
 !-----------------------------------------------------------------------
 
@@ -1674,6 +1860,106 @@
         END DO
       END DO
 # endif
+
+
+!!!  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>YT:Add
+      DO j=LBj, UBj
+        DO i=LBi, UBi
+          DO isp=1,N_Csp
+            DIAGS(ng)%DiaBio3d(i,j,:,iDOCTot(isp)) = 0
+            DO m=1,Ndom    
+              DIAGS(ng)%DiaBio3d(i,j,:,iDOCTot(isp)) &
+              = DIAGS(ng)%DiaBio3d(i,j,:,iDOCTot(isp)) + OCEAN(ng)%t(i,j,:,nnew(ng),iDOC(isp,m))
+            END DO
+          END DO
+          DO isp=1,N_Csp
+            DIAGS(ng)%DiaBio3d(i,j,:,iPOCTot(isp)) = 0
+            DO m=1,Npom    
+              DIAGS(ng)%DiaBio3d(i,j,:,iPOCTot(isp)) &
+              = DIAGS(ng)%DiaBio3d(i,j,:,iPOCTot(isp)) + OCEAN(ng)%t(i,j,:,nnew(ng),iPOC(isp,m))
+            END DO
+          END DO
+          DO isp=1,N_Nsp
+            DIAGS(ng)%DiaBio3d(i,j,:,iDONTot(isp)) = 0
+            DO m=1,Ndom    
+              DIAGS(ng)%DiaBio3d(i,j,:,iDONTot(isp)) &
+              = DIAGS(ng)%DiaBio3d(i,j,:,iDONTot(isp)) + OCEAN(ng)%t(i,j,:,nnew(ng),iDON(isp,m))
+            END DO
+          END DO
+          DO isp=1,N_Nsp
+            DIAGS(ng)%DiaBio3d(i,j,:,iPONTot(isp)) = 0
+            DO m=1,Npom    
+              DIAGS(ng)%DiaBio3d(i,j,:,iPONTot(isp)) &
+              = DIAGS(ng)%DiaBio3d(i,j,:,iPONTot(isp)) + OCEAN(ng)%t(i,j,:,nnew(ng),iPON(isp,m))
+            END DO
+          END DO
+          DO isp=1,N_Psp
+            DIAGS(ng)%DiaBio3d(i,j,:,iDOPTot(isp)) = 0
+            DO m=1,Ndom    
+              DIAGS(ng)%DiaBio3d(i,j,:,iDOPTot(isp)) &
+              = DIAGS(ng)%DiaBio3d(i,j,:,iDOPTot(isp)) + OCEAN(ng)%t(i,j,:,nnew(ng),iDOP(isp,m))
+            END DO
+          END DO
+          DO isp=1,N_Psp
+            DIAGS(ng)%DiaBio3d(i,j,:,iPOPTot(isp)) = 0
+            DO m=1,Npom    
+              DIAGS(ng)%DiaBio3d(i,j,:,iPOPTot(isp)) &
+              = DIAGS(ng)%DiaBio3d(i,j,:,iPOPTot(isp)) + OCEAN(ng)%t(i,j,:,nnew(ng),iPOP(isp,m))
+            END DO
+          END DO
+          DO isp=1,N_Csp
+            DIAGS(ng)%DiaBio3d(i,j,:,iPhyCTot(isp)) = 0
+            DO m=1,Nphy    
+              DIAGS(ng)%DiaBio3d(i,j,:,iPhyCTot(isp)) &
+              = DIAGS(ng)%DiaBio3d(i,j,:,iPhyCTot(isp)) + OCEAN(ng)%t(i,j,:,nnew(ng),iPhyC(isp,m))
+            END DO
+          END DO
+          DO isp=1,N_Csp
+            DIAGS(ng)%DiaBio3d(i,j,:,iZooCTot(isp)) = 0
+            DO m=1,Nzoo    
+              DIAGS(ng)%DiaBio3d(i,j,:,iZooCTot(isp)) &
+              = DIAGS(ng)%DiaBio3d(i,j,:,iZooCTot(isp)) + OCEAN(ng)%t(i,j,:,nnew(ng),iZooC(isp,m))
+            END DO
+          END DO
+          DO isp=1,N_Nsp
+            DIAGS(ng)%DiaBio3d(i,j,:,iPhyNTot(isp)) = 0
+            DO m=1,Nphy    
+              DIAGS(ng)%DiaBio3d(i,j,:,iPhyNTot(isp)) &
+              = DIAGS(ng)%DiaBio3d(i,j,:,iPhyNTot(isp)) + OCEAN(ng)%t(i,j,:,nnew(ng),iPhyN(isp,m))
+            END DO
+          END DO
+          DO isp=1,N_Nsp
+            DIAGS(ng)%DiaBio3d(i,j,:,iZooNTot(isp)) = 0
+            DO m=1,Nzoo    
+              DIAGS(ng)%DiaBio3d(i,j,:,iZooNTot(isp)) &
+              = DIAGS(ng)%DiaBio3d(i,j,:,iZooNTot(isp)) + OCEAN(ng)%t(i,j,:,nnew(ng),iZooN(isp,m))
+            END DO
+          END DO
+          DO isp=1,N_Psp
+            DIAGS(ng)%DiaBio3d(i,j,:,iPhyPTot(isp)) = 0
+            DO m=1,Nphy    
+              DIAGS(ng)%DiaBio3d(i,j,:,iPhyPTot(isp)) &
+              = DIAGS(ng)%DiaBio3d(i,j,:,iPhyPTot(isp)) + OCEAN(ng)%t(i,j,:,nnew(ng),iPhyP(isp,m))
+            END DO
+          END DO
+          DO isp=1,N_Psp
+            DIAGS(ng)%DiaBio3d(i,j,:,iZooPTot(isp)) = 0
+            DO m=1,Nzoo    
+              DIAGS(ng)%DiaBio3d(i,j,:,iZooPTot(isp)) &
+              = DIAGS(ng)%DiaBio3d(i,j,:,iZooPTot(isp)) + OCEAN(ng)%t(i,j,:,nnew(ng),iZooP(isp,m))
+            END DO
+          END DO
+          DO isp=1,N_Csp
+            DIAGS(ng)%DiaBio3d(i,j,:,iPICTot(isp)) = 0
+            DO m=1,Npim    
+              DIAGS(ng)%DiaBio3d(i,j,:,iPICTot(isp)) &
+              = DIAGS(ng)%DiaBio3d(i,j,:,iPICTot(isp)) + OCEAN(ng)%t(i,j,:,nnew(ng),iPIC(isp,m))
+            END DO
+          END DO
+        END DO
+      END DO
+!!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<YT:Add
+
 
       END SUBROUTINE send_reef_ecosys2roms_dia
 #endif
@@ -1704,29 +1990,18 @@
       LBj=BOUNDS(ng)%LBj(tile)
       UBj=BOUNDS(ng)%UBj(tile)
 
-!      CALL initialize_reef_ecosys(ng, N(ng)                        &
-!          , GRID(ng)%Hz(IstrR:IendR,JstrR:JendR,N(ng))             &
-!          , IstrR, IendR, JstrR, JendR                             &
-!          , .not. LReadBioINI(2,ng)                                &   ! TRUE = initialize coral, seagass, macroalgae, sediment from start; FALSE = continue from previous run
-!# ifdef SEAGRASS
-!          , GRID(ng)%om_r(IstrR:IendR,JstrR:JendR)                 &   ! grid size XI-direction (meters)
-!          , GRID(ng)%on_r(IstrR:IendR,JstrR:JendR)                 &   ! grid size ETA-direction (meters)
-!          , GRID(ng)%p_sgrass(Nsg,IstrR:IendR,JstrR:JendR)         &   ! seagrass coverage (habitat area in grid / grid area)
-!# endif
-!# ifdef BIVALVE
-!          , GRID(ng)%dens_aqua(Naq,IstrR:IendR,JstrR:JendR)        &   ! Aquaculture density
-!# endif
-!          )
       CALL initialize_reef_ecosys(ng, N(ng)                        &
           , GRID(ng)%Hz                                            &
-          , LBi, UBi, LBj, UBj                                     &
+          , IstrR, IendR, JstrR, JendR                                     &
           , .not. LReadBioINI(2,ng)                                &   ! TRUE = initialize coral, seagass, macroalgae, sediment from start; FALSE = continue from previous run
-# ifdef SEAGRASS
-          , IstrR, IendR, JstrR, JendR                             &
+# if defined SEAGRASS || defined SEDIMENT_ECOSYS
           , GRID(ng)%om_r(IstrR:IendR,JstrR:JendR)                 &   ! grid size XI-direction (meters)
           , GRID(ng)%on_r(IstrR:IendR,JstrR:JendR)                 &   ! grid size ETA-direction (meters)
+# endif
+# ifdef SEAGRASS
           , GRID(ng)%p_sgrass(Nsg,IstrR:IendR,JstrR:JendR)         &   ! seagrass coverage (habitat area in grid / grid area)
 # endif
+          , GRID(ng)%p_sand(IstrR:IendR,JstrR:JendR)         &   ! sand coverage (sand area in grid / grid area)
 # ifdef BIVALVE
           , GRID(ng)%dens_aqua                                     &   ! Aquaculture density
 # endif

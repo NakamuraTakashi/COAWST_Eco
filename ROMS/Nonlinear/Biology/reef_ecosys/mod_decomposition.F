@@ -174,6 +174,7 @@ CONTAINS
         ! R17:  FeS + 2O2 --> Fe2+ + SO42-
         ! R18:  2FeS2 + 7O2 + 2H2O --> 2Fe2+ + 4SO42- + 4H+
         ! R19:  4S0 + 4H2O --> 3H2S + SO42- + 2H+
+    ! yuta comment: In this reaction model, if POM/DOM is high, oxygen is quickly consumed and goes to zero causing problems. Maybe a michaelis-menten based model would be better???
 !!!! ============================================================== !!!
     !! ----------- Decomposition rate constant for organic matter ------------- !!
     !! DOM
@@ -191,9 +192,11 @@ CONTAINS
 !                                    LDOM    RDOM
 !    real(8),parameter :: kdom(2) = [ 1.0d-4, 5.0d-8 ]  ! For  dom (s-1)           
     real(8),parameter :: kdom(2) = [ 1.0d-6, 1.0d-10 ]  ! For  dom (s-1)           
+    ! real(8),parameter :: kdom(2) = [ 0.0d0 , 0.0d0 ]  ! For  dom (s-1)        yt_debug just for testing   
 !                                    LPOM    RPOM
 !    real(8),parameter :: kpom(2) = [ 9.6d-6, 1.2d-8 ]  ! For  pom (s-1) Fossing (2004)
     real(8),parameter :: kpom(3) = [ 1.0d-6, 1.0d-11, 2.5d-8 ]  ! For  pom (s-1) Kasih (2009)
+    ! real(8),parameter :: kpom(3) = [ 0.0d0, 0.0d0, 0.0d0 ]  ! For  pom        yt_debug just for testing
 
     !! Reaction rate constants
     ! real(8),parameter :: k6  = 2.5d-6  ! For R6  (uM-1 s-1)           Fossing(2004)
@@ -403,7 +406,7 @@ CONTAINS
 
     ! R:  CaCO3 --> Ca2+ + CO3(2-) 
     vdiss = cfs *(-a_diss * Warg + b_diss)* cPIC ! Yamamoto et al. (2012)
-    Vdiss = max(vdiss,0.0d0)
+    vdiss = max(vdiss,0.0d0)
 
 !    if (Vdiss < 0.0d0) then
 !      Vdiss=-1.1d-3*(Warg-1.d0)**1.63d0  ! Calcification rate (nmol cm-2 s-1)

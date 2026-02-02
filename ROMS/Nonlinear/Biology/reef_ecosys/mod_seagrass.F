@@ -11,7 +11,7 @@
 !!! **                                                                                              **
 !!! ** -------------------------------------------------------------------------------------------- **
 !!! **                                                                                              **
-!!! **    This is the updated seagrass module devloped by Yuta A. Takagi (2023)                     **
+!!! **    This is the updated seagrass module devloped by Yuta A. Takagi (2023-2026)                **
 !!! **    Use CPP flag SEAGRASS in your header file to enable                                       **
 !!! **                                                                                              **
 !!! **************************************************************************************************
@@ -116,15 +116,15 @@ MODULE mod_seagrass
 ! >>> Saved Values <<< !
     ! Update at end of main interval
     real(8), pointer :: SgCBmF                              (:,  :,:,:)   ! [umol.C m-2.sg.hab]         iSgSgCBm      Seagrass leaf+root carbon-biomass per unit ground area (in seagrass habitat area) updates on fine time interval
-    real(8), pointer :: DICstock                            (:,  :,:,:)   ! [umol.DIC m-2.sg.hab]                     Seagrass internal DIC stock per unit ground area (in seagrass habitat area)
-    real(8), pointer :: CH2Ostock                           (:,  :,:,:)   ! [umol.CH2O m-2.sg.hab]                    Seagrass internal sugar stock per unit ground area (in seagrass habitat area)
-    real(8), pointer :: DOstock                             (    :,:,:)   ! [umol.DO m-2.sg.hab]                      Seagrass internal DO stock per unit ground area (in seagrass habitat area)
+    real(8), pointer :: DICstock                            (:,  :,:,:)   ! [umol.DIC m-2.sg.hab]       iSgDICstock   Seagrass internal DIC stock per unit ground area (in seagrass habitat area)
+    real(8), pointer :: CH2Ostock                           (:,  :,:,:)   ! [umol.CH2O m-2.sg.hab]      iSgCH2Ostock  Seagrass internal sugar stock per unit ground area (in seagrass habitat area)
+    real(8), pointer :: DOstock                             (    :,:,:)   ! [umol.DO m-2.sg.hab]        iSgDOstock    Seagrass internal DO stock per unit ground area (in seagrass habitat area)
 #  if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
-    real(8), pointer :: SgNBmF                              (:,  :,:,:)   ! [umol.N m-2.sg.hab]         iSgSgCBm      Seagrass leaf+root nitrogen-biomass per unit ground area (in seagrass habitat area) updates on fine time interval
-    real(8), pointer :: SgPBmF                              (:,  :,:,:)   ! [umol.P m-2.sg.hab]         iSgSgCBm      Seagrass leaf+root phosphorus-biomass per unit ground area (in seagrass habitat area) updates on fine time interval
-    real(8), pointer :: NO3stock                            (:,  :,:,:)   ! [umol.NO3 m-2.sg.hab]                     Seagrass internal NO3 stock per unit ground area (in seagrass habitat area)
-    real(8), pointer :: NH4stock                            (:,  :,:,:)   ! [umol.NH4 m-2.sg.hab]                     Seagrass internal NH4 stock per unit ground area (in seagrass habitat area)
-    real(8), pointer :: PO4stock                            (:,  :,:,:)   ! [umol.PO4 m-2.sg.hab]                     Seagrass internal PO4 stock per unit ground area (in seagrass habitat area)
+    real(8), pointer :: SgNBmF                              (:,  :,:,:)   ! [umol.N m-2.sg.hab]         iSgSgNBm      Seagrass leaf+root nitrogen-biomass per unit ground area (in seagrass habitat area) updates on fine time interval
+    real(8), pointer :: SgPBmF                              (:,  :,:,:)   ! [umol.P m-2.sg.hab]         iSgSgPBm      Seagrass leaf+root phosphorus-biomass per unit ground area (in seagrass habitat area) updates on fine time interval
+    real(8), pointer :: NO3stock                            (:,  :,:,:)   ! [umol.NO3 m-2.sg.hab]       iSgNO3stock   Seagrass internal NO3 stock per unit ground area (in seagrass habitat area)
+    real(8), pointer :: NH4stock                            (:,  :,:,:)   ! [umol.NH4 m-2.sg.hab]       iSgNH4stock   Seagrass internal NH4 stock per unit ground area (in seagrass habitat area)
+    real(8), pointer :: PO4stock                            (:,  :,:,:)   ! [umol.PO4 m-2.sg.hab]       iSgPO4stock   Seagrass internal PO4 stock per unit ground area (in seagrass habitat area)
 #  endif
     real(8), pointer :: TotSgCBmF                               (:,:,:)   ! [mol.C.tot]                 iSgTotSgCBm   Total seagrass carbon-biomass in grid. updates on fine time interval
     ! Update at end of growth interval
@@ -162,10 +162,10 @@ MODULE mod_seagrass
 
 # if defined NET_ZERO_MASS_START
 ! >>> Calculate initial seagrass mass balance and destroy (erase) equivalent amount of mass output until net zero is reached, before switching to normal flux <<< !
-    real(8), pointer :: InitialC                                (:,:,:)   ! [mmol.C]                    Initial carbon remaining to destroy until net zero
+    real(8), pointer :: InitialC                                (:,:,:)   ! [mmol.C]                    iSgInitC        Initial carbon remaining to destroy until net zero
 #  if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
-    real(8), pointer :: InitialN                                (:,:,:)   ! [mmol.N]                    Initial nitrogen remaining to destroy until net zero
-    real(8), pointer :: InitialP                                (:,:,:)   ! [mmol.P]                    Initial phosphorus remaining to destroy until net zero
+    real(8), pointer :: InitialN                                (:,:,:)   ! [mmol.N]                    iSgInitN        Initial nitrogen remaining to destroy until net zero
+    real(8), pointer :: InitialP                                (:,:,:)   ! [mmol.P]                    iSgInitP        Initial phosphorus remaining to destroy until net zero
 #  endif
 # endif
 
@@ -392,7 +392,11 @@ MODULE mod_seagrass
     ! SGRASS(ng)%C_N_P_ratios                         = reshape([ 474d0, 24d0, 1d0 ],[3, Nsg])     ! C-N-P ratios: (CH2O)x(NH3)y(H3PO4)z  groups of three per species in list: order is [ sp1-C, sp1-N, sp1-P, sp2-C, sp2-N, sp2-P, etc. ]     ! Duerte (1990) C:N:P = 474:24:1 for average across many species
     ! SGRASS(ng)%C_N_P_ratios                         = reshape([ 550d0, 30d0, 1d0 ],[3, Nsg])     ! C-N-P ratios: (CH2O)x(NH3)y(H3PO4)z  groups of three per species in list: order is [ sp1-C, sp1-N, sp1-P, sp2-C, sp2-N, sp2-P, etc. ]     ! Atkinson and Smith (1983) C:N:P = 550:30:1 for average across many species
     SGRASS(ng)%C_N_P_ratios                         = reshape([ 275d0, 35d0, 1d0 ],[3, Nsg])     ! C-N-P ratios: (CH2O)x(NH3)y(H3PO4)z  groups of three per species in list: order is [ sp1-C, sp1-N, sp1-P, sp2-C, sp2-N, sp2-P, etc. ]     ! same as Martins and Bandeira (2001) except carbon halved to account for variability in non-tissue sugar stock
-    SGRASS(ng)%f_above                              = [ 0.21d0   ]                                    ! [g.lf.drywt g-1.tot.drywt]  also [mol.C.lf mol-1.C.tot] Ideal above ground biomass to total biomass fraction                              ! 0.21 Mallombasi et al. (2020)
+    ! SGRASS(ng)%f_above                              = [ 0.21d0   ]                                    ! [g.lf.drywt g-1.tot.drywt]  also [mol.C.lf mol-1.C.tot] Ideal above ground biomass to total biomass fraction                              ! 0.21 Mallombasi et al. (2020)
+    SGRASS(ng)%f_above                              = [ 0.35d0   ]                                    ! [g.lf.drywt g-1.tot.drywt]  also [mol.C.lf mol-1.C.tot] Ideal above ground biomass to total biomass fraction                              ! 46.8 / 133.3 = 0.35 Watanabe chamber (2012)
+    ! SGRASS(ng)%f_above                              = [ 0.23d0   ]                                    ! [g.lf.drywt g-1.tot.drywt]  also [mol.C.lf mol-1.C.tot] Ideal above ground biomass to total biomass fraction                              ! 93 / (93 + 316) = 0.23 Takagi incubation (2025) T. hemprichii from coral debris area
+    ! SGRASS(ng)%f_above                              = [ 0.55d0   ]                                    ! [g.lf.drywt g-1.tot.drywt]  also [mol.C.lf mol-1.C.tot] Ideal above ground biomass to total biomass fraction                              ! 137 / (137 + 113) = 0.55 Takagi incubation (2025) T. hemprichii from sandy area
+    ! SGRASS(ng)%f_above                              = [ 0.49d0   ]                                    ! [g.lf.drywt g-1.tot.drywt]  also [mol.C.lf mol-1.C.tot] Ideal above ground biomass to total biomass fraction                              ! 38 / (38 + 40) = 0.49 Takagi incubation (2025) H. uninervis from sandy area
     ! SGRASS(ng)%f_above                            = [ 1.0d0    ]                                    ! [g.lf.drywt g-1.tot.drywt]  also [mol.C.lf mol-1.C.tot] Ideal above ground biomass to total biomass fraction                              ! yt_debug testing
     SGRASS(ng)%rho_lf                               = [ 0.069d0  ]                                    ! [kg.drywt m-2.leaf]         Rho_leaf: Species specific leaf mass density                                                                  ! 0.069 kg/m2 Calculated from Zulfikar et al. (2020) 
     SGRASS(ng)%k_proj                               = [ 0.8d0    ]                                    ! [m2.sg.hab m-2.leaf]        Species specific leaf projection coefficient                                                                  ! 0.8 is a guess
@@ -430,21 +434,36 @@ MODULE mod_seagrass
     enddo
     SGRASS(ng)%root_mass_profile(1, :) = SGRASS(ng)%root_mass_profile(1, :) / sum(SGRASS(ng)%root_mass_profile(1, :)); ! Mass ratio of roots in each layer (total must sum to 1.0)
     SGRASS(ng)%root_mass_profile(1, 1) = 1.0d0 - sum(SGRASS(ng)%root_mass_profile(1, 2:Nsed));                         ! make up for numerical inaccuracy to force to sum to 1.0
+    do k=1,Nsed
+      write(*,*) 'seagrass root mass profile: k = ', k, 'zr(k) = ', SEDECO(ng)%zr(k), 'root_mass_profile(1, k) = ' &
+                                                   , SGRASS(ng)%root_mass_profile(1, k)
+    enddo
     write(*,*) 'yt_debug: mod_seagrass.F initialize_seagrass() after root_mass_profile assigment'
     
 # endif
 
     ! photoynthesis: light-limit
     ! SGRASS(ng)%P_max                              = [ 3.45d0   ]                                    ! [umol.C m-2.leaf s-1]       Species specific maximum photoynthesis rate                                                                   ! 50 µmol/kg/s Calculated from net photosynthesis data from Bjo ̈rk et al. (1997) or 3.45 µmol.C m-2.leaf s-1 (see master's thesis section 6.3.2c)
-    SGRASS(ng)%P_max                                = [ 73.8d0   ]                                    ! [umol.C m-2.leaf s-1]       Species specific maximum photoynthesis rate                                                                   ! tuning: when R_basal = 2.5265d0 (half-life in complete darkness is ~7.0 days), biomass reaches equilibrium at 2 kg.drywt/m2.hab under max-photosynthesis.
+    ! SGRASS(ng)%P_max                                = [ 73.8d0   ]                                    ! [umol.C m-2.leaf s-1]       Species specific maximum photoynthesis rate                                                                   ! tuning: when R_basal = 2.5265d0 (half-life in complete darkness is ~7.0 days), biomass reaches equilibrium at 2 kg.drywt/m2.hab under max-photosynthesis.
     ! SGRASS(ng)%P_max                              = [ 34.5d0   ]                                    ! [umol.C m-2.leaf s-1]       Species specific maximum photoynthesis rate                                                                   ! yt_debug testing
-    SGRASS(ng)%I_k                                  = [ 180d0    ]                                    ! [umol.photon m-2 s-1]       Irradiance where the initial slope intersects P_max on the photosynthesis-irradiance curve                    ! Calculated from rETR data from Liu et al. (2005), rETR to ETR conversion using Aquation (2020), ETR to carbon assimilation rate using Miyazawa and Yahata (2006), and a leaf bend angle of 10◦ from James et al. (2021) (refer to master's thesi Section 6.3.2b)
+    ! SGRASS(ng)%P_max                                = [ 0.55d0   ]                                    ! [umol.C m-2.leaf s-1]       Species specific maximum photoynthesis rate                                                                   ! yuta 2025 incubation experiment T. hemprichii leaf net photosynthesis rate 123 [umol h-1 g-1]; leaf area to dryweight 0.616 [cm2 mg-1];   123 (umol/hg) / 0.616 (cm2/mg) * (10000cm2/m2) (h/3600s) (g/1000mg) = 0.5547
+    ! SGRASS(ng)%P_max                                = [ 0.65d0   ]                                    ! [umol.C m-2.leaf s-1]       Species specific maximum photoynthesis rate                                                                   ! yuta 2025 incubation experiment H. uninervis leaf net photosynthesis rate 198.44 [umol h-1 g-1]; leaf area to dryweight 0.851 [cm2 mg-1];   198.44 (umol/hg) / 0.851 (cm2/mg) * (10000cm2/m2) (h/3600s) (g/1000mg) = 0.6477
+    ! SGRASS(ng)%P_max                                = [ 0.74d0   ]                                    ! [umol.C m-2.leaf s-1]       Species specific maximum photoynthesis rate                                                                   ! yuta 2025 incubation experiment T. hemprichii leaf gross photosynthesis rate 163.76 [umol h-1 g-1]; leaf area to dryweight 0.616 [cm2 mg-1];   163.76 (umol/hg) / 0.616 (cm2/mg) * (10000cm2/m2) (h/3600s) (g/1000mg) = 0.7385
+    ! SGRASS(ng)%P_max                                = [ 0.86d0   ]                                    ! [umol.C m-2.leaf s-1]       Species specific maximum photoynthesis rate                                                                   ! yuta 2025 incubation experiment H. uninervis leaf gross photosynthesis rate 263.90 [umol h-1 g-1]; leaf area to dryweight 0.851 [cm2 mg-1];   263.90 (umol/hg) / 0.851 (cm2/mg) * (10000cm2/m2) (h/3600s) (g/1000mg) = 0.8614
+    ! SGRASS(ng)%I_k                                  = [ 180d0    ]                                    ! [umol.photon m-2 s-1]       Irradiance where the initial slope intersects P_max on the photosynthesis-irradiance curve                    ! Calculated from rETR data from Liu et al. (2005), rETR to ETR conversion using Aquation (2020), ETR to carbon assimilation rate using Miyazawa and Yahata (2006), and a leaf bend angle of 10◦ from James et al. (2021) (refer to master's thesi Section 6.3.2b)
+    ! SGRASS(ng)%P_max                                = [ 150.0d0  ]                                    ! [umol.C m-2.leaf s-1]       Species specific maximum photoynthesis rate                                                                   ! tuning to fit Watanabe 2012 chamber
+    ! SGRASS(ng)%P_max                                = [ 64.0d0  ]                                    ! [umol.C m-2.leaf s-1]       Species specific maximum photoynthesis rate                                                                   ! tuning to fit Watanabe 2012 chamber
+    SGRASS(ng)%P_max                                = [ 60.0d0  ]                                    ! [umol.C m-2.leaf s-1]       Species specific maximum photoynthesis rate                                                                   ! tuning to fit Watanabe 2012 chamber
+    ! SGRASS(ng)%I_k                                  = [ 1100.0d0  ]                                    ! [umol.photon m-2 s-1]       Irradiance where the initial slope intersects P_max on the photosynthesis-irradiance curve                    ! tuning to fit Watanabe 2012 chamber
+    SGRASS(ng)%I_k                                  = [ 850.0d0  ]                                    ! [umol.photon m-2 s-1]       Irradiance where the initial slope intersects P_max on the photosynthesis-irradiance curve                    ! tuning to fit Watanabe 2012 chamber
 
     ! photoynthesis: DIC-limit
     ! SGRASS(ng)%Lf_DIC_uptake_max                    = [ 73.8d0   ]                                    ! [umol.DIC m-2.lf s-1]       Maximum uptake rate of DIC in the leaves                                                                      ! tuning set equal to P_max
-    SGRASS(ng)%Lf_DIC_uptake_max                    = [ 1.0696d0 ]                                    ! [umol.DIC g-1.lf.drywt s-1] Maximum uptake rate of DIC in the leaves                                                                      ! tuning set equal to P_max [73.8 umol/m2 s] / [0.069 kg/m2] [kg/1000g] = 1.0696 [ umol/g s]
-    ! SGRASS(ng)%k_lf_DIC                             = [ 4500d0   ]                                    ! [umol.DIC L-1]              Half saturation consentration of DIC in water column for growth                                             ! 4500 µmol L-1 from Bjo ̈rk et al. (1997) (master's thesis section 6.3.2b)
-    SGRASS(ng)%k_lf_DIC                             = [ 3000.0d0 ]                                    ! [umol.DIC L-1]              Half saturation consentration of DIC in water column for growth                                               ! yt_edit Tuning
+    ! SGRASS(ng)%Lf_DIC_uptake_max                    = [ 1.0696d0 ]                                    ! [umol.DIC g-1.lf.drywt s-1] Maximum uptake rate of DIC in the leaves                                                                      ! tuning set equal to P_max [73.8 umol/m2 s] / [0.069 kg/m2] [kg/1000g] = 1.0696 [ umol/g s]
+    ! SGRASS(ng)%Lf_DIC_uptake_max                    = [ 5.0d0    ]                                    ! [umol.DIC g-1.lf.drywt s-1] Maximum uptake rate of DIC in the leaves                                                                      ! 
+    SGRASS(ng)%Lf_DIC_uptake_max                    = [ 1.0d0    ]                                    ! [umol.DIC g-1.lf.drywt s-1] Maximum uptake rate of DIC in the leaves                                                                      ! tuning set equal to P_max [64 umol/m2 s] / [0.069 kg/m2] [kg/1000g] = 0.9275 [ umol/g s]
+    SGRASS(ng)%k_lf_DIC                             = [ 4500d0   ]                                    ! [umol.DIC L-1]              Half saturation consentration of DIC in water column for growth                                             ! 4500 µmol L-1 from Bjo ̈rk et al. (1997) (master's thesis section 6.3.2b)
+    ! SGRASS(ng)%k_lf_DIC                             = [ 3000.0d0 ]                                    ! [umol.DIC L-1]              Half saturation consentration of DIC in water column for growth                                               ! yt_edit Tuning
 # if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE
     ! SGRASS(ng)%Rt_DIC_flux_max                      = [ 73.8d0/0.069d0 ]                              ! [umol.DIC g-1.rt.drywt s-1] Maximum uptake rate of DIC in the roots                                                                       ! yt_edit Tuning
     SGRASS(ng)%Rt_DIC_flux_max                      = [ 0.0d0 ]                                                                                              ! yt_edit Tuning
@@ -462,17 +481,44 @@ MODULE mod_seagrass
     ! SGRASS(ng)%Lf_PO4_uptake_max                    = [ 73.8d0/545d0 ]                                ! [umol.PO4 m-2.lf s-1]       Maximum uptake rate of PO4 in the leaves                                                                      ! yt_edit tuning  set equal to max photosynthesis
     ! SGRASS(ng)%k_lf_PO4                             = [ 11.2d0   ]                                    ! [umol.PO4 L-1]              Half saturation consentration of PO4 in water column for growth                                               ! Stapel et al. (1996) (master's thesis Section 6.3.5b)
     ! SGRASS(ng)%smin_lf_PO4                          = [ 0.0d0    ]                                    ! [umol.PO4 L-1]              Minimum consentration of PO4 in water column for uptake                                               
-    SGRASS(ng)%Lf_NO3_uptake_max                    = [ 14.6d0/3600d0 ]                               ! [umol.NO3 g-1.lf.drywt s-1] Maximum uptake rate of NO3 in the leaves                                                                      ! Yuta seagrass experiment - Thalassia hemprichii
-    SGRASS(ng)%k_lf_NO3                             = [ 2.39d0   ]                                    ! [umol.NO3 L-1]              Half saturation consentration of NO3 in water column for growth                                               ! Yuta seagrass experiment - Thalassia hemprichii
-    SGRASS(ng)%smin_lf_NO3                          = [ 0.58d0   ]                                    ! [umol.NO3 L-1]              Minimum consentration of NO3 in water column for uptake                                                       ! Yuta seagrass experiment - Thalassia hemprichii
-    SGRASS(ng)%Lf_NO3_ratio_slope                   = [ 1.85d0   ]                                    ! [ ]                         Slope of nitrogen species ratio term to multiply michaelis-menten                                             ! Yuta seagrass experiment - Thalassia hemprichii
-    SGRASS(ng)%Lf_NH4_uptake_max                    = [ 13.3d0/3600d0 ]                               ! [umol.NH4 g-1.lf.drywt s-1] Maximum uptake rate of NH4 in the leaves                                                                      ! Yuta seagrass experiment - Thalassia hemprichii
-    SGRASS(ng)%k_lf_NH4                             = [ 2.17d0   ]                                    ! [umol.NH4 L-1]              Half saturation consentration of NH4 in water column for growth                                               ! Yuta seagrass experiment - Thalassia hemprichii
-    SGRASS(ng)%smin_lf_NH4                          = [ 0.39d0   ]                                    ! [umol.NH4 L-1]              Minimum consentration of NH4 in water column for uptake                                                       ! Yuta seagrass experiment - Thalassia hemprichii
-    SGRASS(ng)%Lf_NH4_ratio_slope                   = [ 1.49d0   ]                                    ! [ ]                         Slope of nitrogen species ratio term to multiply michaelis-menten                                             ! Yuta seagrass experiment - Thalassia hemprichii
-    SGRASS(ng)%Lf_PO4_uptake_max                    = [ 1.50d0/3600d0 ]                               ! [umol.PO4 g-1.lf.drywt s-1] Maximum uptake rate of PO4 in the leaves                                                                      ! Yuta seagrass experiment - Thalassia hemprichii
-    SGRASS(ng)%k_lf_PO4                             = [ 0.36d0   ]                                    ! [umol.PO4 L-1]              Half saturation consentration of PO4 in water column for growth                                               ! Yuta seagrass experiment - Thalassia hemprichii
-    SGRASS(ng)%smin_lf_PO4                          = [ 0.02d0   ]                                    ! [umol.PO4 L-1]              Minimum consentration of PO4 in water column for uptake                                                       ! Yuta seagrass experiment - Thalassia hemprichii
+
+    SGRASS(ng)%Lf_NO3_uptake_max                    = [ 14.6d0/3600d0 ]                               ! [umol.NO3 g-1.lf.drywt s-1] Maximum uptake rate of NO3 in the leaves                                                                      ! Yuta 2025 seagrass experiment - Thalassia hemprichii (ser. A)
+    SGRASS(ng)%k_lf_NO3                             = [ 2.39d0   ]                                    ! [umol.NO3 L-1]              Half saturation consentration of NO3 in water column for growth                                               ! Yuta 2025 seagrass experiment - Thalassia hemprichii (ser. A)
+    ! SGRASS(ng)%Lf_NO3_uptake_max                    = [ 77.7d0/3600d0 ]                               ! [umol.NO3 g-1.lf.drywt s-1] Maximum uptake rate of NO3 in the leaves                                                                      ! Yuta 2025 seagrass experiment - Thalassia hemprichii (ser. C)
+    ! SGRASS(ng)%k_lf_NO3                             = [ 24.2d0   ]                                    ! [umol.NO3 L-1]              Half saturation consentration of NO3 in water column for growth                                               ! Yuta 2025 seagrass experiment - Thalassia hemprichii (ser. C)
+    ! SGRASS(ng)%smin_lf_NO3                          = [ 0.58d0   ]                                    ! [umol.NO3 L-1]              Minimum consentration of NO3 in water column for uptake                                                       ! Yuta 2025 seagrass experiment - Thalassia hemprichii (ser. A)
+    SGRASS(ng)%smin_lf_NO3                          = [ 0.0d0   ]                                    ! [umol.NO3 L-1]              Minimum consentration of NO3 in water column for uptake                                                       ! Yuta 2025 seagrass experiment - Thalassia hemprichii (ser. A)
+    SGRASS(ng)%Lf_NO3_ratio_slope                   = [ 1.85d0   ]                                    ! [ ]                         Slope of nitrogen species ratio term to multiply michaelis-menten                                             ! Yuta 2025 seagrass experiment - Thalassia hemprichii
+    SGRASS(ng)%Lf_NH4_uptake_max                    = [ 13.3d0/3600d0 ]                               ! [umol.NH4 g-1.lf.drywt s-1] Maximum uptake rate of NH4 in the leaves                                                                      ! Yuta 2025 seagrass experiment - Thalassia hemprichii (ser. A)
+    SGRASS(ng)%k_lf_NH4                             = [ 2.17d0   ]                                    ! [umol.NH4 L-1]              Half saturation consentration of NH4 in water column for growth                                               ! Yuta 2025 seagrass experiment - Thalassia hemprichii (ser. A)
+    ! SGRASS(ng)%Lf_NH4_uptake_max                    = [ 282d0/3600d0  ]                               ! [umol.NH4 g-1.lf.drywt s-1] Maximum uptake rate of NH4 in the leaves                                                                      ! Yuta 2025 seagrass experiment - Thalassia hemprichii (ser. C)
+    ! SGRASS(ng)%k_lf_NH4                             = [ 52.1d0   ]                                    ! [umol.NH4 L-1]              Half saturation consentration of NH4 in water column for growth                                               ! Yuta 2025 seagrass experiment - Thalassia hemprichii (ser. C)
+    SGRASS(ng)%smin_lf_NH4                          = [ 0.39d0   ]                                    ! [umol.NH4 L-1]              Minimum consentration of NH4 in water column for uptake                                                       ! Yuta 2025 seagrass experiment - Thalassia hemprichii (ser. A)
+    SGRASS(ng)%Lf_NH4_ratio_slope                   = [ 1.49d0   ]                                    ! [ ]                         Slope of nitrogen species ratio term to multiply michaelis-menten                                             ! Yuta 2025 seagrass experiment - Thalassia hemprichii
+    SGRASS(ng)%Lf_PO4_uptake_max                    = [ 1.50d0/3600d0 ]                               ! [umol.PO4 g-1.lf.drywt s-1] Maximum uptake rate of PO4 in the leaves                                                                      ! Yuta 2025 seagrass experiment - Thalassia hemprichii (ser. A)
+    SGRASS(ng)%k_lf_PO4                             = [ 0.36d0   ]                                    ! [umol.PO4 L-1]              Half saturation consentration of PO4 in water column for growth                                               ! Yuta 2025 seagrass experiment - Thalassia hemprichii (ser. A)
+    ! SGRASS(ng)%Lf_PO4_uptake_max                    = [ 31.7d0/3600d0 ]                               ! [umol.PO4 g-1.lf.drywt s-1] Maximum uptake rate of PO4 in the leaves                                                                      ! Yuta 2025 seagrass experiment - Thalassia hemprichii (ser. C)
+    ! SGRASS(ng)%k_lf_PO4                             = [ 13.1d0   ]                                    ! [umol.PO4 L-1]              Half saturation consentration of PO4 in water column for growth                                               ! Yuta 2025 seagrass experiment - Thalassia hemprichii (ser. C)
+    SGRASS(ng)%smin_lf_PO4                          = [ 0.02d0   ]                                    ! [umol.PO4 L-1]              Minimum consentration of PO4 in water column for uptake                                                       ! Yuta 2025 seagrass experiment - Thalassia hemprichii (ser. A)
+
+    ! SGRASS(ng)%Lf_NO3_uptake_max                    = [ 73.5d0/3600d0 ]                               ! [umol.NO3 g-1.lf.drywt s-1] Maximum uptake rate of NO3 in the leaves                                                                      ! Yuta 2025 seagrass experiment - Halodule uninervis (ser. A)
+    ! SGRASS(ng)%k_lf_NO3                             = [ 7.07d0   ]                                    ! [umol.NO3 L-1]              Half saturation consentration of NO3 in water column for growth                                               ! Yuta 2025 seagrass experiment - Halodule uninervis (ser. A)
+    ! ! SGRASS(ng)%Lf_NO3_uptake_max                    = [ 92.8d0/3600d0 ]                               ! [umol.NO3 g-1.lf.drywt s-1] Maximum uptake rate of NO3 in the leaves                                                                      ! Yuta 2025 seagrass experiment - Halodule uninervis (ser. C)
+    ! ! SGRASS(ng)%k_lf_NO3                             = [ 12.7d0   ]                                    ! [umol.NO3 L-1]              Half saturation consentration of NO3 in water column for growth                                               ! Yuta 2025 seagrass experiment - Halodule uninervis (ser. C)
+    ! SGRASS(ng)%smin_lf_NO3                          = [ 0.78d0   ]                                    ! [umol.NO3 L-1]              Minimum consentration of NO3 in water column for uptake                                                       ! Yuta 2025 seagrass experiment - Halodule uninervis (ser. A)
+    ! SGRASS(ng)%Lf_NO3_ratio_slope                   = [ 1.63d0   ]                                    ! [ ]                         Slope of nitrogen species ratio term to multiply michaelis-menten                                             ! Yuta 2025 seagrass experiment - Halodule uninervis
+    ! SGRASS(ng)%Lf_NH4_uptake_max                    = [ 46.5d0/3600d0 ]                               ! [umol.NH4 g-1.lf.drywt s-1] Maximum uptake rate of NH4 in the leaves                                                                      ! Yuta 2025 seagrass experiment - Halodule uninervis (ser. A)
+    ! SGRASS(ng)%k_lf_NH4                             = [ 3.53d0   ]                                    ! [umol.NH4 L-1]              Half saturation consentration of NH4 in water column for growth                                               ! Yuta 2025 seagrass experiment - Halodule uninervis (ser. A)
+    ! ! SGRASS(ng)%Lf_NH4_uptake_max                    = [ 505d0/3600d0  ]                               ! [umol.NH4 g-1.lf.drywt s-1] Maximum uptake rate of NH4 in the leaves                                                                      ! Yuta 2025 seagrass experiment - Halodule uninervis (ser. C)
+    ! ! SGRASS(ng)%k_lf_NH4                             = [ 45.2d0   ]                                    ! [umol.NH4 L-1]              Half saturation consentration of NH4 in water column for growth                                               ! Yuta 2025 seagrass experiment - Halodule uninervis (ser. C)
+    ! SGRASS(ng)%smin_lf_NH4                          = [ 0.46d0   ]                                    ! [umol.NH4 L-1]              Minimum consentration of NH4 in water column for uptake                                                       ! Yuta 2025 seagrass experiment - Halodule uninervis (ser. A)
+    ! SGRASS(ng)%Lf_NH4_ratio_slope                   = [ 2.25d0   ]                                    ! [ ]                         Slope of nitrogen species ratio term to multiply michaelis-menten                                             ! Yuta 2025 seagrass experiment - Halodule uninervis
+    ! SGRASS(ng)%Lf_PO4_uptake_max                    = [ 7.42d0/3600d0 ]                               ! [umol.PO4 g-1.lf.drywt s-1] Maximum uptake rate of PO4 in the leaves                                                                      ! Yuta 2025 seagrass experiment - Halodule uninervis (ser. A)
+    ! SGRASS(ng)%k_lf_PO4                             = [ 0.92d0   ]                                    ! [umol.PO4 L-1]              Half saturation consentration of PO4 in water column for growth                                               ! Yuta 2025 seagrass experiment - Halodule uninervis (ser. A)
+    ! ! SGRASS(ng)%Lf_PO4_uptake_max                    = [ 39.9d0/3600d0 ]                               ! [umol.PO4 g-1.lf.drywt s-1] Maximum uptake rate of PO4 in the leaves                                                                      ! Yuta 2025 seagrass experiment - Halodule uninervis (ser. C)
+    ! ! SGRASS(ng)%k_lf_PO4                             = [ 7.47d0   ]                                    ! [umol.PO4 L-1]              Half saturation consentration of PO4 in water column for growth                                               ! Yuta 2025 seagrass experiment - Halodule uninervis (ser. C)
+    ! SGRASS(ng)%smin_lf_PO4                          = [ 0.02d0   ]                                    ! [umol.PO4 L-1]              Minimum consentration of PO4 in water column for uptake                                                       ! Yuta 2025 seagrass experiment - Halodule uninervis (ser. A)
+
 # endif
 # if defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
     ! SGRASS(ng)%Rt_NO3_flux_max                      = [ 73.8d0/35d0/0.069d0 ]                         ! [umol.NO3 g-1.rt.drywt s-1] Maximum uptake rate of NO3 in the roots                                                                       ! yt_edit tuning, same as leaves
@@ -484,17 +530,31 @@ MODULE mod_seagrass
     ! SGRASS(ng)%Rt_PO4_flux_max                      = [ 73.8/545d0/0.069d0  ]                         ! [umol.PO4 g-1.rt.drywt s-1] Maximum uptake rate of PO4 in the roots                                                                       ! yt_edit tuning, same as leaves
     ! SGRASS(ng)%k_rt_PO4                             = [ 11.2d0*10d0 ]                                 ! [umol.PO4 L-1]              Half saturation consentration of PO4 in soil pore water for growth                                            ! yt_edit tuning, ten times higher than leaves
     ! SGRASS(ng)%smin_rt_PO4                          = [ 0.0d0    ]                                    ! [umol.PO4 L-1]              Minimum consentration of PO4 in soil pore water for uptake                                            
-    SGRASS(ng)%Rt_NO3_flux_max                      = [ 6581.0d0/3600d0 ]                               ! [umol.NO3 g-1.rt.drywt s-1] Maximum uptake rate of NO3 in the roots                                                                     ! Yuta seagrass experiment - Thalassia hemprichii
-    SGRASS(ng)%k_rt_NO3                             = [ 34417d0  ]                                    ! [umol.NO3 L-1]              Half saturation consentration of NO3 in soil pore water for growth                                            ! Yuta seagrass experiment - Thalassia hemprichii
-    SGRASS(ng)%smin_rt_NO3                          = [ 0.0d0    ]                                    ! [umol.NO3 L-1]              Minimum consentration of NO3 in soil pore water for uptake                                                    ! Yuta seagrass experiment - Thalassia hemprichii
-    SGRASS(ng)%Rt_NO3_ratio_slope                   = [ 1.91d0   ]                                    ! [ ]                         Slope of nitrogen species ratio term to multiply michaelis-menten                                             ! Yuta seagrass experiment - Thalassia hemprichii
-    SGRASS(ng)%Rt_NH4_flux_max                      = [ 43.0d0/3600d0 ]                               ! [umol.NH4 g-1.rt.drywt s-1] Maximum uptake rate of NH4 in the roots                                                                       ! Yuta seagrass experiment - Thalassia hemprichii
-    SGRASS(ng)%k_rt_NH4                             = [ 22.0d0 ]                                      ! [umol.NH4 L-1]              Half saturation consentration of NH4 in soil pore water for growth                                            ! Yuta seagrass experiment - Thalassia hemprichii
-    SGRASS(ng)%smin_rt_NH4                          = [ 0.0d0    ]                                    ! [umol.NH4 L-1]              Minimum consentration of NH4 in soil pore water for uptake                                                    ! Yuta seagrass experiment - Thalassia hemprichii
-    SGRASS(ng)%Rt_NH4_ratio_slope                   = [ 2.27d0   ]                                    ! [ ]                         Slope of nitrogen species ratio term to multiply michaelis-menten                                             ! Yuta seagrass experiment - Thalassia hemprichii
-    SGRASS(ng)%Rt_PO4_flux_max                      = [ 3.3d0/3600d0 ]                              ! [umol.PO4 g-1.rt.drywt s-1] Maximum uptake rate of PO4 in the roots                                                                         ! Yuta seagrass experiment - Thalassia hemprichii
-    SGRASS(ng)%k_rt_PO4                             = [ 1.45d0   ]                                    ! [umol.PO4 L-1]              Half saturation consentration of PO4 in soil pore water for growth                                            ! Yuta seagrass experiment - Thalassia hemprichii
-    SGRASS(ng)%smin_rt_PO4                          = [ 0.0d0    ]                                    ! [umol.PO4 L-1]              Minimum consentration of PO4 in soil pore water for uptake                                                    ! Yuta seagrass experiment - Thalassia hemprichii
+
+    SGRASS(ng)%Rt_NO3_flux_max                      = [ 6581.0d0/3600d0 ]                               ! [umol.NO3 g-1.rt.drywt s-1] Maximum uptake rate of NO3 in the roots                                                                     ! Yuta 2025 seagrass experiment - Thalassia hemprichii
+    SGRASS(ng)%k_rt_NO3                             = [ 34417d0  ]                                    ! [umol.NO3 L-1]              Half saturation consentration of NO3 in soil pore water for growth                                            ! Yuta 2025 seagrass experiment - Thalassia hemprichii
+    SGRASS(ng)%smin_rt_NO3                          = [ 0.0d0    ]                                    ! [umol.NO3 L-1]              Minimum consentration of NO3 in soil pore water for uptake                                                    ! Yuta 2025 seagrass experiment - Thalassia hemprichii
+    SGRASS(ng)%Rt_NO3_ratio_slope                   = [ 1.91d0   ]                                    ! [ ]                         Slope of nitrogen species ratio term to multiply michaelis-menten                                             ! Yuta 2025 seagrass experiment - Thalassia hemprichii
+    SGRASS(ng)%Rt_NH4_flux_max                      = [ 43.3d0/3600d0 ]                               ! [umol.NH4 g-1.rt.drywt s-1] Maximum uptake rate of NH4 in the roots                                                                       ! Yuta 2025 seagrass experiment - Thalassia hemprichii
+    SGRASS(ng)%k_rt_NH4                             = [ 21.5d0 ]                                      ! [umol.NH4 L-1]              Half saturation consentration of NH4 in soil pore water for growth                                            ! Yuta 2025 seagrass experiment - Thalassia hemprichii
+    SGRASS(ng)%smin_rt_NH4                          = [ 0.0d0    ]                                    ! [umol.NH4 L-1]              Minimum consentration of NH4 in soil pore water for uptake                                                    ! Yuta 2025 seagrass experiment - Thalassia hemprichii
+    SGRASS(ng)%Rt_NH4_ratio_slope                   = [ 2.27d0   ]                                    ! [ ]                         Slope of nitrogen species ratio term to multiply michaelis-menten                                             ! Yuta 2025 seagrass experiment - Thalassia hemprichii
+    SGRASS(ng)%Rt_PO4_flux_max                      = [ 3.32d0/3600d0  ]                              ! [umol.PO4 g-1.rt.drywt s-1] Maximum uptake rate of PO4 in the roots                                                                       ! Yuta 2025 seagrass experiment - Thalassia hemprichii
+    SGRASS(ng)%k_rt_PO4                             = [ 1.45d0   ]                                    ! [umol.PO4 L-1]              Half saturation consentration of PO4 in soil pore water for growth                                            ! Yuta 2025 seagrass experiment - Thalassia hemprichii
+    SGRASS(ng)%smin_rt_PO4                          = [ 0.0d0    ]                                    ! [umol.PO4 L-1]              Minimum consentration of PO4 in soil pore water for uptake                                                    ! Yuta 2025 seagrass experiment - Thalassia hemprichii
+
+    ! SGRASS(ng)%Rt_NO3_flux_max                      = [ 0.0d0/3600d0  ]                               ! [umol.NO3 g-1.rt.drywt s-1] Maximum uptake rate of NO3 in the roots                                                                       ! Yuta 2025 seagrass experiment - Halodule uninervis
+    ! SGRASS(ng)%k_rt_NO3                             = [ 0.0d0    ]                                    ! [umol.NO3 L-1]              Half saturation consentration of NO3 in soil pore water for growth                                            ! Yuta 2025 seagrass experiment - Halodule uninervis
+    ! SGRASS(ng)%smin_rt_NO3                          = [ 0.0d0    ]                                    ! [umol.NO3 L-1]              Minimum consentration of NO3 in soil pore water for uptake                                                    ! Yuta 2025 seagrass experiment - Halodule uninervis
+    ! SGRASS(ng)%Rt_NO3_ratio_slope                   = [ 1.63d0   ]                                    ! [ ]                         Slope of nitrogen species ratio term to multiply michaelis-menten                                             ! Yuta 2025 seagrass experiment - Halodule uninervis
+    ! SGRASS(ng)%Rt_NH4_flux_max                      = [ 49.7d0/3600d0 ]                               ! [umol.NH4 g-1.rt.drywt s-1] Maximum uptake rate of NH4 in the roots                                                                       ! Yuta 2025 seagrass experiment - Halodule uninervis
+    ! SGRASS(ng)%k_rt_NH4                             = [ 12.3d0 ]                                      ! [umol.NH4 L-1]              Half saturation consentration of NH4 in soil pore water for growth                                            ! Yuta 2025 seagrass experiment - Halodule uninervis
+    ! SGRASS(ng)%smin_rt_NH4                          = [ 0.0d0    ]                                    ! [umol.NH4 L-1]              Minimum consentration of NH4 in soil pore water for uptake                                                    ! Yuta 2025 seagrass experiment - Halodule uninervis
+    ! SGRASS(ng)%Rt_NH4_ratio_slope                   = [ 2.25d0   ]                                    ! [ ]                         Slope of nitrogen species ratio term to multiply michaelis-menten                                             ! Yuta 2025 seagrass experiment - Halodule uninervis
+    ! SGRASS(ng)%Rt_PO4_flux_max                      = [ 3.92d0/3600d0  ]                              ! [umol.PO4 g-1.rt.drywt s-1] Maximum uptake rate of PO4 in the roots                                                                       ! Yuta 2025 seagrass experiment - Halodule uninervis
+    ! SGRASS(ng)%k_rt_PO4                             = [ 0.54d0   ]                                    ! [umol.PO4 L-1]              Half saturation consentration of PO4 in soil pore water for growth                                            ! Yuta 2025 seagrass experiment - Halodule uninervis
+    ! SGRASS(ng)%smin_rt_PO4                          = [ 0.0d0    ]                                    ! [umol.PO4 L-1]              Minimum consentration of PO4 in soil pore water for uptake                                                    ! Yuta 2025 seagrass experiment - Halodule uninervis
+
 # endif
     ! respiration: DO-limit
     ! SGRASS(ng)%Lf_DO_uptake_max                     = [ 2.075d0  ]                                  ! [umol.DO m-2.lf s-1]        Maximum uptake rate of DO in the leaves                                                                       ! 2.075 umol.C/m2.leaf/s calculated from Rasmusson et al. (2020) (refer to master's thesis 6.3.3a)
@@ -509,16 +569,29 @@ MODULE mod_seagrass
 # endif
     ! respiration: required
     ! SGRASS(ng)%R_basal                              = [ 2.5265d0 ]                                    ! [umol.C m-2.leaf s-1]       Maximum respiration rate                                                                                      ! tuning: half-life in complete darkness is ~7.0 days.
-    SGRASS(ng)%R_basal                              = [ 0.0366d0 ]                                    ! [umol.C g-1.leaf s-1]       Maximum respiration rate                                                                                      ! tuning: half-life in complete darkness is ~7.0 days. [2.5265 umol/m2 s] / [0.069 kg/m2] [kg/1000g] = 0.0366 [ umol/g s]
-    SGRASS(ng)%Turnover_rate                        = [0.01      ]                                    ! [umol.C umol-1.C day-1]     Base mass turnover rate (dieoff) in fraction of mass per day
+    ! SGRASS(ng)%R_basal                              = [ 0.0366d0 ]                                    ! [umol.C g-1.leaf s-1]       Maximum respiration rate                                                                                      ! tuning: half-life in complete darkness is ~7.0 days. [2.5265 umol/m2 s] / [0.069 kg/m2] [kg/1000g] = 0.0366 [ umol/g s]
+    ! SGRASS(ng)%R_basal                              = [ 0.0111d0 ]                                    ! [umol.C g-1.leaf s-1]       Maximum respiration rate                                                                                      ! 40 umol O2 h-1 g-1 yuta 2025 nutrient experiment T. hemprichii leaf dark respiration   40 (umol/hg) * h/3600s = 0.0111 [umol.C g-1.leaf s-1]
+    ! SGRASS(ng)%R_basal                              = [ 0.0180d0 ]                                    ! [umol.C g-1.leaf s-1]       Maximum respiration rate                                                                                      ! 65 umol O2 h-1 g-1 yuta 2025 nutrient experiment H. uninervis leaf dark respiration   65 (umol/hg) * h/3600s = 0.0180 [umol.C g-1.leaf s-1]
+    ! SGRASS(ng)%R_basal                              = [ 0.0178d0 ]                                    ! [umol.C g-1.leaf s-1]       Maximum respiration rate                                                                                      ! 64 umol O2 h-1 g-1 yuta 2025 nutrient experiment T. hemprichii sand root respiration   64 (umol/hg) * h/3600s = 0.0178 [umol.C g-1.leaf s-1]
+    ! SGRASS(ng)%R_basal                              = [ 0.0045d0 ]                                    ! [umol.C g-1.leaf s-1]       Maximum respiration rate                                                                                      ! 16.14 umol O2 h-1 g-1 yuta 2025 nutrient experiment T. hemprichii coral root respiration   16.14 (umol/hg) * h/3600s = 0.0045 [umol.C g-1.leaf s-1]
+    ! SGRASS(ng)%R_basal                              = [ 0.0121d0 ]                                    ! [umol.C g-1.leaf s-1]       Maximum respiration rate                                                                                      ! 43 umol O2 h-1 g-1 yuta 2025 nutrient experiment H. uninervis root respiration   43 (umol/hg) * h/3600s = 0.0121 [umol.C g-1.leaf s-1]
+    ! SGRASS(ng)%R_basal                              = [ 0.05d0   ]                                    ! [umol.C g-1.leaf s-1]       Maximum respiration rate                                                                                      ! tuning to match Watanabe 2012 chamber
+    SGRASS(ng)%R_basal                              = [ 0.04d0   ]                                    ! [umol.C g-1.leaf s-1]       Maximum respiration rate                                                                                      ! tuning to match Watanabe 2012 chamber
+    ! SGRASS(ng)%Turnover_rate                        = [0.01d0    ]                                    ! [umol.C umol-1.C day-1]     Base mass turnover rate (dieoff) in fraction of mass per day
+    ! SGRASS(ng)%Turnover_rate                        = [0.00002d0     ]                                    ! [umol.C umol-1.C day-1]     Base mass turnover rate (dieoff) in fraction of mass per day                                                  ! tuning
+    SGRASS(ng)%Turnover_rate                        = [0.006d0     ]                                    ! [umol.C umol-1.C day-1]     Base mass turnover rate (dieoff) in fraction of mass per day                                                  ! tuning
     ! dieoff when respiration is insufficient
-    SGRASS(ng)%max_anoxic_dieoff_rate               = [ 0.5d0    ]                                    ! [mol.C mol-1.C day-1]       maximum dieoff due to anoxia in fraction of mass per day, represents atypical modes of survival such as anaerobic respiration and cellular canibalism which limits extreme death rates ! tuning
+    SGRASS(ng)%max_anoxic_dieoff_rate               = [ 0.1d0    ]                                    ! [mol.C mol-1.C day-1]       maximum dieoff due to anoxia in fraction of mass per day, represents atypical modes of survival such as anaerobic respiration and cellular canibalism which limits extreme death rates ! tuning
     ! stockpile maximum cap
-    SGRASS(ng)%DICstockCap                          = [1.0d0]                                         ! Factor to multiply carbon biomsass to get maximum DIC stock (stock limit = DICstockCap*SgCBmF) 
+    SGRASS(ng)%DICstockCap                          = [0.01d0]                                        ! Factor to multiply carbon biomsass to get maximum DIC stock (stock limit = DICstockCap*SgCBmF) 
     SGRASS(ng)%CH2OstockCap                         = [1.0d0]                                         ! Factor to multiply carbon biomsass to get maximum sugar stock (stock limit = CH2OstockCap*SgCBmF) 
-    SGRASS(ng)%DOstockCap                           = [1.0d0]                                         ! Factor to multiply carbon biomsass to get maximum DO stock (stock limit = DOstockCap*SgCBmF) 
+    SGRASS(ng)%DOstockCap                           = [0.01d0]                                        ! Factor to multiply carbon biomsass to get maximum DO stock (stock limit = DOstockCap*SgCBmF) 
 # if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
+#  if defined SEAGRASS_IMMEDIATE_NO3_TO_NH4_CONVERSION
+    SGRASS(ng)%NO3stockCap                          = [0.0d0]                                         ! Factor to multiply nitrogen biomsass to get maximum NO3 stock (stock limit = NO3stockCap*SgNBmF) 
+# else
     SGRASS(ng)%NO3stockCap                          = [1.0d0]                                         ! Factor to multiply nitrogen biomsass to get maximum NO3 stock (stock limit = NO3stockCap*SgNBmF) 
+# endif
     SGRASS(ng)%NH4stockCap                          = [1.0d0]                                         ! Factor to multiply nitrogen biomsass to get maximum NH4 stock (stock limit = NH4stockCap*SgNBmF) 
     SGRASS(ng)%PO4stockCap                          = [1.0d0]                                         ! Factor to multiply phosphorus biomsass to get maximum PO4 stock (stock limit = PO4stockCap*SgPBmF) 
 # endif
@@ -589,7 +662,6 @@ MODULE mod_seagrass
       do species=1,Nsg
         do i=LBi,UBi
           do j=LBj,UBj
-            ! when initializaing from start in a new run when only coverage is known, calculate biomass values assuming an ELAP of 90% in the coverage area and an ideal ratio of above to belowground biomass
 
             ! HabArea                     [m2.sg.hab]                 Seagrass habitat ground area in grid cell (such that seagrass coverage (p_sgrass) times the grid area equals the habitat area)
             ! GridArea                    [m2.grid]                   Total ground area in grid cell
@@ -622,28 +694,49 @@ MODULE mod_seagrass
             ! LfDryBm                     [g.lf.drywt m-2.sg.hab]     Seagrass leaf dry weight biomass per unit ground area (in seagrass habitat area)
             ! RtDryBm                     [g.rt.drywt m-2.sg.hab]     Seagrass root dry weight biomass per unit ground area (in seagrass habitat area)
             
-            ! SGRASS(ng)%LAI(species,i,j) = (-1*log(1.0-0.85)/SGRASS(ng)%k_proj(species))
-            ! SGRASS(ng)%LAI(species,i,j) = (-1*log(1.0d0-0.30433574d0)/SGRASS(ng)%k_proj(species))
-            SGRASS(ng)%LAI(species,i,j) = 0.001d0
+            ! old >>>>>>>>>>>>>>>>>>>
+            ! ! SGRASS(ng)%LAI(species,i,j) = (-1*log(1.0-0.85)/SGRASS(ng)%k_proj(species))
+            ! ! SGRASS(ng)%LAI(species,i,j) = (-1*log(1.0d0-0.30433574d0)/SGRASS(ng)%k_proj(species))
+            ! SGRASS(ng)%LAI(species,i,j) = 0.001d0
 
-            ! [umol.C/m2.hab]              
-            SGRASS(ng)%LfCBm(species,i,j)  &
-            ! = [m2.lf/m2.hab]              [kg.drywt/m2.lf]             [mol.C/g.drywt]                 (1000.g.drywt/kg.drywt) (1000000umol/mol)
-              = SGRASS(ng)%LAI(species,i,j) * SGRASS(ng)%rho_lf(species) / SGRASS(ng)%SgMperC(species) * 1000000000d0
+            ! ! [umol.C/m2.hab]              
+            ! SGRASS(ng)%LfCBm(species,i,j)  &
+            ! ! = [m2.lf/m2.hab]              [kg.drywt/m2.lf]             [mol.C/g.drywt]                 (1000.g.drywt/kg.drywt) (1000000umol/mol)
+            !   = SGRASS(ng)%LAI(species,i,j) * SGRASS(ng)%rho_lf(species) / SGRASS(ng)%SgMperC(species) * 1000000000d0
 
-            SGRASS(ng)%SgCBmF(  :,species,i,j) = 0.0d0
-            ! [umol.C.tot/m2.hab]              = [umol.C.lf/m2.hab]             [mol.C.tot/mol.C.lf]
-            SGRASS(ng)%SgCBmF(iCt,species,i,j) = SGRASS(ng)%LfCBm(species,i,j) / SGRASS(ng)%f_above(species)
+            ! SGRASS(ng)%SgCBmF(  :,species,i,j) = 0.0d0
+            ! ! [umol.C.tot/m2.hab]              = [umol.C.lf/m2.hab]             [mol.C.tot/mol.C.lf]
+            ! SGRASS(ng)%SgCBmF(iCt,species,i,j) = SGRASS(ng)%LfCBm(species,i,j) / SGRASS(ng)%f_above(species)
+            ! <<<<<<<<<<<<<<<<<<<
 
-            SGRASS(ng)%DICstock(:,species,i,j) = 0.0d0
-            SGRASS(ng)%CH2Ostock(:,species,i,j) = 0.0d0
-            SGRASS(ng)%DOstock(species,i,j) = 0.01d0
-# if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
-            SGRASS(ng)%NO3stock(:,species,i,j) = 0.0d0
-            SGRASS(ng)%NH4stock(:,species,i,j) = 0.0d0
-            SGRASS(ng)%PO4stock(:,species,i,j) = 0.0d0
-# endif
-        
+            ! new based on chamber 2012 >>>>>>>>>>>>>>>>>>>
+            ! [g.drywt/m2.hab]              = g.drywt / m2.chamber
+            ! SGRASS(ng)%LfDryBm(species,i,j) = 46.8d0  / 0.45d0 ! from Watanabe chamber experiments 2012
+            SGRASS(ng)%LfDryBm(species,i,j) = 46.8d0  / 0.45d0 / 100d0 ! 1% of Watanabe chamber experiments 2012
+
+            ! [g.drywt/m2.hab]              = g.drywt / m2.chamber
+            ! SGRASS(ng)%RtDryBm(species,i,j) = 86.5d0  / 0.45d0 ! from Watanabe chamber experiments 2012
+            SGRASS(ng)%RtDryBm(species,i,j) = 86.5d0  / 0.45d0 / 100d0 ! 1% of Watanabe chamber experiments 2012
+
+            ! SGRASS(ng)%LfDryBm(species,i,j) = 0.0d0  ! no seagrass test
+            ! SGRASS(ng)%RtDryBm(species,i,j) = 0.0d0  ! no seagrass test
+
+            ! [g.drywt/m2.hab]
+            SGRASS(ng)%SgDryBm(species,i,j) = SGRASS(ng)%LfDryBm(species,i,j) + SGRASS(ng)%RtDryBm(species,i,j)
+
+            ! [umol.C/m2.hab]                 = [g.drywt/m2.hab]                / [g.drywt/mol.C]             * 1000000umol.C/mol.C
+            SGRASS(ng)%LfCBm(species,i,j) = SGRASS(ng)%LfDryBm(species,i,j) / SGRASS(ng)%SgMperC(species) * 1000000.0d0
+
+            ! [umol.C/m2.hab]                 = [g.drywt/m2.hab]                / [g.drywt/mol.C]             * 1000000umol.C/mol.C
+            SGRASS(ng)%RtCBm(species,i,j) = SGRASS(ng)%RtDryBm(species,i,j) / SGRASS(ng)%SgMperC(species) * 1000000.0d0
+
+            ! [umol.C/m2.hab]                  = [g.drywt/m2.hab]                / [g.drywt/mol.C]             * 1000000umol.C/mol.C
+            SGRASS(ng)%SgCBmF(iCt,species,i,j) = SGRASS(ng)%SgDryBm(species,i,j) / SGRASS(ng)%SgMperC(species) * 1000000.0d0
+
+            ! [m2.lf/m2.hab]            = [g.drywt/m2.hab]                / [kg.drywt/m2.lf]           * (kg.drywt/1000g.drywt)
+            SGRASS(ng)%LAI(species,i,j) = SGRASS(ng)%LfDryBm(species,i,j) / SGRASS(ng)%rho_lf(species) * 0.001d0
+            ! <<<<<<<<<<<<<<<<<<<
+
 # if defined CARBON_ISOTOPE || defined CLUMPED_ISOTOPE
             SGRASS(ng)%SgCBmF(iC13,species,i,j) = Ci_from_Ct_delta( SGRASS(ng)%SgCBmF(iCt,species,i,j), -20.0d0, R13C_VPDB )
 #  if defined CLUMPED_ISOTOPE
@@ -661,8 +754,8 @@ MODULE mod_seagrass
             ! [umol.P.tot/m2.hab]              
             SGRASS(ng)%SgPBmF(iPt,species,i,j) = SGRASS(ng)%SgCBmF(iCt,species,i,j) * SGRASS(ng)%SgPperC(species)
 # endif
-            ! [umol.C.rt/m2.hab]          = [umol.C.tot/m2.hab]                [mol.C.rt/mol.C.tot]
-            SGRASS(ng)%RtCBm(species,i,j) = SGRASS(ng)%SgCBmF(iCt,species,i,j) * (1.0d0 - SGRASS(ng)%f_above(species))
+            ! ! [umol.C.rt/m2.hab]          = [umol.C.tot/m2.hab]                [mol.C.rt/mol.C.tot]
+            ! SGRASS(ng)%RtCBm(species,i,j) = SGRASS(ng)%SgCBmF(iCt,species,i,j) * (1.0d0 - SGRASS(ng)%f_above(species))
 
             ! [mol.C]                        = [umol.C/m2.hab]                    [m2.hab]                          (mol/1000000umol)
             SGRASS(ng)%TotSgCBm(species,i,j) = SGRASS(ng)%SgCBmF(iCt,species,i,j) * SGRASS(ng)%HabArea(species,i,j) * 0.000001d0
@@ -682,14 +775,14 @@ MODULE mod_seagrass
             ! [g.drywt]                        = [mol.C]                          [g.drywt/mol.C]
             SGRASS(ng)%TotRtDryBm(species,i,j) = SGRASS(ng)%TotRtCBm(species,i,j) * SGRASS(ng)%SgMperC(species)
 
-            ! [g.drywt/m2.hab]              = [umol.C/m2.hab]                    [g.drywt/mol.C]               (mol.C/1000000umol.C)
-            SGRASS(ng)%SgDryBm(species,i,j) = SGRASS(ng)%SgCBmF(iCt,species,i,j) * SGRASS(ng)%SgMperC(species) * 0.000001d0
+            ! ! [g.drywt/m2.hab]              = [umol.C/m2.hab]                    [g.drywt/mol.C]               (mol.C/1000000umol.C)
+            ! SGRASS(ng)%SgDryBm(species,i,j) = SGRASS(ng)%SgCBmF(iCt,species,i,j) * SGRASS(ng)%SgMperC(species) * 0.000001d0
 
-            ! [g.drywt/m2.hab]              = [umol.C/m2.hab]               [g.drywt/mol.C]               (mol.C/1000000umol.C)
-            SGRASS(ng)%LfDryBm(species,i,j) = SGRASS(ng)%LfCBm(species,i,j) * SGRASS(ng)%SgMperC(species) * 0.000001d0
+            ! ! [g.drywt/m2.hab]              = [umol.C/m2.hab]               [g.drywt/mol.C]               (mol.C/1000000umol.C)
+            ! SGRASS(ng)%LfDryBm(species,i,j) = SGRASS(ng)%LfCBm(species,i,j) * SGRASS(ng)%SgMperC(species) * 0.000001d0
 
-            ! [g.drywt/m2.hab]              = [umol.C/m2.hab]               [g.drywt/mol.C]               (mol.C/1000000umol.C)
-            SGRASS(ng)%RtDryBm(species,i,j) = SGRASS(ng)%RtCBm(species,i,j) * SGRASS(ng)%SgMperC(species) * 0.000001d0
+            ! ! [g.drywt/m2.hab]              = [umol.C/m2.hab]               [g.drywt/mol.C]               (mol.C/1000000umol.C)
+            ! SGRASS(ng)%RtDryBm(species,i,j) = SGRASS(ng)%RtCBm(species,i,j) * SGRASS(ng)%SgMperC(species) * 0.000001d0
 
             SGRASS(ng)%TotSgCBmF(species,i,j) = SGRASS(ng)%TotSgCBm(species,i,j)
 
@@ -702,10 +795,63 @@ MODULE mod_seagrass
             ! SgNperC                     [mol.N mol-1.C]             Species specific seagrass Nitrogen to Carbon ratio
             ! SgPperC                     [mol.P mol-1.C]             Species specific seagrass Phosphorus to Carbon ratio
             ! [mmol.X]                       = [mol.C]                          [mol.X/mol.C]                 [1000 mmol/mol]
-            SGRASS(ng)%InitialC(species,i,j) = SGRASS(ng)%TotSgCBm(species,i,j)                               * 1000.0d0 ! yt_edit to_do need to add this to save/restart parameters?
+            SGRASS(ng)%InitialC(species,i,j) = SGRASS(ng)%TotSgCBm(species,i,j)                               * 1000.0d0
 #  if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
             SGRASS(ng)%InitialN(species,i,j) = SGRASS(ng)%TotSgCBm(species,i,j) * SGRASS(ng)%SgNperC(species) * 1000.0d0
             SGRASS(ng)%InitialP(species,i,j) = SGRASS(ng)%TotSgCBm(species,i,j) * SGRASS(ng)%SgPperC(species) * 1000.0d0
+#  endif
+# endif
+
+            SGRASS(ng)%DICstock(:,species,i,j) = 0.0d0
+            SGRASS(ng)%CH2Ostock(:,species,i,j) = 0.0d0
+            SGRASS(ng)%DOstock(species,i,j) = 0.0d0
+# if defined FULL_STOCK_START
+            SGRASS(ng)%DICstock(:,species,i,j) = SGRASS(ng)%DICstockCap(species)* SGRASS(ng)%SgCBmF(:,species,i,j)
+            ! SGRASS(ng)%CH2Ostock(:,species,i,j) = SGRASS(ng)%CH2OstockCap(species)* SGRASS(ng)%SgCBmF(:,species,i,j)
+            SGRASS(ng)%DOstock(species,i,j) = SGRASS(ng)%DOstockCap(species)* SGRASS(ng)%SgCBmF(iCt,species,i,j)
+# elif defined CHAMBER_EQUILIBRIUM_STOCK_START
+            ! SGRASS(ng)%DICstock(:,species,i,j)  &
+            !         = SGRASS(ng)%DICstockCap(species)* SGRASS(ng)%SgCBmF(:,species,i,j)  * 0.998913020616880d0
+            ! SGRASS(ng)%CH2Ostock(:,species,i,j) &
+            !         = SGRASS(ng)%CH2OstockCap(species)* SGRASS(ng)%SgCBmF(:,species,i,j) * 1.076256593956242d-05
+            ! SGRASS(ng)%DOstock(species,i,j)     &
+            !         = SGRASS(ng)%DOstockCap(species)* SGRASS(ng)%SgCBmF(iCt,species,i,j) * 1.0d0
+            ! SGRASS(ng)%DICstock(:,species,i,j)  &
+            !         = SGRASS(ng)%DICstockCap(species)* SGRASS(ng)%SgCBmF(:,species,i,j)  * 0.998947817125829d0
+            ! SGRASS(ng)%CH2Ostock(:,species,i,j) &
+            !         = SGRASS(ng)%CH2OstockCap(species)* SGRASS(ng)%SgCBmF(:,species,i,j) * 1.041802767639336d-05
+            SGRASS(ng)%DICstock(:,species,i,j)  &
+                    = SGRASS(ng)%DICstockCap(species)* SGRASS(ng)%SgCBmF(:,species,i,j)  * 1.0d0
+            SGRASS(ng)%CH2Ostock(:,species,i,j) &
+                    = SGRASS(ng)%CH2OstockCap(species)* SGRASS(ng)%SgCBmF(:,species,i,j) * 0.0d0
+            SGRASS(ng)%DOstock(species,i,j)     &
+                    = SGRASS(ng)%DOstockCap(species)* SGRASS(ng)%SgCBmF(iCt,species,i,j) * 1.0d0
+# endif
+# if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
+            SGRASS(ng)%NO3stock(:,species,i,j) = 0.0d0
+            SGRASS(ng)%NH4stock(:,species,i,j) = 0.0d0
+            SGRASS(ng)%PO4stock(:,species,i,j) = 0.0d0
+#  if defined FULL_STOCK_START
+            SGRASS(ng)%NO3stock(:,species,i,j) = SGRASS(ng)%NO3stockCap(species)* SGRASS(ng)%SgNBmF(:,species,i,j)
+            SGRASS(ng)%NH4stock(:,species,i,j) = SGRASS(ng)%NH4stockCap(species)* SGRASS(ng)%SgNBmF(:,species,i,j)
+            SGRASS(ng)%PO4stock(:,species,i,j) = SGRASS(ng)%PO4stockCap(species)* SGRASS(ng)%SgPBmF(:,species,i,j)
+#  elif defined CHAMBER_EQUILIBRIUM_STOCK_START
+            ! SGRASS(ng)%NO3stock(:,species,i,j) &
+            !         = SGRASS(ng)%NO3stockCap(species)* SGRASS(ng)%SgNBmF(:,species,i,j) * 3.666207853999131d-06
+            ! SGRASS(ng)%NH4stock(:,species,i,j) &
+            !         = SGRASS(ng)%NH4stockCap(species)* SGRASS(ng)%SgNBmF(:,species,i,j) * 0.285079904658520d0
+            ! SGRASS(ng)%PO4stock(:,species,i,j) &
+            !         = SGRASS(ng)%PO4stockCap(species)* SGRASS(ng)%SgPBmF(:,species,i,j) * 0.996486838205624d0
+            SGRASS(ng)%NO3stock(:,species,i,j) &
+                    = SGRASS(ng)%NO3stockCap(species)* SGRASS(ng)%SgNBmF(:,species,i,j) * 0.0d0
+            ! SGRASS(ng)%NH4stock(:,species,i,j) &
+            !         = SGRASS(ng)%NH4stockCap(species)* SGRASS(ng)%SgNBmF(:,species,i,j) * 0.256607049362339d0
+            ! SGRASS(ng)%PO4stock(:,species,i,j) &
+            !         = SGRASS(ng)%PO4stockCap(species)* SGRASS(ng)%SgPBmF(:,species,i,j) * 0.315942197801809d0
+            SGRASS(ng)%NH4stock(:,species,i,j) &
+                    = SGRASS(ng)%NH4stockCap(species)* SGRASS(ng)%SgNBmF(:,species,i,j) * 0.5d0
+            SGRASS(ng)%PO4stock(:,species,i,j) &
+                    = SGRASS(ng)%PO4stockCap(species)* SGRASS(ng)%SgPBmF(:,species,i,j) * 0.5d0
 #  endif
 # endif
 
@@ -726,6 +872,7 @@ MODULE mod_seagrass
 
 
       ! write(*,*) 'yt_debug: mod_seagrass.F initialize_seagrass() after analytical start mass assigments'
+
     endif
 
     ! write(*,*) 'yt_debug: mod_seagrass.F initialize_seagrass() root_mass_profile'
@@ -758,9 +905,7 @@ MODULE mod_seagrass
     , date                        &   ! Date (days since x or elapsed days) yt_edit best if in phase with clock to maintain consistency on restart
     , dt                          &   ! [s]                       time step
     , p_sgrass                    &   ! [m2.sg.hab m-2.grid]      (0~1)  Seagrass coverage (every species)
-# if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE || defined SEAGRASS_ROOT_POM
     , p_sand                      &   ! [m2.sedmnt m-2.grid]      (0~1)  Sediment coverage
-# endif
     , PFD                         &   ! [umol m-2 s-1]            Photon flux density 
     , rho_sw                      &   ! [g cm-3]                  Density of seawater 
     , ocean_DIC_conc              &   ! [umol.DIC kg-1]           DIC concentration of ocean water (input only, do not use in calculations)
@@ -810,9 +955,7 @@ MODULE mod_seagrass
     real(8), intent(in)   :: date                       ! [days]                      Date (days since x or elapsed days) yt_edit best if in phase with clock to maintain consistency on restart
     real(8), intent(in)   :: dt                         ! [s]                         Time step interval duration
     real(8), intent(inout):: p_sgrass(Nsg)              ! [m2.sg.hab m-2.grid]        (0~1)  Seagrass coverage (every species)
-# if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE || defined SEAGRASS_ROOT_NUTRIENT_UPTAKE || defined SEAGRASS_ROOT_POM
-    real(8), intent(in)   :: p_sand                     ! [m2.sedmnt m-2.grid]      (0~1)  Sediment coverage
-# endif
+    real(8), intent(in)   :: p_sand                     ! [m2.sedmnt m-2.grid]        (0~1)  Sediment coverage
     real(8), intent(in)   :: PFD                        ! [umol m-2 s-1]              Photon flux density 
     real(8), intent(in)   :: rho_sw                     ! [g cm-3]                    Density of seawater 
     real(8)               :: ocean_DIC_conc(N_Csp)      ! [umol.DIC L-1]              DIC concentration of ocean water
@@ -1099,6 +1242,7 @@ MODULE mod_seagrass
     real(8)               :: translocatable_mass        ! [mol.C]                     Biomass that can be translocated between leaf and root as limited by the translocation rate
 
     real(8)               :: ocnDIC                     ! [umol/L]                    Ocean DIC concentration
+    real(8)               :: ocnDO                      ! [umol/L]                    Ocean DO concentration
     real(8)               :: ocnNO3                     ! [umol/L]                    Ocean NO3 concentration
     real(8)               :: ocnNH4                     ! [umol/L]                    Ocean NH4 concentration
     real(8)               :: ocnN                       ! [umol/L]                    NO3 + NH4 concentration of ocean water
@@ -1369,7 +1513,10 @@ MODULE mod_seagrass
     
     if (date .gt. aint(Day*24.0d0)/24.0d0 ) then
       is_growth_interval = .true.
-      Day = (aint(Day*24.0d0)+1.0d0)/24.0d0  !! TN: One hour interval???????????????????????????????????????????????????
+      DO WHILE (date .gt. aint(Day*24.0d0)/24.0d0)
+        Day = (aint(Day*24.0d0)+1.0d0)/24.0d0  ! One hour interval
+      END DO
+      trans_rate = trans_rate / 24.0d0
       ! if(i == 50 .and. j == 50) then
       !   write(*,*) "yt_debug:    Day = ", Day, "   date = ", date
       ! endif
@@ -1382,6 +1529,8 @@ MODULE mod_seagrass
 ! ====================================================================================================
 
     ! write(*,*) 'yt_debug: i = ', i, 
+    ! write(*,*) 'Yo'
+
 
 ! Widely used temporary variables --------------------------------------------------------------------
 
@@ -1511,13 +1660,22 @@ MODULE mod_seagrass
     ! DICstockCap                 []                          Factor to multiply carbon biomsass to get maximum DIC stock (stock limit = DICstockCap*SgCBmF) 
     sumCUpPos = sum(DIC_uptake_possible(:))
 
+# if defined SEAGRASS_DEBUG_MODE
+    ! if DIC uptake in a single time step exceeds the potential stockpile size, we need to increase the stock cap
+    if (sumCUpPos*dt .gt. DICstockCap*SgCBmF(iCt)) then
+      write(*,*) "yt_debug:     DICstockCap too low.     DIC_uptake_possible = ", sumCUpPos, "dt", dt, &
+              "DICstockCap*SgCBmF = ", DICstockCap*SgCBmF(iCt)
+      error stop
+    endif
+# endif
+
     ! limit uptake so that DIC stock is limited to stockpile cap
     if (DICstock(iCt) .ge. DICstockCap*SgCBmF(iCt)) then
       DIC_uptake_possible(:) = 0d0
       sumCUpPos = 0d0
-    elseif (DICstock(iCt) + sumCUpPos .gt. DICstockCap*SgCBmF(iCt)) then
-      DIC_uptake_possible(:) = DIC_uptake_possible(:) * (DICstockCap*SgCBmF(iCt)-DICstock(iCt))/sumCUpPos
-      sumCUpPos = DICstockCap*SgCBmF(iCt)-DICstock(iCt)
+    elseif (DICstock(iCt) + sumCUpPos*dt .gt. DICstockCap*SgCBmF(iCt)) then
+      DIC_uptake_possible(:) = DIC_uptake_possible(:) * (DICstockCap*SgCBmF(iCt)-DICstock(iCt))/(sumCUpPos*dt)
+      sumCUpPos = (DICstockCap*SgCBmF(iCt)-DICstock(iCt))/dt
     endif
 
 ! DO uptake rate --------------------------------------------------------------------------
@@ -1528,10 +1686,12 @@ MODULE mod_seagrass
     ! ocean_DO__conc              [umol.DO L-1]               DIC concentration of ocean water 
     ! k_lf_DO                     [umol.DO L-1]               Half saturation consentration of DO in water column for respiration
 
+    ocnDO = max(ocean_DO__conc,0.0d0)
+
     ! [umol.DO/m2.hab s]  = [umol.DO/g.lf s] [g.lf/m2.hab] ( Michaelis-Menten term                     )
-    DO_uptake_possible(0) = Lf_DO_uptake_max * LfDryBm     * ocean_DO__conc / (k_lf_DO + ocean_DO__conc)
-    ! [umol.DO/m2.hab s]  = min( [umol.DO/m2.hab s]   ,      [umol.DO/L]     [m/s](1000L/m3)
-    DO_uptake_possible(0) = min( DO_uptake_possible(0), 0.5d0*ocean_DO__conc*dz/dt*1000.0d0 ) ! first order interpolation at low concentration limit to prevent overdraw
+    DO_uptake_possible(0) = Lf_DO_uptake_max * LfDryBm     * ocnDO / (k_lf_DO + ocnDO)
+    ! [umol.DO/m2.hab s]  = min( [umol.DO/m2.hab s]   ,      [umol.DO/L] [m/s](1000L/m3)
+    DO_uptake_possible(0) = min( DO_uptake_possible(0), 0.5d0*ocnDO     *dz/dt*1000.0d0 ) ! first order interpolation at low concentration limit to prevent overdraw
 
 # if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE
     ! DO_uptake_possible(:)       [umol.DO m-2.sg.hab s-1]    DO uptake rate possible in each layer; 0 = water column, 1-Nsed = sediment layers
@@ -1552,14 +1712,38 @@ MODULE mod_seagrass
     ! DOstockCap                  []                          Factor to multiply carbon biomsass to get maximum DO stock (stock limit = DOstockCap*SgCBmF) 
     sumOUpPos = sum(DO_uptake_possible(:))
 
+# if defined SEAGRASS_DEBUG_MODE
+    ! if DO uptake in a single time step exceeds the potential stockpile size, we need to increase the stock cap
+    if (sumOUpPos*dt .gt. DOstockCap*SgCBmF(iCt)) then
+      write(*,*) "yt_debug:     DOstockCap too low.     DO_uptake_possible = ", sumOUpPos, "dt", dt, &
+              "DOstockCap*SgCBmF = ", DOstockCap*SgCBmF(iCt)
+      error stop
+    endif
+# endif
+
     ! limit uptake so that DO stock is limited to 100 percent of biomass C
     if (DOstock .ge. DOstockCap*SgCBmF(iCt)) then
       DO_uptake_possible(:) = 0d0
       sumOUpPos = 0d0
-    elseif (DOstock + sumOUpPos .gt. DOstockCap*SgCBmF(iCt)) then
-      DO_uptake_possible(:) = DO_uptake_possible(:) * (DOstockCap*SgCBmF(iCt)-DOstock)/sumOUpPos
-      sumOUpPos = DOstockCap*SgCBmF(iCt)-DOstock
+    elseif (DOstock + sumOUpPos*dt .gt. DOstockCap*SgCBmF(iCt)) then
+      ! new amount added/dt = old amount added/dt     amount that can be added        / old amount added
+      DO_uptake_possible(:) = DO_uptake_possible(:) * (DOstockCap*SgCBmF(iCt)-DOstock)/(sumOUpPos*dt)
+      sumOUpPos = (DOstockCap*SgCBmF(iCt)-DOstock) / dt
     endif
+
+# if defined SEAGRASS_DEBUG_MODE
+    if (DO_uptake_possible(0) .lt. 0.0d0) then
+      write(*,*) 'yt_debug: negative value in DO_uptake_possible(0)'
+      write(*,*) 'yt_debug: DO_uptake_possible(0) = ', DO_uptake_possible(0), 'SgCBmF(iCt) = ', SgCBmF(iCt), 'DOstock = ', DOstock &
+              , 'ocean_DO__conc = ', ocean_DO__conc, 'ocnDO = ', ocnDO
+      error stop
+    endif
+    if (sum(DO_uptake_possible) .lt. 0.0d0) then
+      write(*,*) 'yt_debug: negative value in sum(DO_uptake_possible)'
+      write(*,*) 'yt_debug: sum(DO_uptake_possible) = ', sum(DO_uptake_possible)
+      error stop
+    endif
+# endif
 
 ! Nutrient uptake rate --------------------------------------------------------------------------
 
@@ -1632,16 +1816,62 @@ MODULE mod_seagrass
     ! CHEM_uptake_possible(:)     [umol.CHEM m-2.sg.hab s-1]  CHEM uptake rate possible in each layer; 0 = water column, 1-Nsed = sediment layers
     sumNO3UpPos = sum(NO3_uptake_possible(:))
     sumNH4UpPos = sum(NH4_uptake_possible(:))
+#  if defined SEAGRASS_IMMEDIATE_NO3_TO_NH4_CONVERSION
+    sumNUpPos = sumNO3UpPos + sumNH4UpPos
+#  endif
     sumPUpPos = sum(PO4_uptake_possible(:))
+
+# if defined SEAGRASS_DEBUG_MODE
+    ! if chem uptake in a single time step exceeds the potential stockpile size, we need to increase the stock cap
+#  if defined SEAGRASS_IMMEDIATE_NO3_TO_NH4_CONVERSION
+#  else
+    if (sumNO3UpPos*dt .gt. NO3stockCap*SgNBmF(iNt)) then
+      write(*,*) "yt_debug:     NO3stockCap too low.     NO3_uptake_possible = ", sumNO3UpPos, "dt", dt, &
+              "NO3stockCap*SgNBmF = ", NO3stockCap*SgNBmF(iNt)
+      error stop
+    endif
+#  endif
+    if (sumNH4UpPos*dt .gt. NH4stockCap*SgNBmF(iNt)) then
+      write(*,*) "yt_debug:     NH4stockCap too low.     NH4_uptake_possible = ", sumNH4UpPos, "dt", dt, &
+              "NH4stockCap*SgNBmF = ", NH4stockCap*SgNBmF(iNt)
+      error stop
+    endif
+    if (sumPUpPos*dt .gt. PO4stockCap*SgPBmF(iPt)) then
+      write(*,*) "yt_debug:     PO4stockCap too low.     PO4_uptake_possible = ", sumPUpPos, "dt", dt, &
+              "PO4stockCap*SgPBmF = ", PO4stockCap*SgPBmF(iPt)
+      error stop
+    endif
+# endif
+
+# if defined SEAGRASS_IMMEDIATE_NO3_TO_NH4_CONVERSION
+
+    ! NH4stockCap                 []                          Factor to multiply nitrogen biomsass to get maximum NH4 stock (stock limit = NH4stockCap*SgNBmF) 
+    ! limit uptake so that NH4 stock is limited to 100 percent of biomass N
+    if (NH4stock(iNt) .ge. NH4stockCap*SgNBmF(iNt)) then
+      NH4_uptake_possible(:) = 0d0
+      NO3_uptake_possible(:) = 0d0
+      sumNH4UpPos = 0d0
+      sumNO3UpPos = 0d0
+      sumNUpPos   = 0d0
+    elseif (NH4stock(iNt) + sumNUpPos*dt .gt. NH4stockCap*SgNBmF(iNt)) then
+      NH4_uptake_possible(:) = NH4_uptake_possible(:) * (NH4stockCap*SgNBmF(iNt)-NH4stock(iNt))/(sumNH4UpPos*dt) &
+              * (sumNH4UpPos / sumNUpPos)
+      NO3_uptake_possible(:) = NO3_uptake_possible(:) * (NH4stockCap*SgNBmF(iNt)-NH4stock(iNt))/(sumNH4UpPos*dt) &
+              * (sumNO3UpPos / sumNUpPos)
+      sumNH4UpPos = (NH4stockCap*SgNBmF(iNt)-NH4stock(iNt))/dt * (sumNH4UpPos / sumNUpPos)
+      sumNO3UpPos = (NH4stockCap*SgNBmF(iNt)-NH4stock(iNt))/dt * (sumNO3UpPos / sumNUpPos)
+    endif
+
+# else
 
     ! NO3stockCap                 []                          Factor to multiply nitrogen biomsass to get maximum NO3 stock (stock limit = NO3stockCap*SgNBmF) 
     ! limit uptake so that NO3 stock is limited to 100 percent of biomass N
     if (NO3stock(iNt) .ge. NO3stockCap*SgNBmF(iNt)) then
       NO3_uptake_possible(:) = 0d0
       sumNO3UpPos = 0d0
-    elseif (NO3stock(iNt) + sumNO3UpPos .gt. NO3stockCap*SgNBmF(iNt)) then
-      NO3_uptake_possible(:) = NO3_uptake_possible(:) * (NO3stockCap*SgNBmF(iNt)-NO3stock(iNt))/sumNO3UpPos
-      sumNO3UpPos = NO3stockCap*SgNBmF(iNt)-NO3stock(iNt)
+    elseif (NO3stock(iNt) + sumNO3UpPos*dt .gt. NO3stockCap*SgNBmF(iNt)) then
+      NO3_uptake_possible(:) = NO3_uptake_possible(:) * (NO3stockCap*SgNBmF(iNt)-NO3stock(iNt))/(sumNO3UpPos*dt)
+      sumNO3UpPos = (NO3stockCap*SgNBmF(iNt)-NO3stock(iNt))/dt
     endif
 
     ! NH4stockCap                 []                          Factor to multiply nitrogen biomsass to get maximum NH4 stock (stock limit = NH4stockCap*SgNBmF) 
@@ -1649,19 +1879,31 @@ MODULE mod_seagrass
     if (NH4stock(iNt) .ge. NH4stockCap*SgNBmF(iNt)) then
       NH4_uptake_possible(:) = 0d0
       sumNH4UpPos = 0d0
-    elseif (NH4stock(iNt) + sumNH4UpPos .gt. NH4stockCap*SgNBmF(iNt)) then
-      NH4_uptake_possible(:) = NH4_uptake_possible(:) * (NH4stockCap*SgNBmF(iNt)-NH4stock(iNt))/sumNH4UpPos
-      sumNH4UpPos = NH4stockCap*SgNBmF(iNt)-NH4stock(iNt)
+    elseif (NH4stock(iNt) + sumNH4UpPos*dt .gt. NH4stockCap*SgNBmF(iNt)) then
+      NH4_uptake_possible(:) = NH4_uptake_possible(:) * (NH4stockCap*SgNBmF(iNt)-NH4stock(iNt))/(sumNH4UpPos*dt)
+      sumNH4UpPos = (NH4stockCap*SgNBmF(iNt)-NH4stock(iNt))/dt
     endif
+
+# endif
+
+#   if defined SEAGRASS_DEBUG_MODE
+    DO k=1,Nsed
+      if (NO3_uptake_possible(k) .lt. 0.0d0) then
+        write(*,*) 'yt_debug: negative value in NO3_uptake_possible(k)'
+        write(*,*) 'yt_debug: NO3_uptake_possible(k) = ', NO3_uptake_possible(k)
+        error stop
+      endif
+    ENDDO
+#   endif
 
     ! PO4stockCap                 []                          Factor to multiply phosphorus biomsass to get maximum PO4 stock (stock limit = PO4stockCap*SgPBmF) 
     ! limit uptake so that PO4 stock is limited to 100 percent of biomass P
     if (PO4stock(iPt) .ge. PO4stockCap*SgPBmF(iPt)) then
       PO4_uptake_possible(:) = 0d0
       sumPUpPos = 0d0
-    elseif (PO4stock(iPt) + sumPUpPos .gt. PO4stockCap*SgPBmF(iPt)) then
-      PO4_uptake_possible(:) = PO4_uptake_possible(:) * (PO4stockCap*SgPBmF(iPt)-PO4stock(iPt))/sumPUpPos
-      sumPUpPos = PO4stockCap*SgPBmF(iPt)-PO4stock(iPt)
+    elseif (PO4stock(iPt) + sumPUpPos*dt .gt. PO4stockCap*SgPBmF(iPt)) then
+      PO4_uptake_possible(:) = PO4_uptake_possible(:) * (PO4stockCap*SgPBmF(iPt)-PO4stock(iPt))/(sumPUpPos*dt)
+      sumPUpPos = (PO4stockCap*SgPBmF(iPt)-PO4stock(iPt))/dt
     endif
 
     sumNUpPos = sumNO3UpPos + sumNH4UpPos
@@ -1683,32 +1925,32 @@ MODULE mod_seagrass
   ! rDIC_sed(N_Csp,Nsed)        [no dim.]                   Isotope ratio or tracer mass ratio
 
 if (sumCUpPos .gt. 0d0) then
-  ! [mmol.CHEM/m2.hab s]        = [mmol.CHEM/m2.hab s]          + [umol.CHEM/m2.hab s]   (mmol/1000umol) (fractionation)
-  DIC_uptake_rate_from_ocean(:) = DIC_uptake_rate_from_ocean(:) + DIC_uptake_possible(0) * 0.001d0       * aC_phot(1:N_Csp)*rDIC_ocn(:)
-  ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (fractionation)
-  delta_DICstock(:)      = delta_DICstock(:)    + DIC_uptake_possible(0) * aC_phot(1:N_Csp)*rDIC_ocn(:)
+  ! [mmol.CHEM/m2.hab s]        = [mmol.CHEM/m2.hab s]          + [umol.CHEM/m2.hab s]   (mmol/1000umol) (isotope ratio)
+  DIC_uptake_rate_from_ocean(:) = DIC_uptake_rate_from_ocean(:) + DIC_uptake_possible(0) * 0.001d0       * rDIC_ocn(:)
+  ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (isotope ratio)
+  delta_DICstock(:)      = delta_DICstock(:)    + DIC_uptake_possible(0) * rDIC_ocn(:)
 # if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE
   do k=1,Nsed
-    ! [umol.CHEM/L s]                      = [umol.CHEM/L s]                        - [umol.CHEM/m2.hab s]   [m2.hab/m2.sedmnt]  [1/mm] (1000mm/m)(m3/1000L) (fractionation)
+    ! [umol.CHEM/L s]                      = [umol.CHEM/L s]                        - [umol.CHEM/m2.hab s]   [m2.hab/m2.sedmnt]  [1/mm] (1000mm/m)(m3/1000L) (isotope ratio)
     SEDECO(ng)%sg_dDIC_dt(:,k,species,i,j) = SEDECO(ng)%sg_dDIC_dt(:,k,species,i,j) - DIC_uptake_possible(k) &
-            * sgrass_per_sedmnt / sed_layer_thickness(k)    * aC_phot(1:N_Csp)*rDIC_sed(:,k)
-    ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (fractionation)
-    delta_DICstock(:)      = delta_DICstock(:)    + DIC_uptake_possible(k) * aC_phot(1:N_Csp)*rDIC_sed(:,k)
+            * sgrass_per_sedmnt / sed_layer_thickness(k)    * rDIC_sed(:,k)
+    ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (isotope ratio)
+    delta_DICstock(:)      = delta_DICstock(:)    + DIC_uptake_possible(k) * rDIC_sed(:,k)
   end do
 # endif
 endif
 
 if (sumOUpPos .gt. 0d0) then
-  ! [mmol.CHEM/m2.hab s]        = [mmol.CHEM/m2.hab s]          + [umol.CHEM/m2.hab s]   (mmol/1000umol) (fractionation)
+  ! [mmol.CHEM/m2.hab s]        = [mmol.CHEM/m2.hab s]          + [umol.CHEM/m2.hab s]   (mmol/1000umol) (isotope ratio)
   DO__uptake_rate_from_ocean    = DO__uptake_rate_from_ocean    + DO_uptake_possible(0)  * 0.001d0
-  ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (fractionation)
+  ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (isotope ratio)
   delta_DOstock          = delta_DOstock        + DO_uptake_possible(0)
 # if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE
   do k=1,Nsed
-    ! [umol.CHEM/L s]                      = [umol.CHEM/L s]                        - [umol.CHEM/m2.hab s]   [m2.hab/m2.sedmnt]  [1/mm] (1000mm/m)(m3/1000L) (fractionation)
+    ! [umol.CHEM/L s]                      = [umol.CHEM/L s]                        - [umol.CHEM/m2.hab s]   [m2.hab/m2.sedmnt]  [1/mm] (1000mm/m)(m3/1000L) (isotope ratio)
     SEDECO(ng)%sg_dO2_dt(k,species,i,j)    = SEDECO(ng)%sg_dO2_dt(k,species,i,j)    - DO_uptake_possible(k)  &
             * sgrass_per_sedmnt / sed_layer_thickness(k)
-    ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (fractionation)
+    ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (isotope ratio)
     delta_DOstock          = delta_DOstock        + DO_uptake_possible(k)
   end do
 # endif
@@ -1716,51 +1958,63 @@ endif
 
 # if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE
 if (sumNO3UpPos .gt. 0d0) then
-  ! [mmol.CHEM/m2.hab s]        = [mmol.CHEM/m2.hab s]          + [umol.CHEM/m2.hab s]   (mmol/1000umol) (fractionation)
+  ! [mmol.CHEM/m2.hab s]        = [mmol.CHEM/m2.hab s]          + [umol.CHEM/m2.hab s]   (mmol/1000umol) (isotope ratio)
   NO3_uptake_rate_from_ocean(:) = NO3_uptake_rate_from_ocean(:) + NO3_uptake_possible(0) * 0.001d0       &
           * aNO3_phot(1:N_Nsp)*rNO3_ocn(:)
-  ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (fractionation)
+#  if defined SEAGRASS_IMMEDIATE_NO3_TO_NH4_CONVERSION
+  ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] +     [umol.CHEM/m2.hab s]   (isotope ratio)
+  delta_NH4stock(:)      = delta_NH4stock(:)    +     NO3_uptake_possible(0) * aNO3_phot(1:N_Nsp)*rNO3_ocn(:)
+  delta_DOstock          = delta_DOstock        + 2 * NO3_uptake_possible(0) ! for every mol of NO3 converted to NH4, 2 mol of DO is produced   NO3- + H+ + 2*H2O -> NH4+ + 2*O2 + OH-
+#  else
+  ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (isotope ratio)
   delta_NO3stock(:)      = delta_NO3stock(:)    + NO3_uptake_possible(0) * aNO3_phot(1:N_Nsp)*rNO3_ocn(:)
+#  endif
 endif
 if (sumNH4UpPos .gt. 0d0) then
-  ! [mmol.CHEM/m2.hab s]        = [mmol.CHEM/m2.hab s]          + [umol.CHEM/m2.hab s]   (mmol/1000umol) (fractionation)
+  ! [mmol.CHEM/m2.hab s]        = [mmol.CHEM/m2.hab s]          + [umol.CHEM/m2.hab s]   (mmol/1000umol) (isotope ratio)
   NH4_uptake_rate_from_ocean(:) = NH4_uptake_rate_from_ocean(:) + NH4_uptake_possible(0) * 0.001d0       &
           * aNH4_phot(1:N_Nsp)*rNH4_ocn(:)
-  ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (fractionation)
+  ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (isotope ratio)
   delta_NH4stock(:)      = delta_NH4stock(:)    + NH4_uptake_possible(0) * aNH4_phot(1:N_Nsp)*rNH4_ocn(:)
 endif
 if (sumPUpPos .gt. 0d0) then
-  ! [mmol.CHEM/m2.hab s]        = [mmol.CHEM/m2.hab s]          + [umol.CHEM/m2.hab s]   (mmol/1000umol) (fractionation)
+  ! [mmol.CHEM/m2.hab s]        = [mmol.CHEM/m2.hab s]          + [umol.CHEM/m2.hab s]   (mmol/1000umol) (isotope ratio)
   PO4_uptake_rate_from_ocean(:) = PO4_uptake_rate_from_ocean(:) + PO4_uptake_possible(0) * 0.001d0       * rPO4_ocn(:)
-  ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (fractionation)
+  ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (isotope ratio)
   delta_PO4stock(:)      = delta_PO4stock(:)    + PO4_uptake_possible(0) * rPO4_ocn(:)
 endif
 # endif
 # if defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
 if (sumNO3UpPos .gt. 0d0) then
   do k=1,Nsed
-    ! [umol.CHEM/L s]                      = [umol.CHEM/L s]                        - [umol.CHEM/m2.hab s]   [m2.hab/m2.sedmnt]  [1/mm] (1000mm/m)(m3/1000L) (fractionation)
+    ! [umol.CHEM/L s]                      = [umol.CHEM/L s]                        - [umol.CHEM/m2.hab s]   [m2.hab/m2.sedmnt]  [1/mm] (1000mm/m)(m3/1000L) (isotope ratio)
     SEDECO(ng)%sg_dNO3_dt(:,k,species,i,j) = SEDECO(ng)%sg_dNO3_dt(:,k,species,i,j) - NO3_uptake_possible(k) &
             * sgrass_per_sedmnt / sed_layer_thickness(k)    * aNO3_phot(1:N_Nsp)*rNO3_sed(:,k)
-    ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (fractionation)
+#  if defined SEAGRASS_IMMEDIATE_NO3_TO_NH4_CONVERSION
+    ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] +    [umol.CHEM/m2.hab s]   (isotope ratio)
+    delta_NH4stock(:)      = delta_NH4stock(:)    +     NO3_uptake_possible(k) * aNO3_phot(1:N_Nsp)*rNO3_sed(:,k)
+    delta_DOstock          = delta_DOstock        + 2 * NO3_uptake_possible(k) ! for every mol of NO3 converted to NH4, 2 mol of DO is produced   NO3- + H+ + 2*H2O -> NH4+ + 2*O2 + OH-
+#  else
+    ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (isotope ratio)
     delta_NO3stock(:)      = delta_NO3stock(:)    + NO3_uptake_possible(k) * aNO3_phot(1:N_Nsp)*rNO3_sed(:,k)
+#  endif
   end do
 endif
 if (sumNH4UpPos .gt. 0d0) then
   do k=1,Nsed
-    ! [umol.CHEM/L s]                      = [umol.CHEM/L s]                        - [umol.CHEM/m2.hab s]   [m2.hab/m2.sedmnt]  [1/mm] (1000mm/m)(m3/1000L) (fractionation)
+    ! [umol.CHEM/L s]                      = [umol.CHEM/L s]                        - [umol.CHEM/m2.hab s]   [m2.hab/m2.sedmnt]  [1/mm] (1000mm/m)(m3/1000L) (isotope ratio)
     SEDECO(ng)%sg_dNH4_dt(:,k,species,i,j) = SEDECO(ng)%sg_dNH4_dt(:,k,species,i,j) - NH4_uptake_possible(k) &
             * sgrass_per_sedmnt / sed_layer_thickness(k)    * aNH4_phot(1:N_Nsp)*rNH4_sed(:,k)
-    ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (fractionation)
+    ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (isotope ratio)
     delta_NH4stock(:)      = delta_NH4stock(:)    + NH4_uptake_possible(k) * aNH4_phot(1:N_Nsp)*rNH4_sed(:,k)
   end do
 endif
 if (sumPUpPos .gt. 0d0) then
   do k=1,Nsed
-    ! [umol.CHEM/L s]                      = [umol.CHEM/L s]                        - [umol.CHEM/m2.hab s]   [m2.hab/m2.sedmnt]  [1/mm] (1000mm/m)(m3/1000L) (fractionation)
+    ! [umol.CHEM/L s]                      = [umol.CHEM/L s]                        - [umol.CHEM/m2.hab s]   [m2.hab/m2.sedmnt]  [1/mm] (1000mm/m)(m3/1000L) (isotope ratio)
     SEDECO(ng)%sg_dPO4_dt(:,k,species,i,j) = SEDECO(ng)%sg_dPO4_dt(:,k,species,i,j) - PO4_uptake_possible(k) &
             * sgrass_per_sedmnt / sed_layer_thickness(k)    * rPO4_sed(:,k)
-    ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (fractionation)
+    ! [umol.CHEM/m2.hab s] = [umol.CHEM/m2.hab s] + [umol.CHEM/m2.hab s]   (isotope ratio)
     delta_PO4stock(:)      = delta_PO4stock(:)    + PO4_uptake_possible(k) * rPO4_sed(:,k)
   end do
 endif
@@ -1793,12 +2047,28 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
     ! [umol.C/m2.hab s] = [umol.C/m2.lf s] [m2.lf/m2.hab] [             ]
     Phot_limit_light  = P_max            * ELAP         * tanh(PFD/I_k)
 
+# if defined SEAGRASS_DEBUG_MODE
+    if (Phot_limit_light .lt. 0.0d0) then
+      write(*,*) 'yt_debug: negative value in Phot_limit_light'
+      write(*,*) 'yt_debug: Phot_limit_light = ', Phot_limit_light, 'ELAP = ', ELAP, 'PFD = ', PFD, 'I_k = ', I_k
+      error stop
+    endif
+# endif
+
 ! DIC limit ---------------------------------------------------------------------
 
     ! Phot_limit_DIC            [umol.C m-2.sg.hab s-1]     Photosynthesis/growth rate possible as limited by DIC uptake
 
     ! [umol.C/m2.hab s] = [mol.C/mol.CHM] [umol.CHM/m2.hab] [1/s]
     Phot_limit_DIC   =                    DICstock(iCt)  / dt
+
+# if defined SEAGRASS_DEBUG_MODE
+    if (Phot_limit_DIC .lt. 0.0d0) then
+      write(*,*) 'yt_debug: negative value in Phot_limit_DIC'
+      write(*,*) 'yt_debug: Phot_limit_DIC = ', Phot_limit_DIC, 'DICstock(iCt) = ', DICstock(iCt)
+      error stop
+    endif
+# endif
 
 ! Gross Photosythesis rate ---------------------------------------------------------------------
 
@@ -1814,10 +2084,10 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
     ! delta_DICstock              [umol.DIC m-2.sg.hab s-1]   Rate of change in DICstock
     ! Phot_rate                   [umol.C m-2.sg.hab s-1]     Gross photosynthesis rate
 
-    ! [umol.C/m2.hab s] = [umol.C/m2.hab s]  - [umol.C/m2.hab s] (isotope ratios)
-    delta_DICstock(:)   = delta_DICstock(:)  - Phot_rate         * rDICstock(:)
+    ! [umol.C/m2.hab s] = [umol.C/m2.hab s]  - [umol.C/m2.hab s] (fractionation)  (isotope ratios)
+    delta_DICstock(:)   = delta_DICstock(:)  - Phot_rate         * aC_phot(1:N_Csp) * rDICstock(:)
     delta_DOstock       = delta_DOstock      + Phot_rate ! for every mol of CO2  consumed in growth: 1 mol of O2 is produced
-    delta_CH2Ostock(:)  = delta_CH2Ostock(:) + Phot_rate         * rDICstock(:)
+    delta_CH2Ostock(:)  = delta_CH2Ostock(:) + Phot_rate         * aC_phot(1:N_Csp) * rDICstock(:)
 
 ! ====================================================================================================
 !
@@ -1856,21 +2126,32 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
     Growth_rate = Growth_limit_CH2O
 # endif
 
-    if (Growth_rate .lt. 0d0) then ! error handling
-      ! write(*,*) "yt_debug: negative value error in photosynthesis/growth. Time =", &
-      !   date, "Position =", i, j, "Growth_rate = ", Growth_rate
-      ! write(*,*) "yt_debug:     Growth_rate        = ", Growth_rate
-      ! write(*,*) "yt_debug:     Growth_limit_CH2O   = ", Growth_limit_CH2O
+# if defined SEAGRASS_DEBUG_MODE
+    if (Growth_rate .lt. -1d-5) then ! error handling
+      write(*,*) "yt_debug: negative value error in growth. Time =", &
+        date, "Position =", i, j, "Growth_rate = ", Growth_rate
+      write(*,*) "yt_debug:     Growth_rate        = ", Growth_rate
+      write(*,*) "yt_debug:     Growth_limit_CH2O   = ", Growth_limit_CH2O
 # if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
-      ! write(*,*) "yt_debug:     Growth_limit_NO3   = ", Growth_limit_NO3
-      ! write(*,*) "yt_debug:     Growth_limit_NH4   = ", Growth_limit_NH4
-      ! write(*,*) "yt_debug:     Growth_limit_PO4   = ", Growth_limit_PO4
+      write(*,*) "yt_debug:     Growth_limit_NO3   = ", Growth_limit_NO3
+      write(*,*) "yt_debug:     Growth_limit_NH4   = ", Growth_limit_NH4
+      write(*,*) "yt_debug:     Growth_limit_PO4   = ", Growth_limit_PO4
 # endif
-      Growth_rate = 0.0d0
+      ! error stop
     endif
+# endif
+      Growth_rate = max(Growth_rate, 0.0d0)
 
 ! Growth mass balance (remove from stock, add to biomass) ---------------------------------------------------------------------------------------
     
+# if defined SEAGRASS_DEBUG_MODE
+    if (NO3stock(iNt) .lt. 0.0d0) then
+      write(*,*) 'yt_debug: negative value in NO3stock(iNt)'
+      write(*,*) 'yt_debug: NO3stock(iNt) = ', NO3stock(iNt)
+      error stop
+    endif
+# endif
+
     ! remove from stock
     ! delta_DICstock              [umol.DIC m-2.sg.hab s-1]   Rate of change in DICstock
     ! Growth_rate                 [umol.C m-2.sg.hab s-1]     Gross photosynthesis/growth rate
@@ -1880,7 +2161,7 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
 #  if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
     if ((NO3stock(iNt)+NH4stock(iNt)) .gt. 0d0) then
       delta_NO3stock(:)   = delta_NO3stock(:) - Growth_rate  * SgNperC * rNO3stock(:)*(NO3stock(iNt)/(NO3stock(iNt)+NH4stock(iNt))) ! portion from nitrate proportional to stock
-      delta_DOstock       = delta_DOstock     + 2*Growth_rate* SgNperC *              (NO3stock(iNt)/(NO3stock(iNt)+NH4stock(iNt))) ! for every mol of NO3- consumed in growth: 2 mol of O2 is produced
+      delta_DOstock       = delta_DOstock     + 2*Growth_rate* SgNperC *              (NO3stock(iNt)/(NO3stock(iNt)+NH4stock(iNt))) ! for every mol of NO3- consumed in growth: 2 mol of O2 is produced   NO3- + H+ + 2*H2O -> NH4+ + 2*O2 + OH-
       delta_NH4stock(:)   = delta_NH4stock(:) - Growth_rate  * SgNperC * rNH4stock(:)*(NH4stock(iNt)/(NO3stock(iNt)+NH4stock(iNt))) ! portion from ammonium proportional to stock
     endif
     delta_PO4stock(:)   = delta_PO4stock(:) - Growth_rate    * SgPperC * rPO4stock(:)
@@ -1918,7 +2199,7 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
     ! Resp_limit_DO               [umol.C m-2.sg.hab s-1]     Respiration/un-growth rate possible as limited by DO uptake
 
     ! [umol.C/m2.hab s] = [mol.C/mol.CHM] [umol.CHM/m2.hab] [1/s]
-    Resp_limit_DO       =                 DOstock           / dt
+    Resp_limit_DO       =                 (DOstock+delta_DOstock*dt) / dt
 
 ! Respiration/ungrowth -------------------------------------------------------------------------------
 
@@ -1942,7 +2223,16 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
 
     anoxic_dieoff = SgCBmF(iCt) - SgCBmF_toMaintain
 
-    ! error check for negative
+# if defined SEAGRASS_DEBUG_MODE
+    if (SgCBmF_toMaintain .lt. -1d-5) then ! error handling
+      write(*,*) "yt_debug: negative value error in respiration rate. Time =", &
+              date, "Position =", i, j
+      write(*,*) "yt_debug:     SgCBmF_toMaintain = ", SgCBmF_toMaintain
+      write(*,*) "yt_debug:     SgCBmF            = ", SgCBmF(iCt)
+      write(*,*) "yt_debug:     Resp_limit_DO     = ", Resp_limit_DO
+      ! error stop
+    endif
+# endif
     SgCBmF_toMaintain = max(SgCBmF_toMaintain, 0d0)
 
     ! [umol.C/m2.hab] = [umol.C/g s] [g/mol.C] [umol.C/m2.hab]     [s]  (mol/1000000umol)
@@ -1950,19 +2240,49 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
 
     ! [umol.C/m2.hab s] = [umol.C/m2.hab] [1/s]
     Resp_rate           = CH2Orequired    / dt
-    if (Resp_rate .lt. 0d0) then ! error handling
-      Resp_rate = 0.0d0
-    endif
 
-    if (CH2Ostock(iCt) .ge. CH2Orequired) then
+    if (CH2Ostock(iCt)+delta_CH2Ostock(iCt)*dt .ge. CH2Orequired) then
       ! respired_mass = 0d0
-      delta_CH2Ostock(:) = delta_CH2Ostock(:) - CH2Orequired * rCH2Ostock(:)
-      delta_DICstock(:)  = delta_DICstock(:)  + CH2Orequired * rCH2Ostock(:)
-      delta_DOstock      = delta_DOstock      - CH2Orequired
+      delta_CH2Ostock(:) = delta_CH2Ostock(:) - Resp_rate * rCH2Ostock(:)
+      delta_DICstock(:)  = delta_DICstock(:)  + Resp_rate * rCH2Ostock(:)
+      delta_DOstock      = delta_DOstock      - Resp_rate
+
+# if defined SEAGRASS_DEBUG_MODE
+      if (CH2Ostock(iCt)+delta_CH2Ostock(iCt)*dt .lt. -1d-5) then
+        write(*,*) "yt_debug:     CH2Ostock = ", CH2Ostock(iCt), &
+                "delta_CH2Ostock = ", delta_CH2Ostock(iCt), "CH2Orequired", CH2Orequired
+        ! error stop
+      endif
+# endif
+
+# if defined SEAGRASS_DEBUG_MODE
+      if (DOstock + delta_DOstock*dt .lt. 0.0d0) then
+        write(*,*) 'yt_debug: negative value in (DOstock + delta_DOstock*dt) after respiration calculation'
+        write(*,*) 'yt_debug: (DOstock + delta_DOstock*dt) = ', (DOstock + delta_DOstock*dt), 'Resp_rate = ', Resp_rate
+        error stop
+      endif
+# endif
+      
     else ! if CH2Oavailable < CH2Orequired
-      delta_CH2Ostock(:) = delta_CH2Ostock(:) - CH2Ostock(:)
-      delta_DICstock(:)  = delta_DICstock(:)  + CH2Ostock(:)
-      delta_DOstock      = delta_DOstock      - CH2Ostock(iCt)
+      delta_DICstock(:)  = delta_DICstock(:)  + (CH2Ostock(:)+delta_CH2Ostock(:)*dt) / dt
+      delta_DOstock      = delta_DOstock      - (CH2Ostock(iCt)+delta_CH2Ostock(iCt)*dt) / dt
+      delta_CH2Ostock(:) = delta_CH2Ostock(:) - (CH2Ostock(:)+delta_CH2Ostock(:)*dt) / dt
+
+# if defined SEAGRASS_DEBUG_MODE
+      if (CH2Ostock(iCt)+delta_CH2Ostock(iCt)*dt .lt. -1d-5) then
+        write(*,*) "yt_debug:     CH2Ostock = ", CH2Ostock(iCt), &
+                "delta_CH2Ostock = ", delta_CH2Ostock(iCt)
+        ! error stop
+      endif
+# endif
+
+# if defined SEAGRASS_DEBUG_MODE
+      if (DOstock + delta_DOstock*dt .lt. 0.0d0) then
+        write(*,*) 'yt_debug: negative value in (DOstock + delta_DOstock*dt) after respiration calculation'
+        write(*,*) 'yt_debug: (DOstock + delta_DOstock*dt) = ', (DOstock + delta_DOstock*dt), 'Resp_rate = ', Resp_rate
+        error stop
+      endif
+# endif
 
       ! massUnsupported  = SgCBmF(iCt) - CH2Ostock(iCt)
     
@@ -1997,6 +2317,21 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
       delta_SgPBmF(:)    = delta_SgPBmF(:)    - Ungrowth_rate * SgPperC * rSgPBm(:)
       delta_PO4stock(:)  = delta_PO4stock(:)  + Ungrowth_rate * SgPperC * rSgPBm(:)
 #  endif
+
+! # if defined SEAGRASS_DEBUG_MODE
+!       if (DOstock + delta_DOstock*dt .lt. 0.0d0) then
+!         write(*,*) 'yt_debug: negative value in (DOstock + delta_DOstock*dt) after ungrowth calculation'
+!         write(*,*) 'yt_debug: (DOstock + delta_DOstock*dt) = ', (DOstock + delta_DOstock*dt), 'Resp_rate = ', Resp_rate
+!       endif
+! # endif
+
+      if (DOstock + delta_DOstock*dt .le. 0.0d0) then
+        ! if overdraw on DO due to respired mass, get the difference from the ocean
+        ! [mmol.CHEM/m2.hab s]     = [mmol.CHEM/m2.hab s]          - [-umol.DIC/m2.hab]          [1/s] (mmol/1000umol)
+        DO__uptake_rate_from_ocean = DO__uptake_rate_from_ocean    - (DOstock + delta_DOstock*dt) / dt * 0.001d0
+        delta_DOstock = -1d0 * DOstock / dt
+      endif
+
     endif
 
 ! Dieoff from base turnover rate rate -------------------------------------------------------------------------
@@ -2014,13 +2349,13 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
       ! anoxic_dieoff             [umol.C m-2.sg.hab]         Seagrass dieoff due to anoxia this time step
       ! SgCBmF                    [umol.C m-2.sg.hab]         Seagrass leaf+root carbon-biomass per unit ground area (in seagrass habitat area) updates on fine time interval
 
-      ! ! limit dieoff rate (especially for when DO intake is zero)
-      ! ! max_anoxic_dieoff_rate      [mol.C mol-1.C day-1]       maximum dieoff due to anoxia in fraction of mass per day, represents atypical modes of survival such as anaerobic respiration and cellular canibalism which limits extreme death rates
-      ! ! [mol.C mol-1.C]     = [mol.C mol-1.C day-1] [s]  (day/86400s)
-      ! ! max_dieoff_per_step = max_anoxic_dieoff_rate       * dt / 86400
-      ! if (anoxic_dieoff/SgCBmF(iCt) .gt. max_anoxic_dieoff_rate*dt/86400d0) then
-      !   anoxic_dieoff = SgCBmF(iCt) * max_anoxic_dieoff_rate*dt/86400d0
-      ! endif
+      ! limit dieoff rate (especially for when DO intake is zero)
+      ! max_anoxic_dieoff_rate      [mol.C mol-1.C day-1]       maximum dieoff due to anoxia in fraction of mass per day, represents atypical modes of survival such as anaerobic respiration and cellular canibalism which limits extreme death rates
+      ! [mol.C mol-1.C]     = [mol.C mol-1.C day-1] [s]  (day/86400s)
+      ! max_dieoff_per_step = max_anoxic_dieoff_rate       * dt / 86400
+      if (anoxic_dieoff/SgCBmF(iCt) .gt. max_anoxic_dieoff_rate*dt/86400d0) then
+        anoxic_dieoff = SgCBmF(iCt) * max_anoxic_dieoff_rate*dt/86400d0
+      endif
 
       ! dieoff_rate                 [umol.C m-2.sg.hab s-1]     Seagrass dieoff rate
       dieoff_rate = dieoff_rate + anoxic_dieoff /dt
@@ -2140,13 +2475,14 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
 
 ! Mass balance of seagrass biomass -------------------------------------------------------------------------
 
-    ! if seagrass dry weight biomass would become less than 1.0 ug per m2, then instead set to zero
-
     ! SgCBmF                      [umol.C m-2.sg.hab]         Seagrass leaf+root carbon-biomass per unit ground area (in seagrass habitat area)
     ! delta_SgCBmF                [umol.C m-2.sg.hab s-1]     Rate of change in SgCBmF
     ! dt                          [s]                         Time step interval duration
     ! SgMperC                     [g.drywt mol-1.C]           Species specific biomass mass per unit carbon based on C-N-P ratio according to (CH2O)x(NH3)y(H3PO4)z as the chemical formula for biomass
-    if (SgCBmF(iCt) + delta_SgCBmF(iCt) * dt .lt. 1.0d0/SgMperC) then
+    ! ! if seagrass dry weight biomass would become less than 1.0 ug per m2, then instead set to zero
+    ! if (SgCBmF(iCt) + delta_SgCBmF(iCt) * dt .lt. 1.0d0/SgMperC) then
+    ! if seagrass dry weight biomass would become less than one seed per m2, then instead set to zero
+    if (SgCBmF(iCt) + delta_SgCBmF(iCt) * dt .lt. (100d0 * 0.3d0) * (0.001d0/12.01d0)/100d0 /24d0) then ! approx (100 mg per seed * 30% (carbon to mass ratio)) * (0.001 g/mg 1mol.C/12.01g.C) * (1 seed per 100 m2 per day)
       ! Move seagrass biomass to POM
 # if defined SEAGRASS_LEAF_POM
       ! Add leaf portion to ocean POM
@@ -2230,6 +2566,69 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
     PO4stock(:)         = PO4stock(:)       + delta_PO4stock(:)   * dt
 # endif
 
+# if defined SEAGRASS_DEBUG_MODE
+    ! error check for negative stock value
+    if (DICstock(iCt) .lt. -1d-5) then
+      write(*,*) "yt_debug: negative value error in DICstock. Time =", &
+              date, "Position =", i, j
+      write(*,*) "yt_debug:     DICstock = ", DICstock(iCt)
+      ! error stop
+    endif
+    if (CH2Ostock(iCt) .lt. -1d-5) then
+      write(*,*) "yt_debug: negative value error in CH2Ostock. Time =", &
+              date, "Position =", i, j
+      write(*,*) "yt_debug:     CH2Ostock = ", CH2Ostock(iCt), "delta_CH2Ostock = ", delta_CH2Ostock(iCt)
+      ! error stop
+    endif
+    if (DOstock .lt. -1d-5) then
+      write(*,*) "yt_debug: negative value error in DOstock. Time =", &
+              date, "Position =", i, j
+      write(*,*) "yt_debug:     DOstock = ", DOstock
+      ! error stop
+    endif
+# if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
+    if (NO3stock(iNt) .lt. -1d-5) then
+      write(*,*) "yt_debug: negative value error in NO3stock. Time =", &
+              date, "Position =", i, j
+      write(*,*) "yt_debug:     NO3stock = ", NO3stock(iNt)
+      ! error stop
+    endif
+    if (NH4stock(iNt) .lt. -1d-5) then
+      write(*,*) "yt_debug: negative value error in NH4stock. Time =", &
+              date, "Position =", i, j
+      write(*,*) "yt_debug:     NH4stock = ", NH4stock(iNt)
+      ! error stop
+    endif
+    if (PO4stock(iPt) .lt. -1d-5) then
+      write(*,*) "yt_debug: negative value error in PO4stock. Time =", &
+              date, "Position =", i, j
+      write(*,*) "yt_debug:     PO4stock = ", PO4stock(iPt)
+      ! error stop
+    endif
+# endif
+# endif
+
+    if (DICstock(iCt) .le. 0.0d0) then
+      DICstock(:) = 0.0d0
+    endif
+    if (CH2Ostock(iCt) .le. 0.0d0) then
+      CH2Ostock(:) = 0.0d0
+    endif
+    if (DOstock .le. 0.0d0) then
+      DOstock = 0.0d0
+    endif
+# if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
+    if (NO3stock(iNt) .le. 0.0d0) then
+      NO3stock(:) = 0.0d0
+    endif
+    if (NH4stock(iNt) .le. 0.0d0) then
+      NH4stock(:) = 0.0d0
+    endif
+    if (PO4stock(iPt) .le. 0.0d0) then
+      PO4stock(:) = 0.0d0
+    endif
+# endif
+
 ! If stocks exceed limit, leak to environment -------------------------------------------------------------------------
 
     ! stock is limited to stock cap so leak any excess
@@ -2238,22 +2637,27 @@ ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
     ! delta_DICstock              [umol.DIC m-2.sg.hab s-1]   Rate of change in DICstock
     ! CHEM_uptake_rate_from_ocean [mmol.CHEM m-2.sg.hab s-1]  direction of ocean to seagrass is positive
     ! SEDECO(ng)%sg_dDIC_dt()     [umol.DIC L-1 s-1]          Rate of change in DIC due to flux from roots to sediment (positive means seagrass to sediment)
-    ! f_above                     [g.lf.drywt g-1.tot.drywt]  also [mol.C.lf mol-1.C.tot] Ideal above ground biomass to total biomass fraction
+    ! f_abv_cur                   [g.lf.drywt g-1.tot.drywt]  also [mol.C.lf mol-1.C.tot] current above ground biomass to total biomass fraction, calculated on the last growth interval
     ! root_comp_dist_factor(Nsed) [g.rt.comp g-1.tot m2.sg.hab m-2.sedmnt mm-1]    root compartemtent distribution factor equal to f_blw_cur * root_mass_profile(:) * sgrass_per_sedmnt / sed_layer_thickness(:) 
     ! DICstockCap                 []                          Factor to multiply carbon biomsass to get maximum DIC stock (stock limit = DICstockCap*SgCBmF) 
 
 if (DICstock(iCt) .gt. DICstockCap*SgCBmF(iCt)) then
     ! Excess DIC = (DIC stock - seagrass biomass) = (DICstock(:)-SgCBmF(iCt)*rDICstock(:))
+# if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE
     ! Distribute this to ocean and sediment
     ! [mmol.CHEM/m2.hab s]        = [mmol.CHEM/m2.hab s]          - [umol.DIC/m2.hab]                      [1/s] []        (mmol/1000umol)
     DIC_uptake_rate_from_ocean(:) = DIC_uptake_rate_from_ocean(:) &
-            - (DICstock(:)-DICstockCap*SgCBmF(iCt)*rDICstock(:)) / dt  * f_above * 0.001d0
-# if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE
+            - (DICstock(:)-DICstockCap*SgCBmF(iCt)*rDICstock(:)) / dt  * f_abv_cur * 0.001d0
     do k=1,Nsed
       ! [umol.CHEM/L s]                      = [umol.CHEM/L s]                        + [umol.DIC/m2.hab]                      [1/s] {[][g.rt.comp/g.tot][m2.hab/m2.sedmnt][1/mm](m2.sedmnt*mm/L)}
       SEDECO(ng)%sg_dDIC_dt(:,k,species,i,j) = SEDECO(ng)%sg_dDIC_dt(:,k,species,i,j) &
               + (DICstock(:)-DICstockCap*SgCBmF(iCt)*rDICstock(:)) / dt  * root_comp_dist_factor(k)
     end do
+# else
+    ! Distribute this to ocean
+    ! [mmol.CHEM/m2.hab s]        = [mmol.CHEM/m2.hab s]          - [umol.DIC/m2.hab]                      [1/s] []        (mmol/1000umol)
+    DIC_uptake_rate_from_ocean(:) = DIC_uptake_rate_from_ocean(:) &
+            - (DICstock(:)-DICstockCap*SgCBmF(iCt)*rDICstock(:)) / dt  * 0.001d0
 # endif
     ! Set stock equal to seagrass biomass
     ! [umol.DIC/m2.hab] = [umol.C/m2.hab] (isotope ratio)
@@ -2263,16 +2667,21 @@ endif
   ! CH2OstockCap                []                          Factor to multiply carbon biomsass to get maximum sugar stock (stock limit = CH2OstockCap*SgCBmF) 
 if (CH2Ostock(iCt) .gt. CH2OstockCap*SgCBmF(iCt)) then
   ! Excess DOC = (CH2O stock - seagrass biomass) = (CH2Ostock(:)-SgCBmF(iCt)*rCH2Ostock(:))
+# if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE
   ! Distribute this to ocean and sediment
   ! [mmol.CHEM/m2.hab s]        = [mmol.CHEM/m2.hab s]          - [umol.CH2O/m2.hab]                      [1/s] []        (mmol/1000umol)
   DOC_uptake_rate_from_ocean(:) = DOC_uptake_rate_from_ocean(:) &
-          - (CH2Ostock(:)-CH2OstockCap*SgCBmF(iCt)*rCH2Ostock(:)) / dt  * f_above * 0.001d0
-# if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE
+          - (CH2Ostock(:)-CH2OstockCap*SgCBmF(iCt)*rCH2Ostock(:)) / dt  * f_abv_cur * 0.001d0
   do k=1,Nsed
     ! [umol.CHEM/L s]                      = [umol.CHEM/L s]                        + [umol.DIC/m2.hab]                      [1/s] {[][g.rt.comp/g.tot][m2.hab/m2.sedmnt][1/mm](m2.sedmnt*mm/L)}
     SEDECO(ng)%sg_dDOC_dt(:,k,species,i,j) = SEDECO(ng)%sg_dDOC_dt(:,k,species,i,j) &
             + (CH2Ostock(:)-CH2OstockCap*SgCBmF(iCt)*rCH2Ostock(:)) / dt  * root_comp_dist_factor(k)
   end do
+# else
+  ! Distribute this to ocean
+  ! [mmol.CHEM/m2.hab s]        = [mmol.CHEM/m2.hab s]          - [umol.CH2O/m2.hab]                      [1/s] []        (mmol/1000umol)
+  DOC_uptake_rate_from_ocean(:) = DOC_uptake_rate_from_ocean(:) &
+          - (CH2Ostock(:)-CH2OstockCap*SgCBmF(iCt)*rCH2Ostock(:)) / dt * 0.001d0
 # endif
   ! Set stock equal to seagrass biomass
   ! [umol.DIC/m2.hab] = [umol.C/m2.hab] (isotope ratio)
@@ -2282,15 +2691,19 @@ endif
   ! DOstockCap                  []                          Factor to multiply carbon biomsass to get maximum DO stock (stock limit = DOstockCap*SgCBmF) 
 if (DOstock .gt. DOstockCap*SgCBmF(iCt)) then
   ! Excess DO = (DO stock - seagrass C-biomass) = (DOstock-SgCBmF(iCt))
+# if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE
   ! Distribute this to ocean and sediment
   ! [mmol.CHEM/m2.hab s]     = [mmol.CHEM/m2.hab s]          - [umol.DIC/m2.hab]     [1/s] []        (mmol/1000umol)
-  DO__uptake_rate_from_ocean = DO__uptake_rate_from_ocean    - (DOstock-DOstockCap*SgCBmF(iCt)) / dt  * f_above * 0.001d0
-# if defined SEAGRASS_ROOT_CARBON_OXYGEN_EXCHANGE
+  DO__uptake_rate_from_ocean = DO__uptake_rate_from_ocean    - (DOstock-DOstockCap*SgCBmF(iCt)) / dt  * f_abv_cur * 0.001d0
   do k=1,Nsed
     ! [umol.CHEM/L s]                   = [umol.CHEM/L s]                     + [umol.DIC/m2.hab]     [1/s] {[][g.rt.comp/g.tot][m2.hab/m2.sedmnt][1/mm](m2.sedmnt*mm/L)}
     SEDECO(ng)%sg_dO2_dt(k,species,i,j) = SEDECO(ng)%sg_dO2_dt(k,species,i,j) &
             + (DOstock-DOstockCap*SgCBmF(iCt)) / dt * root_comp_dist_factor(k)
   end do
+# else
+  ! Distribute this to ocean
+  ! [mmol.CHEM/m2.hab s]     = [mmol.CHEM/m2.hab s]          - [umol.DIC/m2.hab]     [1/s] []        (mmol/1000umol)
+  DO__uptake_rate_from_ocean = DO__uptake_rate_from_ocean    - (DOstock-DOstockCap*SgCBmF(iCt)) / dt * 0.001d0
 # endif
   ! Set stock equal to seagrass biomass
   ! [umol.DIC/m2.hab] = [umol.C/m2.hab] (isotope ratio)
@@ -2301,19 +2714,28 @@ endif
 # if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
 if (NO3stock(iNt) .gt. NO3stockCap*SgNBmF(iNt)) then
   ! Excess NO3 = (NO3 stock - seagrass biomass) = (NO3stock(:)-SgNBmF(iNt)*rNO3stock(:))
-  ! Distribute this to ocean and sediment
 # endif
-# if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE
+# if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE && defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
+  ! Distribute this to ocean and sediment
   ! [mmol.CHEM/m2.hab s]        = [mmol.CHEM/m2.hab s]          - [umol.NO3/m2.hab]                      [1/s] []        (mmol/1000umol)
   NO3_uptake_rate_from_ocean(:) = NO3_uptake_rate_from_ocean(:) &
-          - (NO3stock(:)-NO3stockCap*SgNBmF(iNt)*rNO3stock(:)) / dt  * f_above * 0.001d0
-# endif
-# if defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
+          - (NO3stock(:)-NO3stockCap*SgNBmF(iNt)*rNO3stock(:)) / dt  * f_abv_cur * 0.001d0
   do k=1,Nsed
     ! [umol.CHEM/L s]                      = [umol.CHEM/L s]                        + [umol.NO3/m2.hab]                      [1/s] {[][g.rt.comp/g.tot][m2.hab/m2.sedmnt][1/mm](m2.sedmnt*mm/L)}
     SEDECO(ng)%sg_dNO3_dt(:,k,species,i,j) = SEDECO(ng)%sg_dNO3_dt(:,k,species,i,j) &
             + (NO3stock(:)-NO3stockCap*SgNBmF(iNt)*rNO3stock(:)) / dt  * root_comp_dist_factor(k)
   end do
+# elif defined SEAGRASS_LEAF_NUTRIENT_UPTAKE
+  ! Distribute this to ocean
+  ! [mmol.CHEM/m2.hab s]        = [mmol.CHEM/m2.hab s]          - [umol.NO3/m2.hab]                      [1/s] []        (mmol/1000umol)
+  NO3_uptake_rate_from_ocean(:) = NO3_uptake_rate_from_ocean(:) &
+          - (NO3stock(:)-NO3stockCap*SgNBmF(iNt)*rNO3stock(:)) / dt * 0.001d0
+# elif defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
+  ! Distribute this to sediment
+  do k=1,Nsed
+    ! [umol.CHEM/L s]                      = [umol.CHEM/L s]                        + [umol.NO3/m2.hab]                      [1/s] {[][g.rt.comp/g.tot][m2.hab/m2.sedmnt][1/mm](m2.sedmnt*mm/L)}
+    SEDECO(ng)%sg_dNO3_dt(:,k,species,i,j) = SEDECO(ng)%sg_dNO3_dt(:,k,species,i,j) &
+            + (NO3stock(:)-NO3stockCap*SgNBmF(iNt)*rNO3stock(:)) / dt  * root_comp_dist_factor(k) / f_blw_cur
 # endif
 # if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
   ! Set stock equal to seagrass biomass
@@ -2321,22 +2743,33 @@ if (NO3stock(iNt) .gt. NO3stockCap*SgNBmF(iNt)) then
   NO3stock(:)         = NO3stockCap*SgNBmF(iNt)     * rNO3stock(:)
 endif
 # endif
+
   ! NH4stockCap                 []                          Factor to multiply nitrogen biomsass to get maximum NH4 stock (stock limit = NH4stockCap*SgNBmF) 
 # if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
 if (NH4stock(iNt) .gt. NH4stockCap*SgNBmF(iNt)) then
   ! Excess NH4 = (NH4 stock - seagrass biomass) = (NH4stock(:)-SgNBmF(iNt)*rNH4stock(:))
-  ! Distribute this to ocean and sediment
 # endif
-# if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE
+# if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE && defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
+  ! Distribute this to ocean and sediment
   ! [mmol.CHEM/m2.hab s]        = [mmol.CHEM/m2.hab s]          - [umol.NH4/m2.hab]                      [1/s] []        (mmol/1000umol)
   NH4_uptake_rate_from_ocean(:) = NH4_uptake_rate_from_ocean(:) &
-          - (NH4stock(:)-NH4stockCap*SgNBmF(iNt)*rNH4stock(:)) / dt  * f_above * 0.001d0
-# endif
-# if defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
+          - (NH4stock(:)-NH4stockCap*SgNBmF(iNt)*rNH4stock(:)) / dt  * f_abv_cur * 0.001d0
   do k=1,Nsed
     ! [umol.CHEM/L s]                      = [umol.CHEM/L s]                        + [umol.NH4/m2.hab]                      [1/s] {[][g.rt.comp/g.tot][m2.hab/m2.sedmnt][1/mm](m2.sedmnt*mm/L)}
     SEDECO(ng)%sg_dNH4_dt(:,k,species,i,j) = SEDECO(ng)%sg_dNH4_dt(:,k,species,i,j) &
             + (NH4stock(:)-NH4stockCap*SgNBmF(iNt)*rNH4stock(:)) / dt  * root_comp_dist_factor(k)
+  end do
+# elif defined SEAGRASS_LEAF_NUTRIENT_UPTAKE
+  ! Distribute this to ocean
+  ! [mmol.CHEM/m2.hab s]        = [mmol.CHEM/m2.hab s]          - [umol.NH4/m2.hab]                      [1/s] []        (mmol/1000umol)
+  NH4_uptake_rate_from_ocean(:) = NH4_uptake_rate_from_ocean(:) &
+          - (NH4stock(:)-NH4stockCap*SgNBmF(iNt)*rNH4stock(:)) / dt * 0.001d0
+# elif defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
+  ! Distribute this to sediment
+  do k=1,Nsed
+    ! [umol.CHEM/L s]                      = [umol.CHEM/L s]                        + [umol.NH4/m2.hab]                      [1/s] {[][g.rt.comp/g.tot][m2.hab/m2.sedmnt][1/mm](m2.sedmnt*mm/L)}
+    SEDECO(ng)%sg_dNH4_dt(:,k,species,i,j) = SEDECO(ng)%sg_dNH4_dt(:,k,species,i,j) &
+            + (NH4stock(:)-NH4stockCap*SgNBmF(iNt)*rNH4stock(:)) / dt  * root_comp_dist_factor(k) / f_blw_cur
   end do
 # endif
 # if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
@@ -2350,19 +2783,28 @@ endif
 # if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
 if (PO4stock(iPt) .gt. PO4stockCap*SgPBmF(iPt)) then
   ! Excess PO4 = (PO4 stock - seagrass biomass) = (PO4stock(:)-SgPBmF(iPt)*rPO4stock(:))
-  ! Distribute this to ocean and sediment
 # endif
-# if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE
+# if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE && defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
+  ! Distribute this to ocean and sediment
   ! [mmol.CHEM/m2.hab s]        = [mmol.CHEM/m2.hab s]          - [umol.PO4/m2.hab]                      [1/s] []        (mmol/1000umol)
   PO4_uptake_rate_from_ocean(:) = PO4_uptake_rate_from_ocean(:) &
-          - (PO4stock(:)-PO4stockCap*SgPBmF(iPt)*rPO4stock(:)) / dt  * f_above * 0.001d0
-# endif
-# if defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
+          - (PO4stock(:)-PO4stockCap*SgPBmF(iPt)*rPO4stock(:)) / dt  * f_abv_cur * 0.001d0
   do k=1,Nsed
     ! [umol.CHEM/L s]                      = [umol.CHEM/L s]                        + [umol.PO4/m2.hab]                      [1/s] {[][g.rt.comp/g.tot][m2.hab/m2.sedmnt][1/mm](m2.sedmnt*mm/L)}
     SEDECO(ng)%sg_dPO4_dt(:,k,species,i,j) = SEDECO(ng)%sg_dPO4_dt(:,k,species,i,j) &
             + (PO4stock(:)-PO4stockCap*SgPBmF(iPt)*rPO4stock(:)) / dt  * root_comp_dist_factor(k)
   end do
+# elif defined SEAGRASS_LEAF_NUTRIENT_UPTAKE
+  ! Distribute this to ocean
+  ! [mmol.CHEM/m2.hab s]        = [mmol.CHEM/m2.hab s]          - [umol.PO4/m2.hab]                      [1/s] []        (mmol/1000umol)
+  PO4_uptake_rate_from_ocean(:) = PO4_uptake_rate_from_ocean(:) &
+          - (PO4stock(:)-PO4stockCap*SgPBmF(iPt)*rPO4stock(:)) / dt * 0.001d0
+# elif defined SEAGRASS_ROOT_NUTRIENT_UPTAKE
+  ! Distribute this to sediment
+  do k=1,Nsed
+    ! [umol.CHEM/L s]                      = [umol.CHEM/L s]                        + [umol.PO4/m2.hab]                      [1/s] {[][g.rt.comp/g.tot][m2.hab/m2.sedmnt][1/mm](m2.sedmnt*mm/L)}
+    SEDECO(ng)%sg_dPO4_dt(:,k,species,i,j) = SEDECO(ng)%sg_dPO4_dt(:,k,species,i,j) &
+            + (PO4stock(:)-PO4stockCap*SgPBmF(iPt)*rPO4stock(:)) / dt  * root_comp_dist_factor(k) / f_blw_cur
 # endif
 # if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
   ! Set stock equal to seagrass biomass
@@ -2528,6 +2970,9 @@ endif
 ! ====================================================================================================
     
     if (is_growth_interval) then 
+      ! if (i .eq. 50 .and. j .eq. 50) then
+      !   write(*,*) 'yt_debug: Yo! its growth interval (seagrass)'
+      ! endif
 
 ! update total carbon-biomass ------------------------------------------------------------------------
 
@@ -2609,6 +3054,10 @@ endif
       ! desiredHabArea = TotSgCBm / opt_sg_bed_C_density
 
         desiredHabArea = TotSgCBm / (opt_sg_bed_density/SgMperC)
+
+        if (HabArea .le. GridArea*p_sand * 0.000001d0) then ! set a minimum HabArea as one mm2 per m2
+          HabArea = GridArea*p_sand * 0.000001d0
+        endif
   
         if ( (TotSgCBm / HabArea) .lt. (opt_sg_bed_density/SgMperC) ) then  ! if density is too low, then shrink hab area
           ! [m2]               = [mol.C]             [m2/mol.C]
@@ -2631,8 +3080,8 @@ endif
           else
             HabArea = HabArea + translocatableArea
           endif
-          if (HabArea .gt. GridArea) then ! yt_edit need to fix this to interact with other habitat types
-            HabArea = GridArea
+          if (HabArea .gt. GridArea*p_sand) then
+            HabArea = GridArea*p_sand
           endif
         endif
 
@@ -3003,6 +3452,8 @@ endif
     , dz                          &   ! [m]                       vertical layer thickness (bottom water column layer)
     , date                        &   ! Date (days since x or elapsed days) yt_edit best if in phase with clock to maintain consistency on restart
     , dt                          &   ! [s]                       time step
+    , p_sgrass                    &   ! [m2.sg.hab m-2.grid]      (0~1)  Seagrass coverage (every species)
+    , p_sand                      &   ! [m2.sedmnt m-2.grid]      (0~1)  Sediment coverage
     )
 ! ====================================================================================================
 ! Module dependencies
@@ -3024,6 +3475,8 @@ endif
     real(8), intent(in)   :: dz                         ! [m]                         vertical layer thickness (bottom water column layer)
     real(8), intent(in)   :: date                       ! [days]                      Date (days since x or elapsed days) yt_edit best if in phase with clock to maintain consistency on restart
     real(8), intent(in)   :: dt                         ! [s]                         Time step interval duration
+    real(8), intent(inout):: p_sgrass(Nsg)              ! [m2.sg.hab m-2.grid]        (0~1)  Seagrass coverage (every species)
+    real(8), intent(in)   :: p_sand                     ! [m2.sedmnt m-2.grid]        (0~1)  Sediment coverage
 
 ! >>> Housekeeping Vars <<< !
     real(8), pointer      :: day                        !                             Simulation whole day (integer round down)
@@ -3032,6 +3485,51 @@ endif
 ! >>> Saved Constants <<< !
     ! model params
     real(8), pointer      :: GridArea                   ! [m2.grid]                   Area of grid cell
+    real(8), pointer      :: SgMperC                    ! [g.drywt mol-1.C]           Species specific biomass mass per unit carbon based on C-N-P ratio according to (CH2O)x(NH3)y(H3PO4)z as the chemical formula for biomass
+    real(8), pointer      :: opt_sg_bed_density         ! [g.drywt m-2.hab]           Ideal seagrass bed density (represents guerilla vs phallanx strategy)
+    real(8), pointer      :: f_above                    ! [g.lf.drywt g-1.tot.drywt]  also [mol.C.lf mol-1.C.tot] Ideal above ground biomass to total biomass fraction  
+    real(8), pointer      :: trans_rate                 ! [mol.C mol-1.C day-1]       Maximum translocation rate as fraction of mass translocatable per day
+    real(8), pointer      :: k_proj                     ! [m2.sg.hab m-2.leaf]        Species specific leaf projection coefficient
+
+    real(8)               :: desiredHabArea             ! [m2.hab]                    The desired habitat area given the biomass and optimal density
+    real(8)               :: translocatableArea         ! [m2.hab]                    Area that can be translocated (shrink or expand) as limited by the translocation rate
+    real(8)               :: ELAP                       ! [m2.lf.proj m-2.sg.hab]     Effective leaf area projection on ground (only within seagrass habitat (covered area))
+
+! >>> Saved Values <<< !
+    ! Update at end of main interval
+    real(8), pointer :: SgCBmF                              (:)   ! [umol.C m-2.sg.hab]         iSgSgCBm      Seagrass leaf+root carbon-biomass per unit ground area (in seagrass habitat area) updates on fine time interval
+    real(8), pointer :: DICstock                            (:)   ! [umol.DIC m-2.sg.hab]       iSgDICstock   Seagrass internal DIC stock per unit ground area (in seagrass habitat area)
+    real(8), pointer :: CH2Ostock                           (:)   ! [umol.CH2O m-2.sg.hab]      iSgCH2Ostock  Seagrass internal sugar stock per unit ground area (in seagrass habitat area)
+    real(8), pointer :: DOstock                                   ! [umol.DO m-2.sg.hab]        iSgDOstock    Seagrass internal DO stock per unit ground area (in seagrass habitat area)
+#  if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
+    real(8), pointer :: SgNBmF                              (:)   ! [umol.N m-2.sg.hab]         iSgSgNBm      Seagrass leaf+root nitrogen-biomass per unit ground area (in seagrass habitat area) updates on fine time interval
+    real(8), pointer :: SgPBmF                              (:)   ! [umol.P m-2.sg.hab]         iSgSgPBm      Seagrass leaf+root phosphorus-biomass per unit ground area (in seagrass habitat area) updates on fine time interval
+    real(8), pointer :: NO3stock                            (:)   ! [umol.NO3 m-2.sg.hab]       iSgNO3stock   Seagrass internal NO3 stock per unit ground area (in seagrass habitat area)
+    real(8), pointer :: NH4stock                            (:)   ! [umol.NH4 m-2.sg.hab]       iSgNH4stock   Seagrass internal NH4 stock per unit ground area (in seagrass habitat area)
+    real(8), pointer :: PO4stock                            (:)   ! [umol.PO4 m-2.sg.hab]       iSgPO4stock   Seagrass internal PO4 stock per unit ground area (in seagrass habitat area)
+#  endif
+    real(8), pointer :: TotSgCBmF                                 ! [mol.C.tot]                 iSgTotSgCBm   Total seagrass carbon-biomass in grid. updates on fine time interval
+    ! Update at end of growth interval
+    ! update total carbon-biomass
+    real(8), pointer :: TotSgCBm                                  ! [mol.C.tot]                 iSgTotSgCBmS  Total seagrass carbon-biomass in grid
+    ! allocate growth
+    real(8), pointer :: TotLfCBm                                  ! [mol.C.lf]                  iSgTotLfCBm   Total seagrass above ground carbon-biomass in grid
+    real(8), pointer :: TotRtCBm                                  ! [mol.C.rt]                  iSgTotRtCBm   Total seagrass below ground carbon-biomass in grid
+    ! update bed-density/habitat area
+    real(8), pointer :: HabArea                                   ! [m2.sg.hab]                 Seagrass habitat ground area in grid cell (such that seagrass coverage (p_sgrass) times the grid area equals the habitat area)
+    ! leaf-root biomass translocation
+    ! update carbon-biomass per area
+    real(8), pointer :: LfCBm                                     ! [umol.lf.C m-2.sg.hab]      iSgLfCBm      Seagrass leaf carbon-biomass per unit ground area (in seagrass habitat area)
+    real(8), pointer :: RtCBm                                     ! [umol.rt.C m-2.sg.hab]      iSgRtCBm      Seagrass root carbon-biomass per unit ground area (in seagrass habitat area)
+    ! update dry-weight biomass
+    real(8), pointer :: TotSgDryBm                                ! [g.drywt]                   Total seagrass dry weight biomass in grid cell
+    real(8), pointer :: TotLfDryBm                                ! [g.lf.drywt]                Total seagrass leaf dry weight biomass in grid cell
+    real(8), pointer :: TotRtDryBm                                ! [g.rt.drywt]                Total seagrass root dry weight biomass in grid cell
+    real(8), pointer :: SgDryBm                                   ! [g.drywt m-2.sg.hab]        Seagrass dry weight biomass per unit ground area (in seagrass habitat area)
+    real(8), pointer :: LfDryBm                                   ! [g.lf.drywt m-2.sg.hab]     Seagrass leaf dry weight biomass per unit ground area (in seagrass habitat area)
+    real(8), pointer :: RtDryBm                                   ! [g.rt.drywt m-2.sg.hab]     Seagrass root dry weight biomass per unit ground area (in seagrass habitat area)
+    ! update leaf area index
+    real(8), pointer :: LAI                                       ! [m2.lf m-2.sg.hab]          iSgLAI          Leaf area index: one-sided green leaf area per unit ground surface area 
 
 ! ====================================================================================================
 ! Variable initializations
@@ -3045,6 +3543,47 @@ endif
 ! >>> Saved Constants <<< !
     ! model params
     GridArea            =>  SGRASS(ng)%GridArea                       (i,j) ! [m2]                        Area of grid cells
+    SgMperC             =>  SGRASS(ng)%SgMperC                (species)     ! [g.drywt mol-1.C]           Species specific biomass mass per unit carbon based on C-N-P ratio according to (CH2O)x(NH3)y(H3PO4)z as the chemical formula for biomass
+    opt_sg_bed_density  =>  SGRASS(ng)%opt_sg_bed_density     (species)     ! [g.drywt m-2.hab]           Ideal seagrass bed density (represents guerilla vs phallanx strategy)
+    f_above             =>  SGRASS(ng)%f_above                (species)     ! [g.lf.drywt g-1.tot.drywt]  also [mol.C.lf mol-1.C.tot] Ideal above ground biomass to total biomass fraction  
+    trans_rate          =>  SGRASS(ng)%trans_rate             (species)     ! [mol.C mol-1.C day-1]       Maximum translocation rate as fraction of mass translocatable per day
+    k_proj              =>  SGRASS(ng)%k_proj                 (species)     ! [m2.sg.hab m-2.leaf]        Species specific leaf projection coefficient
+
+! >>> Saved Values <<< !
+    ! Update at end of main interval
+    SgCBmF(1:N_Csp)     =>  SGRASS(ng)%SgCBmF               (:,species,i,j) ! [umol.C m-2.sg.hab]         Seagrass leaf+root carbon-biomass per unit ground area (in seagrass habitat area) updates on fine time interval
+    DICstock(1:N_Csp)   =>  SGRASS(ng)%DICstock             (:,species,i,j) ! [umol.DIC m-2.sg.hab]       Seagrass internal DIC stock per unit ground area (in seagrass habitat area)
+    CH2Ostock(1:N_Csp)  =>  SGRASS(ng)%CH2Ostock            (:,species,i,j) ! [umol.CH2O m-2.sg.hab]      Seagrass internal sugar stock per unit ground area (in seagrass habitat area)
+    DOstock             =>  SGRASS(ng)%DOstock                (species,i,j) ! [umol.DO m-2.sg.hab]        Seagrass internal DO stock per unit ground area (in seagrass habitat area)
+#  if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
+    SgNBmF(1:N_Nsp)     =>  SGRASS(ng)%SgNBmF               (:,species,i,j) ! [umol.N m-2.sg.hab]         Seagrass leaf+root nitrogen-biomass per unit ground area (in seagrass habitat area) updates on fine time interval
+    SgPBmF(1:N_Psp)     =>  SGRASS(ng)%SgPBmF               (:,species,i,j) ! [umol.P m-2.sg.hab]         Seagrass leaf+root phosphorus-biomass per unit ground area (in seagrass habitat area) updates on fine time interval
+    NO3stock(1:N_Nsp)   =>  SGRASS(ng)%NO3stock             (:,species,i,j) ! [umol.NO3 m-2.sg.hab]       Seagrass internal NO3 stock per unit ground area (in seagrass habitat area)
+    NH4stock(1:N_Nsp)   =>  SGRASS(ng)%NH4stock             (:,species,i,j) ! [umol.NH4 m-2.sg.hab]       Seagrass internal NH4 stock per unit ground area (in seagrass habitat area)
+    PO4stock(1:N_Psp)   =>  SGRASS(ng)%PO4stock             (:,species,i,j) ! [umol.PO4 m-2.sg.hab]       Seagrass internal PO4 stock per unit ground area (in seagrass habitat area)
+#  endif
+    TotSgCBmF           =>  SGRASS(ng)%TotSgCBmF              (species,i,j) ! [mol.C.tot]                 Total seagrass carbon-biomass in grid cell. updates on fine time interval
+    ! Update at end of growth interval
+    ! update total carbon-biomass
+    TotSgCBm            =>  SGRASS(ng)%TotSgCBm               (species,i,j) ! [mol.C.tot]                 Total seagrass carbon-biomass in grid cell
+    ! allocate growth
+    TotLfCBm            =>  SGRASS(ng)%TotLfCBm               (species,i,j) ! [mol.C.lf]                  Total seagrass leaf carbon-biomass in grid cell
+    TotRtCBm            =>  SGRASS(ng)%TotRtCBm               (species,i,j) ! [mol.C.rt]                  Total seagrass root carbon-biomass in grid cell
+    ! update bed-density/habitat area
+    HabArea             =>  SGRASS(ng)%HabArea                (species,i,j) ! [m2.sg.hab]                 Seagrass habitat ground area in grid cell (such that seagrass coverage (p_sgrass) times the grid area equals the habitat area)
+    ! leaf-root biomass translocation
+    ! update carbon-biomass per area
+    LfCBm               =>  SGRASS(ng)%LfCBm                  (species,i,j) ! [umol.lf.C m-2.sg.hab]      Seagrass leaf carbon-biomass per unit ground area (in seagrass habitat area)
+    RtCBm               =>  SGRASS(ng)%RtCBm                  (species,i,j) ! [umol.rt.C m-2.sg.hab]      Seagrass root carbon-biomass per unit ground area (in seagrass habitat area)
+    ! update dry-weight biomass
+    TotSgDryBm          =>  SGRASS(ng)%TotSgDryBm             (species,i,j) ! [g.drywt]                   Total seagrass dry weight biomass in grid cell
+    TotLfDryBm          =>  SGRASS(ng)%TotLfDryBm             (species,i,j) ! [g.lf.drywt]                Total seagrass leaf dry weight biomass in grid cell
+    TotRtDryBm          =>  SGRASS(ng)%TotRtDryBm             (species,i,j) ! [g.rt.drywt]                Total seagrass root dry weight biomass in grid cell
+    SgDryBm             =>  SGRASS(ng)%SgDryBm                (species,i,j) ! [g.drywt m-2.sg.hab]        Seagrass dry weight biomass per unit ground area (in seagrass habitat area)
+    LfDryBm             =>  SGRASS(ng)%LfDryBm                (species,i,j) ! [g.lf.drywt m-2.sg.hab]     Seagrass leaf dry weight biomass per unit ground area (in seagrass habitat area)
+    RtDryBm             =>  SGRASS(ng)%RtDryBm                (species,i,j) ! [g.rt.drywt m-2.sg.hab]     Seagrass root dry weight biomass per unit ground area (in seagrass habitat area)
+    ! update leaf area index
+    LAI                 =>  SGRASS(ng)%LAI                    (species,i,j) ! []                          Leaf area index: one-sided green leaf area per unit ground surface area
 
 ! >>> Delta Values <<< !      amount to add to stored variables at end of the calculation time step to update values: positive adds, negative subtracts (erased each time step)
     ! values to write to sediment module
@@ -3074,7 +3613,9 @@ endif
 
     if (date .gt. aint(Day*24.0d0)/24.0d0 ) then
       is_growth_interval = .true.
-      Day = (aint(Day*24.0d0)+1.0d0)/24.0d0  !! TN: One hour interval???????????????????????????????????????????????????
+      DO WHILE (date .gt. aint(Day*24.0d0)/24.0d0)
+        Day = (aint(Day*24.0d0)+1.0d0)/24.0d0  !! One hour interval -> should match growth interval of seagrass subroutine (if you change this, also change the seeding mass equation)
+      END DO
       ! if(i == 50 .and. j == 50) then
       !   write(*,*) "yt_debug:    Day = ", Day, "   date = ", date
       ! endif
@@ -3119,13 +3660,178 @@ endif
 ! ----------------------------------------------------------------------------------------------------
 ! ====================================================================================================
     
-    if (is_growth_interval) then  
+    if (is_growth_interval) then
+      ! if (i .eq. 50 .and. j .eq. 50) then
+      !   write(*,*) 'yt_debug: Yo! its growth interval (no_seagrass)'
+      ! endif
+      ! if (p_sand .gt. 0.0d0) then
+      !   write(*,*) 'yt_debug: Hi! its growth interval in no_seagrass and p_sand > 0: ', 'i = ', i, 'j = ', j
+      ! endif
+
+#   if defined SEEDING
 
 ! update total carbon-biomass ------------------------------------------------------------------------
 
       ! TotSgCBm                    [mol.C]                     Total seagrass carbon-biomass in grid cell
-      SGRASS(ng)%TotSgCBm(species,i,j) = 0.0d0
+      ! GridArea                    [m2.grid]                   Area of grid cell
 
+      SGRASS(ng)%TotSgCBm(species,i,j) = (100d0 * 0.3d0) * (0.001d0/12.01d0) * (GridArea*p_sand/100d0 /24d0) ! approx (100 mg per seed * 30% (carbon to mass ratio)) * (0.001 g/mg 1mol.C/12.01g.C) * (1 seed per 100 m2 per day)
+
+# if defined DYNAMIC_COVERAGE
+! update bed-density/habitat area --------------------------------------------------------------------
+
+      ! HabArea                     [m2.sg.hab]                 Seagrass habitat ground area in grid cell (such that seagrass coverage (p_sgrass) times the grid area equals the habitat area)
+      ! desiredHabArea              [m2.hab]                    The desired habitat area given the biomass and optimal density
+      ! TotSgCBm                    [mol.C.tot]                 Total seagrass carbon-biomass in grid cell
+      ! opt_sg_bed_density          [g.drywt m-2.hab]           Ideal seagrass bed density (represents guerilla vs phallanx strategy)
+      ! SgMperC                     [g.drywt mol-1.C]           Species specific biomass mass per unit carbon based on C-N-P ratio according to (CH2O)x(NH3)y(H3PO4)z as the chemical formula for biomass
+      ! translocatableArea          [m2.hab]                    Area that can be translocated (shrink or expand) as limited by the translocation rate
+      ! trans_rate                  [mol.C mol-1.C day-1]       Maximum translocation rate as fraction of mass translocatable per day
+      ! GridArea                    [m2.grid]                   Area of grid cell
+
+      ! [mol.C/m2.hab]       = [g.drywt/m2.hab]   [mol.C/g.drywt]
+      ! opt_sg_bed_C_density = opt_sg_bed_density / SgMperC
+
+      if (HabArea .le. GridArea*p_sand * 0.000001d0) then ! set a minimum HabArea as one mm2 per m2
+        HabArea = GridArea*p_sand * 0.000001d0
+      endif
+
+      ! write(*,*) 'yt_debug: ', 'HabArea = ', HabArea, 'GridArea = ', GridArea, 'p_sand = ', p_sand, 'i = ', i, 'j = ', j
+
+      ! ! TotSgCBm / desiredHabArea = opt_sg_bed_C_density
+      ! ! desiredHabArea = TotSgCBm / opt_sg_bed_C_density
+
+      ! desiredHabArea = TotSgCBm / (opt_sg_bed_density/SgMperC)
+
+      ! if ( (TotSgCBm / HabArea) .lt. (opt_sg_bed_density/SgMperC) ) then  ! if density is too low, then shrink hab area
+      !   ! [m2]               = [mol.C]             [m2/mol.C]
+      !   ! translocatableArea = translocatable_mass     / current_density
+      !   translocatableArea   = (TotSgCBm * trans_rate) / (TotSgCBm / HabArea)
+      !   if (HabArea - translocatableArea .lt. desiredHabArea) then
+      !     HabArea = desiredHabArea
+      !   else
+      !     HabArea = HabArea - translocatableArea
+      !   endif
+      !   if (HabArea .lt. 0d0) then 
+      !     HabArea = 0d0
+      !   endif
+      ! else                                                        ! if density is too high, then expand hab area
+      ! ! [m2]               = [mol.C]             [m2/mol.C]
+      ! ! translocatableArea = translocatable_mass     / optimal_density
+      !   translocatableArea   = (TotSgCBm * trans_rate) / (opt_sg_bed_density / SgMperC)
+      !   if (HabArea + translocatableArea .gt. desiredHabArea) then
+      !     HabArea = desiredHabArea
+      !   else
+      !     HabArea = HabArea + translocatableArea
+      !   endif
+      !   if (HabArea .gt. GridArea*p_sand) then
+      !     HabArea = GridArea*p_sand
+      !   endif
+      ! endif
+
+      ! update seagrass fraction 
+      ! p_sgrass(Nsg)               [m2.sg.hab m-2.grid]        (0~1)  Seagrass coverage (every species)
+      p_sgrass(species) = HabArea / GridArea ! yt_edit need to fix this to interact with other habitat types
+# endif
+
+      if (HabArea .gt. 0.0d0) then
+        ! TotLfCBm                    [mol.C.lf]                  Total seagrass leaf carbon-biomass in grid cell
+        ! TotRtCBm                    [mol.C.rt]                  Total seagrass root carbon-biomass in grid cell
+        SGRASS(ng)%TotLfCBm(species,i,j) = f_above*TotSgCBm
+        SGRASS(ng)%TotRtCBm(species,i,j) = TotSgCBm-TotLfCBm
+
+        ! [umol.C/m2.hab]                  = [mol.C]                          / [m2.hab] * (1000000umol/mol)
+        SGRASS(ng)%SgCBmF(iCt,species,i,j) = SGRASS(ng)%TotSgCBm(species,i,j) / HabArea  * 1000000d0
+
+# if defined CARBON_ISOTOPE || defined CLUMPED_ISOTOPE
+        SGRASS(ng)%SgCBmF(iC13,species,i,j) = Ci_from_Ct_delta( SGRASS(ng)%SgCBmF(iCt,species,i,j), -20.0d0, R13C_VPDB )
+#  if defined CLUMPED_ISOTOPE
+        SGRASS(ng)%SgCBmF(iD47,species,i,j) = Ci_from_Ct_delta( SGRASS(ng)%SgCBmF(iCt,species,i,j), -20.0d0, R13C_VPDB ) !!???????
+#  endif
+# endif
+
+        ! write(*,*) 'yt_debug: SgCBmF = ', SGRASS(ng)%SgCBmF(iCt,species,i,j), 'i = ', i, 'j = ', j, 'HabArea = ', HabArea
+
+        ! DICstock
+        ! CH2Ostock
+        ! DOstock
+# if defined SEAGRASS_LEAF_NUTRIENT_UPTAKE || defined  SEAGRASS_ROOT_NUTRIENT_UPTAKE
+        SGRASS(ng)%SgNBmF(  :,species,i,j) = 0.0d0
+        ! [umol.N.tot/m2.hab]              
+        SGRASS(ng)%SgNBmF(iNt,species,i,j) = SGRASS(ng)%SgCBmF(iCt,species,i,j) * SGRASS(ng)%SgNperC(species)
+#  if defined NITROGEN_ISOTOPE
+        SGRASS(ng)%SgNBmF(iN15,species,i,j) = Ci_from_Ct_delta( SGRASS(ng)%SgNBmF(iNt,species,i,j), -20.0d0, R13C_VPDB )
+#  endif
+        SGRASS(ng)%SgPBmF(  :,species,i,j) = 0.0d0
+        ! [umol.P.tot/m2.hab]              
+        SGRASS(ng)%SgPBmF(iPt,species,i,j) = SGRASS(ng)%SgCBmF(iCt,species,i,j) * SGRASS(ng)%SgPperC(species)
+        ! NO3stock
+        ! NH4stock
+        ! PO4stock
+# endif
+
+        ! [g.drywt/m2.hab]              = [umol.C/m2.hab]                    * [g.drywt/mol.C]             * (mol.C/1000000umol.C)
+        SGRASS(ng)%SgDryBm(species,i,j) = SGRASS(ng)%SgCBmF(iCt,species,i,j) * SGRASS(ng)%SgMperC(species) * 0.000001d0
+        SGRASS(ng)%LfDryBm(species,i,j) = f_above*SGRASS(ng)%SgDryBm(species,i,j)
+        SGRASS(ng)%RtDryBm(species,i,j) = SGRASS(ng)%SgDryBm(species,i,j) - SGRASS(ng)%LfDryBm(species,i,j)
+
+! update leaf area index -----------------------------------------------------------------------------
+
+        ! LAI                         []                          Leaf area index: one-sided green leaf area per unit ground surface area
+        ! [m2.lf/m2.hab]            = [g.drywt/m2.hab]                / [kg.drywt/m2.lf]           * (kg.drywt/1000g.drywt)
+        SGRASS(ng)%LAI(species,i,j) = SGRASS(ng)%LfDryBm(species,i,j) / SGRASS(ng)%rho_lf(species) * 0.001d0
+
+! update saved output values -------------------------------------------------------------------------
+
+        ! TotLA                       [m2.lf]                     Total one-sided green leaf area in grid
+        ! LAI                         []                          Leaf area index: one-sided green leaf area per unit ground surface area
+        ! HabArea                     [m2.sg.hab]                 Seagrass habitat ground area in grid cell (such that seagrass coverage (p_sgrass) times the grid area equals the habitat area)
+        ! [m2.lf] = [m2.lf/m2.hab] [m2.hab]
+        SGRASS(ng)%TotLA(species,i,j) = SGRASS(ng)%LAI(species,i,j)*HabArea
+
+        ! GridELAP                    [m2.lf.proj m-2.grid]       Effective leaf area projection on ground (whole grid)
+        ! ELAP                        [m2.lf.proj m-2.sg.hab]     Effective leaf area projection on ground (only within seagrass habitat (covered area))
+        ! p_sgrass(Nsg)               [m2.sg.hab m-2.grid]        (0~1)  Seagrass coverage (every species)
+        ELAP = 1.0d0-exp(-1d0*k_proj*LAI)
+        ! [m2.lf.proj/m2.grid] = [m2.lf.proj/m2.hab] [m2.hab/m2.grid]
+        SGRASS(ng)%GridELAP(species,i,j) = ELAP                * p_sgrass(species)
+
+
+# if defined DYNAMIC_COVERAGE
+! update bed-density/habitat area --------------------------------------------------------------------
+        ! yt_edit to do implement lateral transfer???
+# endif
+
+! update carbon-biomass per area ---------------------------------------------------------------------
+        ! LfCBm                       [umol.lf.C m-2.sg.hab]      Seagrass leaf carbon-biomass per unit ground area (in seagrass habitat area)
+        ! RtCBm                       [umol.rt.C m-2.sg.hab]      Seagrass root carbon-biomass per unit ground area (in seagrass habitat area)
+        ! [umol.C/m2.hab]             = [mol.C]                          /[m2.hab] * (1000000umol/mol)
+        SGRASS(ng)%LfCBm(species,i,j) = SGRASS(ng)%TotLfCBm(species,i,j) / HabArea * 1000000d0
+        SGRASS(ng)%RtCBm(species,i,j) = SGRASS(ng)%TotRtCBm(species,i,j) / HabArea * 1000000d0
+
+! update dry-weight biomass --------------------------------------------------------------------------
+
+        ! TotSgDryBm                  [g.drywt]                   Total seagrass dry weight biomass in grid cell
+        ! TotLfDryBm                  [g.lf.drywt]                Total seagrass leaf dry weight biomass in grid cell
+        ! TotRtDryBm                  [g.rt.drywt]                Total seagrass root dry weight biomass in grid cell
+        ! [g.drywt]                        = [mol.C]                          [g.drywt/mol.C]
+        SGRASS(ng)%TotSgDryBm(species,i,j) = SGRASS(ng)%TotSgCBm(species,i,j) * SGRASS(ng)%SgMperC(species)
+        SGRASS(ng)%TotLfDryBm(species,i,j) = SGRASS(ng)%TotLfCBm(species,i,j) * SGRASS(ng)%SgMperC(species)
+        SGRASS(ng)%TotRtDryBm(species,i,j) = SGRASS(ng)%TotRtCBm(species,i,j) * SGRASS(ng)%SgMperC(species)
+
+        ! SgDryBm                     [g.drywt m-2.sg.hab]        Seagrass dry weight biomass per unit ground area (in seagrass habitat area)
+        ! LfDryBm                     [g.lf.drywt m-2.sg.hab]     Seagrass leaf dry weight biomass per unit ground area (in seagrass habitat area)
+        ! RtDryBm                     [g.rt.drywt m-2.sg.hab]     Seagrass root dry weight biomass per unit ground area (in seagrass habitat area)
+        ! [g.drywt m-2.sg.hab]          = [g.drywt]                          /[m2.hab]
+        SGRASS(ng)%SgDryBm(species,i,j) = SGRASS(ng)%TotSgDryBm(species,i,j) / HabArea
+        SGRASS(ng)%LfDryBm(species,i,j) = SGRASS(ng)%TotLfDryBm(species,i,j) / HabArea
+        SGRASS(ng)%RtDryBm(species,i,j) = SGRASS(ng)%TotRtDryBm(species,i,j) / HabArea
+      endif
+#   else
+! update total carbon-biomass ------------------------------------------------------------------------
+
+      ! TotSgCBm                    [mol.C]                     Total seagrass carbon-biomass in grid cell
+      SGRASS(ng)%TotSgCBm(species,i,j) = 0.0d0
 
 ! allocate growth ------------------------------------------------------------------------------------
 
@@ -3138,7 +3844,6 @@ endif
       SGRASS(ng)%TotLA(species,i,j) = 0.0d0 
       ! GridELAP                    [m2.lf.proj m-2.grid]       Effective leaf area projection on ground (whole grid)
       SGRASS(ng)%GridELAP(species,i,j) = 0.0d0
-
 
 # if defined DYNAMIC_COVERAGE
 ! update bed-density/habitat area --------------------------------------------------------------------
@@ -3167,11 +3872,12 @@ endif
       SGRASS(ng)%LfDryBm(species,i,j) = 0.0d0
       SGRASS(ng)%RtDryBm(species,i,j) = 0.0d0
 
-
 ! update leaf area index -----------------------------------------------------------------------------
 
       ! LAI                         []                          Leaf area index: one-sided green leaf area per unit ground surface area
       SGRASS(ng)%LAI(species,i,j) = 0.0d0
+
+#   endif
 
     endif
 

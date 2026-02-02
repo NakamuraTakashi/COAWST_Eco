@@ -822,6 +822,16 @@
           DO j=JstrR,JendR
             DO i=IstrR,IendR
               Zt_avg1(i,j)=Zt_avg1(i,j)+cff1*zeta(i,j,krhs)
+! # if defined YT_DEBUG_MODE
+!             ! if (Hz(i,j,k) .lt. 0.0d0) then
+!             if (i .eq. 17 .and. j .eq. 163) then
+!               write(*,*) 'yt_debug: step2d_LF_AM3.h 824 Zt_avg1(i,j) =', Zt_avg1(i,j), &
+!                           'i = ', i, 'j = ', j, &
+!                           'Zt_avg1(i,j) before = ', Zt_avg1(i,j) - cff1*zeta(i,j,krhs), &
+!                           'cff1 = ', cff1, 'zeta(i,j,krhs) = ', zeta(i,j,krhs)
+!               ! error stop
+!             endif
+! # endif
             END DO
             DO i=Istr,IendR
               DU_avg1(i,j)=DU_avg1(i,j)+cff1*DUon(i,j)
@@ -1047,11 +1057,28 @@
         DO i=Istr,Iend
           zeta(i,j,knew)=zeta_new(i,j)
 # if defined WET_DRY && defined MASKING
+          ! IF (i .eq. 9 .and. j .eq. 60 .and. zeta(i,j,knew).le.(Dcrit(ng)-h(i,j)) .and. rmask(i,j) .gt. 0.5) THEN
+          !   write(*,*) 'yt_debug: step2d_LF_AM3.h original i = ', i, 'j = ', j, &
+          !     'zeta(i,j,knew) = ', zeta(i,j,knew), 'Dcrit(ng) = ', Dcrit(ng), 'h(i,j) = ', h(i,j)
+          ! END IF
           zeta(i,j,knew)=zeta(i,j,knew)+                                &
      &                   (Dcrit(ng)-h(i,j))*(1.0_r8-rmask(i,j))
-!         IF (zeta(i,j,knew).le.(Dcrit(ng)-h(i,j))) THEN
-!           zeta(i,j,knew)=Dcrit(ng)-h(i,j)
-!         END IF
+! YT_DEBUG uncommented following three lines to resolve negative Hz layer thickness problem
+          ! IF (zeta(i,j,knew).le.(Dcrit(ng)-h(i,j)) .and. rmask(i,j) .gt. 0.5) THEN
+          !   zeta(i,j,knew)=Dcrit(ng)-h(i,j)
+          ! END IF
+! YT_DEBUG modification of above three lines to resolve negative Hz layer thickness problem, and 
+          ! IF (zeta(i,j,knew).le.(Dcrit(ng)-h(i,j)) .and. rmask(i,j) .gt. 0.5) THEN
+          !   cff = Dcrit(ng)-h(i,j) - zeta(i,j,knew)
+          !   zeta(i,j,knew)=Dcrit(ng)-h(i,j)
+          ! END IF
+          ! IF (i .eq. 9 .and. j .eq. 60 .and. zeta(i,j,knew).le.(Dcrit(ng)-h(i,j)) .and. rmask(i,j) .gt. 0.5) THEN
+          !   write(*,*) 'yt_debug: step2d_LF_AM3.h after correction i = ', i, 'j = ', j, &
+          !     'zeta(i,j,knew) = ', zeta(i,j,knew), 'Dcrit(ng) = ', Dcrit(ng), 'h(i,j) = ', h(i,j)
+          !   zeta(i,j,knew)=Dcrit(ng)-h(i,j)
+          !   write(*,*) 'yt_debug: step2d_LF_AM3.h  i = ', i, 'j = ', j, &
+          !     'zeta adjustment = ', cff
+          ! END IF
 # endif
         END DO
       END DO

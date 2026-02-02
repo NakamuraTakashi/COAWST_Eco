@@ -85,19 +85,6 @@
                   VEGHMIXCOEF(iveg,ng)=Rveg(iveg,ng)
                 END DO
               END DO
-!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
-#if defined AQUACULTURE
-            CASE ('F_AQUA_DENS')
-              IF (.not.allocated(F_AQUA_DENS))                         &
-     &                 allocate(F_AQUA_DENS(NVEG,Ngrids))
-              Npts=load_r(Nval, Rval, NVEG*Ngrids, Rveg)
-              DO ng=1,Ngrids
-                DO iveg=1,NVEG
-                  F_AQUA_DENS(iveg,ng)=Rveg(iveg,ng)
-                END DO
-              END DO
-#endif
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
 #if defined MANGROVE_DRAG
             CASE ('SPE_MANGR')

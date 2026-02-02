@@ -336,7 +336,7 @@
 #ifdef MACROALGAE
           real(r8), pointer :: p_algae(:,:,:)
 #endif
-#ifdef SEDIMENT_ECOSYS
+#ifdef REEF_ECOSYS
           real(r8), pointer :: p_sand(:,:)
 #endif
 #ifdef AQUACULTURE
@@ -570,7 +570,7 @@
 #ifdef MACROALGAE
       allocate ( GRID(ng) % p_algae(Nag,LBi:UBi,LBj:UBj) )
 #endif
-#ifdef SEDIMENT_ECOSYS
+#ifdef REEF_ECOSYS
       allocate ( GRID(ng) % p_sand(LBi:UBi,LBj:UBj) )
 #endif
 #ifdef AQUACULTURE
@@ -808,7 +808,7 @@
 #ifdef MACROALGAE
             GRID(ng) % p_algae(:,i,j) = IniVal
 #endif
-#ifdef SEDIMENT_ECOSYS
+#ifdef REEF_ECOSYS
             GRID(ng) % p_sand(i,j) = IniVal
 #endif
 #ifdef AQUACULTURE
