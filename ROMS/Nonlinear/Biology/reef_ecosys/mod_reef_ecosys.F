@@ -73,6 +73,7 @@ END SUBROUTINE allocate_reef_ecosys
 # endif
 # ifdef BIVALVE
       , dens_aqua           &   ! Aquaculture density
+      , f_dens              &   ! Factor to adjust oyster density (default = 1.0)
 # endif
     )
 
@@ -107,6 +108,7 @@ END SUBROUTINE allocate_reef_ecosys
 # endif
 # ifdef BIVALVE
     real(8), intent(in) :: dens_aqua(Naq,LBi:UBi,LBj:UBj)   ! Aquaculture density
+    real(8), intent(in) :: f_dens                           ! Factor to adjust oyster density (default = 1.0)
 # endif
 
     write(*,*) 'mod_reef_ecosys.F initialize_reef_ecosys() start_of_new_run =', start_of_new_run
@@ -132,7 +134,7 @@ END SUBROUTINE allocate_reef_ecosys
     write(*,*) 'mod_reef_ecosys.F initialize_reef_ecosys() finished macroalgae init'
 # endif
 # ifdef BIVALVE
-    CALL initialize_bivalve(ng, Nz, dz, LBi, UBi, LBj, UBj, dens_aqua, start_of_new_run)
+    CALL initialize_bivalve(ng, Nz, dz, LBi, UBi, LBj, UBj, dens_aqua, f_dens, start_of_new_run)
     write(*,*) 'mod_reef_ecosys.F initialize_reef_ecosys() finished bivalv init'
 # endif
 

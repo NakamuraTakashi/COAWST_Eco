@@ -289,6 +289,10 @@
               Npts=load_r(Nval, Rval, 1, Rsed1)
               rCaCO3_sed = Rsed1(1)
 #endif
+#if defined BIVALVE 
+            CASE ('f_Oys_dens')
+              Npts=load_r(Nval, Rval, Ngrids, f_Oys_dens)
+#endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
             CASE ('TNU2')
               Npts=load_r(Nval, Rval, NBT*Ngrids, Rbio)

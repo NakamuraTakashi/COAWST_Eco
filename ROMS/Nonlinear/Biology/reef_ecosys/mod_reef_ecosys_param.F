@@ -125,8 +125,9 @@ MODULE mod_reef_ecosys_param
 
 ! ==== BIVALVE MODEL PARAMETER SETTINGS ===========================================================
 
-  integer, parameter :: Nbv = 1    !! Number of bivalve groups
-  integer, parameter ::  iOys  =  1 ! 1: Oyster
+  integer, parameter :: Nbv = 2    !! Number of bivalve groups
+  integer, parameter ::  iOys1  =  1 ! 1: Oyster1 (year-1)
+  integer, parameter ::  iOys2  =  2 ! 2: Oyster2 (year-2)
 
 
 END MODULE mod_reef_ecosys_param

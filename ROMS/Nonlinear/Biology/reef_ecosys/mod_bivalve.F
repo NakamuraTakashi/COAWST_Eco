@@ -85,7 +85,7 @@ CONTAINS
 !!!  set initial conditions for the bivalve model
 !!! **********************************************************************
 
-  SUBROUTINE initialize_bivalve(ng, Nz, dz, LBi, UBi, LBj, UBj, dens_aqua, start_of_new_run)
+  SUBROUTINE initialize_bivalve(ng, Nz, dz, LBi, UBi, LBj, UBj, dens_aqua, f_dens, start_of_new_run)
     USE mod_reef_ecosys_param
     USE mod_aquaculture
     USE mod_deb_model
@@ -95,6 +95,7 @@ CONTAINS
     integer, intent(in) :: ng, Nz, LBi, UBi, LBj, UBj
     real(8), intent(in) :: dz(LBi:UBi,LBj:UBj,Nz)
     real(8), intent(in) :: dens_aqua(Naq,LBi:UBi,LBj:UBj)     ! Density of oyster aquaculture (rope m-3)
+    real(8), intent(in) :: f_dens                             ! Factor to adjust oyster density (default = 1.0)
     logical, intent(in) :: start_of_new_run               ! TRUE = initialize; FALSE = continue from previous run
 ! --- Dynamic Energy Budget (DEB) model parameters ---
     real(8), parameter :: delta_M(1) = [   0.245d0] ! (no dim.)      Shape parameter (0.175: Van der Veer et al., 2006; 0.245: Sakamaki et al., 2025)
@@ -136,11 +137,18 @@ CONTAINS
        do i=LBi,UBi
 
          if (dens_aqua(1,i,j) > 0.0d0) then
-           CALL dens_oyster_Shizugawa(dens_aqua(1,i,j), Nz, dz(i,j,:), BVLV(ng)%dens(iOys,:,i,j))   ! Initial bivalve density (ind. m-3)
+           CALL dens_oyster_Shizugawa(dens_aqua(1,i,j), Nz, dz(i,j,:), f_dens, BVLV(ng)%dens(iOys1,:,i,j))   ! Initial bivalve density (ind. m-3)
            do k=1,Nz !!!>>>>>>>>>>>DEBUG !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            if(BVLV(ng)%dens(iOys,k,i,j)*0.0d0/=0.0d0) then
-              write(*,*) 'Error', i,j,k, BVLV(ng)%dens(iOys,k,i,j)
-              BVLV(ng)%dens(iOys,k,i,j) = 0.0d0
+            if(BVLV(ng)%dens(iOys1,k,i,j)*0.0d0/=0.0d0) then
+              write(*,*) 'Error', i,j,k, BVLV(ng)%dens(iOys1,k,i,j)
+              BVLV(ng)%dens(iOys1,k,i,j) = 0.0d0
+            end if
+           enddo     !!!<<<<<<<<<<<DEBUG !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+           CALL dens_oyster_Shizugawa(dens_aqua(1,i,j), Nz, dz(i,j,:), f_dens, BVLV(ng)%dens(iOys2,:,i,j))   ! Initial bivalve density (ind. m-3)
+           do k=1,Nz !!!>>>>>>>>>>>DEBUG !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            if(BVLV(ng)%dens(iOys2,k,i,j)*0.0d0/=0.0d0) then
+              write(*,*) 'Error', i,j,k, BVLV(ng)%dens(iOys2,k,i,j)
+              BVLV(ng)%dens(iOys2,k,i,j) = 0.0d0
             end if
            enddo     !!!<<<<<<<<<<<DEBUG !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
          end if
@@ -149,8 +157,8 @@ CONTAINS
            do n=1,Nbv
              
              ! initialize for each bivalve group
-             if (n.eq.iOys) then ! 01: Oyster
-               if (BVLV(ng)%dens(iOys,k,i,j) > 0.0d0) then
+             if (n.eq.iOys1) then ! 01: Oyster
+               if (BVLV(ng)%dens(n,k,i,j) > 0.0d0) then
                  !--- Shell length (cm) -----------------
                  BVLV(ng)%L(n,k,i,j)  = 0.5d0  ! cm
                  !--- Body volume (cm3) ----------------- 
@@ -160,6 +168,37 @@ CONTAINS
                  BVLV(ng)%QCe(iCt,n,k,i,j) = BVLV(ng)%QCv(iCt,n,k,i,j) *0.01d0  ! mmolC individual-1
                  BVLV(ng)%QCr(iCt,n,k,i,j) = 0.0d0 ! mmolC individual-1
                  BVLV(ng)%QCh(iCt,n,k,i,j) = 0.0d0 ! mmolC individual-1
+                 BVLV(ng)%QNv(iNt,n,k,i,j) = BVLV(ng)%QCv(iCt,n,k,i,j)*16.0d0/106.0d0  ! mmolN individual-1
+                 BVLV(ng)%QNe(iNt,n,k,i,j) = BVLV(ng)%QCe(iCt,n,k,i,j)*16.0d0/106.0d0  ! mmolN individual-1
+                 BVLV(ng)%QNr(iNt,n,k,i,j) = BVLV(ng)%QCr(iCt,n,k,i,j)*16.0d0/106.0d0  ! mmolN individual-1
+                 BVLV(ng)%QNh(iNt,n,k,i,j) = BVLV(ng)%QCh(iCt,n,k,i,j)*16.0d0/106.0d0  ! mmolN individual-1
+                 BVLV(ng)%QPv(iPt,n,k,i,j) = BVLV(ng)%QCv(iCt,n,k,i,j)* 1.0d0/106.0d0  ! mmolP individual-1
+                 BVLV(ng)%QPe(iPt,n,k,i,j) = BVLV(ng)%QCe(iCt,n,k,i,j)* 1.0d0/106.0d0  ! mmolP individual-1
+                 BVLV(ng)%QPr(iPt,n,k,i,j) = BVLV(ng)%QCr(iCt,n,k,i,j)* 1.0d0/106.0d0  ! mmolP individual-1
+                 BVLV(ng)%QPh(iPt,n,k,i,j) = BVLV(ng)%QCh(iCt,n,k,i,j)* 1.0d0/106.0d0  ! mmolP individual-1
+                 !--- Total dry weight (g) (mmolC -> g(dw)) -----------------
+                 BVLV(ng)%Wd(n,k,i,j) = (  BVLV(ng)%QCe(iCt,n,k,i,j) + BVLV(ng)%QCv(iCt,n,k,i,j)    &
+                                         + BVLV(ng)%QCr(iCt,n,k,i,j) + BVLV(ng)%QCh(iCt,n,k,i,j) )  &
+                                         * C2Wd(n) * 1.0d-3  ! mmolC -> g(dw)  !!!!! Check the conversion factor !!!!!!
+                 !--- Wet flesh (meat) weight (g) (Wd g(dw)-> Ww g(ww)) -----------------
+                 BVLV(ng)%Ww(n,k,i,j) = BVLV(ng)%Wd(n,k,i,j) / Ww2Wd(n)
+                 !--- Total (shell + flesh) weight (g) (L (cm) -> Wt g(ww)) (Kobayashi et al., 1997)-----------------
+                 BVLV(ng)%Wt(n,k,i,j) = 0.105d0 * BVLV(ng)%L(n,k,i,j)**2.967d0 ! g(wet weight)
+                 !--- CaCO3 in living bivalve (mmolC ind.-1)
+                 BVLV(ng)%CaCO3(iCt,n,k,i,j) = (BVLV(ng)%Wt(n,k,i,j)-BVLV(ng)%Ww(n,k,i,j)) * 10.0d0 ! = 1000.0d0 / 100.09d0 ! g -> mmol CaCO3               BVLV(ng)%QCv(iCt,n,k,i,j) = BVLV(ng)%Wd(n,k,i,j)*0.51d0/12.0d0 * 1.0d3 *0.9d0! mmolC individual-1
+                                                                        ! [carbon mass]/[dry mass] = 0.51+-0.07 (Sakamaki et al. 2022; Sakamaki et al. 2020; Fujibayashi et al. 2021). 
+               end if
+             else if (n.eq.iOys2) then ! 01: Oyster
+               if (BVLV(ng)%dens(n,k,i,j) > 0.0d0) then
+                 !--- Shell length (cm) -----------------
+                 BVLV(ng)%L(n,k,i,j)  = 6.6d0  ! cm
+                 !--- Body volume (cm3) ----------------- 
+                 BVLV(ng)%V(n,k,i,j)  = (delta_M(n)*BVLV(ng)%L(n,k,i,j))**3.0d0  ! mmolC -> cm3
+                                                                        ! w_V   = 12.0d0/0.51d0 (g(dw) molC−1) [carbon mass]/[dry mass]=0.51d0 (Sakamaki et al. 2022; Sakamaki et al. 2020; Fujibayashi et al. 2021). 
+                 BVLV(ng)%QCv(iCt,n,k,i,j) = BVLV(ng)%V(n,k,i,j)*Ww2Wd(n)/C2Wd(n)*1.0d3 *0.99d0! mmolC individual-1
+                 BVLV(ng)%QCe(iCt,n,k,i,j) = BVLV(ng)%QCv(iCt,n,k,i,j) *0.01d0  ! mmolC individual-1
+                 BVLV(ng)%QCr(iCt,n,k,i,j) = 17.8d0 ! mmolC individual-1
+                 BVLV(ng)%QCh(iCt,n,k,i,j) = 1.0d0 ! mmolC individual-1
                  BVLV(ng)%QNv(iNt,n,k,i,j) = BVLV(ng)%QCv(iCt,n,k,i,j)*16.0d0/106.0d0  ! mmolN individual-1
                  BVLV(ng)%QNe(iNt,n,k,i,j) = BVLV(ng)%QCe(iCt,n,k,i,j)*16.0d0/106.0d0  ! mmolN individual-1
                  BVLV(ng)%QNr(iNt,n,k,i,j) = BVLV(ng)%QCr(iCt,n,k,i,j)*16.0d0/106.0d0  ! mmolN individual-1
@@ -268,69 +307,70 @@ CONTAINS
     real(8), intent(out) :: dPIC_dt (N_Csp,Npim) ! dPIC/dt  (umol L-1 s-1) 
 
 ! --- C:N:P:CaCO3 ratio of bivalves ---
-    real(8), parameter :: rNCb(1)  = [ 16d0/106d0 ] ! (no dim.) Oyster N:C ratio
-    real(8), parameter :: rPCb(1)  = [  1d0/106d0 ] ! (no dim.) Oyster P:C ratio
-    real(8), parameter :: rCaCb(1) = [      0.0d0 ]  ! ***** (no dim.) CaCO3:OrgC ratio !!! Need Ref!!!!!!!!!!
+    real(8), parameter :: rNCb(2)  = [ 16d0/106d0, 16d0/106d0 ] ! (no dim.) Oyster N:C ratio
+    real(8), parameter :: rPCb(2)  = [  1d0/106d0,   1d0/106d0 ] ! (no dim.) Oyster P:C ratio
+    real(8), parameter :: rCaCb(2) = [      0.0d0,      0.0d0 ]  ! ***** (no dim.) CaCO3:OrgC ratio !!! Need Ref!!!!!!!!!!
 ! --- Photoplankton ingestion parameters ---
     ! Assimilation efficiency (no dim.)  (0.75: Van der Veer et al., 2006)
-    !                                      from     Dnfl       Dtm        Ccl         Cya
-    real(8), parameter :: AE(4,1) = reshape( [ 0.75d0,    0.75d0,    0.75d0,     0.75d0    ], [4,1] ) ! to bivalve (no dim.)      Assimilation efficiency
+    !                                   from     Dnfl       Dtm        Ccl         Cya
+    real(8), parameter :: AE(4,2) = reshape( [  0.75d0,    0.75d0,    0.75d0,     0.75d0  &
+                                              , 0.75d0,    0.75d0,    0.75d0,     0.75d0  ], [4,2] ) ! to bivalve (no dim.)      Assimilation efficiency
 
 ! --- Dynamic Energy Budget (DEB) model parameters ---
-    real(8), parameter :: delta_M(1) = [   0.245d0] ! (no dim.)      Shape parameter (0.175: Van der Veer et al., 2006; 0.245: Sakamaki et al., 2025)
-    real(8), parameter :: C2Wd(1) = [12.0d0/0.51d0] ! (g(dw) molC−1) [carbon mass]/[dry mass] = 0.51+-0.07 (Sakamaki et al. 2022; Sakamaki et al. 2020; Fujibayashi et al. 2021). 
-    real(8), parameter :: Ww2Wd(1)   = [   0.19d0 ] ! (g(dw) cm−3)   ! 0.19+-0.02 g(dw)/g(ww), 1g(ww)/cm3 (Sakamaki et al. 2022; Sakamaki et al. 2020; Fujibayashi et al. 2021). 
-    real(8), parameter :: Tref(1)    = [  293.15d0] ! (K) Refernce temperature
-    real(8), parameter :: T_A(1)     = [ 5800.0d0 ] ! (K) Arrhenius temperature (Van der Veer et al., 2006)
-!    real(8), parameter :: T_H(1)     = [  305.0d0 ] ! (K) Upper boundary tolerance range (Van der Veer et al., 2006)
-    real(8), parameter :: T_Hing(1)  = [  298.0d0 ] ! (K) Upper boundary tolerance range for ingestion (Bourles et al., 2009)
-    real(8), parameter :: T_Hresp(1) = [  305.0d0 ] ! (K) Upper boundary tolerance range for respiration (Bourles et al., 2009)
-    real(8), parameter :: T_AH(1)    = [30000.0d0 ] ! (K) Arrhenius temp. for upper boundary (Van der Veer et al., 2006)
-!    real(8), parameter :: T_L(1)     = [  281.0d0 ] ! (K) Lower boundary tolerance range (Van der Veer et al., 2006)
-    real(8), parameter :: T_L(1)     = [  276.0d0 ] ! (K) Lower boundary tolerance range (Bourles et al., 2009)
-    real(8), parameter :: T_AL(1)    = [75000.0d0 ] ! (K) Arrhenius temp. for lower boundary (Van der Veer et al., 2006)
-  ! --- Photoplankton ingestion parameters ---
-    ! Maximum surface area specific clearance rate (L s-1 cm-2)
-    !  0.096 (m3 d−1 cm−2) = 1.1d-3 (L s-1 cm-2) for mussels,  Saraiva et al. (2011b)
+    real(8), parameter :: delta_M(2) = [   0.245d0,   0.245d0 ] ! (no dim.)      Shape parameter (0.175: Van der Veer et al., 2006; 0.245: Sakamaki et al., 2025)
+    real(8), parameter :: C2Wd(2) = [12.0d0/0.51d0,12.0d0/0.51d0] ! (g(dw) molC−1) [carbon mass]/[dry mass] = 0.51+-0.07 (Sakamaki et al. 2022; Sakamaki et al. 2020; Fujibayashi et al. 2021). 
+    real(8), parameter :: Ww2Wd(2)   = [   0.19d0 ,    0.19d0 ] ! (g(dw) cm−3)   ! 0.19+-0.02 g(dw)/g(ww), 1g(ww)/cm3 (Sakamaki et al. 2022; Sakamaki et al. 2020; Fujibayashi et al. 2021).
+    real(8), parameter :: Tref(2)    = [  293.15d0,  293.15d0] ! (K) Refernce temperature
+    real(8), parameter :: T_A(2)     = [ 5800.0d0, 5800.0d0 ] ! (K) Arrhenius temperature (Van der Veer et al., 2006)
+!    real(8), parameter :: T_H(2)     = [  305.0d0,  305.0d0] ! (K) Upper boundary tolerance range (Van der Veer et al., 2006)
+    real(8), parameter :: T_Hing(2)  = [  298.0d0,  298.0d0 ] ! (K) Upper boundary tolerance range for ingestion (Bourles et al., 2009)
+    real(8), parameter :: T_Hresp(2) = [  305.0d0,  305.0d0 ] ! (K) Upper boundary tolerance range for respiration (Bourles et al., 2009)
+    real(8), parameter :: T_AH(2)    = [30000.0d0, 30000.0d0 ] ! (K) Arrhenius temp. for upper boundary (Van der Veer et al., 2006)
+!    real(8), parameter :: T_L(2)     = [  281.0d0, 281.0d0 ] ! (K) Lower boundary tolerance range (Van der Veer et al., 2006)
+    real(8), parameter :: T_L(2)     = [  276.0d0,  276.0d0 ] ! (K) Lower boundary tolerance range (Bourles et al., 2014)
+    real(8), parameter :: T_AL(2)    = [7500.1d-1,   -1.d-1 ] ! (K) Arrhenius temp. for lower boundary (Van der Veer et al., 2
     !  The clearance rate of oysters may be two times higher than that of mussels. (Check is needed!!)
-!    real(8), parameter :: C_Rmax  (1) = [ 2.2d-3 ] !Maximum surface area specific clearance rate (L s-1 cm-2)
-    real(8), parameter :: C_Rmax  (1) = [ 2.2d-2 ] !Maximum surface area specific clearance rate (L s-1 cm-2)
-!    real(8), parameter :: C_Rmax  (1) = [ 1.5d-3 ] !Maximum surface area specific clearance rate (L s-1 cm-2)
+!    real(8), parameter :: C_Rmax  (2) = [ 2.2d-3, 2.2d-3 ] !Maximum surface area specific clearance rate (L s-1 cm-2)
+    real(8), parameter :: C_Rmax  (2) = [ 2.2d-2, 2.2d-2 ] !Maximum surface area specific clearance rate (L s-1 cm-2)
+!    real(8), parameter :: C_Rmax  (2) = [ 1.5d-3, 1.5d-3 ] !Maximum surface area specific clearance rate (L s-1 cm-2)
     ! Maximum surface area specific filtration rate (umol s−1 cm−2)
     !  4.8d-4 (molC d−1 cm−2), Rosland et al. (2009)
-    real(8), parameter :: J_XiFmax(4,1) = reshape( [ 0.0693d0,  0.0693d0,  0.0693d0,   0.0693d0  ], [4,1] ) ! to Oyster
+    real(8), parameter :: J_XiFmax(4,2) = reshape( [  0.0693d0,  0.0693d0,  0.0693d0,   0.0693d0 &
+                                                    , 0.0693d0,  0.0693d0,  0.0693d0,   0.0693d0 ], [4,2] ) ! to Oyster
 !    real(8), parameter :: J_XiFmax(4,1) = reshape( [ 5.56d-3, 5.56d-3,  5.56d-3,  5.56d-3  ], [4,1] ) ! to Oyster
     ! Algal binding probability (no dim.)
     !  0.4 (no dim.),  Saraiva et al. (2011a)
-    real(8), parameter :: rho_XiI (4,1) = reshape( [ 0.4d0, 0.4d0, 0.4d0, 0.4d0 ], [4,1] ) ! to Oyster
+    real(8), parameter :: rho_XiI (4,2) = reshape( [ 0.4d0, 0.4d0, 0.4d0, 0.4d0 &
+                                                   , 0.4d0, 0.4d0, 0.4d0, 0.4d0 ], [4,2] ) ! to Oyster
     ! Algal maximum ingestion rate (umol s−1)
     !  1.3d4 (molC d-1), Saraiva et al. (2011a)
-    real(8), parameter :: J_XiImax(4,1) = reshape( [ 0.15d0,    0.15d0,    0.15d0,     0.15d0    ], [4,1] ) ! to Oyster
+    real(8), parameter :: J_XiImax(4,2) = reshape( [ 0.15d0,    0.15d0,    0.15d0,     0.15d0 &
+                                                   , 0.15d0,    0.15d0,    0.15d0,     0.15d0 ], [4,2] ) ! to Oyster
     !!! Need to be checked !!!
     real(8), parameter :: c2e = 0.0d0 ! enrtgy cost for water exchange (J L-1)
   ! --- Assimiration related parameters ---
-    real(8), parameter :: y_EX(1) = [ 0.75d0 ] ! Yield coefficient of reserves in algal structure (Saraiva et al., 2012)
+    real(8), parameter :: y_EX(2) = [ 0.75d0,  0.75d0 ] ! Yield coefficient of reserves in algal structure (Saraiva et al., 2012)
   ! --- Somatic maintenance related parameters ---
-    real(8), parameter :: mu_E(1) = [ 5.29d5 ] ! (J molC-1), Energy content of reserves (Ren & Schiel, 2008)
+    real(8), parameter :: mu_E(2) = [ 5.29d5, 5.29d5 ] ! (J molC-1), Energy content of reserves (Ren & Schiel, 2008)
     ! mu_E = 22.49 (J mg−1) = 5.29d5 (J molC-1),  Energy content of reserves (Ren & Schiel, 2008)
     !                        12.0d0/0.51d0 (g(dw) molC−1) [carbon mass]/[dry mass]=0.51d0 (Sakamaki et al. 2022; Sakamaki et al. 2020; Fujibayashi et al. 2021). 
-    real(8), parameter :: p_M(1) = [ 2.14d-4 ] ! (J s-1 cm-3), volume specific somatic maintenance rate (18.5 (J d-1 cm-3): Ren & Schiel, 2008)
+    real(8), parameter :: p_M(2) = [ 2.14d-4, 2.14d-4 ] ! (J s-1 cm-3), volume specific somatic maintenance rate (18.5 (J d-1 cm-3): Ren & Schiel, 2008)
   ! --- Mobilization flux related parameters ---
-    real(8), parameter :: E_G(1)  = [ 2.9d3 ]  !  Specific cost for structure ([E_G] = 2900 (J cm-3), Ren & Schiel, 2008)
-    real(8), parameter :: cond(1) = [ 3.83d-6 ]  ! (cm s-1) Energy conductance; 0.01381 (cm h-1), (Monaco & McQuaid, 2018)
-    real(8), parameter :: kappa(1)= [ 0.55d0  ]  ! (no dim.) Allocation fraction to growth and somatic maintenance, (Ren & Schiel, 2008)
+    real(8), parameter :: E_G(2)  = [ 2.9d3, 2.9d3 ]  !  Specific cost for structure ([E_G] = 2900 (J cm-3), Ren & Schiel, 2008)
+    real(8), parameter :: cond(2) = [ 3.83d-6, 3.83d-6 ]  ! (cm s-1) Energy conductance; 0.01381 (cm h-1), (Monaco & McQuaid, 2018)
+    real(8), parameter :: kappa(2)= [ 0.55d0, 0.55d0 ]  ! (no dim.) Allocation fraction to growth and somatic maintenance, (Ren & Schiel, 2008)
   ! --- Maturity and reproduction related parameters --- 
     ! E_Hp (J) = 1.58d-2 (J)  Maturity at puberty (Saraiva et al., 2011)
     ! mu_E = 22.49 (J mg−1) = 5.29d5 (J molC-1),  Energy content of reserves (Ren & Schiel, 2008)
     !                        12.0d0/0.51d0 (g(dw) molC−1) [carbon mass]/[dry mass]=0.51d0 (Sakamaki et al. 2022; Sakamaki et al. 2020; Fujibayashi et al. 2021). 
     ! Mp_H = E_Hp/mu_E = 2.99d-4 molC = 2.99d-1 mmolC
-    real(8), parameter :: Mp_H(1)     = [ 1.0d0 ]  ! Cumulative maturity at puberty (mmolC) (2.99d-1; Saraiva et al., 2011)
-    real(8), parameter :: kappa_R(1)  = [ 0.7d0  ]  ! (no dim.) Reproduction efficiency (Pouvreau et al., 2006)
-    real(8), parameter :: Rspawn(1)   = [ 1.0d0 ]  ! (days) Spawning period (1 day? assumed in Saraiva et al. (2012))
-    real(8), parameter :: GSRspawn(1) = [ 0.46d0 ]  ! (molC molC−1) Gonado-somatic ratio to spawn (0.46d0; Bernard et al., 2011)
-    real(8), parameter :: Tspawn(1)   = [ 19.0d0 ]  ! (oC) Minimum temperature for spawning, (Bernard et al., 2011)
+    real(8), parameter :: Mp_H(2)     = [ 1.0d0, 1.0d0 ]  ! Cumulative maturity at puberty (mmolC) (2.99d-1; Saraiva et al., 2011)
+    real(8), parameter :: kappa_R(2)  = [ 0.7d0, 0.7d0 ]  ! (no dim.) Reproduction efficiency (Pouvreau et al., 2006)
+    real(8), parameter :: Rspawn(2)   = [ 1.0d0, 1.0d0 ]  ! (days) Spawning period (1 day? assumed in Saraiva et al. (2012))
+    real(8), parameter :: GSRspawn(2) = [ 0.46d0, 0.46d0 ]  ! (molC molC−1) Gonado-somatic ratio to spawn (0.46d0; Bernard et al., 2011)
+    real(8), parameter :: Tspawn(2)   = [ 19.0d0, 19.0d0 ]  ! (oC) Minimum temperature for spawning, (Bernard et al., 2011)
   ! --- Mortality (s-1) --- 
-    real(8), parameter :: BM(1)   = [ 0.0d0 ]  ! (s-1) Background mortality rate
+    real(8), parameter :: BM(2)   = [ 0.0d0, 0.0d0 ]  ! (s-1) Background mortality rate
 
 ! --- Variables ---
     real(8) :: kT   ! Temperature correction factor (no dimension)

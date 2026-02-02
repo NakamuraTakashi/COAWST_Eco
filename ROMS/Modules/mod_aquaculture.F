@@ -28,11 +28,12 @@ CONTAINS
 !======================================================================================
 ! Density of oyster (indiv. m-3) for Sizugawa Bay aquaculture
 !======================================================================================
-  SUBROUTINE dens_oyster_Shizugawa(dens_aqua, N, dz, dens_oys)
+  SUBROUTINE dens_oyster_Shizugawa(dens_aqua, N, dz, f_dens, dens_oys)
     ! input parameters
     real(8), intent(in ) :: dens_aqua  ! Density of oyster aquaculture (rope m-2)
     integer, intent(in ) :: N          ! Vertical index; total number of vertical layers
     real(8), intent(in ) :: dz(N)      ! Thicknesses (m) of vertical RHO-points.
+    real(8), intent(in ) :: f_dens     ! Factor to adjust oyster density (default = 1.0)
     real(8), intent(out) :: dens_oys(N)  ! Density of oyster aquaculture (indiv. m-3)
 
     real(8) :: z_w(0:N)   ! Depth of vertical W-points (m, positive downward)
@@ -56,7 +57,8 @@ CONTAINS
         end if
       end if
 
-      dens_oys(k) = dens_aqua * dens_oyster_per_rope * rDepth2Rope  ! Density of oyster (indiv. m-3)
+      dens_oys(k) = dens_aqua * dens_oyster_per_rope * rDepth2Rope * f_dens  ! Density of oyster (indiv. m-3)
+      dens_oys(k) = dens_oys(k)/2.0d0 ! half is for iOys1 (Year-1) and half is for iOys2 (Year-2)
     END DO
     
   END SUBROUTINE dens_oyster_Shizugawa

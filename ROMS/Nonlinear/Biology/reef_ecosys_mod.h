@@ -251,6 +251,9 @@
       real(r8), allocatable :: H2S_0(:)              ! umol/L
       real(r8), allocatable :: S0_0 (:)              ! umol/L
 #endif
+#if defined BIVALVE
+      real(r8), allocatable :: f_Oys_dens(:)         ! Factor to adjust oyster density
+#endif
 #if defined CARBON_ISOTOPE
       real(r8), allocatable :: d13C_DIC_0(:)         ! permil (VPDB)
       real(r8), allocatable :: d13C_DOC_0(:,:)       ! permil (VPDB)
@@ -1186,6 +1189,11 @@
         allocate ( S0_0(Ngrids) )
       END IF
 #endif
+#if defined BIVALVE 
+      IF (.not.allocated(f_Oys_dens)) THEN
+        allocate ( f_Oys_dens(Ngrids) )
+      END IF
+#endif
 #if defined CARBON_ISOTOPE
       IF (.not.allocated(d13C_DIC_0)) THEN
         allocate ( d13C_DIC_0(Ngrids) )
@@ -1729,6 +1737,7 @@
 # endif
 # ifdef BIVALVE
           , GRID(ng)%dens_aqua                                     &   ! Aquaculture density
+          , f_Oys_dens(ng)                                      &   ! Factor to adjust oyster density 
 # endif
           )
 

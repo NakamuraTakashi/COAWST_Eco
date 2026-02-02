@@ -197,6 +197,10 @@ CONTAINS
     real(8), parameter :: nNH4_Hill(4)   = [ 2.0d0,    1.0d0,    1.0d0,  1.0d0 ]      ! (µmol L-1)  (!!!Tuning parameters!!!)
     real(8), parameter :: nNO3_Hill(4)   = [ 1.0d0,    2.0d0,    1.0d0,  1.0d0 ]      ! (µmol L-1)  (!!!Tuning parameters!!!)
     real(8), parameter :: nPO4_Hill(4)   = [ 1.0d0,    1.0d0,    1.0d0,  1.0d0 ]      ! (µmol L-1)  (!!!Tuning parameters!!!)
+!   Offset constants.           
+    real(8), parameter :: off_NH4(4)    = [ 0.1d0,    0.25d0,  0.0d0,  0.0d0 ]      ! (µmol L-1)  
+    real(8), parameter :: off_NO3(4)    = [ 0.0d0,    0.25d0,  0.0d0,  0.0d0 ]      ! (µmol L-1)
+    real(8), parameter :: off_PO4(4)    = [ 0.0d0,    0.0d0,  0.0d0,  0.0d0 ]      ! (µmol L-1)  (!!!Tuning parameters!!!)
 
 !  Respiration rate at 0 oC
     real(8), parameter :: k_Rp(4) = [ 3.0d-7,   5.0d-7,   1.0d-7,   1.0d-7   ]    ! (s-1)    (!!!Tuning parameters!!!)
@@ -456,9 +460,9 @@ CONTAINS
 
 !----- Assimilation rate (umolC L-1 s-1) ----------------- 
 
-      cNH4 = MAX( NH4(iNt), 0.0d0)  !!! Error handling
-      cNO3 = MAX( NO3(iNt), 0.0d0)  !!! Error handling
-      cPO4 = MAX( PO4(iPt), 0.0d0)  !!! Error handling
+      cNH4 = MAX( NH4(iNt)-off_NH4(k), 0.0d0)  !!! Offset
+      cNO3 = MAX( NO3(iNt)-off_NO3(k), 0.0d0)  !!! Offset
+      cPO4 = MAX( PO4(iPt)-off_PO4(k), 0.0d0)  !!! Offset
       
       ! --- Hill equation (nC_Hill=1 -> Michaelis-Menten equation) -----
       nVp_NH4 =  nVmax_NH4(k)*cNH4**nNH4_Hill(k)/ &

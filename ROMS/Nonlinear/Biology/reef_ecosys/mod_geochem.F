@@ -2089,10 +2089,11 @@ contains
   integer, intent(in) :: m    ! Index of Phytoplankton functional group 
 
                                       !  Dnfl   Dtm    Ccl    Cya
-  real(8), parameter :: r(4)        = [ 0.4d0, 0.3d0, 0.1d0, 0.2d0 ]
-!  real(8), parameter :: Chl2PhyC(4) = [ 0.2d0, 0.2d0, 0.2d0, 0.2d0 ] !Conversion ratio from Chl-a to phyC (umolC/L)/(ug/L)
+  real(8), parameter :: r(4)        = [ 0.4d0, 0.39d0, 0.01d0, 0.2d0 ]
+  real(8), parameter :: Chl2PhyC(4) = [ 0.2d0, 0.2d0, 0.2d0, 0.2d0 ] !Conversion ratio from Chl-a to phyC (umolC/L)/(ug/L)
          
-  PhyC_Profile = ( 2.7d0-PO4_Profile(T, S, d) )*106.0d0/1.0d0*0.1d0*r(4)
+!  PhyC_Profile = ( 2.7d0-PO4_Profile(T, S, d) )*106.0d0/1.0d0*0.1d0*r(m)
+  PhyC_Profile = 0.5d0*Chl2PhyC(m)*r(m) ! Uniform 0.05 ug/L Chl-a was assumed
   PhyC_Profile = max( PhyC_Profile, 0.0d0 )
 
   end function PhyC_Profile
@@ -2218,7 +2219,7 @@ contains
     [ -1.447d0, -8.447d-1, 8.370d-2, -3.811d0 , -4.265d0 ,  3.089d1,  1.750d-1, 1.793d0  ]
 #endif
 
-  real(8), parameter :: as(0:7)  = &
+  real(8), parameter :: as(0:5)  = &
 #if defined BIO_VPROFILE_YAEYAMA
     [ 9.032d-1, -3.844d-1, 3.951d-2, -8.172d-1,  5.009d-1,  2.258d-1 ]
 #elif defined BIO_VPROFILE_SHIZUGAWA
@@ -2319,7 +2320,7 @@ contains
     [ -6.903d-2, -6.035d-2, 6.247d-3, -2.620d-1, -2.924d-1, 2.013d0 ,  2.113d-2, 1.221d-1 ]
 #endif
 
-  real(8), parameter :: as(0:7)  = &
+  real(8), parameter :: as(0:5)  = &
 #if defined BIO_VPROFILE_YAEYAMA
     [ 1.096d-1, -3.178d-2, 2.530d-3, -4.185d-2,  5.948d-3,  6.234d-3 ]
 #elif defined BIO_VPROFILE_SHIZUGAWA
