@@ -9276,7 +9276,7 @@
 
 'TA'                                       ! Input/Output
   'total alkalinity'
-  'umol kg-1'                       ! [milliequivalents/m3]
+  'umol L-1'                       ! [milliequivalents/m3]
   'TA, scalar, series'
   'ocean_time'
   'idTvar(iTA)'
@@ -9285,7 +9285,7 @@
 
 'DIC'                                              ! Input/Output
   'total dissolved inorganic carbon'
-  'umolC kg-1'                       ! [millimole/m3]
+  'umolC L-1'                       ! [millimole/m3]
   'TIC, scalar, series'
   'ocean_time'
   'idTvar(iDIC(i))'
@@ -9577,7 +9577,7 @@
 
 'coral_TAcal'                                ! Input/Output
   'coral TA in the calcifiying fluid'
-  'umol kg-1'                                 ! [umol kg-1]
+  'umol L-1'                                 ! [umol L-1]
   'coral_TAcal, scalar, series'
   'ocean_time'
   'iHbio2(iClTAcal(j))'
@@ -9586,7 +9586,7 @@
 
 'coral_TAcoe'                                ! Input/Output
   'coral TA in the coelenteron'
-  'umol kg-1'                                 ! [umol kg-1]
+  'umol L-1'                                 ! [umol L-1]
   'coral_TAcoe, scalar, series'
   'ocean_time'
   'iHbio2(iClTAcoe(j))'
@@ -9596,7 +9596,7 @@
 
 'coral_DICcal'                                ! Input/Output
   'coral DIC in the calcifiying fluid'
-  'umol kg-1'                                 ! [umol kg-1]
+  'umol L-1'                                 ! [umol L-1]
   'coral_DICcal, scalar, series'
   'ocean_time'
   'iHbio2(iClDICcal(i,j))'
@@ -9605,7 +9605,7 @@
 
 'coral_DICcoe'                                ! Input/Output
   'coral DIC in the coelenteron'
-  'umol kg-1'                                 ! [umol kg-1]
+  'umol L-1'                                 ! [umol L-1]
   'coral_DICcoe_, scalar, series'
   'ocean_time'
   'iHbio2(iClDICcoe(i,j))'
@@ -9614,7 +9614,7 @@
 
 'coral_DOcoe'                                ! Input/Output
   'coral DO in the coelenteron'
-  'umol kg-1'                                 ! [umol kg-1]
+  'umol L-1'                                 ! [umol L-1]
   'coral_DOcoe, scalar, series'
   'ocean_time'
   'iHbio2(iClDOcoe(j))'
@@ -9632,7 +9632,7 @@
 
 'coral_CO2cal'                                ! Input/Output
   'coral [CO2*] in the calcifiying fluid'
-  'umol kg-1'                                 ! [umol kg-1]
+  'umol L-1'                                 ! [umol L-1]
   'coral_CO2cal, scalar, series'
   'ocean_time'
   'iHbio2(iClCO2cal(i,j))'
@@ -9641,7 +9641,7 @@
 
 'coral_CO2coe'                                ! Input/Output
   'coral [CO2*] in the coelenteron'
-  'umol kg-1'                                 ! [umol kg-1]
+  'umol L-1'                                 ! [umol L-1]
   'coral_CO2coe, scalar, series'
   'ocean_time'
   'iHbio2(iClCO2coe(i,j))'
@@ -10262,7 +10262,7 @@
 
 'TA_east'                                  ! Input
   'alkalinity eastern boundary condition'
-  'umol kg-1'                                      ! [umol kg-1]
+  'umol L-1'                                      ! [umol L-1]
   'TA_east, scalar, series'
   'TA_time'
   'idTbry(ieast,iTA)'
@@ -10271,7 +10271,7 @@
 
 'TA_west'                                  ! Input
   'alkalinity western boundary condition'
-  'umol kg-1'                                      ! [umol kg-1]
+  'umol L-1'                                      ! [umol L-1]
   'TA_west, scalar, series'
   'TA_time'
   'idTbry(iwest,iTA)'
@@ -10280,7 +10280,7 @@
 
 'TA_north'                                 ! Input
   'alkalinity northern boundary condition'
-  'umol kg-1'                                      ! [umol kg-1]
+  'umol L-1'                                      ! [umol L-1]
   'TA_north, scalar, series'
   'TA_time'
   'idTbry(inorth,iTA)'
@@ -10289,7 +10289,7 @@
 
 'TA_south'                                 ! Input
   'alkalinity southern boundary condition'
-  'umol kg-1'                                      ! [umol kg-1]
+  'umol L-1'                                      ! [umol L-1]
   'TA_south, scalar, series'
   'TA_time'
   'idTbry(isouth,iTA)'
@@ -10298,7 +10298,7 @@
 
 'DIC_east'                                         ! Input
   'DIC eastern boundary condition'
-  'umolC kg-1'                                      ! [umol kg-1]
+  'umolC L-1'                                      ! [umol L-1]
   'DIC_east, scalar, series'
   'TIC_time'
   'idTbry(ieast,iDIC(i))'
@@ -10307,7 +10307,7 @@
 
 'DIC_west'                                         ! Input
   'DIC western boundary condition'
-  'umolC kg-1'                                      ! [umol kg-1]
+  'umolC L-1'                                      ! [umol L-1]
   'DIC_west, scalar, series'
   'DIC_time'
   'idTbry(iwest,iDIC(i))'
@@ -10316,7 +10316,7 @@
 
 'DIC_north'                                        ! Input
   'DIC northern boundary condition'
-  'umolC kg-1'                                      ! [umol kg-1]
+  'umolC L-1'                                      ! [umol L-1]
   'DIC_north, scalar, series'
   'DIC_time'
   'idTbry(inorth,iDIC(i))'
@@ -10325,7 +10325,7 @@
 
 'DIC_south'                                        ! Input
   'DIC southern boundary condition'
-  'umolC kg-1'                                      ! [umol kg-1]
+  'umolC L-1'                                      ! [umol L-1]
   'DIC_south, scalar, series'
   'DIC_time'
   'idTbry(isouth,iDIC(i))'
@@ -11078,7 +11078,7 @@
 
 'river_TA'                                 ! Input
   'river runoff alkalinity'
-  'umol kg-1'                       ! [umol kg-1]
+  'umol L-1'                       ! [umol L-1]
   'river_TA, scalar, series'
   'river_time'
   'idRtrc(iTA)'
@@ -11087,7 +11087,7 @@
 
 'river_DIC'                                        ! Input
   'river runoff DIC'
-  'umol kg-1'                       ! [umol kg-1]
+  'umol L-1'                       ! [umol L-1]
   'river_DIC, scalar, series'
   'river_time'
   'idRtrc(iDIC(i))'
@@ -11323,7 +11323,7 @@
 
 'sediment_TA'                                             ! Input/Output
   'SedEco: total alkalinity'
-  'umol kg-1'                                 ! (umol kg-1)
+  'umol L-1'                                 ! (umol L-1)
   'sediment_TA, scalar, series'
   'ocean_time'
   'iHbiosed3(iSdTA)'
@@ -11332,7 +11332,7 @@
 
 'sediment_DIC'                                             ! Input/Output
   'SedEco: dissolved inorganic carbon'
-  'umolC kg-1'                                 ! (umol kg-1)
+  'umolC L-1'                                 ! (umol L-1)
   'sediment_DIC, scalar, series'
   'ocean_time'
   'iHbiosed3(iSdDIC(i))'

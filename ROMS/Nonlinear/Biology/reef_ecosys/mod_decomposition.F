@@ -25,8 +25,8 @@ CONTAINS
     , rhos_d         &   ! Dry soil density (g cm-3)
     , poro           &   ! Soil porosity (= Vwater/(Vwater+Vsed) (non-dimensional: 0.0-1.0)
     , O2             &   ! Dissolved oxygen (umol L-1)
-    , TA             &   ! Total alkalinity (TA: umol kg-1)
-    , DIC            &   ! Total dissolved inorganic carbon (DIC: umol kg-1)
+    , TA             &   ! Total alkalinity (TA: umol L-1)
+    , DIC            &   ! Total dissolved inorganic carbon (DIC: umol L-1)
     , NO3            &   ! NO3 (umol L-1)
     , NH4            &   ! NH4 (umol L-1)
     , PO4            &   ! PO4 (umol L-1)
@@ -190,7 +190,7 @@ CONTAINS
 
 !                                    LDOM    RDOM
 !    real(8),parameter :: kdom(2) = [ 1.0d-4, 5.0d-8 ]  ! For  dom (s-1)           
-    real(8),parameter :: kdom(2) = [ 1.0d-6, 1.0d-10 ]  ! For  dom (s-1)           
+    real(8),parameter :: kdom(2) = [ 1.0d-8, 1.0d-10 ]  ! For  dom (s-1)           
 !                                    LPOM    RPOM
 !    real(8),parameter :: kpom(2) = [ 9.6d-6, 1.2d-8 ]  ! For  pom (s-1) Fossing (2004)
     real(8),parameter :: kpom(3) = [ 1.0d-6, 1.0d-11, 2.5d-8 ]  ! For  pom (s-1) Kasih (2009)
@@ -396,8 +396,8 @@ CONTAINS
 !!!! ==== Carbonate dissoution =========================================== !!!
 
     TK   = Tmp + 273.15d0
-    pH   = pH_fromATCT( TA, DIC(iCt),TK, Sal )   ! pH
-    CO3  = cCO3_fromCTpH( DIC(iCt), pH, TK, Sal )  ! CO32- concentration
+    pH   = pH_fromATCT( TA/1.024d0, DIC(iCt)/1.024d0,TK, Sal )   ! TA, DIC (umol/L) -> (umol/kg)
+    CO3  = cCO3_fromCTpH( DIC(iCt)/1.024d0, pH, TK, Sal )  ! CO32- concentration (umol/kg)
     Wcal = Wcal_fromcCO3( CO3, TK, Sal )  ! Calcite saturation state
     Warg = Warg_fromcCO3( CO3, TK, Sal )  ! Calcite saturation state
 
@@ -482,7 +482,7 @@ CONTAINS
         !! ギブスエネルギーで反応が変化するようにするべき
 # else
     !! Redox concentration limit in organic matter degradation (Berg et al.2003)
-    if (O2 > O2lim) then            !! -- Redox of CH2O       (CH2O)  (umol L-1) -- !!   if O2 > O2lim
+    if (cO2 > O2lim) then            !! -- Redox of CH2O       (CH2O)  (umol L-1) -- !!   if O2 > O2lim
       r1 = 1.0d0
       r2 = 0.0d0
       r3 = 0.0d0

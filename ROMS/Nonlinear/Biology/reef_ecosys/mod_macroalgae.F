@@ -90,7 +90,7 @@ CONTAINS
     , PFD            &   ! Photon flux density (umol m-2 s-1)
     , rho_sw         &   ! Density of seawater (g cm-3)
     , DOamb          &   ! DO (umol L-1)
-    , DICamb         &   ! DIC (umol kg-1)
+    , DICamb         &   ! DIC (umol L-1)
     , NO3amb         &   ! NO3 concentration (umol L-1)
     , NH4amb         &   ! NH4 concentration (umol L-1)
     , PO4amb         &   ! NH4 concentration (umol L-1)

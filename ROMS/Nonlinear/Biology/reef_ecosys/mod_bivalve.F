@@ -1,5 +1,5 @@
 
-!!!=== Copyright (c) 2025 Takashi NAKAMURA  =====
+!!!=== Copyright (c) 2025-2026 Takashi NAKAMURA  =====
 
 #include "cppdefs.h"
 
@@ -98,9 +98,9 @@ CONTAINS
     real(8), intent(in) :: f_dens                             ! Factor to adjust oyster density (default = 1.0)
     logical, intent(in) :: start_of_new_run               ! TRUE = initialize; FALSE = continue from previous run
 ! --- Dynamic Energy Budget (DEB) model parameters ---
-    real(8), parameter :: delta_M(1) = [   0.245d0] ! (no dim.)      Shape parameter (0.175: Van der Veer et al., 2006; 0.245: Sakamaki et al., 2025)
-    real(8), parameter :: C2Wd(1) = [12.0d0/0.51d0] ! (g(dw) molC−1) [carbon mass]/[dry mass] = 0.51+-0.07 (Sakamaki et al. 2022; Sakamaki et al. 2020; Fujibayashi et al. 2021). 
-    real(8), parameter :: Ww2Wd(1)   = [   0.19d0 ] ! (g(dw) cm−3)   ! 0.19+-0.02 g(dw)/g(ww), 1g(ww)/cm3 (Sakamaki et al. 2022; Sakamaki et al. 2020; Fujibayashi et al. 2021). 
+    real(8), parameter :: delta_M(2) = [   0.245d0,   0.245d0 ] ! (no dim.)      Shape parameter (0.175: Van der Veer et al., 2006; 0.245: Sakamaki et al., 2025)
+    real(8), parameter :: C2Wd(2) = [12.0d0/0.51d0,12.0d0/0.51d0] ! (g(dw) molC−1) [carbon mass]/[dry mass] = 0.51+-0.07 (Sakamaki et al. 2022; Sakamaki et al. 2020; Fujibayashi et al. 2021). 
+    real(8), parameter :: Ww2Wd(2)   = [   0.19d0 ,    0.19d0 ] ! (g(dw) cm−3)   ! 0.19+-0.02 g(dw)/g(ww), 1g(ww)/cm3 (Sakamaki et al. 2022; Sakamaki et al. 2020; Fujibayashi et al. 2021).
     real(8) :: R13C
     integer :: i,j,k,n
 
@@ -244,7 +244,7 @@ CONTAINS
     , Tmp            &   ! Temperature (oC)
     , Sal            &   ! Salinity (PSU)
     , DOx            &   ! DOx             : Dissolved oxygen (umol O2 L-1)
-    , DIC            &   ! DIC(N_Csp)      : Total dissolved inorganic carbon (umol C kg-1)
+    , DIC            &   ! DIC(N_Csp)      : Total dissolved inorganic carbon (umol C L-1)
     , Wcal           &   ! Calcite saturation state
     , PhyC           &   ! Phytoplankton C bomass (umol C L-1)
     , PhyN           &   ! Phytoplankton N bomass (umol N L-1)
@@ -252,8 +252,8 @@ CONTAINS
     , PIC            &   ! Particulate inorganic carbon (PIC: umolC L-1), coccolith (CaCO3)
 !   output parameters
     , dDOx_dt        &   ! dDOx_dt             : dDOx/dt  (umol O2 L-1 s-1) 
-    , dTA_dt         &   ! dTA_dt              : dTA/dt   (umol kg-1 s-1) 
-    , dDIC_dt        &   ! dDIC_dt(N_Csp)      : dDIC/dt  (umol C kg-1 s-1)  1 mmol m-3 = 1 umol L-1 = 1/1.024 umol kg-1
+    , dTA_dt         &   ! dTA_dt              : dTA/dt   (umol L-1 s-1) 
+    , dDIC_dt        &   ! dDIC_dt(N_Csp)      : dDIC/dt  (umol C L-1 s-1)  1 mmol m-3 = 1 umol L-1 = 1/1.024 umol kg-1
     , dNH4_dt        &   ! dNH4_dt(N_Nsp)      : dNH4/dt  (umol N L-1 s-1)
     , dPO4_dt        &   ! dPO4_dt(N_Psp)      : dPO4/dt  (umol P L-1 s-1)
     , dDOC_dt        &   ! dDOC_dt(N_Csp,Ndom) : dDOC/dt  (umol C L-1 s-1) 
@@ -290,21 +290,21 @@ CONTAINS
     real(8), intent(in) :: PhyP(N_Psp,Nphy)     ! phytoplankton P biomass (umol P L-1), dinoflagellate
     real(8), intent(in) :: PIC (N_Csp,Npim)     ! Particulate inorganic carbon (PIC: umol L-1), coccolith (CaCO3)
 ! output parameters
-    real(8), intent(out) :: dDOx_dt              ! dDOx/dt  (umol L-1 s-1) 
-    real(8), intent(out) :: dTA_dt               ! dTA/dt   (umol kg-1 s-1) 
-    real(8), intent(out) :: dDIC_dt(N_Csp)       ! dDIC/dt  (umol kg-1 s-1)  1 mmol m-3 = 1 umol L-1 = 1/1.024 umol kg-1
-    real(8), intent(out) :: dNH4_dt(N_Nsp)       ! dNH4/dt (umol L-1 s-1)
-    real(8), intent(out) :: dPO4_dt(N_Psp)       ! dPO4/dt (umol L-1 s-1)
-    real(8), intent(out) :: dDOC_dt(N_Csp,Ndom)  ! dDOC/dt  (umol L-1 s-1) 
-    real(8), intent(out) :: dPOC_dt(N_Csp,Npom)  ! dPOC/dt  (umol L-1 s-1) 
-    real(8), intent(out) :: dDON_dt(N_Nsp,Ndom)  ! dDON/dt (umol L-1 s-1)
-    real(8), intent(out) :: dPON_dt(N_Nsp,Npom)  ! dPON/dt (umol L-1 s-1)
-    real(8), intent(out) :: dDOP_dt(N_Psp,Ndom)  ! dDOP/dt (umol L-1 s-1)
-    real(8), intent(out) :: dPOP_dt(N_Psp,Npom)  ! dPOP/dt (umol L-1 s-1)
-    real(8), intent(out) :: dPhyC_dt(N_Csp,Nphy) ! dPhyC/dt  (umolC L-1 s-1)  
-    real(8), intent(out) :: dPhyN_dt(N_Nsp,Nphy) ! dPhyN/dt  (umolN L-1 s-1)  
-    real(8), intent(out) :: dPhyP_dt(N_Psp,Nphy) ! dPhyP/dt  (umolP L-1 s-1)  
-    real(8), intent(out) :: dPIC_dt (N_Csp,Npim) ! dPIC/dt  (umol L-1 s-1) 
+    real(8), intent(inout) :: dDOx_dt              ! dDOx/dt  (umol L-1 s-1) 
+    real(8), intent(inout) :: dTA_dt               ! dTA/dt   (umol L-1 s-1) 
+    real(8), intent(inout) :: dDIC_dt(N_Csp)       ! dDIC/dt  (umol L-1 s-1)  1 mmol m-3 = 1 umol L-1
+    real(8), intent(inout) :: dNH4_dt(N_Nsp)       ! dNH4/dt (umol L-1 s-1)
+    real(8), intent(inout) :: dPO4_dt(N_Psp)       ! dPO4/dt (umol L-1 s-1)
+    real(8), intent(inout) :: dDOC_dt(N_Csp,Ndom)  ! dDOC/dt  (umol L-1 s-1) 
+    real(8), intent(inout) :: dPOC_dt(N_Csp,Npom)  ! dPOC/dt  (umol L-1 s-1) 
+    real(8), intent(inout) :: dDON_dt(N_Nsp,Ndom)  ! dDON/dt (umol L-1 s-1)
+    real(8), intent(inout) :: dPON_dt(N_Nsp,Npom)  ! dPON/dt (umol L-1 s-1)
+    real(8), intent(inout) :: dDOP_dt(N_Psp,Ndom)  ! dDOP/dt (umol L-1 s-1)
+    real(8), intent(inout) :: dPOP_dt(N_Psp,Npom)  ! dPOP/dt (umol L-1 s-1)
+    real(8), intent(inout) :: dPhyC_dt(N_Csp,Nphy) ! dPhyC/dt  (umolC L-1 s-1)  
+    real(8), intent(inout) :: dPhyN_dt(N_Nsp,Nphy) ! dPhyN/dt  (umolN L-1 s-1)  
+    real(8), intent(inout) :: dPhyP_dt(N_Psp,Nphy) ! dPhyP/dt  (umolP L-1 s-1)  
+    real(8), intent(inout) :: dPIC_dt (N_Csp,Npim) ! dPIC/dt  (umol L-1 s-1) 
 
 ! --- C:N:P:CaCO3 ratio of bivalves ---
     real(8), parameter :: rNCb(2)  = [ 16d0/106d0, 16d0/106d0 ] ! (no dim.) Oyster N:C ratio
@@ -325,10 +325,10 @@ CONTAINS
 !    real(8), parameter :: T_H(2)     = [  305.0d0,  305.0d0] ! (K) Upper boundary tolerance range (Van der Veer et al., 2006)
     real(8), parameter :: T_Hing(2)  = [  298.0d0,  298.0d0 ] ! (K) Upper boundary tolerance range for ingestion (Bourles et al., 2009)
     real(8), parameter :: T_Hresp(2) = [  305.0d0,  305.0d0 ] ! (K) Upper boundary tolerance range for respiration (Bourles et al., 2009)
-    real(8), parameter :: T_AH(2)    = [30000.0d0, 30000.0d0 ] ! (K) Arrhenius temp. for upper boundary (Van der Veer et al., 2006)
+    real(8), parameter :: T_AH(2)    = [30000.0d0, 30000.0d0] ! (K) Arrhenius temp. for upper boundary (Van der Veer et al., 2006)
 !    real(8), parameter :: T_L(2)     = [  281.0d0, 281.0d0 ] ! (K) Lower boundary tolerance range (Van der Veer et al., 2006)
-    real(8), parameter :: T_L(2)     = [  276.0d0,  276.0d0 ] ! (K) Lower boundary tolerance range (Bourles et al., 2014)
-    real(8), parameter :: T_AL(2)    = [7500.1d-1,   -1.d-1 ] ! (K) Arrhenius temp. for lower boundary (Van der Veer et al., 2
+    real(8), parameter :: T_L(2)     = [  276.0d0,  276.0d0 ] ! (K) Lower boundary tolerance range (Bourles et al., 2009)
+    real(8), parameter :: T_AL(2)    = [75000.0d0, 75000.0d0] ! (K) Arrhenius temp. for lower boundary (Van der Veer et al., 2006)
     !  The clearance rate of oysters may be two times higher than that of mussels. (Check is needed!!)
 !    real(8), parameter :: C_Rmax  (2) = [ 2.2d-3, 2.2d-3 ] !Maximum surface area specific clearance rate (L s-1 cm-2)
     real(8), parameter :: C_Rmax  (2) = [ 2.2d-2, 2.2d-2 ] !Maximum surface area specific clearance rate (L s-1 cm-2)
@@ -417,26 +417,26 @@ CONTAINS
 
 # if defined BIVALVE_TESTMODE
 !  Output
-    real(8), save :: dsec = 0.d0 !sec
+    real(8), save :: dsec(Nbv) = 0.d0 !sec
 # endif
 
 !======================================================================================
 !  Preparation
-    dDOx_dt       = 0.0d0
-    dTA_dt        = 0.0d0
-    dDIC_dt(:)    = 0.0d0
-    dNH4_dt(:)    = 0.0d0
-    dPO4_dt(:)    = 0.0d0
-    dDOC_dt(:,:)  = 0.0d0
-    dPOC_dt(:,:)  = 0.0d0
-    dDON_dt(:,:)  = 0.0d0
-    dPON_dt(:,:)  = 0.0d0
-    dDOP_dt(:,:)  = 0.0d0
-    dPOP_dt(:,:)  = 0.0d0
-    dPhyC_dt(:,:) = 0.0d0
-    dPhyN_dt(:,:) = 0.0d0
-    dPhyP_dt(:,:) = 0.0d0
-    dPIC_dt (:,:) = 0.0d0
+!    dDOx_dt       = 0.0d0
+!    dTA_dt        = 0.0d0
+!    dDIC_dt(:)    = 0.0d0
+!    dNH4_dt(:)    = 0.0d0
+!    dPO4_dt(:)    = 0.0d0
+!    dDOC_dt(:,:)  = 0.0d0
+!    dPOC_dt(:,:)  = 0.0d0
+!    dDON_dt(:,:)  = 0.0d0
+!    dPON_dt(:,:)  = 0.0d0
+!    dDOP_dt(:,:)  = 0.0d0
+!    dPOP_dt(:,:)  = 0.0d0
+!    dPhyC_dt(:,:) = 0.0d0
+!    dPhyN_dt(:,:) = 0.0d0
+!    dPhyP_dt(:,:) = 0.0d0
+!    dPIC_dt (:,:) = 0.0d0
 
     dQCe_dt(:) = 0.0d0
     dQCv_dt(:) = 0.0d0
@@ -714,9 +714,6 @@ CONTAINS
     dPhyP_dt(:,:) = dPhyP_dt(:,:) * BVLV(ng)%dens(n,k,i,j)*1.0d-3
     dPIC_dt (:,:) = dPIC_dt (:,:) * BVLV(ng)%dens(n,k,i,j)*1.0d-3
 
-    dDIC_dt(:) = dDIC_dt(:)/rho_sw !(umol L-1 s-1) -> (umol kg-1 s-1)
-    dTA_dt     = dTA_dt/rho_sw     !(umol L-1 s-1) -> (umol kg-1 s-1)
-
 ! === Mortality rate (population dens. s-1) =========================
     Mort = BM(n) * BVLV(ng)%dens(n,k,i,j) ! Mortality rate (population dens. s-1)
 
@@ -729,11 +726,11 @@ CONTAINS
 
 # if defined BIVALVE_TESTMODE
 
-    IF( date*86400.0d0 >= dsec ) THEN
-      if(dsec == 0.0d0) then
-        dsec=date*86400.0d0+BIVALVE_OUTPUT_INTERVAL*60.0d0
+    IF( date*86400.0d0 >= dsec(n) ) THEN
+      if(dsec(n) == 0.0d0) then
+        dsec(n)=date*86400.0d0+BIVALVE_OUTPUT_INTERVAL*60.0d0
         ! Write lavels at the first step
-        write(80,'(*(g0:,", "))')                        &
+        write(80+n,'(*(g0:,", "))')                      &
            'date', 'k'                                   &
          , 'dens','L','V','Ww','Wd','Wt'                 &
          , 'QCe','QCv','QCr','QCh'                       &
@@ -748,31 +745,31 @@ CONTAINS
          , 'J_ER', 'JM_ER', 'JR_ER', 'Jspawn_ER'         &
          , 'GSR', 'G', 'R', 'Mort', 'kT'
       else
-        dsec=dsec+BIVALVE_OUTPUT_INTERVAL*60.0d0
+        dsec(n)=dsec(n)+BIVALVE_OUTPUT_INTERVAL*60.0d0
       endif
       
-      write(80,'(*(g0:,", "))')              &
+      write(80+n,'(*(g0:,", "))')            &
          date, k                             &
-       , BVLV(ng)%dens(1,k,i,j)              &
-       , BVLV(ng)%L (1,k,i,j)                &
-       , BVLV(ng)%V (1,k,i,j)                &
-       , BVLV(ng)%Ww(1,k,i,j)                &
-       , BVLV(ng)%Wd(1,k,i,j)                &
-       , BVLV(ng)%Wt(1,k,i,j)                &
-       , BVLV(ng)%QCe(:,1,k,i,j)             &
-       , BVLV(ng)%QCv(:,1,k,i,j)             &
-       , BVLV(ng)%QCr(:,1,k,i,j)             &
-       , BVLV(ng)%QCh(:,1,k,i,j)             &
-       , BVLV(ng)%QNe(:,1,k,i,j)             &
-       , BVLV(ng)%QNv(:,1,k,i,j)             &
-       , BVLV(ng)%QNr(:,1,k,i,j)             &
-       , BVLV(ng)%QNh(:,1,k,i,j)             &
-       , BVLV(ng)%QPe(:,1,k,i,j)             &
-       , BVLV(ng)%QPv(:,1,k,i,j)             &
-       , BVLV(ng)%QPr(:,1,k,i,j)             &
-       , BVLV(ng)%QPh(:,1,k,i,j)             &
-       , BVLV(ng)%CaCO3(:,1,k,i,j)           &
-       , BVLV(ng)%Dead_CaCO3(:,1,k,i,j)      &
+       , BVLV(ng)%dens(n,k,i,j)              &
+       , BVLV(ng)%L (n,k,i,j)                &
+       , BVLV(ng)%V (n,k,i,j)                &
+       , BVLV(ng)%Ww(n,k,i,j)                &
+       , BVLV(ng)%Wd(n,k,i,j)                &
+       , BVLV(ng)%Wt(n,k,i,j)                &
+       , BVLV(ng)%QCe(:,n,k,i,j)             &
+       , BVLV(ng)%QCv(:,n,k,i,j)             &
+       , BVLV(ng)%QCr(:,n,k,i,j)             &
+       , BVLV(ng)%QCh(:,n,k,i,j)             &
+       , BVLV(ng)%QNe(:,n,k,i,j)             &
+       , BVLV(ng)%QNv(:,n,k,i,j)             &
+       , BVLV(ng)%QNr(:,n,k,i,j)             &
+       , BVLV(ng)%QNh(:,n,k,i,j)             &
+       , BVLV(ng)%QPe(:,n,k,i,j)             &
+       , BVLV(ng)%QPv(:,n,k,i,j)             &
+       , BVLV(ng)%QPr(:,n,k,i,j)             &
+       , BVLV(ng)%QPh(:,n,k,i,j)             &
+       , BVLV(ng)%CaCO3(:,n,k,i,j)           &
+       , BVLV(ng)%Dead_CaCO3(:,n,k,i,j)      &
        , C_R, J_Rc, J_XiF, J_XiI, J_PiF      &
        , J_EC, J_ES, J_EJ, J_EG              &
        , J_ER, JM_ER, JR_ER, Jspawn_ER       &
