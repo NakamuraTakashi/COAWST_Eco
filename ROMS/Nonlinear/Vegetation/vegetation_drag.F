@@ -388,6 +388,22 @@
                 !     write(*,*) 'a, dab_down, dab_up', farea_out(i,j,k)/Hz(i,j,k), dab(i,j,k-1), dab(i,j,k)
                 !   end if
                 ! end if
+              ELSE IF (SPE_MANGR(iveg,ng)==2 .and.                           &
+     &            dab(i,j,k-1)<mangr_layer_thck*                        &
+     &            dble(mangr_n_layer)) THEN
+                CALL mangr_bg_get_farea ( &
+                                                     ! *** Input ***
+                plant(i,j,iveg,pdiam)           , &  ! Bruguiera sp. DBH given in a grid-cell (m)
+                0.002_r8                        , &  ! Variation of Bruguiera sp. DBH given in a grid-cell (m)
+                plant(i,j,iveg,pdens)           , &  ! Bruguiera sp. Tree density (tree/m2)
+                0.0_r8                          , &  ! Rhizophora sp. DBH given in a grid-cell (m)
+                0.0_r8                          , &  ! Rhizophora sp. Tree density (tree/m2)
+                dab(i,j,k-1)                    , &  ! Height of lower boundary of the layer (m)
+                dab(i,j,k)                      , &  ! Height of upper boundary of the layer (m)
+                                                     !
+                                                     ! *** Output ***
+                farea_out(i,j,k)                  &  ! Vertically integrated root projected area in a layer (m2 root/m2 ground)
+                )
               ELSE
                 farea_out(i,j,k)=0.0_r8
               END IF
@@ -770,6 +786,107 @@
 
       RETURN
       END SUBROUTINE mangr_get_farea
+
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+      !-----------------------------------------------------------------------
+      SUBROUTINE mangr_bg_get_farea ( &
+                                           ! *** Input ***
+        DBH_Bg                      , &  ! Bruguiera sp. DBH given in a grid-cell (m)
+        Var_DBH_Bg                  , &  ! Variation of Bruguiera sp. DBH given in a grid-cell (m)
+        dens_Bg                     , &  ! Bruguiera sp. Tree density (tree/m2)
+        DBH_Rh                      , &  ! Rhizophora sp. DBH given in a grid-cell (m)
+        dens_Rh                     , &  ! Rhizophora sp. Tree density (tree/m2)
+        h_lower                     , &  ! Height of lower boundary of the layer (m)
+        h_upper                     , &  ! Height of upper boundary of the layer (m)
+                                           !
+                                           ! *** Output ***
+        mangr_farea_out_layer           &  ! Vertically integrated root projected area in a layer (m2 root/m2 ground)
+        )
+        !
+        ! !DESCRIPTION:
+        ! Calculate the vertically integrated root projected area in a layer
+        !
+        ! !USES:
+        USE mod_mangr_root, only : mangr_layer_thck, mangr_n_layer, PI
+        USE mod_kinds
+        !
+        ! !ARGUMENTS:
+        implicit none
+        real(r8), intent(in)    :: DBH_Bg, Var_DBH_Bg, dens_Bg, DBH_Rh, dens_Rh, h_lower, h_upper
+        real(r8), intent(inout) :: mangr_farea_out_layer
+        !
+        ! !LOCAL VARIABLES:
+        real(r8), dimension(0:mangr_n_layer) :: mangr_dab  ! Depth above bed for mangrove root layers
+        real(r8) :: mangr_Hz_inverse, mangr_cff1, mangr_cff2
+        real(r8) :: mangr_Lveg_loc1, mangr_Lveg_loc2, mangr_layer_frac
+        real(r8) :: a_pneu, n_pneu, S1, S2, S3, S4, H1, H2, H3
+        real(r8) :: L_butt(mangr_n_layer), L_pneu(mangr_n_layer)
+        real(r8) :: dens_pneu, Aplot
+        integer  :: k
+        !---------------------------------------------------------------------
+
+        ! Zero out
+
+        mangr_dab(:) = 0.0_r8
+        mangr_farea_out_layer = 0.0_r8
+
+        IF (dens_Bg>1.e-06_r8) THEN
+        ! Constant variable
+
+          mangr_Hz_inverse = 1.0_r8/mangr_layer_thck
+
+        ! Buttress root parameters for Bruguiera gymnorhiza
+
+          S1 = 0.6785_r8*(DBH_Bg*PI*100.0_r8) + 10.025_r8 ! DBH_Bg*PI*100.0_r8 = GBH_Bg (cm)
+          S2 = 0.0042_r8*S1*S1 - 0.2515_r8*S1 + 14.801_r8
+          H1 = 0.6896_r8*S1 + 13.354_r8
+          H2 = 0.4729_r8*S2 + 5.7379_r8
+
+        ! Pneumatophore parameters for Bruguiera gymnorhiza
+
+          Aplot=25.0_r8 * PI  ! Plot area (m2) (5 m radius plot)
+          dens_pneu = exp(6.8270_r8) * (dens_Bg*Aplot)**0.4354_r8 * (dens_Rh*Aplot+1.0_r8)**(-0.0630_r8) &
+     &                * (DBH_Bg*100.0_r8)**0.2905_r8 * (DBH_Rh*100.0_r8+1.0_r8)**0.4505_r8 * (Var_DBH_Bg+1.0_r8)**60.0744_r8
+          dens_pneu = dens_pneu/Aplot  ! Convert from number per plot to density (num. m-2). 
+
+          S3 = 14.0_r8 ! width of pneumatophore base (cm)
+          S4 = 3.0_r8  ! tickness of pneumatophore (cm)
+          H3 = 0.6478_r8*S3 + 4.1279_r8 ! height of pneumatophore (cm)
+          a_pneu = 3.1363_r8*H1 - 2.3279_r8
+          n_pneu = 0.537_r8
+
+        ! Compute the root projected area in the layer
+
+          DO k=1,mangr_n_layer
+            mangr_dab(k)=mangr_dab(k-1)+mangr_layer_thck
+            mangr_cff1=MIN((mangr_dab(k)-h_upper)*mangr_Hz_inverse,1.0_r8)
+            mangr_Lveg_loc1=MIN(1.0_r8-mangr_cff1,1.0_r8)
+            mangr_cff2=MIN((mangr_dab(k)-h_lower)*mangr_Hz_inverse,1.0_r8)
+            mangr_Lveg_loc2=MIN(1.0_r8-mangr_cff2,1.0_r8)
+            mangr_layer_frac=MAX(mangr_Lveg_loc1-mangr_Lveg_loc2,0.0_r8)
+
+            if( mangr_dab(k) <= H2*0.01_r8 ) then
+              L_butt(k) = S1*0.01_r8-S2/H2*mangr_dab(k)  ! (m)
+            else if( mangr_dab(k) > H2*0.01_r8 .and. mangr_dab(k) <= H1*0.01_r8 ) then
+              L_butt(k) = L_butt(k-1) - (L_butt(k-1)*100.0_r8)**(n_pneu+1.0_r8) /(a_pneu*n_pneu) * mangr_layer_thck
+            else
+              L_butt(k) = 0.0_r8
+            end if
+            L_butt(k) = MAX( L_butt(k), 0.0_r8 ) ! 
+            !L_butt(k) = 0.0_r8 !!!! DEBUG !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+            L_pneu(k) = -2.0_r8*S3/PI/H3 * mangr_dab(k) + 2.0_r8/PI*(S3+S4)*0.01_r8  ! (m)
+            L_pneu(k) = MAX(L_pneu(k), 0.0_r8)
+
+            mangr_farea_out_layer = mangr_farea_out_layer                                     &
+     &        + ( 2.0_r8*L_butt(k)*dens_Bg + L_pneu(k)*dens_pneu )     & ! (m)
+     &        * mangr_layer_thck * mangr_layer_frac
+          END DO
+        END IF
+
+      RETURN
+      END SUBROUTINE mangr_bg_get_farea
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 
 #  ifdef MANGR_XIE
       !-----------------------------------------------------------------------

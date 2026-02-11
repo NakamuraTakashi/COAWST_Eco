@@ -191,6 +191,17 @@
         END DO
       END IF
 
+#elif defined MANGROVE_BG
+      IF (LBC(iwest,isFsur,ng)%acquire.and.                             &
+     &    DOMAIN(ng)%Western_Edge(tile)) THEN
+        omega=2.0_r8*pi*time(ng)/(12.42_r8*3600.0_r8)  !  M2 Tide period
+        val=-0.53_r8
+        phase=0.0_r8
+        DO j=JstrT,JendT
+          BOUNDARY(ng)%zeta_west(j)=val*COS(omega-phase)
+        END DO
+      END IF
+
 #elif defined OFFLINE
 ! OFFLINE option
       IF (LBC(ieast,isUvel,ng)%acquire.and.                             &

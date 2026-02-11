@@ -428,6 +428,8 @@
               L = cl_veg*plant(i,j,iveg,pdiam)
               IF (SPE_MANGR(iveg,ng)==1) THEN
                 L_root = cl_veg*FAI_ROOT
+              ELSE IF (SPE_MANGR(iveg,ng)==2) THEN
+                L_root = cl_veg*FAI_ROOT
               ELSE
                 L_root = cl_veg*plant(i,j,iveg,pdiam)  ! Dummy input
               END IF
@@ -495,7 +497,7 @@
 !
 ! Zero-out in case this is not Rhizophora
 !
-              IF (SPE_MANGR(iveg,ng)/=1) THEN
+              IF (SPE_MANGR(iveg,ng)/=1 .and. SPE_MANGR(iveg,ng)/=2) THEN
                 tke_loc_veg_root = 0.0_r8
                 gls_loc_veg_root = 0.0_r8
               END IF
