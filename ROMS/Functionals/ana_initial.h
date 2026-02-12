@@ -389,6 +389,12 @@
           zeta(i,j,1)=-0.4040_r8*REAL(i,r8)/REAL(Lm(ng)+1,r8)
         END DO
       END DO
+#elif defined MANGROVE_BG
+      DO j=JstrT,JendT
+        DO i=IstrT,IendT
+          zeta(i,j,1)=0.1_r8
+        END DO
+      END DO
 #else
       DO j=JstrT,JendT
         DO i=IstrT,IendT

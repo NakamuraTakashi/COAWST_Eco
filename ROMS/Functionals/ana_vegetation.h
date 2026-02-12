@@ -248,6 +248,21 @@
       endif
 # endif
 
+#elif defined MANGROVE_BG
+# ifdef VEG_DRAG
+      DO iveg=1,NVEG
+        DO j=JstrT,JendT
+          DO i=IstrT,IendT
+            ! Plot 9
+            plant(i,j,iveg,pdiam)=0.17_r8        !Diameter
+            plant(i,j,iveg,phght)=6.0_r8         !Height
+            plant(i,j,iveg,pdens)=9.0_r8/25.0_r8/3.14_r8     !Density
+            plant(i,j,iveg,pthck)=0.17_r8        !Thickness
+          END DO
+        END DO
+      END DO
+# endif
+
 #else
 
 # ifdef VEG_DRAG

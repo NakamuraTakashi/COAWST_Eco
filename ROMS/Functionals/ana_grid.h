@@ -393,6 +393,12 @@
       depth=50.0_r8
       f0=1.0E-04_r8
       beta=0.0_r8
+#elif defined MANGROVE_BG
+      Xsize=5.0_r8*REAL(Lm(ng),r8)
+      Esize=5.0_r8*REAL(Mm(ng),r8)
+      depth=0.1_r8
+      f0=0.0E-04_r8
+      beta=0.0_r8
 #else
       ana_grid.h: no values provided for Xsize, Esize, depth, f0, beta.
 #endif
@@ -1106,6 +1112,12 @@
         DO j=JstrT,JendT
          val2=2.0_r8*REAL(j-(Mm(ng)+1)/2,r8)/REAL(Mm(ng)+1,r8)
          h(i,j)=depth*(0.08_r8+0.92_r8*val1*(1.0_r8-val2*val2))
+        END DO
+      END DO
+#elif defined MANGROVE_BG
+      DO i=IstrT,IendT
+        DO j=JstrT,JendT
+         h(i,j)=depth
         END DO
       END DO
 #else

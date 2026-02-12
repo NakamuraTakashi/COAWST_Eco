@@ -199,6 +199,12 @@
           mask(i,j)=1.0_r8
         END DO
       END DO
+#elif defined MANGROVE_BG
+      DO j=Jstrm2,Jendp2
+        DO i=Istrm2,Iendp2
+          mask(i,j)=1.0_r8
+        END DO
+      END DO
 #else
       ana_mask.h: no values provided for mask.
 #endif
