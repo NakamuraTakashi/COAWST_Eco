@@ -236,14 +236,14 @@
       real(r8) :: cff5, cff6
       real(r8) :: sma, buoy, Umag, Ca, cflex
       real(r8) :: Lveg_loc, plant_height_eff
-      real(r8), dimension(IminS:ImaxS,JminS:JmaxS,0:N(ng)) :: dab
-      real(r8), dimension(IminS:ImaxS,JminS:JmaxS) :: wrk
+      real(r8), dimension(LBi:UBi,LBj:UBj,0:N(ng)) :: dab !!!<<< TN:mod, IminS:ImaxS,JminS:JmaxS -> LBi:UBi,LBj:UBj
+      real(r8), dimension(LBi:UBi,LBj:UBj) :: wrk  !!!<<< TN:mod, IminS:ImaxS,JminS:JmaxS -> LBi:UBi,LBj:UBj
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
 # if defined MANGROVE_DRAG
-      real(r8), dimension(IminS:ImaxS,JminS:JmaxS) :: wrk_root           ! For mangrove roots
-      real(r8), dimension(IminS:ImaxS,JminS:JmaxS,1:N(ng)) :: farea_out  ! Root projected area in a layer (m2 root/m2 ground)
+      real(r8), dimension(LBi:UBi,LBj:UBj) :: wrk_root           ! For mangrove roots  !!!<<< TN:mod, IminS:ImaxS,JminS:JmaxS -> LBi:UBi,LBj:UBj
+      real(r8), dimension(LBi:UBi,LBj:UBj,1:N(ng)) :: farea_out  ! Root projected area in a layer (m2 root/m2 ground)  !!!<<< TN:mod, IminS:ImaxS,JminS:JmaxS -> LBi:UBi,LBj:UBj
 # endif
-      real(r8), dimension(IminS:ImaxS,JminS:JmaxS) :: wrk2               ! For turbulence calculation
+      real(r8), dimension(LBi:UBi,LBj:UBj) :: wrk2               ! For turbulence calculation  !!!<<< TN:mod, IminS:ImaxS,JminS:JmaxS -> LBi:UBi,LBj:UBj
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 !
 # include "set_bounds.h"
@@ -489,25 +489,29 @@
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
           ENDIF
     
-    !
+!
+# ifdef DISTRIBUTE
+!
             CALL mp_exchange2d (ng, tile, iNLM, 1,                          &
          &                    LBi, UBi, LBj, UBj,                           &
          &                    NghostPoints,                                 &
          &                    EWperiodic(ng), NSperiodic(ng),               &
          &                    wrk(:,:)) 
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MY:Add
-# if defined MANGROVE_DRAG
+#  if defined MANGROVE_DRAG
             CALL mp_exchange2d (ng, tile, iNLM, 1,                          &
          &                    LBi, UBi, LBj, UBj,                           &
          &                    NghostPoints,                                 &
          &                    EWperiodic(ng), NSperiodic(ng),               &
          &                    wrk_root(:,:)) 
-# endif
+#  endif
             CALL mp_exchange2d (ng, tile, iNLM, 1,                          &
          &                    LBi, UBi, LBj, UBj,                           &
          &                    NghostPoints,                                 &
          &                    EWperiodic(ng), NSperiodic(ng),               &
          &                    wrk2(:,:)) 
+!
+# endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MY:Add
 !
 ! Compute friction force (at cell faces)

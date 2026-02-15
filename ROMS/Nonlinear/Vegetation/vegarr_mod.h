@@ -306,7 +306,7 @@
         END DO
 # endif
 # ifdef VEG_TURB
-        DO k=1,N(ng)
+        DO k=0,N(ng)
           DO j=Jmin,Jmax
             DO i=Imin,Imax
               VEG(ng) % tke_veg(i,j,k) = IniVal
